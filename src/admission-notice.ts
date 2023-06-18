@@ -17,7 +17,7 @@ const getAdmission = async ({ level }: AdmissionRequestOptions) => {
       await imageResponse.arrayBuffer()
     ).toString("base64")}`;
 
-    const headers = new Headers({});
+    const headers = new Headers();
 
     headers.append("Cookie", cookies);
 
