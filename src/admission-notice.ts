@@ -46,7 +46,6 @@ const getAdmission = async ({ level }: AdmissionRequestOptions) => {
 };
 
 export const admissionNoticeHandler: RequestHandler = (req, res) => {
-  console.log(req.body);
   const { body } = req;
 
   console.log(body);
