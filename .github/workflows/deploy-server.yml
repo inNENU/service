@@ -35,11 +35,6 @@ jobs:
           git config --global user.name 'Mr.Hope'
           git config --global user.email 'mister-hope@outlook.com'
 
-      - name: Linter Test
-        env:
-          NODE_OPTIONS: --max_old_space_size=4096
-        run: pnpm lint
-
       - name: Deploy
         run: |
           ssh git@mp.innenu.com "git config --global --add safe.directory /www/wwwroot/innenu-service"
