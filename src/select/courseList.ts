@@ -78,14 +78,14 @@ export const courseListHandler: RequestHandler = async (req, res) => {
 
       console.log("Raw data:", data);
 
-      const courses = data.map(({ kch, hcmc, kkdw, kclb }) => ({
+      const courses = data.map(({ kch, kcmc, kkdw, kclb }) => ({
         id: kch,
-        name: hcmc,
+        name: kcmc,
         office: kkdw,
         type: kclb,
       }));
 
-      console.log("Getting courses:", courses);
+      console.log(`Getting ${courses.length} courses`);
 
       res.json({ status: "success", courses });
     } catch (err) {
