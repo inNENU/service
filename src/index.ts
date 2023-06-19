@@ -6,6 +6,7 @@ import { admissionNoticeHandler } from "./admission-notice.js";
 import { weatherHandler } from "./weather/handler.js";
 import {
   courseListHandler,
+  selectHandler,
   selectLoginHandler,
   selectInfoHandler,
   studentAmountHandler,
@@ -25,6 +26,7 @@ app.post("/admission-notice", admissionNoticeHandler);
 app.post("/select/login", selectLoginHandler);
 app.post("/select/course-list", courseListHandler);
 app.post("/select/info", selectInfoHandler);
+app.post("/select/select", selectHandler);
 app.post("/select/student-amount", studentAmountHandler);
 app.get("/weather", weatherHandler);
 
