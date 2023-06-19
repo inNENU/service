@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "rollup -c rollup.config.ts --configPlugin esbuild",
-    "dev": "tsx src/index.ts",
-    "postinstall": "pnpm build"
+    "dev": "tsx src/index.ts"
   },
   "packageManager": "pnpm@8.6.2",
   "dependencies": {
