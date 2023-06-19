@@ -24,23 +24,48 @@ export interface StudentAmountSuccessResponse {
 }
 
 export const studentAmountHandler: RequestHandler = async (req, res) => {
-  const { cookies, server, id } = <StudentAmountOptions>req.body;
+  try {
+    const { cookies, server, id } = <StudentAmountOptions>req.body;
+    const url = `${server}xk/GetXkRs`;
+    const body = `jx0502id=59&kch=${id}`;
 
-  const response = await fetch(`${server}xk/GetXkRs`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      Cookie: cookies.join("; "),
-    },
-    body: `jx0502id=49&kch=${id}`,
-  });
+    console.log(`Getting ${url} with ${body}`);
 
-  const data = (<StudentAmountRaw[]>await response.json()).map(
-    ({ jx0404id, rs }) => ({
-      id: jx0404id,
-      amount: rs,
-    })
-  );
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Cookie: cookies.join("; "),
+      },
+      body,
+    });
 
-  res.json({ status: "success", data });
+    console.log("Response ends with", response.status);
+
+    const rawData = await response.text();
+
+    console.log("Raw data:", rawData);
+
+    if (rawData.match(/\s+<!DOCTYPE html/))
+      return res.json({ status: "failed", err: "请重新登录" });
+
+    try {
+      const rawData = await response.json();
+
+      const data = (<StudentAmountRaw[]>JSON.parse(rawData)).map(
+        ({ jx0404id, rs }) => ({
+          id: jx0404id,
+          amount: rs,
+        })
+      );
+
+      res.json({ status: "success", data });
+    } catch (err) {
+      console.error(err);
+      res.json({ status: "failed", err: (<Error>err).message });
+    }
+  } catch (err) {
+    console.error(err);
+    res.json({ status: "failed", err: (<Error>err).message });
+  }
 };

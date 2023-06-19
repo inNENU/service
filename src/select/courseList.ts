@@ -18,7 +18,7 @@ export interface CourseListOptions extends SelectBaseOptions {
   index?: string;
 }
 
-export interface CourseInfo {
+export interface CourseBasicInfo {
   /** 课程号 */
   id: string;
   /** 课程名称 */
@@ -31,7 +31,7 @@ export interface CourseInfo {
 
 export interface CourseListSuccessResponse {
   status: "success";
-  courses: CourseInfo[];
+  courses: CourseBasicInfo[];
 }
 
 export const courseListHandler: RequestHandler = async (req, res) => {
@@ -73,17 +73,22 @@ export const courseListHandler: RequestHandler = async (req, res) => {
       body: params.toString(),
     });
 
+    const rawData = await response.text();
+
+    console.log("Raw data:", rawData);
+
+    if (rawData.match(/\s+<!DOCTYPE html/))
+      return res.json({ status: "failed", err: "请重新登录" });
+
     try {
-      const data = <Record<string, string>[]>await response.json();
-
-      console.log("Raw data:", data);
-
-      const courses = data.map(({ kch, kcmc, kkdw, kclb }) => ({
-        id: kch,
-        name: kcmc,
-        office: kkdw,
-        type: kclb,
-      }));
+      const courses = (<Record<string, string>[]>JSON.parse(rawData)).map(
+        ({ kch, kcmc, kkdw, kclb }) => ({
+          id: kch,
+          name: kcmc,
+          office: kkdw,
+          type: kclb,
+        })
+      );
 
       console.log(`Getting ${courses.length} courses`);
 

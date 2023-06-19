@@ -3,13 +3,48 @@ import type { SelectBaseOptions } from "./typings.js";
 import { COURSE_TYPE } from "./utils.js";
 import { readResponseContent } from "../utils/content.js";
 
-export interface MajorInfo {
+export interface CourseInfo {
+  /** 名称 */
   name: string;
+  /** 开课单位 */
+  office: string;
+  /** 类别 */
+  type: string;
+  /** 学分 */
+  point: string;
+  /** 容量 */
+  capacity: string;
+  /** 任课教师 */
+  teacher: string;
+  /** 上课周次 */
+  week: string;
+  /** 上课时间 */
+  time: string;
+  /** 上课地点 */
+  place: string;
+  /** 课 ID */
+  cid: string;
+  /** 课程 ID */
+  id: string;
+
+  /** 考试时间 */
+  examTime: string;
+  /** 周次类型 */
+  weekType: string;
+  /** 班级名称 */
+  className: string;
+}
+
+export interface MajorInfo {
+  /** 名称 */
+  name: string;
+  /** 编号 */
   id: string;
 }
 
 export interface SelectInfoSuccessResponse {
   status: "success";
+  courses: CourseInfo[];
   courseType: string[];
   courseOffices: string[];
   majors: MajorInfo[];
@@ -25,9 +60,13 @@ const majorsReg = /<select id="zys" name="zys"[\s\S]*?<\/select>/;
 const majorReg = /<option value="(.*?)" (?:selected)?>(.*?)<\/option>/g;
 const currentMajorReg = /<option value="(.*?)" selected>/;
 
+const courseInfoReg =
+  /tmpKc\[0\] = " ";\s+tmpKc\[1\] = "(.*)";\s+tmpKc\[2\] = "(.*?)";\s+tmpKc\[3\] = "(.*)";\s+tmpKc\[4\] = "(.*)";.*tmpKc\[6\] = (\d+);\s+tmpKc\[7\] = "(.*)";\s+tmpKc\[8\] = "(.*)";\s+tmpKc\[9\] = "(.*)";\s+tmpKc\[10\] = "(.*)";\s+tmpKc\[11\] = "(.*)";\s+tmpKc\[12\] = "(.*)";.*tmpKc\[18\]="(.*)";\s+tmpKc\[19\]="(.*)";\s+tmpKc[20]="(.*)";\s+tmpKc\[21\]="(.*)"/g;
+
 // cache
 let courseOffices = <string[]>[];
 let majors = <MajorInfo[]>[];
+let courses = <CourseInfo[]>[];
 
 export const selectInfoHandler: RequestHandler = async (req, res) => {
   const { cookies, server } = <SelectBaseOptions>req.body;
@@ -79,16 +118,44 @@ export const selectInfoHandler: RequestHandler = async (req, res) => {
     courseOffices = courseOfficesInfo;
   }
 
+  if (!courses.length) {
+    const coursesInfo = [];
+
+    let courseMatch;
+
+    while ((courseMatch = courseInfoReg.exec(actualText))) {
+      coursesInfo.push({
+        name: courseMatch[1],
+        office: courseMatch[2],
+        type: courseMatch[3],
+        point: courseMatch[4],
+        capacity: courseMatch[5],
+        teacher: courseMatch[6],
+        week: courseMatch[7],
+        time: courseMatch[8],
+        place: courseMatch[9],
+        cid: courseMatch[10],
+        id: courseMatch[11],
+        examTime: `${courseMatch[14]}-${courseMatch[12]}`,
+        weekType: courseMatch[13],
+        className: courseMatch[15],
+      });
+    }
+
+    courses = coursesInfo;
+  }
+
+  console.log("Personal Information:", grade, currentMajor);
+
   const info: SelectInfoSuccessResponse = {
     status: "success",
     grade,
     major: currentMajor,
+    courses,
     courseType: COURSE_TYPE,
     courseOffices,
     majors,
   };
-
-  console.log("Information:", info);
 
   res.json(info);
 };

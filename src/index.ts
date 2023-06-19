@@ -8,6 +8,7 @@ import {
   courseListHandler,
   selectLoginHandler,
   selectInfoHandler,
+  studentAmountHandler,
 } from "./select/index.js";
 
 const app = express();
@@ -24,6 +25,7 @@ app.post("/admission-notice", admissionNoticeHandler);
 app.post("/select/login", selectLoginHandler);
 app.post("/select/course-list", courseListHandler);
 app.post("/select/info", selectInfoHandler);
+app.post("/select/student-amount", studentAmountHandler);
 app.get("/weather", weatherHandler);
 
 // @ts-ignore
