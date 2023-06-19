@@ -61,7 +61,7 @@ const majorReg = /<option value="(.*?)" (?:selected)?>(.*?)<\/option>/g;
 const currentMajorReg = /<option value="(.*?)" selected>/;
 
 const courseInfoReg =
-  /tmpKc\[0\] = " ";\s+tmpKc\[1\] = "(.*)";\s+tmpKc\[2\] = "(.*?)";\s+tmpKc\[3\] = "(.*)";\s+tmpKc\[4\] = "(.*)";.*tmpKc\[6\] = (\d+);\s+tmpKc\[7\] = "(.*)";\s+tmpKc\[8\] = "(.*)";\s+tmpKc\[9\] = "(.*)";\s+tmpKc\[10\] = "(.*)";\s+tmpKc\[11\] = "(.*)";\s+tmpKc\[12\] = "(.*)";.*tmpKc\[18\]="(.*)";\s+tmpKc\[19\]="(.*)";\s+tmpKc[20]="(.*)";\s+tmpKc\[21\]="(.*)"/g;
+  /tmpKc\[0\] = " ";\s+tmpKc\[1\] = "(.*)";\s+tmpKc\[2\] = "(.*?)";\s+tmpKc\[3\] = "(.*?)";\s+tmpKc\[4\] = "(.*?)";.*tmpKc\[6\] = (\d+);\s+tmpKc\[7\] = "(.*?)";\s+tmpKc\[8\] = "(.*?)";\s+tmpKc\[9\] = "(.*?)";\s+tmpKc\[10\] = "(.*?)";\s+tmpKc\[11\] = "(.*?)";\s+tmpKc\[12\] = "(.*?)";[\s\S]*?tmpKc\[18\]="(.*?)";\s+tmpKc\[19\]="(.*?)";\s+tmpKc\[20\]="(.*?)";\s+tmpKc\[21\]="(.*?)"/g;
 
 // cache
 let courseOffices = <string[]>[];
