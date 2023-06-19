@@ -35,49 +35,65 @@ export interface CourseListSuccessResponse {
 }
 
 export const courseListHandler: RequestHandler = async (req, res) => {
-  const {
-    cookies,
-    server,
-    grade = "",
-    major = "",
-    courseType = "",
-    courseName = "",
-    office = "",
-    week = "",
-    index = "",
-  } = <CourseListOptions>req.body;
+  try {
+    const {
+      cookies,
+      server,
+      grade = "",
+      major = "",
+      courseType = "",
+      courseName = "",
+      office = "",
+      week = "",
+      index = "",
+    } = <CourseListOptions>req.body;
 
-  const params = new URLSearchParams({
-    jx0502id: "49",
-    kclbs: courseType,
-    kkdws: office,
-    njs: grade,
-    kcmc: courseName,
-    zys: major,
-  });
+    const params = new URLSearchParams({
+      // check this
+      jx0502id: "59",
+      kclbs: courseType,
+      kkdws: office,
+      njs: grade,
+      kcmc: courseName,
+      zys: major,
+      xq: week,
+      jc: index,
+    });
 
-  if (week) params.append("xq", week);
-  if (index) params.append("jc", index);
+    const url = `${server}xk/SeachKC`;
 
-  const response = await fetch(`${server}xk/SearchKC`, {
-    method: "POST",
-    headers: new Headers({
-      "Content-Type": "application/x-www-form-urlencoded",
-      Cookie: cookies.join(", "),
-    }),
-    body: `jx0502id=49&kclbs=${courseType}&kxh=&skjs=&xq=&jx0502id=${major}&jx0502zbid=${grade}&sfktx=1&sfkxk=1`,
-  });
+    console.log("Searching with", url, params.toString());
 
-  // TODO: Add failed logic
+    const response = await fetch(url, {
+      method: "POST",
+      headers: new Headers({
+        "Content-Type": "application/x-www-form-urlencoded",
+        Cookie: cookies.join(", "),
+      }),
+      body: params.toString(),
+    });
 
-  const courses = (<Record<string, string>[]>await response.json()).map(
-    ({ kch, hcmc, kkdw, kclb }) => ({
-      id: kch,
-      name: hcmc,
-      office: kkdw,
-      type: kclb,
-    })
-  );
+    try {
+      const data = <Record<string, string>[]>await response.json();
 
-  res.json({ status: "success", courses });
+      console.log("Raw data:", data);
+
+      const courses = data.map(({ kch, hcmc, kkdw, kclb }) => ({
+        id: kch,
+        name: hcmc,
+        office: kkdw,
+        type: kclb,
+      }));
+
+      console.log("Getting courses:", courses);
+
+      res.json({ status: "success", courses });
+    } catch (err) {
+      console.error(err);
+      res.json({ status: "failed", err: (<Error>err).message });
+    }
+  } catch (err) {
+    console.error(err);
+    res.json({ status: "failed", err: (<Error>err).message });
+  }
 };

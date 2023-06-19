@@ -9,7 +9,7 @@ export interface SelectLoginOptions {
 
 export interface SelectLoginSuccessResponse {
   status: "success";
-  cookie: string;
+  cookies: string[];
   server: string;
 }
 
@@ -71,7 +71,7 @@ export const selectLoginHandler: RequestHandler = async (req, res) => {
         // @ts-ignore
         return res.json({
           status: "success",
-          cookie: getCookie(loginResponse),
+          cookies: getCookie(loginResponse),
           server,
         });
       }
