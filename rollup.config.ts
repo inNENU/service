@@ -1,11 +1,6 @@
 import esbuild from "rollup-plugin-esbuild";
 
-const external = [
-  "body-parser",
-  "compression",
-  "cookie-parser",
-  "express"
-];
+const external = ["body-parser", "compression", "cookie-parser", "express"];
 
 export default [
   {
@@ -13,7 +8,7 @@ export default [
     output: [
       {
         file: "./dist/index.js",
-        format: "cjs",
+        format: "esm",
         sourcemap: true,
       },
     ],
