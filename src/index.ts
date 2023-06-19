@@ -21,10 +21,10 @@ app.get("/", (_req, res) => {
   res.json({ status: "ok" });
 });
 app.post("/admission-notice", admissionNoticeHandler);
-app.get("/weather", weatherHandler);
 app.post("/select/login", selectLoginHandler);
 app.post("/select/course-list", courseListHandler);
 app.post("/select/info", selectInfoHandler);
+app.get("/weather", weatherHandler);
 
 app.listen(port, () => {
   console.log(`Service listening on port ${port}`);
