@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import { getCookie } from "../utils/cookie";
+import { isNumber, isPlainObject, isString } from "../utils";
 
 export interface SelectLoginOptions {
   id: number;
@@ -18,44 +19,71 @@ export interface SelectLoginFailedResponse {
 }
 
 export const selectLoginHandler: RequestHandler = async (req, res) => {
-  const { id, password } = <SelectLoginOptions>req.body;
+  try {
+    const { body } = req;
 
-  const mainPageResponse = await fetch("http://xk.nenu.edu.cn");
+    if (isPlainObject(body) && isNumber(body.id) && isString(body.password)) {
+      const { id, password } = body;
+      console.log("Login with id:", id, "password:", password);
 
-  const cookieHeader = mainPageResponse.headers.get("Set-Cookie")!;
-  const content = await mainPageResponse.text();
+      const mainPageResponse = await fetch("http://xk.nenu.edu.cn");
 
-  if (typeof id !== "number")
-    return res.json({ status: "failed", msg: "学号必须为数字" });
+      const cookieHeader = mainPageResponse.headers.get("Set-Cookie")!;
+      const content = await mainPageResponse.text();
 
-  const servers = /;tmpKc[0] =\s+"(.*)?";/g
-    .exec(content)!
-    .map(([, link]) => link);
+      if (typeof id !== "number")
+        return res.json({ status: "failed", msg: "学号必须为数字" });
 
-  const server = servers[id % servers.length];
-  const url = `${server}qzxk/xk/LoginToXkLdap`;
+      const servers = [];
+      const serverReg = /;tmpKc\[0\] =\s+"(.*?)";/g;
 
-  const headers = new Headers({
-    "Cache-Control": "max-age=0",
-    "Content-Type": "application/x-www-form-urlencoded",
-    Cookie: cookieHeader,
-    DNT: "1",
-    Origin: "http://xk.nenu.edu.cn",
-  });
+      let match;
 
-  const loginResponse = await fetch(`${url}?url=${url}`, {
-    method: "POST",
-    headers,
-    redirect: "manual",
-    body: `IDToken1=${id}&IDToken2=${password}&RANDOMCODE=1234&ymyzm=1234`,
-  });
+      while ((match = serverReg.exec(content))) servers.push(match[1]);
 
-  if (loginResponse.status === 302)
-    // @ts-ignore
+      console.log("Available servers:", servers);
+      const server = servers[id % servers.length];
+      console.log("Using server:", server);
+      const url = `${server}xk/LoginToXkLdap`;
+
+      const headers = new Headers({
+        "Cache-Control": "max-age=0",
+        "Content-Type": "application/x-www-form-urlencoded",
+        Cookie: cookieHeader,
+        DNT: "1",
+        Origin: "http://xk.nenu.edu.cn",
+      });
+
+      console.log(`Login at ${url}`);
+
+      const loginResponse = await fetch(`${url}?url=${url}`, {
+        method: "POST",
+        headers,
+        redirect: "manual",
+        body: `IDToken1=${id}&IDToken2=${password}&RANDOMCODE=1234&ymyzm=1234`,
+      });
+
+      if (loginResponse.status === 302) {
+        const cookie = getCookie(loginResponse);
+
+        console.log("Login success, getting cookie:", cookie);
+
+        // @ts-ignore
+        return res.json({
+          status: "success",
+          cookie: getCookie(loginResponse),
+          server,
+        });
+      }
+      return res.json({ status: "failed", msg: "用户名或密码错误" });
+    }
+
+    return res.json({ status: "failed", msg: "请传入必须参数" });
+  } catch (err) {
     res.json({
-      status: "success",
-      cookie: getCookie(loginResponse),
-      server,
+      status: "failed",
+      msg: (<Error>err).message,
+      details: (<Error>err).stack,
     });
-  else res.json({ status: "failed", msg: "用户名或密码错误" });
+  }
 };

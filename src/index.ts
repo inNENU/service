@@ -26,6 +26,12 @@ app.post("/select/course-list", courseListHandler);
 app.post("/select/info", selectInfoHandler);
 app.get("/weather", weatherHandler);
 
+// @ts-ignore
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send("Something broke!");
+});
+
 app.listen(port, () => {
   console.log(`Service listening on port ${port}`);
 });
