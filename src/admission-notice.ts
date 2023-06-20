@@ -5,7 +5,17 @@ interface AdmissionRequestOptions {
   level: "本科生" | "研究生";
 }
 
-const getAdmission = async ({ level }: AdmissionRequestOptions) => {
+interface AdmissionResponseOptions {
+  cookies: string;
+  info: string[];
+  verifyCode: string;
+  notice: string;
+  detail: { title: string; content: string };
+}
+
+const getAdmission = async ({
+  level,
+}: AdmissionRequestOptions): Promise<AdmissionResponseOptions | null> => {
   if (level === "本科生") {
     const imageResponse = await fetch(
       "http://bkzsw.nenu.edu.cn/include/webgetcode.php?width=85&height=28&sitex=15&sitey=6"
@@ -17,7 +27,7 @@ const getAdmission = async ({ level }: AdmissionRequestOptions) => {
       await imageResponse.arrayBuffer()
     ).toString("base64")}`;
 
-    const headers = new Headers({});
+    const headers = new Headers();
 
     headers.append("Cookie", cookies);
 
@@ -33,7 +43,7 @@ const getAdmission = async ({ level }: AdmissionRequestOptions) => {
     )!;
 
     return {
-      cookies: cookies,
+      cookies,
       info: ["name", "id", "testId"],
       verifyCode: base64Image,
       notice: "部分省份信息正在录入中，点击查看详情",
@@ -43,15 +53,18 @@ const getAdmission = async ({ level }: AdmissionRequestOptions) => {
       },
     };
   }
+
+  return null;
 };
 
 export const admissionNoticeHandler: RequestHandler = (req, res) => {
-  console.log(req.body);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const { body } = req;
 
   console.log(body);
 
-  if (body.type === "fetch") {
-    getAdmission(body).then((data) => res.send(data));
-  }
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  if (body.type === "fetch")
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    void getAdmission(body).then((data) => res.send(data));
 };
