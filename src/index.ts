@@ -4,7 +4,7 @@ import cookieParser from "cookie-parser";
 import express, { Response } from "express";
 
 import { admissionNoticeHandler } from "./admission-notice.js";
-import { enrollPlanHandler } from "./enroll/index.js";
+import { enrollPlanHandler, historyGradeHandler } from "./enroll/index.js";
 import {
   processHandler,
   searchHandler,
@@ -25,6 +25,7 @@ app.get("/", (_req, res) => {
   res.json({ status: "ok" });
 });
 app.post("/admission-notice", admissionNoticeHandler);
+app.post("/enroll/grade", historyGradeHandler);
 app.post("/enroll/plan", enrollPlanHandler);
 app.post("/select/login", selectLoginHandler);
 app.post("/select/info", selectInfoHandler);

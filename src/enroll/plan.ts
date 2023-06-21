@@ -8,7 +8,7 @@ export interface EnrollPlanOptions {
   reformType: string;
 }
 
-export interface EnrollPlainInfo {
+export interface EnrollPlanInfo {
   /** 专业名称 */
   major: string;
   /** 专业属性 */
@@ -25,17 +25,19 @@ export interface EnrollPlainInfo {
   remark: string;
 }
 
-export interface EnrollSuccessResponse {
+export interface EnrollPlanSuccessResponse {
   status: "success";
-  data: EnrollPlainInfo[];
+  data: EnrollPlanInfo[];
 }
 
-export interface EnrollFailedResponse {
+export interface EnrollPlanFailedResponse {
   status: "failed";
   msg: string;
 }
 
-export type EnrollResponse = EnrollSuccessResponse | EnrollFailedResponse;
+export type EnrollPlanResponse =
+  | EnrollPlanSuccessResponse
+  | EnrollPlanFailedResponse;
 
 const enrollItemReg =
   /<tr class='RowTr'>\s+<td align='center'>(.*?)<\/td>\s+<td align='center'>(.*?)<\/td>\s+<td align='center'>(.*?)<\/td>\s+<td align='center'>(.*?)<\/td>\s+<td align='center'>(.*?)<\/td>\s+<td align='center'>(.*?)<\/td>\s*<td align='center'>(.*?)<\/td>\s*<\/tr>/g;
@@ -66,14 +68,14 @@ export const enrollPlanHandler: RequestHandler = async (req, res) => {
 
     const content = await searchResponse.text();
 
-    const plainInfo: EnrollPlainInfo[] = [];
+    const planInfo: EnrollPlanInfo[] = [];
     let planMatch;
 
     while ((planMatch = enrollItemReg.exec(content))) {
       const [, major, majorType, planType, count, year, fee, remark] =
         planMatch;
 
-      plainInfo.push({
+      planInfo.push({
         major,
         majorType,
         planType,
@@ -84,14 +86,14 @@ export const enrollPlanHandler: RequestHandler = async (req, res) => {
       });
     }
 
-    console.log("Getting", plainInfo);
+    console.log("Getting", planInfo);
 
-    return res.json({
+    return res.json(<EnrollPlanSuccessResponse>{
       status: "success",
-      data: plainInfo,
+      data: planInfo,
     });
   } catch (err) {
-    res.json({
+    res.json(<EnrollPlanFailedResponse>{
       status: "failed",
       msg: (<Error>err).message,
       details: (<Error>err).stack,
