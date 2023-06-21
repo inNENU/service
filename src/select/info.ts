@@ -164,7 +164,7 @@ const getCourseTable = (documentContent: string): CourseData[][][] => {
     while ((matched = courseItemReg.exec(item))) {
       const courseContent = matched[1]!;
       const courseDataReg =
-        /<a onclick=funSearchYxkc1\(2,'(\d+)',1\); style='cursor:pointer;width:100%'>(.+?)<\/a>/g;
+        /<a onclick=funSearchYxkc1\(2,'(.+?)',1\); style='cursor:pointer;width:100%'>(.+?)<\/a>/g;
 
       const courseData: CourseData[] = [];
       let matchedCourseData;
