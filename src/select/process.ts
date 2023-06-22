@@ -1,7 +1,12 @@
 import type { RequestHandler } from "express";
 
 import { coursesStore } from "./store";
-import type { SelectBaseOptions } from "./typings";
+import type {
+  SelectBaseFailedResponse,
+  SelectBaseOptions,
+  SelectBaseSuccessResponse,
+} from "./typings";
+import type { EmptyObject } from "../typings";
 
 export interface ProcessOptions extends SelectBaseOptions {
   /** 课程号 */
@@ -10,26 +15,25 @@ export interface ProcessOptions extends SelectBaseOptions {
   jx0502zbid: string;
 }
 
-export interface ProcessSuccessResponse {
-  status: "success";
+export interface ProcessSuccessResponse extends SelectBaseSuccessResponse {
   msg: string;
 }
 
-export interface ProcessFailedResponse {
-  status: "failed";
-  msg: string;
+export interface ProcessFailedResponse extends SelectBaseFailedResponse {
   type?: "conflict" | "relogin" | "forbid";
 }
 
 export type ProcessResponse = ProcessSuccessResponse | ProcessFailedResponse;
 
-export const processHandler: RequestHandler = async (req, res) => {
+export const processHandler: RequestHandler<
+  EmptyObject,
+  EmptyObject,
+  ProcessOptions
+> = async (req, res) => {
   const { method } = req;
 
   try {
-    const { cookies, server, id, jx0502id, jx0502zbid } = <ProcessOptions>(
-      req.body
-    );
+    const { cookies, server, id, jx0502id, jx0502zbid } = req.body;
 
     const url = `${server}xk/process${method === "DELETE" ? "Tx" : "Xk"}`;
     const params = new URLSearchParams({

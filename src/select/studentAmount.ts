@@ -1,6 +1,11 @@
 import type { RequestHandler } from "express";
 
-import type { SelectBaseOptions } from "./typings";
+import type {
+  SelectBaseFailedResponse,
+  SelectBaseOptions,
+  SelectBaseSuccessResponse,
+} from "./typings";
+import type { EmptyObject } from "../typings";
 
 export interface StudentAmountOptions extends SelectBaseOptions {
   /** 课程号 */
@@ -20,23 +25,26 @@ export interface StudentAmountData {
   amount: number;
 }
 
-export interface StudentAmountSuccessResponse {
-  status: "success";
+export interface StudentAmountSuccessResponse
+  extends SelectBaseSuccessResponse {
   data: StudentAmountData[];
 }
 
-export interface StudentAmountFailedResponse {
-  status: "failed";
-  msg: string;
+export interface StudentAmountFailedResponse extends SelectBaseFailedResponse {
+  type?: "relogin";
 }
 
 export type StudentAmountResponse =
   | StudentAmountSuccessResponse
   | StudentAmountFailedResponse;
 
-export const studentAmountHandler: RequestHandler = async (req, res) => {
+export const studentAmountHandler: RequestHandler<
+  EmptyObject,
+  EmptyObject,
+  StudentAmountOptions
+> = async (req, res) => {
   try {
-    const { cookies, server, id, jx0502id } = <StudentAmountOptions>req.body;
+    const { cookies, server, id, jx0502id } = req.body;
     const url = `${server}xk/GetXkRs`;
     const params = new URLSearchParams({
       jx0502id,
@@ -62,7 +70,11 @@ export const studentAmountHandler: RequestHandler = async (req, res) => {
     console.log("Raw data:", rawData);
 
     if (rawData.match(/\s+<!DOCTYPE html/))
-      return res.json({ status: "failed", msg: "请重新登录" });
+      return res.json(<StudentAmountFailedResponse>{
+        status: "failed",
+        msg: "请重新登录",
+        type: "relogin",
+      });
 
     try {
       const data: StudentAmountData[] = (<StudentAmountRaw[]>(
@@ -72,13 +84,19 @@ export const studentAmountHandler: RequestHandler = async (req, res) => {
         amount: rs,
       }));
 
-      res.json({ status: "success", data });
+      res.json(<StudentAmountSuccessResponse>{ status: "success", data });
     } catch (err) {
       console.error(err);
-      res.json({ status: "failed", msg: (<Error>err).message });
+      res.json(<StudentAmountFailedResponse>{
+        status: "failed",
+        msg: (<Error>err).message,
+      });
     }
   } catch (err) {
     console.error(err);
-    res.json({ status: "failed", msg: (<Error>err).message });
+    res.json(<StudentAmountFailedResponse>{
+      status: "failed",
+      msg: (<Error>err).message,
+    });
   }
 };

@@ -8,33 +8,46 @@ import {
   majorsStore,
   paramsStore,
 } from "./store.js";
-import type { SelectBaseOptions } from "./typings.js";
+import type {
+  SelectBaseFailedResponse,
+  SelectBaseOptions,
+  SelectBaseSuccessResponse,
+} from "./typings.js";
 import { COURSE_TYPES } from "./utils.js";
+import type { EmptyObject } from "../typings.js";
 import { readResponseContent } from "../utils/content.js";
 
 export interface CourseData {
+  /** 课程名称 */
   name: string;
+  /** 课程 ID */
   cid: string;
 }
 
-export interface SelectInfoSuccessResponse {
-  status: "success";
+export interface SelectInfoSuccessResponse extends SelectBaseSuccessResponse {
   jx0502id: string;
   jx0502zbid: string;
+
+  /** 课程信息 */
   courses: CourseInfo[];
-  courseTable: CourseData[][][];
+  /** 课程类别 */
   courseTypes: string[];
+  /** 开课单位 */
   courseOffices: string[];
-  currentMajor: string;
-  currentGrade: string;
+  /** 年级 */
   grades: string[];
+  /** 专业 */
   majors: MajorInfo[];
+
+  /** 当前专业 */
+  currentMajor: string;
+  /** 当前年级 */
+  currentGrade: string;
+  /** 课程表 */
+  courseTable: CourseData[][][];
 }
 
-export interface SelectInfoFailedResponse {
-  status: "failed";
-  msg: string;
-}
+export type SelectInfoFailedResponse = SelectBaseFailedResponse;
 
 export type SelectInfoResponse =
   | SelectInfoSuccessResponse
@@ -141,10 +154,10 @@ const setParams = async ({
     }),
   });
 
-  const infoReponseText = await readResponseContent(infoResponse);
+  const infoResponseText = await readResponseContent(infoResponse);
 
-  const jx0502zbid = /tmpKc\[6\] = "(\d+)";/.exec(infoReponseText)![1];
-  const jx0502id = /tmpKc\[7\] = "(\d+)";/.exec(infoReponseText)![1];
+  const jx0502zbid = /tmpKc\[6\] = "(\d+)";/.exec(infoResponseText)![1];
+  const jx0502id = /tmpKc\[7\] = "(\d+)";/.exec(infoResponseText)![1];
 
   paramsStore.setState({ jx0502id, jx0502zbid });
 };
@@ -182,9 +195,13 @@ const getCourseTable = (documentContent: string): CourseData[][][] => {
   });
 };
 
-export const selectInfoHandler: RequestHandler = async (req, res) => {
+export const selectInfoHandler: RequestHandler<
+  EmptyObject,
+  EmptyObject,
+  SelectBaseOptions
+> = async (req, res) => {
   try {
-    const { cookies, server } = <SelectBaseOptions>req.body;
+    const { cookies, server } = req.body;
 
     if (!paramsStore.state) await setParams({ cookies, server });
 
@@ -207,7 +224,7 @@ export const selectInfoHandler: RequestHandler = async (req, res) => {
     const documentContent = await readResponseContent(response);
 
     if (documentContent.includes("不在选课时间范围内，无法选课!"))
-      return res.json({
+      return res.json(<SelectInfoFailedResponse>{
         status: "failed",
         msg: "不在选课时间范围内，无法选课!",
       });
@@ -240,6 +257,9 @@ export const selectInfoHandler: RequestHandler = async (req, res) => {
       courseOffices: coursesOfficeStore.state,
     });
   } catch (err) {
-    res.json({ status: "failed", msg: (<Error>err).message });
+    res.json(<SelectInfoFailedResponse>{
+      status: "failed",
+      msg: (<Error>err).message,
+    });
   }
 };

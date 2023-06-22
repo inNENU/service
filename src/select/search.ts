@@ -1,6 +1,11 @@
 import type { RequestHandler } from "express";
 
-import type { SelectBaseOptions } from "./typings.js";
+import type {
+  SelectBaseFailedResponse,
+  SelectBaseOptions,
+  SelectBaseSuccessResponse,
+} from "./typings.js";
+import type { EmptyObject } from "../typings.js";
 
 export interface SearchOptions extends SelectBaseOptions {
   /** 年级 */
@@ -31,19 +36,24 @@ export interface CourseBasicInfo {
   type: string;
 }
 
-export interface SearchSuccessResponse {
-  status: "success";
+export interface SelectSearchSuccessResponse extends SelectBaseSuccessResponse {
+  /** 课程信息 */
   courses: CourseBasicInfo[];
 }
 
-export interface SearchFailedResponse {
-  status: "failed";
-  msg: string;
+export interface SelectSearchFailedResponse extends SelectBaseFailedResponse {
+  type?: "relogin";
 }
 
-export type SearchResponse = SearchSuccessResponse | SearchFailedResponse;
+export type SelectSearchResponse =
+  | SelectSearchSuccessResponse
+  | SelectSearchFailedResponse;
 
-export const searchHandler: RequestHandler = async (req, res) => {
+export const searchHandler: RequestHandler<
+  EmptyObject,
+  EmptyObject,
+  SearchOptions
+> = async (req, res) => {
   try {
     const {
       cookies,
@@ -56,7 +66,7 @@ export const searchHandler: RequestHandler = async (req, res) => {
       office = "",
       week = "",
       index = "",
-    } = <SearchOptions>req.body;
+    } = req.body;
 
     // Tip: kcmc is not URL encoded
     const params = Object.entries({
@@ -90,7 +100,11 @@ export const searchHandler: RequestHandler = async (req, res) => {
     console.log("Raw data:", rawData);
 
     if (rawData.match(/\s+<!DOCTYPE html/))
-      return res.json({ status: "failed", msg: "请重新登录" });
+      return res.json(<SelectSearchFailedResponse>{
+        status: "failed",
+        msg: "请重新登录",
+        type: "relogin",
+      });
 
     try {
       const courses = (<Record<string, string>[]>JSON.parse(rawData)).map(
@@ -104,13 +118,19 @@ export const searchHandler: RequestHandler = async (req, res) => {
 
       console.log(`Getting ${courses.length} courses`);
 
-      res.json({ status: "success", courses });
+      res.json(<SelectSearchSuccessResponse>{ status: "success", courses });
     } catch (err) {
       console.error(err);
-      res.json({ status: "failed", msg: (<Error>err).message });
+      res.json(<SelectSearchFailedResponse>{
+        status: "failed",
+        msg: (<Error>err).message,
+      });
     }
   } catch (err) {
     console.error(err);
-    res.json({ status: "failed", msg: (<Error>err).message });
+    res.json(<SelectSearchFailedResponse>{
+      status: "failed",
+      msg: (<Error>err).message,
+    });
   }
 };

@@ -8,3 +8,13 @@ export interface SelectBaseOptions {
    */
   server: string;
 }
+
+export interface SelectBaseSuccessResponse {
+  status: "success";
+}
+
+export interface SelectBaseFailedResponse {
+  status: "failed";
+  /** 错误信息 */
+  msg: string;
+}

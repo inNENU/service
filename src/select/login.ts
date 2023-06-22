@@ -1,5 +1,11 @@
 import type { RequestHandler } from "express";
 
+import type {
+  SelectBaseFailedResponse,
+  SelectBaseOptions,
+  SelectBaseSuccessResponse,
+} from "./typings.js";
+import type { EmptyObject } from "../typings.js";
 import {
   getCookie,
   isNumber,
@@ -8,24 +14,24 @@ import {
 } from "../utils/index.js";
 
 export interface SelectLoginOptions {
+  /** 学号 */
   id: number;
+  /** 密码 */
   password: string;
 }
 
-export interface SelectLoginSuccessResponse {
-  status: "success";
-  cookies: string[];
-  server: string;
-}
+export type SelectLoginSuccessResponse = SelectBaseOptions &
+  SelectBaseSuccessResponse;
 
-export interface SelectLoginFailedResponse {
-  status: "failed";
-  msg: string;
-}
+export type SelectLoginFailedResponse = SelectBaseFailedResponse;
 
-export const selectLoginHandler: RequestHandler = async (req, res) => {
+export const selectLoginHandler: RequestHandler<
+  EmptyObject,
+  EmptyObject,
+  SelectLoginOptions
+> = async (req, res) => {
   try {
-    const body = <SelectLoginOptions>req.body;
+    const { body } = req;
 
     if (isPlainObject(body) && isNumber(body.id) && isString(body.password)) {
       const { id, password } = body;
@@ -75,20 +81,25 @@ export const selectLoginHandler: RequestHandler = async (req, res) => {
 
         console.log("Login success, getting cookie:", cookie);
 
-        // @ts-ignore
-        return res.json({
+        return res.json(<SelectLoginSuccessResponse>{
           status: "success",
           cookies: getCookie(loginResponse),
           server,
         });
       }
 
-      return res.json({ status: "failed", msg: "用户名或密码错误" });
+      return res.json(<SelectLoginFailedResponse>{
+        status: "failed",
+        msg: "用户名或密码错误",
+      });
     }
 
-    return res.json({ status: "failed", msg: "请传入必须参数" });
+    return res.json(<SelectLoginFailedResponse>{
+      status: "failed",
+      msg: "请传入必须参数",
+    });
   } catch (err) {
-    res.json({
+    res.json(<SelectLoginFailedResponse>{
       status: "failed",
       msg: (<Error>err).message,
     });

@@ -1,5 +1,7 @@
 import type { RequestHandler } from "express";
 
+import type { EmptyObject } from "../typings";
+
 export interface HistoryGradeOptions {
   year: string;
   province: string;
@@ -39,21 +41,29 @@ const enrollGradeItemReg = /<tr class="RowTr">([\s\S]+?)<\/tr>/g;
 
 const enrollGradeItemInfoReg = /<td align="center">(.*?)<\/td>/g;
 
-export const historyGradeHandler: RequestHandler = async (req, res) => {
+export const historyGradeHandler: RequestHandler<
+  EmptyObject,
+  EmptyObject,
+  HistoryGradeOptions
+> = async (req, res) => {
   try {
-    const body = <HistoryGradeOptions>req.body;
+    const { majorType, planType, province, reformType, year } = req.body;
 
     const url =
       "http://bkzsw.nenu.edu.cn//col_000018_000170_action_Fraction.html";
-    const params = new URLSearchParams({
-      nianfen: body.year,
-      shengfen: body.province,
-      jhlb: body.planType,
-      zylb: body.majorType,
-      kelei: body.reformType,
-    }).toString();
+    const options = {
+      nianfen: year,
+      shengfen: province,
+      jhlb: planType,
+      zylb: majorType,
+      kelei: reformType,
+    };
 
-    console.log("Requesting enroll plan with params:", params);
+    console.log("Receiving options:", options);
+
+    const params = new URLSearchParams(options).toString();
+
+    console.log("Requesting history grade with params:", params);
 
     const searchResponse = await fetch(`${url}`, {
       method: "POST",

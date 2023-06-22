@@ -1,5 +1,7 @@
 import type { RequestHandler } from "express";
 
+import type { EmptyObject } from "../typings";
+
 export interface EnrollPlanOptions {
   year: string;
   province: string;
@@ -42,19 +44,27 @@ export type EnrollPlanResponse =
 const enrollItemReg =
   /<tr class='RowTr'>\s+<td align='center'>(.*?)<\/td>\s+<td align='center'>(.*?)<\/td>\s+<td align='center'>(.*?)<\/td>\s+<td align='center'>(.*?)<\/td>\s+<td align='center'>(.*?)<\/td>\s+<td align='center'>(.*?)<\/td>\s*<td align='center'>(.*?)<\/td>\s*<\/tr>/g;
 
-export const enrollPlanHandler: RequestHandler = async (req, res) => {
+export const enrollPlanHandler: RequestHandler<
+  EmptyObject,
+  EmptyObject,
+  EnrollPlanOptions
+> = async (req, res) => {
   try {
-    const body = <EnrollPlanOptions>req.body;
+    const { majorType, planType, province, reformType, year } = req.body;
 
     const url =
       "http://bkzsw.nenu.edu.cn/col_000018_000171_action_Enrollment.html";
-    const params = new URLSearchParams({
-      nianfen: body.year,
-      shengfen: body.province,
-      jhlb: body.planType,
-      zylb: body.majorType,
-      kelei: body.reformType,
-    }).toString();
+    const options = {
+      nianfen: year,
+      shengfen: province,
+      jhlb: planType,
+      zylb: majorType,
+      kelei: reformType,
+    };
+
+    console.log("Receiving options:", options);
+
+    const params = new URLSearchParams(options).toString();
 
     console.log("Requesting enroll plan with params:", params);
 
