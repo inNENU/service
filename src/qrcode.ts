@@ -88,7 +88,10 @@ export const qrCodeHandler: RequestHandler<
       );
 
       if (image instanceof Buffer) {
-        res.set({ "Content-Disposition": `qrcode.png` });
+        res.set({
+          "Content-Disposition": `qrcode.jpg`,
+          "Content-Type": "image/jpeg",
+        });
 
         return res.end(image);
       }
@@ -101,7 +104,10 @@ export const qrCodeHandler: RequestHandler<
 
     const image = await getQQQRCode(appID, page);
 
-    res.set({ "Content-Disposition": `qrcode.png` });
+    res.set({
+      "Content-Disposition": `qrcode.png`,
+      "Content-Type": "image/png",
+    });
 
     return res.end(image);
   } catch (err) {
