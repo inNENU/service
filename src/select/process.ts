@@ -18,7 +18,7 @@ export interface ProcessSuccessResponse {
 export interface ProcessFailedResponse {
   status: "failed";
   msg: string;
-  type?: "conflict" | "relogin";
+  type?: "conflict" | "relogin" | "forbid";
 }
 
 export type ProcessResponse = ProcessSuccessResponse | ProcessFailedResponse;
@@ -82,7 +82,18 @@ export const processHandler: RequestHandler = async (req, res) => {
             msg,
           });
       } else {
-        if (msg.endsWith("上课时间冲突") || msg.includes("跨校区"))
+        if (
+          msg === "不在选课时间范围内，无法选课!!" ||
+          msg.includes("跨校区") ||
+          msg.includes("禁止")
+        )
+          return res.json(<ProcessFailedResponse>{
+            status: "failed",
+            msg,
+            type: "forbid",
+          });
+
+        if (msg.endsWith("上课时间冲突"))
           return res.json({
             status: "failed",
             msg,
