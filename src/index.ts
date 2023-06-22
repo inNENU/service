@@ -5,6 +5,7 @@ import express, { Response } from "express";
 
 import { admissionNoticeHandler } from "./admission-notice.js";
 import { enrollPlanHandler, historyGradeHandler } from "./enroll/index.js";
+import { qrCodeHandler } from "./qrcode.js";
 import {
   processHandler,
   searchHandler,
@@ -33,6 +34,8 @@ app.post("/select/search", searchHandler);
 app.post("/select/student-amount", studentAmountHandler);
 app.delete("/select/process", processHandler);
 app.put("/select/process", processHandler);
+
+app.get("/qrcode", qrCodeHandler);
 app.get("/weather", weatherHandler);
 
 // @ts-ignore

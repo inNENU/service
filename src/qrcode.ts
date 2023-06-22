@@ -11,9 +11,8 @@ export interface WechatQRCodeOptions {
 }
 
 export interface QQQRCodeOptions {
-  appID: 1109559721;
+  appID: "1109559721";
   page: string;
-  params: Record<string, string>;
 }
 
 export type QRCodeOptions = WechatQRCodeOptions | QQQRCodeOptions;
@@ -37,7 +36,7 @@ const getWechatQRCode = async (
   accessToken: string,
   page: string,
   scene: string
-): Promise<ArrayBuffer | WechatQRCodeError> => {
+): Promise<Buffer | WechatQRCodeError> => {
   const response = await fetch(
     `https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=${accessToken}`,
     {
@@ -59,25 +58,19 @@ const getWechatQRCode = async (
   return image;
 };
 
-const getQQQRCode = async (
-  appID: number,
-  page: string,
-  params: Record<string, string>
-): Promise<Buffer> =>
-  toBuffer(
-    `https://m.q.qq.com/a/p/${appID}?s=${encodeURI(
-      `${page}?${Object.entries(params)
-        .map(([key, value]) => `${key}=${value}`)
-        .join("&")}`
-    )}`
-  );
+const getQQQRCode = async (appID: string, page: string): Promise<Buffer> =>
+  toBuffer(`https://m.q.qq.com/a/p/${appID}?s=${encodeURI(page)}`);
 
-export const qrCodeHandler: RequestHandler<QRCodeOptions> = async (
-  req,
-  res
-) => {
+export const qrCodeHandler: RequestHandler<
+  Record<never, never>,
+  Record<never, never>,
+  Record<never, never>,
+  QRCodeOptions
+> = async (req, res) => {
   try {
-    const { appID, page } = req.params;
+    const { appID, page } = req.query;
+
+    console.log("Requesting", req.query);
 
     if (!appIDInfo[appID])
       return res.json({
@@ -85,36 +78,32 @@ export const qrCodeHandler: RequestHandler<QRCodeOptions> = async (
         msg: "AppID 非法",
       });
 
-    if (typeof appID === "number") {
-      const image = await getQQQRCode(appID, page, req.params.params);
+    if (Number.isNaN(Number(appID))) {
+      const wechatAccessToken = await getWechatAccessToken(appID);
 
-      res.set({
-        "Content-Disposition": `小程序二维码.png`,
+      const image = await getWechatQRCode(
+        wechatAccessToken,
+        page,
+        (<WechatQRCodeOptions>req.query).scene
+      );
+
+      if (image instanceof Buffer) {
+        res.set({ "Content-Disposition": `qrcode.png` });
+
+        return res.end(image);
+      }
+
+      return res.json({
+        status: "failed",
+        msg: image.errmsg,
       });
-
-      return res.end(image);
     }
 
-    const wechatAccessToken = await getWechatAccessToken(appID);
+    const image = await getQQQRCode(appID, page);
 
-    const image = await getWechatQRCode(
-      wechatAccessToken,
-      page,
-      req.params.scene
-    );
+    res.set({ "Content-Disposition": `qrcode.png` });
 
-    if (image instanceof ArrayBuffer) {
-      res.set({
-        "Content-Disposition": `小程序二维码.png`,
-      });
-
-      return res.end(Buffer.from(image));
-    }
-
-    return res.json({
-      status: "failed",
-      msg: image.errmsg,
-    });
+    return res.end(image);
   } catch (err) {
     res.json({
       status: "failed",
