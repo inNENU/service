@@ -8,26 +8,14 @@ export interface HistoryGradeOptions {
   reformType: string;
 }
 
-export interface HistoryGradeInfo {
-  /** 专业名称 */
-  major: string;
-  /** 专业属性 */
-  majorType: string;
-  /** 重点线 */
-  line: string;
-  /** 最低分 */
-  min: string;
-  /** 最高分 */
-  max: string;
-  /** 平均分 */
-  average: string;
-  /** 备注 */
-  remark: string;
-}
+export type HistoryGradeInfoItem = string[];
 
 export interface EnrollGradeSuccessResponse {
   status: "success";
-  data: HistoryGradeInfo[];
+  data: {
+    titles: string[];
+    items: HistoryGradeInfoItem[];
+  };
 }
 
 export interface EnrollGradeFailedResponse {
@@ -39,8 +27,15 @@ export type EnrollGradeResponse =
   | EnrollGradeSuccessResponse
   | EnrollGradeFailedResponse;
 
-const enrollGradeItemReg =
-  /<tr class="RowTr">\s+<td align="center">(.*?)<\/td>\s+<td align="center">(.*?)<\/td>\s+<td align="center">(.*?)<\/td>\s+<td align="center">(.*?)<\/td>\s+<td align="center">(.*?)<\/td>\s+<td align="center">(.*?)<\/td>\s*<!--\s+-->\s+<td align="center">(.*?)<\/td>\s*<\/tr>/g;
+const enrollGradeTitleReg =
+  /<tr class="RowTr"\s+bgcolor="#f5f5f5">([\s\S]+?)<\/tr>/g;
+
+const enrollGradeTitleItemReg =
+  /<td align="center".*?><strong>(.*?)<\/strong><\/td>/g;
+
+const enrollGradeItemReg = /<tr class="RowTr">([\s\S]+?)<\/tr>/g;
+
+const enrollGradeItemInfoReg = /<td align="center">(.*?)<\/td>/g;
 
 export const historyGradeHandler: RequestHandler = async (req, res) => {
   try {
@@ -66,31 +61,45 @@ export const historyGradeHandler: RequestHandler = async (req, res) => {
       body: params,
     });
 
-    const content = await searchResponse.text();
+    const content = (await searchResponse.text()).split("WeishilgBt")[1];
 
-    const historyInfo: HistoryGradeInfo[] = [];
+    const titleText = enrollGradeTitleReg
+      .exec(content)![1]
+      .replace(/<!--[\s\S]*?-->/g, () => "");
+
+    const titles: string[] = [];
+
+    let titleMatch;
+
+    while ((titleMatch = enrollGradeTitleItemReg.exec(titleText)))
+      titles.push(titleMatch[1]);
+
+    console.log(titles);
+
+    const historyInfos: HistoryGradeInfoItem[] = [];
     let historyMatch;
 
     while ((historyMatch = enrollGradeItemReg.exec(content))) {
-      const [, major, majorType, line, min, max, average, remark] =
-        historyMatch;
+      console.log(historyMatch[1]);
+      const enrollItems = historyMatch[1].replace(/<!--[\s\S]*?-->/g, () => "");
 
-      historyInfo.push({
-        major,
-        majorType,
-        line,
-        min,
-        max,
-        average,
-        remark: remark.replace(/&nbsp;/g, " ").trim(),
-      });
+      const historyInfo: HistoryGradeInfoItem = [];
+
+      let enrollItemMatch;
+
+      while ((enrollItemMatch = enrollGradeItemInfoReg.exec(enrollItems)))
+        historyInfo.push(enrollItemMatch[1].replace(/&nbsp;/g, " ").trim());
+
+      historyInfos.push(historyInfo);
     }
 
-    console.log("Getting", historyInfo);
+    const results = { titles, items: historyInfos };
+
+    console.log("Getting", results);
 
     return res.json(<EnrollGradeSuccessResponse>{
       status: "success",
-      data: historyInfo,
+      data: results,
     });
   } catch (err) {
     res.json(<EnrollGradeFailedResponse>{
