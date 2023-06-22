@@ -206,6 +206,12 @@ export const selectInfoHandler: RequestHandler = async (req, res) => {
 
     const documentContent = await readResponseContent(response);
 
+    if (documentContent.includes("不在选课时间范围内，无法选课!"))
+      return res.json({
+        status: "failed",
+        msg: "不在选课时间范围内，无法选课!",
+      });
+
     const courseTable = getCourseTable(documentContent);
 
     const gradesText = gradesReg.exec(documentContent)![0];
@@ -221,7 +227,7 @@ export const selectInfoHandler: RequestHandler = async (req, res) => {
 
     console.log("Personal Information:", currentGrade, currentMajor);
 
-    const info: SelectInfoSuccessResponse = {
+    return res.json(<SelectInfoSuccessResponse>{
       status: "success",
       ...paramsStore.state!,
       currentMajor,
@@ -232,9 +238,7 @@ export const selectInfoHandler: RequestHandler = async (req, res) => {
       courseTable,
       courseTypes: COURSE_TYPES,
       courseOffices: coursesOfficeStore.state,
-    };
-
-    res.json(info);
+    });
   } catch (err) {
     res.json({ status: "failed", msg: (<Error>err).message });
   }

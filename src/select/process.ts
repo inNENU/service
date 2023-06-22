@@ -82,7 +82,7 @@ export const processHandler: RequestHandler = async (req, res) => {
             msg,
           });
       } else {
-        if (msg.endsWith("上课时间冲突"))
+        if (msg.endsWith("上课时间冲突") || msg.includes("跨校区"))
           return res.json({
             status: "failed",
             msg,
