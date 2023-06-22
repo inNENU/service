@@ -10,12 +10,14 @@ export interface HistoryGradeOptions {
 
 export type HistoryGradeInfoItem = string[];
 
+export interface HistoryGradeResult {
+  titles: string[];
+  items: HistoryGradeInfoItem[];
+}
+
 export interface EnrollGradeSuccessResponse {
   status: "success";
-  data: {
-    titles: string[];
-    items: HistoryGradeInfoItem[];
-  };
+  data: HistoryGradeResult;
 }
 
 export interface EnrollGradeFailedResponse {
@@ -90,7 +92,7 @@ export const historyGradeHandler: RequestHandler = async (req, res) => {
       while ((enrollItemMatch = enrollGradeItemInfoReg.exec(enrollItems)))
         historyInfo.push(enrollItemMatch[1].replace(/&nbsp;/g, " ").trim());
 
-      historyInfos.push(historyInfo);
+      if (historyInfo.length > 0) historyInfos.push(historyInfo);
     }
 
     const results = { titles, items: historyInfos };
