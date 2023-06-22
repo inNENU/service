@@ -66,48 +66,54 @@ export const historyGradeHandler: RequestHandler = async (req, res) => {
     const content = (await searchResponse.text()).split("WeishilgBt")[1];
 
     const titleText = enrollGradeTitleReg
-      .exec(content)![1]
+      .exec(content)?.[1]
       .replace(/<!--[\s\S]*?-->/g, () => "");
 
-    const titles: string[] = [];
+    if (titleText) {
+      const titles: string[] = [];
 
-    let titleMatch;
+      let titleMatch;
 
-    while ((titleMatch = enrollGradeTitleItemReg.exec(titleText)))
-      titles.push(titleMatch[1]);
+      while ((titleMatch = enrollGradeTitleItemReg.exec(titleText)))
+        titles.push(titleMatch[1]);
 
-    console.log(titles);
+      const historyInfos: HistoryGradeInfoItem[] = [];
+      let historyMatch;
 
-    const historyInfos: HistoryGradeInfoItem[] = [];
-    let historyMatch;
+      while ((historyMatch = enrollGradeItemReg.exec(content))) {
+        const enrollItems = historyMatch[1].replace(
+          /<!--[\s\S]*?-->/g,
+          () => ""
+        );
 
-    while ((historyMatch = enrollGradeItemReg.exec(content))) {
-      console.log(historyMatch[1]);
-      const enrollItems = historyMatch[1].replace(/<!--[\s\S]*?-->/g, () => "");
+        const historyInfo: HistoryGradeInfoItem = [];
 
-      const historyInfo: HistoryGradeInfoItem = [];
+        let enrollItemMatch;
 
-      let enrollItemMatch;
+        while ((enrollItemMatch = enrollGradeItemInfoReg.exec(enrollItems)))
+          historyInfo.push(enrollItemMatch[1].replace(/&nbsp;/g, " ").trim());
 
-      while ((enrollItemMatch = enrollGradeItemInfoReg.exec(enrollItems)))
-        historyInfo.push(enrollItemMatch[1].replace(/&nbsp;/g, " ").trim());
+        if (historyInfo.length > 0) historyInfos.push(historyInfo);
+      }
 
-      if (historyInfo.length > 0) historyInfos.push(historyInfo);
+      const results = { titles, items: historyInfos };
+
+      console.log("Getting", results);
+
+      return res.json(<EnrollGradeSuccessResponse>{
+        status: "success",
+        data: results,
+      });
     }
 
-    const results = { titles, items: historyInfos };
-
-    console.log("Getting", results);
-
-    return res.json(<EnrollGradeSuccessResponse>{
-      status: "success",
-      data: results,
+    return res.json(<EnrollGradeFailedResponse>{
+      status: "failed",
+      msg: "获取数据失败，请重试",
     });
   } catch (err) {
     res.json(<EnrollGradeFailedResponse>{
       status: "failed",
       msg: (<Error>err).message,
-      details: (<Error>err).stack,
     });
   }
 };

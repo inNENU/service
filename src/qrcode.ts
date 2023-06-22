@@ -114,7 +114,6 @@ export const qrCodeHandler: RequestHandler<
     res.json({
       status: "failed",
       msg: (<Error>err).message,
-      details: (<Error>err).stack,
     });
   }
 };

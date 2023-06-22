@@ -96,7 +96,6 @@ export const enrollPlanHandler: RequestHandler = async (req, res) => {
     res.json(<EnrollPlanFailedResponse>{
       status: "failed",
       msg: (<Error>err).message,
-      details: (<Error>err).stack,
     });
   }
 };

@@ -91,7 +91,6 @@ export const selectLoginHandler: RequestHandler = async (req, res) => {
     res.json({
       status: "failed",
       msg: (<Error>err).message,
-      details: (<Error>err).stack,
     });
   }
 };
