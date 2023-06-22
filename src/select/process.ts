@@ -88,8 +88,12 @@ export const processHandler: RequestHandler<
       } else {
         if (
           msg === "不在选课时间范围内，无法选课!!" ||
+          // TODO: Get exact message
           msg.includes("跨校区") ||
-          msg.includes("禁止")
+          // TODO: Get exact message
+          msg.includes("禁止") ||
+          // TODO: Get exact message
+          msg.includes("学分")
         )
           return res.json(<ProcessFailedResponse>{
             status: "failed",
