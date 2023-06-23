@@ -88,10 +88,8 @@ export const processHandler: RequestHandler<
       } else {
         if (
           msg === "不在选课时间范围内，无法选课!!" ||
-          // TODO: Get exact message
-          msg.includes("跨校区") ||
-          // TODO: Get exact message
-          msg.includes("禁止") ||
+          msg === "不允许跨校区选课！" ||
+          msg === "此课程当前年级专业禁止选！" ||
           // TODO: Get exact message
           msg.includes("学分")
         )
@@ -108,7 +106,7 @@ export const processHandler: RequestHandler<
             type: "conflict",
           });
 
-        if (msg.includes("选课成功"))
+        if (msg === "选课成功")
           return res.json(<ProcessSuccessResponse>{
             status: "success",
             msg,
