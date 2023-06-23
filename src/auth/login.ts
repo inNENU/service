@@ -1,8 +1,8 @@
 import CryptoJS from "crypto-js";
 import type { RequestHandler } from "express";
 
-import type { EmptyObject } from "./typings.js";
-import { getCookies } from "./utils/index.js";
+import type { EmptyObject } from "../typings.js";
+import { getCookies } from "../utils/index.js";
 
 const saltRegExp = /var pwdDefaultEncryptSalt = "(.*)";/;
 

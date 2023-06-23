@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
-import type { LoginOptions, LoginUnknownData } from "../login.js";
-import { login } from "../login.js";
+import type { LoginOptions, LoginUnknownData } from "../auth/login.js";
+import { login } from "../auth/login.js";
 import type { EmptyObject } from "../typings.js";
 import { getCookies } from "../utils/index.js";
 
@@ -21,7 +21,7 @@ export const dsjxLoginHandler: RequestHandler<
     "http://dsjx.nenu.edu.cn/framework/main.jsp"
   );
 
-  let authLocation = result.response.headers.get("Location");
+  const authLocation = result.response.headers.get("Location");
 
   console.log("login service", result.response.status, authLocation);
 
