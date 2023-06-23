@@ -1,8 +1,12 @@
-export const parseCookieValues = (cookieHeader: string): string[] =>
-  cookieHeader.split(",").map((item) => item.split(";")[0].trim());
+export const parseCookieValue = (cookieHeader: string): string =>
+  cookieHeader.split(";")[0].trim();
 
 export const getCookies = (res: Response): string[] => {
-  const cookieHeader = res.headers.get("Set-Cookie") || "";
+  const cookieHeaders: string[] = [];
 
-  return parseCookieValues(cookieHeader);
+  res.headers.forEach((value, key) => {
+    if (key === "set-cookie") cookieHeaders.push(value);
+  });
+
+  return cookieHeaders.map((item) => parseCookieValue(item));
 };
