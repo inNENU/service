@@ -39,6 +39,8 @@ export interface SelectInfoSuccessResponse extends SelectBaseSuccessResponse {
   /** 专业 */
   majors: MajorInfo[];
 
+  /** 当前校区 */
+  currentLocation: "本部" | "净月";
   /** 当前专业 */
   currentMajor: string;
   /** 当前年级 */
@@ -236,6 +238,9 @@ export const selectInfoHandler: RequestHandler<
     const majorsText = majorsReg.exec(documentContent)![0];
     const currentGrade = currentGradeReg.exec(gradesText)![1];
     const currentMajor = currentMajorReg.exec(majorsText)![1];
+    const currentLocation = /'SO'=="SO"/.test(documentContent)
+      ? "净月"
+      : "本部";
 
     setCourses(documentContent);
     setCourseOffices(documentContent);
@@ -247,8 +252,9 @@ export const selectInfoHandler: RequestHandler<
     return res.json(<SelectInfoSuccessResponse>{
       status: "success",
       ...paramsStore.state!,
-      currentMajor,
+      currentLocation,
       currentGrade,
+      currentMajor,
       grades: gradesStore.state,
       majors: majorsStore.state,
       courses: coursesStore.state,
