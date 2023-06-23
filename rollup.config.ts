@@ -4,8 +4,11 @@ const external = [
   "body-parser",
   "compression",
   "cookie-parser",
+  "crypto-js",
+  "dotenv",
   "express",
   "iconv-lite",
+  "qrcode",
 ];
 
 export default [
@@ -22,7 +25,7 @@ export default [
       esbuild({
         charset: "utf8",
         minify: true,
-        target: "node16",
+        target: "node18",
       }),
     ],
     external,
