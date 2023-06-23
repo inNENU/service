@@ -4,7 +4,7 @@ import type { RequestHandler } from "express";
 import type { EmptyObject } from "../typings.js";
 import { getCookies } from "../utils/index.js";
 
-const saltRegExp = /var pwdDefaultEncryptSalt = "(.*)";/;
+export const saltRegExp = /var pwdDefaultEncryptSalt = "(.*)";/;
 
 const DICT = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678";
 const DICT_LENGTH = DICT.length;
@@ -15,7 +15,7 @@ const getRandomString = (length: number): string =>
     .map(() => DICT.charAt(Math.floor(Math.random() * DICT_LENGTH)))
     .join("");
 
-const customEncryptAES = (password: string, key: string): string => {
+export const customEncryptAES = (password: string, key: string): string => {
   const CONTENT = getRandomString(64) + password;
   const SECRET_KEY = CryptoJS.enc.Utf8.parse(key);
   const SECRET_IV = CryptoJS.enc.Utf8.parse(getRandomString(16));

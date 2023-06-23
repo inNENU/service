@@ -5,7 +5,11 @@ import type { Response } from "express";
 import express from "express";
 
 import { admissionNoticeHandler } from "./admission-notice.js";
-import { infoHandler, loginHandler } from "./auth/index.js";
+import {
+  changePasswordHandler,
+  infoHandler,
+  loginHandler,
+} from "./auth/index.js";
 import { dsjxLoginHandler } from "./dsjx/index.js";
 import { enrollPlanHandler, historyGradeHandler } from "./enroll/index.js";
 import { qrCodeHandler } from "./qrcode.js";
@@ -29,11 +33,17 @@ app.get("/", (_req, res) => {
   res.json({ status: "ok" });
 });
 app.post("/admission-notice", admissionNoticeHandler);
+
+app.post("/auth/change-password", changePasswordHandler);
+app.patch("/auth/change-password", changePasswordHandler);
 app.post("/auth/login", loginHandler);
 app.post("/auth/info", infoHandler);
+
 app.post("/dsjx/login", dsjxLoginHandler);
+
 app.post("/enroll/grade", historyGradeHandler);
 app.post("/enroll/plan", enrollPlanHandler);
+
 app.post("/select/login", selectLoginHandler);
 app.post("/select/info", selectInfoHandler);
 app.post("/select/search", searchHandler);
