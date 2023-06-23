@@ -24,6 +24,22 @@ export interface CourseData {
   cid: string;
 }
 
+export interface StudentInfo {
+  /** 当前学期 */
+  period: string;
+  /** 阶段 */
+  stage: string;
+  /** 姓名 */
+  name: string;
+  /** 学号 */
+  id: string;
+  /** 年级 */
+  grade: string;
+  /** 专业名 */
+  majorName: string;
+  max: number;
+}
+
 export interface SelectInfoSuccessResponse extends SelectBaseSuccessResponse {
   jx0502id: string;
   jx0502zbid: string;
@@ -48,20 +64,7 @@ export interface SelectInfoSuccessResponse extends SelectBaseSuccessResponse {
   /** 课程表 */
   courseTable: CourseData[][][];
   /** 学生信息 */
-  info: {
-    /** 当前学期 */
-    period: string;
-    /** 阶段 */
-    stage: string;
-    /** 姓名 */
-    name: string;
-    /** 学号 */
-    id: string;
-    /** 年级 */
-    grade: string;
-    /** 专业名 */
-    majorName: string;
-  };
+  info: StudentInfo;
 }
 
 export type SelectInfoFailedResponse = SelectBaseFailedResponse;
@@ -78,6 +81,7 @@ const majorsReg = /<select id="zys" name="zys"[\s\S]*?<\/select>/;
 const majorReg = /<option value="(.*?)" (?:selected)?>(.*?)<\/option>/g;
 const infoReg =
   /class='tr_bg'\s*>\s*<font color="white">(.*?)&nbsp;&nbsp;学期选课 选课阶段：(.*?)<\/font><br>\s*<font color="white">姓名：(.*?)&nbsp;&nbsp;学号：(.*?)&nbsp;&nbsp;年级：(\d+)&nbsp;&nbsp;专业：(.*?)<\/font>/;
+const maxCreditReg = /最多可选学分：(\d+)学分/;
 
 const currentGradeReg = /<option value="(.*?)" selected>/;
 const currentMajorReg = /<option value="(.*?)" selected>/;
@@ -260,6 +264,7 @@ export const selectInfoHandler: RequestHandler<
       : "本部";
     const [, period, stage, name, id, grade, majorName] =
       infoReg.exec(documentContent)!;
+    const max = Number(maxCreditReg.exec(documentContent)![1]);
 
     setCourses(documentContent);
     setCourseOffices(documentContent);
@@ -277,7 +282,7 @@ export const selectInfoHandler: RequestHandler<
       grades: gradesStore.state,
       majors: majorsStore.state,
       courses: coursesStore.state,
-      info: { period, stage, name, id, grade, majorName },
+      info: { period, stage, name, id, grade, majorName, max },
       courseTable,
       courseTypes: COURSE_TYPES,
       courseOffices: coursesOfficeStore.state,
