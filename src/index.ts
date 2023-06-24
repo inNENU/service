@@ -1,9 +1,16 @@
 import bodyParser from "body-parser";
 import compression from "compression";
 import cookieParser from "cookie-parser";
-import express, { Response } from "express";
+import type { Response } from "express";
+import express from "express";
 
 import { admissionNoticeHandler } from "./admission-notice.js";
+import {
+  changePasswordHandler,
+  infoHandler,
+  loginHandler,
+} from "./auth/index.js";
+import { dsjxLoginHandler } from "./dsjx/index.js";
 import { enrollPlanHandler, historyGradeHandler } from "./enroll/index.js";
 import { qrCodeHandler } from "./qrcode.js";
 import {
@@ -16,7 +23,7 @@ import {
 import { weatherHandler } from "./weather/handler.js";
 
 const app = express();
-const port = 8080;
+const port = process.env.PORT ? Number(process.env.PORT) : 8080;
 
 app.use(cookieParser());
 app.use(compression());
@@ -26,8 +33,17 @@ app.get("/", (_req, res) => {
   res.json({ status: "ok" });
 });
 app.post("/admission-notice", admissionNoticeHandler);
+
+app.post("/auth/change-password", changePasswordHandler);
+app.patch("/auth/change-password", changePasswordHandler);
+app.post("/auth/login", loginHandler);
+app.post("/auth/info", infoHandler);
+
+app.post("/dsjx/login", dsjxLoginHandler);
+
 app.post("/enroll/grade", historyGradeHandler);
 app.post("/enroll/plan", enrollPlanHandler);
+
 app.post("/select/login", selectLoginHandler);
 app.post("/select/info", selectInfoHandler);
 app.post("/select/search", searchHandler);
