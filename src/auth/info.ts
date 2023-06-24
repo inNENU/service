@@ -26,63 +26,70 @@ const userNameRegexp =
 
 const inputRegExp = /id="alias".*?value="(.*?)"/;
 
+export const getInfo = async (cookies: string[]): Promise<InfoResponse> => {
+  const userNameResponse = await fetch(
+    "https://authserver.nenu.edu.cn/authserver/index.do",
+    {
+      method: "GET",
+      headers: {
+        Cookie: cookies.join("; "),
+      },
+    }
+  );
+
+  const userNameResponseText = await userNameResponse.text();
+
+  const userName = userNameRegexp.exec(userNameResponseText)?.[1];
+
+  console.log("Getting username", userName);
+
+  if (!userName)
+    return <InfoFailedResponse>{
+      status: "failed",
+      msg: "获取姓名失败",
+    };
+
+  const emailResponse = await fetch(
+    "https://authserver.nenu.edu.cn/authserver/userAttributesEdit.do",
+    {
+      method: "GET",
+      headers: {
+        Cookie: cookies.join("; "),
+      },
+    }
+  );
+
+  const emailResponseText = await emailResponse.text();
+
+  const emailName = inputRegExp.exec(emailResponseText)?.[1];
+
+  console.log("Getting email name", emailName);
+
+  if (typeof emailName !== "string")
+    return <InfoFailedResponse>{
+      status: "failed",
+      msg: "获取邮箱失败",
+    };
+
+  return <InfoSuccessResponse>{
+    status: "success",
+    name: userName,
+    email: emailName ? `${emailName}@nenu.edu.cn` : "未设置邮箱",
+  };
+};
+
 export const infoHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  LoginOptions
+  LoginOptions | { cookies: string[] }
 > = async (req, res) => {
   try {
-    const { id, password } = req.body;
+    if ("cookies" in req.body) return res.json(await getInfo(req.body.cookies));
 
-    const result = await login({ id, password });
+    const result = await login(req.body);
 
-    if (result.status === "success") {
-      const userNameResponse = await fetch(
-        "https://authserver.nenu.edu.cn/authserver/index.do",
-        {
-          method: "GET",
-          headers: {
-            Cookie: result.cookies.join("; "),
-          },
-        }
-      );
-
-      const userNameResponseText = await userNameResponse.text();
-
-      const userName = userNameRegexp.exec(userNameResponseText)?.[1];
-
-      if (!userName)
-        return res.json(<InfoFailedResponse>{
-          status: "failed",
-          msg: "获取姓名失败",
-        });
-
-      const emailResponse = await fetch(
-        "https://authserver.nenu.edu.cn/authserver/userAttributesEdit.do",
-        {
-          method: "GET",
-          headers: {
-            Cookie: result.cookies.join("; "),
-          },
-        }
-      );
-
-      const emailResponseText = await emailResponse.text();
-
-      const emailName = inputRegExp.exec(emailResponseText)?.[1];
-
-      if (typeof emailName !== "string")
-        return res.json(<InfoFailedResponse>{
-          status: "failed",
-          msg: "获取邮箱失败",
-        });
-
-      return res.json(<InfoSuccessResponse>{
-        status: "success",
-        name: userName,
-        email: emailName ? `${emailName}@nenu.edu.cn` : "未设置邮箱",
-      });
-    }
+    if (result.status === "success")
+      return res.json(await getInfo(result.cookies));
 
     return res.json(<InfoResponse>{
       status: "failed",

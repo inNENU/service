@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rollup -c rollup.config.ts --configPlugin esbuild",
     "debug": "pnpm build && node dist/index.js",
-    "dev": "cross-env PORT=9090 tsx src/index.ts",
+    "dev": "cross-env tsx src/index.ts",
     "lint": "prettier --check --write . && eslint . --ext .ts --fix",
     "lint:check": "prettier --check . && eslint . --ext .ts",
     "run": "npm i && npm run build && node dist/index.js"
