@@ -4,7 +4,7 @@ import cookieParser from "cookie-parser";
 import type { Response } from "express";
 import express from "express";
 
-import { admissionNoticeHandler } from "./admission-notice.js";
+import { underAdmissionHandler } from "./enroll/admission-notice.js";
 import {
   changePasswordHandler,
   infoHandler,
@@ -32,7 +32,6 @@ app.use(bodyParser.json());
 app.get("/", (_req, res) => {
   res.json({ status: "ok" });
 });
-app.post("/admission-notice", admissionNoticeHandler);
 
 app.post("/auth/change-password", changePasswordHandler);
 app.patch("/auth/change-password", changePasswordHandler);
@@ -41,6 +40,8 @@ app.post("/auth/info", infoHandler);
 
 app.post("/dsjx/login", dsjxLoginHandler);
 
+app.get("/enroll/under-admission", underAdmissionHandler);
+app.post("/enroll/under-admission", underAdmissionHandler);
 app.post("/enroll/grade", historyGradeHandler);
 app.post("/enroll/plan", enrollPlanHandler);
 
