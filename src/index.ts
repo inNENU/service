@@ -4,14 +4,18 @@ import cookieParser from "cookie-parser";
 import type { Response } from "express";
 import express from "express";
 
-import { underAdmissionHandler } from "./enroll/admission-notice.js";
 import {
   changePasswordHandler,
   infoHandler,
   loginHandler,
 } from "./auth/index.js";
 import { dsjxLoginHandler } from "./dsjx/index.js";
-import { enrollPlanHandler, historyGradeHandler } from "./enroll/index.js";
+import {
+  enrollPlanHandler,
+  historyGradeHandler,
+  postAdmissionHandler,
+  underAdmissionHandler,
+} from "./enroll/index.js";
 import { qrCodeHandler } from "./qrcode.js";
 import {
   processHandler,
@@ -40,10 +44,11 @@ app.post("/auth/info", infoHandler);
 
 app.post("/dsjx/login", dsjxLoginHandler);
 
-app.get("/enroll/under-admission", underAdmissionHandler);
-app.post("/enroll/under-admission", underAdmissionHandler);
 app.post("/enroll/grade", historyGradeHandler);
 app.post("/enroll/plan", enrollPlanHandler);
+app.get("/enroll/under-admission", underAdmissionHandler);
+app.post("/enroll/under-admission", underAdmissionHandler);
+app.post("/enroll/post-admission", postAdmissionHandler);
 
 app.post("/select/login", selectLoginHandler);
 app.post("/select/info", selectInfoHandler);
