@@ -179,6 +179,8 @@ const setParams = async ({
 
   const infoResponseText = await readResponseContent(infoResponse);
 
+  if (infoResponseText.includes("请先登录系统")) throw new Error("系统已关闭");
+
   const jx0502zbid = /tmpKc\[6\] = "(\d+)";/.exec(infoResponseText)![1];
   const jx0502id = /tmpKc\[7\] = "(\d+)";/.exec(infoResponseText)![1];
 
@@ -237,6 +239,8 @@ export const selectInfoHandler: RequestHandler<
       sfkxk: "1",
     }).toString();
 
+    console.log("get");
+
     const response = await fetch(`${server}xk/getXkInfo?${urlParams}`, {
       method: "GET",
       headers: new Headers({
@@ -245,6 +249,8 @@ export const selectInfoHandler: RequestHandler<
     });
 
     const documentContent = await readResponseContent(response);
+
+    console.log(documentContent);
 
     if (documentContent.includes("不在选课时间范围内，无法选课!"))
       return res.json(<SelectInfoFailedResponse>{
