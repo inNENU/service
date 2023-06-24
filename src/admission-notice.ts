@@ -27,13 +27,13 @@ const getAdmission = async ({
       await imageResponse.arrayBuffer()
     ).toString("base64")}`;
 
-    const headers = new Headers();
-
-    headers.append("Cookie", cookies);
-
     const infoResponse = await fetch(
       "http://bkzsw.nenu.edu.cn/col_000018_000169.html",
-      { headers }
+      {
+        headers: {
+          Cookie: cookies,
+        },
+      }
     );
 
     const infoBody = await infoResponse.text();

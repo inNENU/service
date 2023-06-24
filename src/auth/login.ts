@@ -1,8 +1,9 @@
 import CryptoJS from "crypto-js";
 import type { RequestHandler } from "express";
+import type { Cookie } from "set-cookie-parser";
 
 import type { EmptyObject } from "../typings.js";
-import { getCookies } from "../utils/index.js";
+import { getCookieHeader, getCookies } from "../utils/index.js";
 
 export const saltRegExp = /var pwdDefaultEncryptSalt = "(.*)";/;
 
@@ -36,13 +37,13 @@ export interface LoginOptions {
 
 export interface LoginSuccessData {
   status: "success";
-  cookies: string[];
+  cookies: Cookie[];
   response: Response;
 }
 
 export interface LoginUnknownData {
   status: "unknown";
-  cookies: string[];
+  cookies: Cookie[];
   response: Response;
 }
 
@@ -82,8 +83,13 @@ export const login = async (
   const headers = {
     "Content-Type": "application/x-www-form-urlencoded",
     Cookie: [
-      ...cookies,
-      "org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN",
+      getCookieHeader([
+        ...cookies,
+        {
+          name: "org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE",
+          value: "zh_CN",
+        },
+      ]),
     ].join("; "),
     Origin: "https://authserver.nenu.edu.cn",
   };

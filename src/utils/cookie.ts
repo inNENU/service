@@ -1,12 +1,34 @@
+import type { Cookie } from "set-cookie-parser";
+import { parse, splitCookiesString } from "set-cookie-parser";
+
 export const parseCookieValue = (cookieHeader: string): string =>
   cookieHeader.split(";")[0].trim();
 
-export const getCookies = (res: Response): string[] => {
-  const cookieHeaders: string[] = [];
+export const getCookies = (res: Response): Cookie[] =>
+  parse(splitCookiesString(res.headers.get("set-cookie") || ""));
 
-  res.headers.forEach((value, key) => {
-    if (key === "set-cookie") cookieHeaders.push(value);
-  });
+export const joinCookies = (
+  cookies: Cookie[],
+  newCookies: Cookie[]
+): Cookie[] => {
+  const joined = [...cookies, ...newCookies];
 
-  return cookieHeaders.map((item) => parseCookieValue(item));
+  return joined.filter(
+    ({ name }, index) =>
+      // eslint-disable-next-line
+      joined.findLastIndex((item) => item.name === name) === index
+  );
+};
+export const getCookieHeader = (cookies: Cookie[]): string => {
+  const finalCookies = cookies.filter(
+    ({ name }, index) =>
+      // eslint-disable-next-line
+      cookies.findLastIndex((item) => item.name === name) === index
+  );
+
+  const cookieHeader = finalCookies
+    .map((cookie) => `${cookie.name}=${cookie.value}`)
+    .join("; ");
+
+  return cookieHeader;
 };

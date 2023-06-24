@@ -3,6 +3,7 @@ import type { RequestHandler } from "express";
 import type { LoginOptions } from "./login.js";
 import { customEncryptAES, login, saltRegExp } from "./login.js";
 import type { EmptyObject } from "../typings.js";
+import { getCookieHeader } from "../utils/cookie.js";
 
 export interface ChangePasswordOptions {
   /** 认证 Cookie */
@@ -85,14 +86,14 @@ export const changePasswordHandler: RequestHandler<
     const result = await login({ id, password });
 
     if (result.status === "success") {
-      const authCookie = result.cookies.join("; ");
+      const authCookieHeader = getCookieHeader(result.cookies);
 
       const passwordChangePageResponse = await fetch(
         "https://authserver.nenu.edu.cn/authserver/passwordChange.do",
         {
           method: "GET",
           headers: {
-            Cookie: authCookie,
+            Cookie: authCookieHeader,
           },
         }
       );
@@ -107,7 +108,7 @@ export const changePasswordHandler: RequestHandler<
         {
           method: "GET",
           headers: {
-            Cookie: authCookie,
+            Cookie: authCookieHeader,
             Referer:
               "https://authserver.nenu.edu.cn/authserver/userAttributesEdit.do",
           },
@@ -116,7 +117,7 @@ export const changePasswordHandler: RequestHandler<
 
       const recaptchaImage = await recaptchaResponse.arrayBuffer();
 
-      res.set("auth-cookies", authCookie);
+      res.set("auth-cookies", authCookieHeader);
       res.set("salt", salt);
 
       recaptchaResponse.headers.forEach((value, key) => {

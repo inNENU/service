@@ -9,6 +9,7 @@ const external = [
   "express",
   "iconv-lite",
   "qrcode",
+  "set-cookie-parser",
 ];
 
 export default [

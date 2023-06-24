@@ -3,7 +3,7 @@ import type { RequestHandler } from "express";
 import type { LoginOptions, LoginUnknownData } from "../auth/login.js";
 import { login } from "../auth/login.js";
 import type { EmptyObject } from "../typings.js";
-import { getCookies } from "../utils/index.js";
+import { getCookieHeader, getCookies } from "../utils/index.js";
 
 export const dsjxLoginHandler: RequestHandler<
   EmptyObject,
@@ -60,12 +60,12 @@ export const dsjxLoginHandler: RequestHandler<
   // }
 
   const ticketHeaders = {
-    Cookie: [
-      systemCookies.find((item) => item.startsWith("acw_tc="))!,
-      (<LoginUnknownData>result).cookies.find((item) =>
-        item.startsWith("iPlanetDirectoryPro=")
+    Cookie: getCookieHeader([
+      systemCookies.find((item) => item.name === "acw_tc")!,
+      (<LoginUnknownData>result).cookies.find(
+        (item) => item.name === "iPlanetDirectoryPro"
       )!,
-    ].join("; "),
+    ]),
     "User-Agent":
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.51",
     Accept:

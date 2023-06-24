@@ -1,8 +1,10 @@
 import type { RequestHandler } from "express";
+import type { Cookie } from "set-cookie-parser";
 
 import type { LoginOptions } from "./login.js";
 import { login } from "./login.js";
 import type { EmptyObject } from "../typings.js";
+import { getCookieHeader } from "../utils/cookie.js";
 
 export interface InfoSuccessResponse {
   status: "success";
@@ -26,13 +28,13 @@ const userNameRegexp =
 
 const inputRegExp = /id="alias".*?value="(.*?)"/;
 
-export const getInfo = async (cookies: string[]): Promise<InfoResponse> => {
+export const getInfo = async (cookies: Cookie[]): Promise<InfoResponse> => {
   const userNameResponse = await fetch(
     "https://authserver.nenu.edu.cn/authserver/index.do",
     {
       method: "GET",
       headers: {
-        Cookie: cookies.join("; "),
+        Cookie: getCookieHeader(cookies),
       },
     }
   );
@@ -54,7 +56,7 @@ export const getInfo = async (cookies: string[]): Promise<InfoResponse> => {
     {
       method: "GET",
       headers: {
-        Cookie: cookies.join("; "),
+        Cookie: getCookieHeader(cookies),
       },
     }
   );
@@ -81,7 +83,7 @@ export const getInfo = async (cookies: string[]): Promise<InfoResponse> => {
 export const infoHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  LoginOptions | { cookies: string[] }
+  LoginOptions | { cookies: Cookie[] }
 > = async (req, res) => {
   try {
     if ("cookies" in req.body) return res.json(await getInfo(req.body.cookies));
