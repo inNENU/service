@@ -1,6 +1,7 @@
 import type { RequestHandler } from "express";
 
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
+import { getCookieHeader, getCookies } from "../utils/cookie.js";
 
 export interface PostAdmissionPostOptions {
   name: string;
@@ -20,15 +21,33 @@ const getInfo = async ({
   id,
   name,
 }: PostAdmissionPostOptions): Promise<PostAdmissionResponse> => {
+  const mainPageResponse = await fetch("https://yzb.nenu.edu.cn/yjs/sslq/", {
+    method: "GET",
+  });
+
+  const mainContent = await mainPageResponse.text();
+
+  const captchaID =
+    /<input type="hidden" name="csrf_test_name" value="(.*?)" \/>/.exec(
+      mainContent
+    )![1];
+
+  const cookies = getCookies(mainPageResponse)!;
+
+  console.log("Getting cookies", cookies);
+
   const params = new URLSearchParams({
+    csrf_test_name: captchaID,
     xm: name,
     zjhm: id,
   });
 
   console.log("Getting params", params);
-  const response = await fetch("http://yzb.nenu.edu.cn/yjs/sslq_result/2023", {
+
+  const response = await fetch("https://yzb.nenu.edu.cn/yjs/sslq_result/2023", {
     method: "POST",
     headers: {
+      Cookie: getCookieHeader(cookies),
       "Content-Type": "application/x-www-form-urlencoded",
     },
     body: params.toString(),
@@ -62,8 +81,8 @@ const getInfo = async ({
       content
     )![1];
 
-  const contact =
-    /<li class="label_short">家庭成员电话：<\/li>\s*<li class="bz">(.*?)<\/li>/.exec(
+  const others =
+    /<li class="label_short">其他电话：<\/li>\s*<li class="bz">(.*?)<\/li>/.exec(
       content
     )![1];
 
@@ -99,8 +118,8 @@ const getInfo = async ({
       value: phone,
     },
     {
-      text: "家庭成员电话",
-      value: contact,
+      text: "其他电话",
+      value: others,
     },
     {
       text: "收件人",

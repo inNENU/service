@@ -107,16 +107,7 @@ export const login = async (
   console.log("Headers", headers);
   console.log("Params", params);
 
-  const body = new URLSearchParams({
-    username: id.toString(),
-    password: customEncryptAES(password, salt),
-    lt,
-    dllt,
-    execution,
-    _eventId,
-    rmShown,
-    rememberMe: "on",
-  });
+  const body = new URLSearchParams(params).toString();
 
   const response = await fetch(
     `https://authserver.nenu.edu.cn/authserver/login${
