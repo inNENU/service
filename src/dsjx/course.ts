@@ -14,6 +14,48 @@ export type DSJXCourseOptions = AuthOptions & {
   time: string;
 };
 
+const courseTableRegExp = /<table id="kbtable" [\s\S]*?>([\s\S]+?)<\/table>/;
+const courseRowRegExp =
+  /<tr>\s+<td .*>\s+\d+\s+<\/td>\s+((?:<td .*>[\s\S]+?<\/td>\s*?)+)\s+<\/tr>/g;
+const courseCellRegExp =
+  /<td .*?>\s+<div id="\d-\d-\d"\s?>([\s\S]+?)<\/div>[\s\S]+?<\/td>/g;
+
+const classRegExp =
+  /<a .*?>(\S+?)<br>(\S+?)<br>\s*<nobr>\s*(\S+?)<nobr><br>(\S+?)<br><br>\s*<\/a>/g;
+
+interface ClassItem {
+  name: string;
+  teacher: string;
+  time: string;
+  location: string;
+}
+
+type CellItem = ClassItem[];
+type RowItem = CellItem[];
+type TableItem = RowItem[];
+
+const getCourseData = (content: string): TableItem => {
+  const table = courseTableRegExp.exec(content)?.[0];
+
+  if (!table) throw new Error("Failed to get course table");
+
+  return [...table.matchAll(courseRowRegExp)].map(([, rowContent]) =>
+    [...rowContent.matchAll(courseCellRegExp)].map(([, cell]) =>
+      [...cell.matchAll(classRegExp)].map(
+        ([, name, teacher, time, location]) => (
+          console.log(name, teacher, time, location),
+          {
+            name,
+            teacher,
+            time,
+            location,
+          }
+        )
+      )
+    )
+  );
+};
+
 export const dsjxCourseHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
@@ -34,21 +76,15 @@ export const dsjxCourseHandler: RequestHandler<
       ({ cookies } = result);
     }
 
-    const loginResponse = await fetch(
-      "https://dsjx.webvpn.nenu.edu.cn/Logon.do?method=logonBySSO",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Cookie: getCookieHeader(cookies),
-          Referer: "https://dsjx.webvpn.nenu.edu.cn/framework/main.jsp",
-          "User-Agent": IE_8_USER_AGENT,
-        },
-      }
-    );
-
-    console.log(loginResponse.status);
-    console.log(await loginResponse.text());
+    await fetch("https://dsjx.webvpn.nenu.edu.cn/Logon.do?method=logonBySSO", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Cookie: getCookieHeader(cookies),
+        Referer: "https://dsjx.webvpn.nenu.edu.cn/framework/main.jsp",
+        "User-Agent": IE_8_USER_AGENT,
+      },
+    });
 
     const params = new URLSearchParams({
       method: "goListKbByXs",
@@ -79,9 +115,9 @@ export const dsjxCourseHandler: RequestHandler<
 
     const content = await response.text();
 
-    console.log(content);
+    const tableData = getCourseData(content);
 
-    res.end();
+    return res.json(tableData);
   } catch (err) {
     res.json(<LoginFailedData>{
       status: "failed",
