@@ -7,21 +7,6 @@ import type { LoginFailedData, LoginOptions } from "../auth/index.js";
 import type { EmptyObject } from "../typings.js";
 import { IE_8_USER_AGENT, getCookieHeader } from "../utils/index.js";
 
-interface UnderCourseTableAuthOptions extends LoginOptions {
-  /** 查询时间 */
-  time: string;
-}
-
-interface UnderCourseTableCookieOptions {
-  cookies: Cookie[];
-  id: number;
-  time: string;
-}
-
-export type UserCourseTableOptions =
-  | UnderCourseTableAuthOptions
-  | UnderCourseTableCookieOptions;
-
 export interface ClassItem {
   name: string;
   teacher: string;
@@ -63,6 +48,32 @@ const getCourses = (content: string): TableItem => {
     )
   );
 };
+
+interface UnderCourseTableAuthOptions extends LoginOptions {
+  /** 查询时间 */
+  time: string;
+}
+
+interface UnderCourseTableCookieOptions {
+  cookies: Cookie[];
+  id: number;
+  time: string;
+}
+
+export type UserCourseTableOptions =
+  | UnderCourseTableAuthOptions
+  | UnderCourseTableCookieOptions;
+
+export interface UserCourseTableSuccessResponse {
+  status: "success";
+  data: TableItem;
+}
+
+export type UserCourseTableFailedResponse = LoginFailedData;
+
+export type UserCourseTableResponse =
+  | UserCourseTableSuccessResponse
+  | UserCourseTableFailedResponse;
 
 export const underCourseTableHandler: RequestHandler<
   EmptyObject,
@@ -125,7 +136,10 @@ export const underCourseTableHandler: RequestHandler<
 
     const tableData = getCourses(content);
 
-    return res.json(tableData);
+    return res.json(<UserCourseTableSuccessResponse>{
+      status: "success",
+      data: tableData,
+    });
   } catch (err) {
     res.json(<LoginFailedData>{
       status: "failed",
