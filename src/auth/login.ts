@@ -2,8 +2,12 @@ import CryptoJS from "crypto-js";
 import type { RequestHandler } from "express";
 import type { Cookie } from "set-cookie-parser";
 
-import type { EmptyObject } from "../typings.js";
-import { getCookieHeader, getCookies } from "../utils/index.js";
+import type { CommonFailedResponse, EmptyObject } from "../typings.js";
+import {
+  USER_AGENT_HEADERS,
+  getCookieHeader,
+  getCookies,
+} from "../utils/index.js";
 
 export const saltRegExp = /var pwdDefaultEncryptSalt = "(.*)";/;
 
@@ -41,28 +45,37 @@ export interface LoginSuccessData {
   location: string;
 }
 
-export interface LoginFailedData {
-  status: "failed";
+export interface LoginFailedData extends CommonFailedResponse {
   type: "captcha" | "wrong" | "unknown";
-  msg: string;
 }
 
 export type LoginData = LoginSuccessData | LoginFailedData;
+
+export const AUTH_SERVER = "https://authserver.nenu.edu.cn";
+export const WEB_VPN_AUTH_SERVER = "https://authserver-443.webvpn.nenu.edu.cn";
+
+const COMMON_HEADERS = {
+  DNT: "1",
+  "Upgrade-Insecure-Requests": "1",
+  ...USER_AGENT_HEADERS,
+};
 
 export const login = async (
   { id, password }: LoginOptions,
   service = "",
   webVPN = false
 ): Promise<LoginData> => {
-  const server = webVPN
-    ? "https://authserver-443.nenu.edu.cn"
-    : "https://authserver.nenu.edu.cn";
+  const server = webVPN ? WEB_VPN_AUTH_SERVER : AUTH_SERVER;
 
-  const loginPageResponse = await fetch(
-    `${server}/authserver/login${
-      service ? `?service=${encodeURIComponent(service)}` : ""
-    }`
-  );
+  const url = `${server}/authserver/login${
+    service ? `?service=${encodeURIComponent(service)}` : ""
+  }`;
+
+  console.log("Login url:", url);
+
+  const loginPageResponse = await fetch(url, {
+    headers: COMMON_HEADERS,
+  });
 
   const cookies = getCookies(loginPageResponse);
 
@@ -80,10 +93,18 @@ export const login = async (
   console.log("Parsing", { salt, lt, dllt, execution, _eventId, rmShown });
 
   const captchaCheckResponse = await fetch(
-    `${server}/authserver/needCaptcha.html?username=${id}8&pwdEncrypt2=pwdEncryptSalt&_=${Date.now()}`,
+    `${server}/authserver/needCaptcha.html?username=${id}&pwdEncrypt2=pwdEncryptSalt&_=${Date.now()}`,
     {
       headers: {
-        Cookie: getCookieHeader(cookies),
+        Cookie: getCookieHeader([
+          ...cookies,
+          {
+            name: "org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE",
+            value: "zh_CN",
+          },
+        ]),
+        ...COMMON_HEADERS,
+        Referer: `${server}/authserver/login`,
       },
     }
   );
@@ -110,7 +131,11 @@ export const login = async (
         },
       ]),
     ].join("; "),
-    Origin: server,
+    "Sec-Fetch-Site": "same-origin",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-User": "?1",
+    "Sec-Fetch-Dest": "document",
+    ...COMMON_HEADERS,
   };
   const params = {
     username: id.toString(),
