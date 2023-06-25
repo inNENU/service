@@ -4,7 +4,7 @@ import type { Cookie } from "set-cookie-parser";
 
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 import {
-  USER_AGENT_HEADERS,
+  EDGE_USER_AGENT_HEADERS,
   getCookieHeader,
   getCookies,
 } from "../utils/index.js";
@@ -57,7 +57,7 @@ export const WEB_VPN_AUTH_SERVER = "https://authserver-443.webvpn.nenu.edu.cn";
 const COMMON_HEADERS = {
   DNT: "1",
   "Upgrade-Insecure-Requests": "1",
-  ...USER_AGENT_HEADERS,
+  ...EDGE_USER_AGENT_HEADERS,
 };
 
 export const login = async (

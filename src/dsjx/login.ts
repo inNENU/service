@@ -10,9 +10,15 @@ export interface DSJXLoginSuccessResponse {
   status: "success";
 
   cookies: Cookie[];
+  // userID: string;
 }
 
 export type DSJXLoginResponse = DSJXLoginSuccessResponse | LoginFailedData;
+
+const COMMON_HEADERS = {
+  "User-Agent":
+    "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 10.0; WOW64; Trident/7.0; .NET4.0C; .NET4.0E; .NET CLR 2.0.50727; .NET CLR 3.0.30729; .NET CLR 3.5.30729; Tablet PC 2.0)",
+};
 
 export const dsjxLogin = async (
   options: LoginOptions
@@ -39,13 +45,8 @@ export const dsjxLogin = async (
 
   const ticketHeaders = {
     Cookie: getCookieHeader(authCookies),
-    "User-Agent":
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.51",
-    Accept:
-      "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-    "Upgrade-Insecure-Requests": "1",
-    DNT: "1",
     Referer: WEB_VPN_AUTH_SERVER,
+    ...COMMON_HEADERS,
   };
 
   console.log("ticket headers", ticketHeaders);
@@ -72,6 +73,31 @@ export const dsjxLogin = async (
     };
 
   const finalLocation = ticketResponse.headers.get("Location");
+
+  // Tip: The user id seems to be all same, so we don't need it anymore
+  // if (finalLocation?.includes(";jsessionid=")) {
+  //   const mainHeaders = {
+  //     Cookie: getCookieHeader(authCookies),
+  //     Referer: "https://dsjx.webvpn.nenu.edu.cn/Logon.do?method=logonjz",
+  //     ...COMMON_HEADERS,
+  //   };
+
+  //   const mainPageResponse = await fetch(finalLocation, {
+  //     headers: new Headers(mainHeaders),
+  //   });
+
+  //   console.log(mainPageResponse.status);
+
+  //   const mainContent = await mainPageResponse.text();
+
+  //   const userID = /getUserId\("(.*?)"\);/.exec(mainContent)![1];
+
+  //   return <DSJXLoginSuccessResponse>{
+  //     status: "success",
+  //     cookies: authCookies,
+  //     userID,
+  //   };
+  // }
 
   if (finalLocation?.includes(";jsessionid="))
     return <DSJXLoginSuccessResponse>{

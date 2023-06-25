@@ -9,7 +9,7 @@ import {
   infoHandler,
   loginHandler,
 } from "./auth/index.js";
-import { dsjxLoginHandler } from "./dsjx/index.js";
+import { dsjxCourseHandler, dsjxLoginHandler } from "./dsjx/index.js";
 import {
   enrollPlanHandler,
   historyGradeHandler,
@@ -42,6 +42,7 @@ app.patch("/auth/change-password", changePasswordHandler);
 app.post("/auth/login", loginHandler);
 app.post("/auth/info", infoHandler);
 
+app.post("/dsjx/course", dsjxCourseHandler);
 app.post("/dsjx/login", dsjxLoginHandler);
 
 app.post("/enroll/grade", historyGradeHandler);
