@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import type { LoginOptions, LoginUnknownData } from "../auth/login.js";
+import type { LoginOptions } from "../auth/login.js";
 import { login } from "../auth/login.js";
 import type { EmptyObject } from "../typings.js";
 import { getCookieHeader, getCookies } from "../utils/index.js";
@@ -21,19 +21,17 @@ export const dsjxLoginHandler: RequestHandler<
     "http://dsjx.nenu.edu.cn/framework/main.jsp"
   );
 
-  const authLocation = result.response.headers.get("Location");
-
-  console.log("login service", result.response.status, authLocation);
-
   if (
-    result.response.status !== 302 ||
-    !authLocation ||
-    !authLocation.startsWith("http://dsjx.nenu.edu.cn/framework/main.jsp")
+    result.status === "failed" ||
+    !result.location ||
+    !result.location.startsWith("http://dsjx.nenu.edu.cn/framework/main.jsp")
   ) {
     console.error("catch");
 
     return res.json({ status: "failed", msg: "登录失败" });
   }
+
+  const authLocation = result.location;
 
   // 处理多一次的重定向
   // if (authLocation === "http://dsjx.nenu.edu.cn/framework/main.jsp") {
@@ -62,9 +60,7 @@ export const dsjxLoginHandler: RequestHandler<
   const ticketHeaders = {
     Cookie: getCookieHeader([
       systemCookies.find((item) => item.name === "acw_tc")!,
-      (<LoginUnknownData>result).cookies.find(
-        (item) => item.name === "iPlanetDirectoryPro"
-      )!,
+      result.cookies.find((item) => item.name === "iPlanetDirectoryPro")!,
     ]),
     "User-Agent":
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.51",

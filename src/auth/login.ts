@@ -38,29 +38,28 @@ export interface LoginOptions {
 export interface LoginSuccessData {
   status: "success";
   cookies: Cookie[];
-  response: Response;
-}
-
-export interface LoginUnknownData {
-  status: "unknown";
-  cookies: Cookie[];
-  response: Response;
+  location: string;
 }
 
 export interface LoginFailedData {
   status: "failed";
+  type: "captcha" | "wrong" | "unknown";
   msg: string;
-  response: Response;
 }
 
-export type LoginData = LoginSuccessData | LoginUnknownData | LoginFailedData;
+export type LoginData = LoginSuccessData | LoginFailedData;
 
 export const login = async (
   { id, password }: LoginOptions,
-  service = ""
+  service = "",
+  webVPN = false
 ): Promise<LoginData> => {
+  const server = webVPN
+    ? "https://authserver-443.nenu.edu.cn"
+    : "https://authserver.nenu.edu.cn";
+
   const loginPageResponse = await fetch(
-    `https://authserver.nenu.edu.cn/authserver/login${
+    `${server}/authserver/login${
       service ? `?service=${encodeURIComponent(service)}` : ""
     }`
   );
@@ -80,6 +79,26 @@ export const login = async (
 
   console.log("Parsing", { salt, lt, dllt, execution, _eventId, rmShown });
 
+  const captchaCheckResponse = await fetch(
+    `${server}/authserver/needCaptcha.html?username=${id}8&pwdEncrypt2=pwdEncryptSalt&_=${Date.now()}`,
+    {
+      headers: {
+        Cookie: getCookieHeader(cookies),
+      },
+    }
+  );
+
+  const needCaptcha = await (<Promise<boolean>>captchaCheckResponse.json());
+
+  console.log("Need captcha:", needCaptcha);
+
+  if (needCaptcha)
+    return {
+      status: "failed",
+      type: "captcha",
+      msg: "需要验证码",
+    };
+
   const headers = {
     "Content-Type": "application/x-www-form-urlencoded",
     Cookie: [
@@ -91,7 +110,7 @@ export const login = async (
         },
       ]),
     ].join("; "),
-    Origin: "https://authserver.nenu.edu.cn",
+    Origin: server,
   };
   const params = {
     username: id.toString(),
@@ -110,7 +129,7 @@ export const login = async (
   const body = new URLSearchParams(params).toString();
 
   const response = await fetch(
-    `https://authserver.nenu.edu.cn/authserver/login${
+    `${server}/authserver/login${
       service ? `?service=${encodeURIComponent(service)}` : ""
     }`,
     {
@@ -121,6 +140,7 @@ export const login = async (
     }
   );
 
+  const resultContent = await response.text();
   const location = response.headers.get("Location");
 
   cookies.push(...getCookies(response));
@@ -128,36 +148,54 @@ export const login = async (
   console.log(`Request ends with ${response.status}`, location);
   console.log("Login cookies:", cookies);
 
-  if (response.status === 302) {
-    if (location === "https://authserver.nenu.edu.cn/authserver/login")
+  if (response.status === 200)
+    if (resultContent.includes("您提供的用户名或者密码有误"))
       return {
         status: "failed",
+        type: "wrong",
         msg: "用户名或密码错误",
-        response,
+      };
+    else if (resultContent.includes("请输入验证码"))
+      return {
+        status: "failed",
+        type: "captcha",
+        msg: "需要验证码",
       };
 
-    if (location === "https://authserver.nenu.edu.cn/authserver/index.do")
+  if (response.status === 302) {
+    if (location === `${server}/authserver/login`)
       return {
-        status: "success",
-        cookies,
-        response,
+        status: "failed",
+        type: "wrong",
+        msg: "用户名或密码错误",
       };
+
+    return {
+      status: "success",
+      cookies,
+      location: location!,
+    };
   }
 
+  console.error("Unknown status", response.status);
+  console.error("Reponse", await response.text());
+
   return {
-    status: "unknown",
-    cookies,
-    response,
+    status: "failed",
+    type: "unknown",
+    msg: "未知错误",
   };
 };
 
 export interface LoginSuccessResponse {
   status: "success";
-  cookies: string[];
+  cookies: Cookie[];
+  location: string;
 }
 
 export interface LoginFailedResponse {
   status: "failed";
+  type: "captcha" | "wrong" | "unknown";
   msg: string;
 }
 
@@ -172,7 +210,7 @@ export const loginHandler: RequestHandler<
     const { id, password } = req.body;
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { response, ...data } = await login({ id, password });
+    const data = await login({ id, password });
 
     return res.json(<LoginResponse>data);
   } catch (err) {
