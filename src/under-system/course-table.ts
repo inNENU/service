@@ -1,18 +1,37 @@
 import type { RequestHandler } from "express";
 import type { Cookie } from "set-cookie-parser";
 
-import { dsjxLogin } from "./login.js";
+import { underSystemLogin } from "./login.js";
 import { getTimeStamp } from "./utils.js";
 import type { LoginFailedData, LoginOptions } from "../auth/index.js";
 import type { EmptyObject } from "../typings.js";
 import { IE_8_USER_AGENT, getCookieHeader } from "../utils/index.js";
 
-type AuthOptions = LoginOptions | { cookies: Cookie[]; userID: string };
+interface UnderCourseTableAuthOptions extends LoginOptions {
+  /** 查询时间 */
+  time: string;
+}
 
-export type DSJXCourseOptions = AuthOptions & {
+interface UnderCourseTableCookieOptions {
+  cookies: Cookie[];
   id: number;
   time: string;
-};
+}
+
+export type UserCourseTableOptions =
+  | UnderCourseTableAuthOptions
+  | UnderCourseTableCookieOptions;
+
+export interface ClassItem {
+  name: string;
+  teacher: string;
+  time: string;
+  location: string;
+}
+
+export type CellItem = ClassItem[];
+export type RowItem = CellItem[];
+export type TableItem = RowItem[];
 
 const courseTableRegExp = /<table id="kbtable" [\s\S]*?>([\s\S]+?)<\/table>/;
 const courseRowRegExp =
@@ -23,18 +42,7 @@ const courseCellRegExp =
 const classRegExp =
   /<a .*?>(\S+?)<br>(\S+?)<br>\s*<nobr>\s*(\S+?)<nobr><br>(\S+?)<br><br>\s*<\/a>/g;
 
-interface ClassItem {
-  name: string;
-  teacher: string;
-  time: string;
-  location: string;
-}
-
-type CellItem = ClassItem[];
-type RowItem = CellItem[];
-type TableItem = RowItem[];
-
-const getCourseData = (content: string): TableItem => {
+const getCourses = (content: string): TableItem => {
   const table = courseTableRegExp.exec(content)?.[0];
 
   if (!table) throw new Error("Failed to get course table");
@@ -56,10 +64,10 @@ const getCourseData = (content: string): TableItem => {
   );
 };
 
-export const dsjxCourseHandler: RequestHandler<
+export const underCourseTableHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  DSJXCourseOptions
+  UserCourseTableOptions
 > = async (req, res) => {
   try {
     let cookies: Cookie[] = [];
@@ -69,7 +77,7 @@ export const dsjxCourseHandler: RequestHandler<
     if ("cookies" in req.body) {
       ({ cookies } = req.body);
     } else {
-      const result = await dsjxLogin(req.body);
+      const result = await underSystemLogin(req.body);
 
       if (result.status === "failed") return res.json(result);
 
@@ -115,7 +123,7 @@ export const dsjxCourseHandler: RequestHandler<
 
     const content = await response.text();
 
-    const tableData = getCourseData(content);
+    const tableData = getCourses(content);
 
     return res.json(tableData);
   } catch (err) {

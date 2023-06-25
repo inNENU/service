@@ -6,23 +6,25 @@ import { WEB_VPN_AUTH_SERVER, login } from "../auth/login.js";
 import type { EmptyObject } from "../typings.js";
 import { getCookieHeader, getCookies } from "../utils/index.js";
 
-export interface DSJXLoginSuccessResponse {
+export interface UnderSystemLoginSuccessResponse {
   status: "success";
 
   cookies: Cookie[];
   // userID: string;
 }
 
-export type DSJXLoginResponse = DSJXLoginSuccessResponse | LoginFailedData;
+export type UnderSystemLoginResponse =
+  | UnderSystemLoginSuccessResponse
+  | LoginFailedData;
 
 const COMMON_HEADERS = {
   "User-Agent":
     "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 10.0; WOW64; Trident/7.0; .NET4.0C; .NET4.0E; .NET CLR 2.0.50727; .NET CLR 3.0.30729; .NET CLR 3.5.30729; Tablet PC 2.0)",
 };
 
-export const dsjxLogin = async (
+export const underSystemLogin = async (
   options: LoginOptions
-): Promise<DSJXLoginResponse> => {
+): Promise<UnderSystemLoginResponse> => {
   const result = await login(
     options,
     "http://dsjx.nenu.edu.cn:80/Logon.do?method=logonjz",
@@ -100,7 +102,7 @@ export const dsjxLogin = async (
   // }
 
   if (finalLocation?.includes(";jsessionid="))
-    return <DSJXLoginSuccessResponse>{
+    return <UnderSystemLoginSuccessResponse>{
       status: "success",
       cookies: authCookies,
     };
@@ -108,13 +110,13 @@ export const dsjxLogin = async (
   return { status: "failed", type: "unknown", msg: "登录失败" };
 };
 
-export const dsjxLoginHandler: RequestHandler<
+export const underSystemLoginHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
   LoginOptions
 > = async (req, res) => {
   try {
-    return res.json(await dsjxLogin(req.body));
+    return res.json(await underSystemLogin(req.body));
   } catch (err) {
     res.json(<LoginFailedData>{
       status: "failed",
