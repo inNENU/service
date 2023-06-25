@@ -3,7 +3,7 @@ import type { Cookie } from "set-cookie-parser";
 
 import { underSystemLogin } from "./login.js";
 import { getTimeStamp } from "./utils.js";
-import type { LoginFailedData, LoginOptions } from "../auth/index.js";
+import type { LoginFailedResponse, LoginOptions } from "../auth/index.js";
 import type { EmptyObject } from "../typings.js";
 import { IE_8_USER_AGENT, getCookieHeader } from "../utils/index.js";
 
@@ -69,7 +69,7 @@ export interface UserCourseTableSuccessResponse {
   data: TableItem;
 }
 
-export type UserCourseTableFailedResponse = LoginFailedData;
+export type UserCourseTableFailedResponse = LoginFailedResponse;
 
 export type UserCourseTableResponse =
   | UserCourseTableSuccessResponse
@@ -141,7 +141,7 @@ export const underCourseTableHandler: RequestHandler<
       data: tableData,
     });
   } catch (err) {
-    res.json(<LoginFailedData>{
+    res.json(<LoginFailedResponse>{
       status: "failed",
       msg: (<Error>err).message,
     });

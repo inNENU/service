@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 import type { Cookie } from "set-cookie-parser";
 
-import type { LoginFailedData, LoginOptions } from "../auth/login.js";
+import type { LoginFailedResponse, LoginOptions } from "../auth/login.js";
 import { WEB_VPN_AUTH_SERVER, login } from "../auth/login.js";
 import type { EmptyObject } from "../typings.js";
 import { getCookieHeader, getCookies } from "../utils/index.js";
@@ -15,7 +15,7 @@ export interface UnderSystemLoginSuccessResponse {
 
 export type UnderSystemLoginResponse =
   | UnderSystemLoginSuccessResponse
-  | LoginFailedData;
+  | LoginFailedResponse;
 
 const COMMON_HEADERS = {
   "User-Agent":
@@ -34,7 +34,7 @@ export const underSystemLogin = async (
   if (result.status !== "success") {
     console.error(result.msg);
 
-    return <LoginFailedData>{
+    return <LoginFailedResponse>{
       status: "failed",
       type: result.type,
       msg: result.msg,
@@ -68,7 +68,7 @@ export const underSystemLogin = async (
   );
 
   if (ticketResponse.status !== 302)
-    return <LoginFailedData>{
+    return <LoginFailedResponse>{
       status: "failed",
       type: "unknown",
       msg: "登录失败",
@@ -118,7 +118,7 @@ export const underSystemLoginHandler: RequestHandler<
   try {
     return res.json(await underSystemLogin(req.body));
   } catch (err) {
-    res.json(<LoginFailedData>{
+    res.json(<LoginFailedResponse>{
       status: "failed",
       msg: (<Error>err).message,
     });

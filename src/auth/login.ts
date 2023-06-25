@@ -39,17 +39,17 @@ export interface LoginOptions {
   password: string;
 }
 
-export interface LoginSuccessData {
+export interface LoginSuccessResponse {
   status: "success";
   cookies: Cookie[];
   location: string;
 }
 
-export interface LoginFailedData extends CommonFailedResponse {
+export interface LoginFailedResponse extends CommonFailedResponse {
   type: "captcha" | "wrong" | "unknown";
 }
 
-export type LoginData = LoginSuccessData | LoginFailedData;
+export type LoginResponse = LoginSuccessResponse | LoginFailedResponse;
 
 export const AUTH_SERVER = "https://authserver.nenu.edu.cn";
 export const WEB_VPN_AUTH_SERVER = "https://authserver-443.webvpn.nenu.edu.cn";
@@ -64,7 +64,7 @@ export const login = async (
   { id, password }: LoginOptions,
   service = "",
   webVPN = false
-): Promise<LoginData> => {
+): Promise<LoginResponse> => {
   const server = webVPN ? WEB_VPN_AUTH_SERVER : AUTH_SERVER;
 
   const url = `${server}/authserver/login${
@@ -212,20 +212,6 @@ export const login = async (
   };
 };
 
-export interface LoginSuccessResponse {
-  status: "success";
-  cookies: Cookie[];
-  location: string;
-}
-
-export interface LoginFailedResponse {
-  status: "failed";
-  type: "captcha" | "wrong" | "unknown";
-  msg: string;
-}
-
-export type LoginResponse = LoginSuccessResponse | LoginFailedResponse;
-
 export const loginHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
@@ -237,7 +223,7 @@ export const loginHandler: RequestHandler<
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const data = await login({ id, password });
 
-    return res.json(<LoginResponse>data);
+    return res.json(data);
   } catch (err) {
     return res.json(<LoginFailedResponse>{ status: "failed", msg: "参数错误" });
   }
