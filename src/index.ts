@@ -16,6 +16,7 @@ import {
   postAdmissionHandler,
   underAdmissionHandler,
 } from "./enroll/index.js";
+import { libraryPeopleHandler } from "./library/people.js";
 import { qrCodeHandler } from "./qrcode.js";
 import {
   processHandler,
@@ -63,6 +64,7 @@ app.post("/select/student-amount", studentAmountHandler);
 app.delete("/select/process", processHandler);
 app.put("/select/process", processHandler);
 
+app.get("/library/people", libraryPeopleHandler);
 app.get("/qrcode", qrCodeHandler);
 app.get("/weather", weatherHandler);
 
