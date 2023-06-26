@@ -6,6 +6,7 @@ import { getTimeStamp } from "./utils.js";
 import type { LoginFailedResponse, LoginOptions } from "../auth/index.js";
 import type { EmptyObject } from "../typings.js";
 import { IE_8_USER_AGENT, getCookieHeader } from "../utils/index.js";
+import { semesterStartTime } from "../config/semester-start-time.js";
 
 export interface ClassItem {
   name: string;
@@ -67,6 +68,7 @@ export type UserCourseTableOptions =
 export interface UserCourseTableSuccessResponse {
   status: "success";
   data: TableItem;
+  startTime: string;
 }
 
 export type UserCourseTableFailedResponse = LoginFailedResponse;
@@ -139,6 +141,7 @@ export const underCourseTableHandler: RequestHandler<
     return res.json(<UserCourseTableSuccessResponse>{
       status: "success",
       data: tableData,
+      startTime: semesterStartTime[time],
     });
   } catch (err) {
     res.json(<LoginFailedResponse>{
