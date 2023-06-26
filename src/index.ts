@@ -3,16 +3,13 @@ import compression from "compression";
 import cookieParser from "cookie-parser";
 import type { Response } from "express";
 import express from "express";
+import morgan from "morgan";
 
 import {
   changePasswordHandler,
   infoHandler,
   loginHandler,
 } from "./auth/index.js";
-import {
-  underCourseTableHandler,
-  underSystemLoginHandler,
-} from "./under-system/index.js";
 import {
   enrollPlanHandler,
   historyGradeHandler,
@@ -27,6 +24,10 @@ import {
   selectLoginHandler,
   studentAmountHandler,
 } from "./select/index.js";
+import {
+  underCourseTableHandler,
+  underSystemLoginHandler,
+} from "./under-system/index.js";
 import { weatherHandler } from "./weather/handler.js";
 
 const app = express();
@@ -35,6 +36,7 @@ const port = process.env.PORT ? Number(process.env.PORT) : 8080;
 app.use(cookieParser());
 app.use(compression());
 app.use(bodyParser.json());
+app.use(morgan("common"));
 
 app.get("/", (_req, res) => {
   res.json({ status: "ok" });
