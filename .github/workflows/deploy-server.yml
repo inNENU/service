@@ -30,7 +30,7 @@ jobs:
         run: pnpm build
 
       - name: Linter Test
-        run: pnpm link:check
+        run: pnpm lint:check
 
       - name: Config environment
         run: |
