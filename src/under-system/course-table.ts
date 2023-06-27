@@ -52,7 +52,7 @@ interface UserCourseTableExtraOptions {
 }
 
 export type UserCourseTableOptions =
-  | (LoginOptions & CookieOptions) & UserCourseTableExtraOptions;
+  | (LoginOptions | CookieOptions) & UserCourseTableExtraOptions;
 
 export interface UserCourseTableSuccessResponse {
   status: "success";
