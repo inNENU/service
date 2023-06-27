@@ -4,9 +4,9 @@ import type { Cookie } from "set-cookie-parser";
 import { underSystemLogin } from "./login.js";
 import { getTimeStamp } from "./utils.js";
 import type { LoginFailedResponse, LoginOptions } from "../auth/index.js";
+import { semesterStartTime } from "../config/semester-start-time.js";
 import type { EmptyObject } from "../typings.js";
 import { IE_8_USER_AGENT, getCookieHeader } from "../utils/index.js";
-import { semesterStartTime } from "../config/semester-start-time.js";
 
 export interface ClassItem {
   name: string;
