@@ -2,7 +2,11 @@ import CryptoJS from "crypto-js";
 import type { RequestHandler } from "express";
 import type { Cookie } from "set-cookie-parser";
 
-import type { CommonFailedResponse, EmptyObject } from "../typings.js";
+import type {
+  CommonFailedResponse,
+  EmptyObject,
+  LoginOptions,
+} from "../typings.js";
 import {
   EDGE_USER_AGENT_HEADERS,
   getCookieHeader,
@@ -31,13 +35,6 @@ export const customEncryptAES = (password: string, key: string): string => {
     padding: CryptoJS.pad.Pkcs7,
   }).toString();
 };
-
-export interface LoginOptions {
-  /** 学号 */
-  id: number;
-  /** 密码 */
-  password: string;
-}
 
 export interface LoginSuccessResponse {
   status: "success";

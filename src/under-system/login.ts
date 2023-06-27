@@ -1,9 +1,9 @@
 import type { RequestHandler } from "express";
 import type { Cookie } from "set-cookie-parser";
 
-import type { LoginFailedResponse, LoginOptions } from "../auth/login.js";
+import type { LoginFailedResponse } from "../auth/login.js";
 import { WEB_VPN_AUTH_SERVER, login } from "../auth/login.js";
-import type { EmptyObject } from "../typings.js";
+import type { EmptyObject, LoginOptions } from "../typings.js";
 import {
   IE_8_USER_AGENT,
   getCookieHeader,

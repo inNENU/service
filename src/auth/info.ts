@@ -1,9 +1,8 @@
 import type { RequestHandler } from "express";
 import type { Cookie } from "set-cookie-parser";
 
-import type { LoginOptions } from "./login.js";
 import { login } from "./login.js";
-import type { EmptyObject } from "../typings.js";
+import type { EmptyObject, LoginOptions } from "../typings.js";
 import { getCookieHeader } from "../utils/cookie.js";
 
 export interface InfoSuccessResponse {

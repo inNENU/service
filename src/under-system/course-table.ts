@@ -3,9 +3,9 @@ import type { Cookie } from "set-cookie-parser";
 
 import { underSystemLogin } from "./login.js";
 import { getTimeStamp } from "./utils.js";
-import type { LoginFailedResponse, LoginOptions } from "../auth/index.js";
+import type { LoginFailedResponse } from "../auth/index.js";
 import { semesterStartTime } from "../config/semester-start-time.js";
-import type { EmptyObject } from "../typings.js";
+import type { CookieOptions, EmptyObject, LoginOptions } from "../typings.js";
 import { IE_8_USER_AGENT, getCookieHeader } from "../utils/index.js";
 
 export interface ClassItem {
@@ -44,20 +44,15 @@ const getCourses = (content: string): TableItem =>
     )
   );
 
-interface UnderCourseTableAuthOptions extends LoginOptions {
+interface UserCourseTableExtraOptions {
+  /** 学号 */
+  id: number;
   /** 查询时间 */
   time: string;
 }
 
-interface UnderCourseTableCookieOptions {
-  cookies: Cookie[];
-  id: number;
-  time: string;
-}
-
 export type UserCourseTableOptions =
-  | UnderCourseTableAuthOptions
-  | UnderCourseTableCookieOptions;
+  | (LoginOptions & CookieOptions) & UserCourseTableExtraOptions;
 
 export interface UserCourseTableSuccessResponse {
   status: "success";

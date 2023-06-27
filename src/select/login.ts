@@ -5,20 +5,13 @@ import type {
   SelectBaseOptions,
   SelectBaseSuccessResponse,
 } from "./typings.js";
-import type { EmptyObject } from "../typings.js";
+import type { EmptyObject, LoginOptions } from "../typings.js";
 import {
   getCookies,
   isNumber,
   isPlainObject,
   isString,
 } from "../utils/index.js";
-
-export interface SelectLoginOptions {
-  /** 学号 */
-  id: number;
-  /** 密码 */
-  password: string;
-}
 
 export type SelectLoginSuccessResponse = SelectBaseOptions &
   SelectBaseSuccessResponse;
@@ -28,7 +21,7 @@ export type SelectLoginFailedResponse = SelectBaseFailedResponse;
 export const selectLoginHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  SelectLoginOptions
+  LoginOptions
 > = async (req, res) => {
   try {
     const { body } = req;

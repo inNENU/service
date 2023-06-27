@@ -3,8 +3,8 @@ import type { Cookie } from "set-cookie-parser";
 
 import { underSystemLogin } from "./login.js";
 import { getTimeStamp } from "./utils.js";
-import type { LoginFailedResponse, LoginOptions } from "../auth/index.js";
-import type { EmptyObject } from "../typings.js";
+import type { LoginFailedResponse } from "../auth/index.js";
+import type { CookieOptions, EmptyObject, LoginOptions } from "../typings.js";
 import { IE_8_USER_AGENT, getCookieHeader } from "../utils/index.js";
 
 type CourseType =
@@ -19,7 +19,7 @@ type CourseType =
   | "教师教育必修课"
   | "教师教育选修课";
 
-interface UnderGradeListAuthOptions extends LoginOptions {
+interface UserGradeListExtraOptions {
   /** 查询时间 */
   time?: string;
   /** 课程名称 */
@@ -29,36 +29,39 @@ interface UnderGradeListAuthOptions extends LoginOptions {
   gradeType?: "all" | "best";
 }
 
-interface UnderGradeListCookieOptions {
-  cookies: Cookie[];
-  /** 查询时间 */
-  time?: string;
-  /** 课程名称 */
-  name?: string;
-  /** 课程性质 */
-  courseType?: CourseType;
-  gradeType?: "all" | "best";
-}
+export type UserGradeListOptions = (LoginOptions | CookieOptions) &
+  UserGradeListExtraOptions;
 
-export type UserGradeListOptions =
-  | UnderGradeListAuthOptions
-  | UnderGradeListCookieOptions;
-
-interface GradeResult {
+export interface GradeResult {
+  /** 修读时间 */
   time: string;
+  /** 课程 id */
   cid: string;
-  courseName: string;
+  /** 课程名称 */
+  name: string;
+  /** 难度系数 */
   difficulty: number;
+  /** 分数 */
   grade: number;
+  /** 绩点成绩 */
   creditScore: number;
+  /** 成绩标志 */
   mark: string;
+  /** 课程类型 */
   courseType: string;
+  /** 选修课类型 */
   commonType: string;
+  /** 课程类型短称 */
   shortCourseType: string;
+  /** 学时 */
   hours: number | null;
+  /** 学分 */
   credit: number;
+  /** 考试性质 */
   examType: string;
+  /** 补重学期 */
   reLearn: string;
+  /** 审核状态 */
   status: string;
 }
 
@@ -102,7 +105,7 @@ export const getGradeList = (content: string): GradeResult[] =>
       ,
       time,
       cid,
-      courseName,
+      name,
       difficulty,
       grade,
       creditScore,
@@ -126,7 +129,7 @@ export const getGradeList = (content: string): GradeResult[] =>
     return {
       time,
       cid,
-      courseName,
+      name,
       difficulty: Number(difficulty) || 1,
       grade: actualGrade,
       creditScore: Number(creditScore),
