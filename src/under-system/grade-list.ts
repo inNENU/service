@@ -122,9 +122,11 @@ export const getGradeList = (content: string): GradeResult[] =>
       item.replace(/&nbsp;/g, " ").trim()
     );
 
+    const actualDifficulty = Number(difficulty) || 1;
     const actualGrade = grade
-      ? Number(gradeNumberRegExp.exec(grade))
-      : (Number(creditScore) / Number(credit)) * 10 + 50;
+      ? Number(gradeNumberRegExp.exec(grade)) ||
+        (Number(creditScore) / Number(credit) / actualDifficulty) * 10 + 50
+      : (Number(creditScore) / Number(credit) / actualDifficulty) * 10 + 50;
 
     return {
       time,
