@@ -97,16 +97,6 @@ export const underCourseTableHandler: RequestHandler<
       ({ cookies } = result);
     }
 
-    await fetch("https://dsjx.webvpn.nenu.edu.cn/Logon.do?method=logonBySSO", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Cookie: getCookieHeader(cookies),
-        Referer: "https://dsjx.webvpn.nenu.edu.cn/framework/main.jsp",
-        "User-Agent": IE_8_USER_AGENT,
-      },
-    });
-
     const params = new URLSearchParams({
       method: "goListKbByXs",
       istsxx: "no",

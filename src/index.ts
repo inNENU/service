@@ -27,6 +27,7 @@ import {
 } from "./select/index.js";
 import {
   underCourseTableHandler,
+  underGradeListHandler,
   underSystemLoginHandler,
 } from "./under-system/index.js";
 import { weatherHandler } from "./weather/handler.js";
@@ -49,6 +50,7 @@ app.post("/auth/login", loginHandler);
 app.post("/auth/info", infoHandler);
 
 app.post("/under-system/course-table", underCourseTableHandler);
+app.post("/under-system/grade-list", underGradeListHandler);
 app.post("/under-system/login", underSystemLoginHandler);
 
 app.post("/enroll/grade", historyGradeHandler);

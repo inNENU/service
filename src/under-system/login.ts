@@ -4,13 +4,16 @@ import type { Cookie } from "set-cookie-parser";
 import type { LoginFailedResponse, LoginOptions } from "../auth/login.js";
 import { WEB_VPN_AUTH_SERVER, login } from "../auth/login.js";
 import type { EmptyObject } from "../typings.js";
-import { getCookieHeader, getCookies } from "../utils/index.js";
+import {
+  IE_8_USER_AGENT,
+  getCookieHeader,
+  getCookies,
+} from "../utils/index.js";
 
 export interface UnderSystemLoginSuccessResponse {
   status: "success";
 
   cookies: Cookie[];
-  // userID: string;
 }
 
 export type UnderSystemLoginResponse =
@@ -76,36 +79,22 @@ export const underSystemLogin = async (
 
   const finalLocation = ticketResponse.headers.get("Location");
 
-  // Tip: The user id seems to be all same, so we don't need it anymore
-  // if (finalLocation?.includes(";jsessionid=")) {
-  //   const mainHeaders = {
-  //     Cookie: getCookieHeader(authCookies),
-  //     Referer: "https://dsjx.webvpn.nenu.edu.cn/Logon.do?method=logonjz",
-  //     ...COMMON_HEADERS,
-  //   };
+  if (finalLocation?.includes(";jsessionid=")) {
+    await fetch("https://dsjx.webvpn.nenu.edu.cn/Logon.do?method=logonBySSO", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Cookie: getCookieHeader(authCookies),
+        Referer: "https://dsjx.webvpn.nenu.edu.cn/framework/main.jsp",
+        "User-Agent": IE_8_USER_AGENT,
+      },
+    });
 
-  //   const mainPageResponse = await fetch(finalLocation, {
-  //     headers: new Headers(mainHeaders),
-  //   });
-
-  //   console.log(mainPageResponse.status);
-
-  //   const mainContent = await mainPageResponse.text();
-
-  //   const userID = /getUserId\("(.*?)"\);/.exec(mainContent)![1];
-
-  //   return <DSJXLoginSuccessResponse>{
-  //     status: "success",
-  //     cookies: authCookies,
-  //     userID,
-  //   };
-  // }
-
-  if (finalLocation?.includes(";jsessionid="))
     return <UnderSystemLoginSuccessResponse>{
       status: "success",
       cookies: authCookies,
     };
+  }
 
   return { status: "failed", type: "unknown", msg: "登录失败" };
 };
