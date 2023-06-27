@@ -44,7 +44,7 @@ export interface GradeResult {
   /** 分数 */
   grade: number;
   /** 绩点成绩 */
-  creditScore: number;
+  gradePoint: number;
   /** 成绩标志 */
   mark: string;
   /** 课程类型 */
@@ -56,7 +56,7 @@ export interface GradeResult {
   /** 学时 */
   hours: number | null;
   /** 学分 */
-  credit: number;
+  point: number;
   /** 考试性质 */
   examType: string;
   /** 补重学期 */
@@ -108,13 +108,13 @@ export const getGradeList = (content: string): GradeResult[] =>
       name,
       difficulty,
       grade,
-      creditScore,
+      gradePoint,
       mark = "",
       courseType,
       commonType,
       shortCourseType,
       hours,
-      credit,
+      point,
       examType,
       reLearn,
       status,
@@ -125,8 +125,8 @@ export const getGradeList = (content: string): GradeResult[] =>
     const actualDifficulty = Number(difficulty) || 1;
     const actualGrade = grade
       ? Number(gradeNumberRegExp.exec(grade)) ||
-        (Number(creditScore) / Number(credit) / actualDifficulty) * 10 + 50
-      : (Number(creditScore) / Number(credit) / actualDifficulty) * 10 + 50;
+        (Number(gradePoint) / Number(point) / actualDifficulty) * 10 + 50
+      : (Number(gradePoint) / Number(point) / actualDifficulty) * 10 + 50;
 
     return {
       time,
@@ -134,13 +134,13 @@ export const getGradeList = (content: string): GradeResult[] =>
       name,
       difficulty: Number(difficulty) || 1,
       grade: actualGrade,
-      creditScore: Number(creditScore),
+      gradePoint: Number(gradePoint),
       mark,
       courseType,
       commonType,
       shortCourseType,
       hours: hours ? Number(hours) : null,
-      credit: Number(credit),
+      point: Number(point),
       examType,
       reLearn: reLearn ? getDisplayTime(reLearn) : "",
       status,
