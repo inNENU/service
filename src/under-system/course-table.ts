@@ -19,21 +19,16 @@ export type CellItem = ClassItem[];
 export type RowItem = CellItem[];
 export type TableItem = RowItem[];
 
-const courseTableRegExp = /<table id="kbtable" [\s\S]*?>([\s\S]+?)<\/table>/;
 const courseRowRegExp =
-  /<tr>\s+<td .*>\s+\d+\s+<\/td>\s+((?:<td .*>[\s\S]+?<\/td>\s*?)+)\s+<\/tr>/g;
+  /<tr>\s+<td[^>]*>\s+\d+\s+<\/td>\s+((?:<td[^>]*>[\s\S]+?<\/td>\s*?)+)\s+<\/tr>/g;
 const courseCellRegExp =
   /<td .*?>\s+<div id="\d-\d-\d"\s?>([\s\S]+?)<\/div>[\s\S]+?<\/td>/g;
 
 const classRegExp =
-  /<a .*?>(\S+?)<br>(\S+?)<br>\s*<nobr>\s*(\S+?)<nobr><br>(\S+?)<br><br>\s*<\/a>/g;
+  /<a[^>]*?>(\S+?)<br>(\S+?)<br>\s*<nobr>\s*(\S+?)<nobr><br>(\S+?)<br><br>\s*<\/a>/g;
 
-const getCourses = (content: string): TableItem => {
-  const table = courseTableRegExp.exec(content)?.[0];
-
-  if (!table) throw new Error("Failed to get course table");
-
-  return [...table.matchAll(courseRowRegExp)].map(([, rowContent]) =>
+const getCourses = (content: string): TableItem =>
+  [...content.matchAll(courseRowRegExp)].map(([, rowContent]) =>
     [...rowContent.matchAll(courseCellRegExp)].map(([, cell]) =>
       [...cell.matchAll(classRegExp)].map(
         ([, name, teacher, time, location]) => (
@@ -48,7 +43,6 @@ const getCourses = (content: string): TableItem => {
       )
     )
   );
-};
 
 interface UnderCourseTableAuthOptions extends LoginOptions {
   /** 查询时间 */
