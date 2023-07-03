@@ -125,8 +125,10 @@ export const getGradeList = (content: string): GradeResult[] =>
     const actualDifficulty = Number(difficulty) || 1;
     const actualGrade = grade
       ? Number(gradeNumberRegExp.exec(grade)) ||
-        (Number(gradePoint) / Number(point) / actualDifficulty) * 10 + 50
-      : (Number(gradePoint) / Number(point) / actualDifficulty) * 10 + 50;
+        Math.round(Number(gradePoint) / Number(point) / actualDifficulty + 5) *
+          10
+      : Math.round(Number(gradePoint) / Number(point) / actualDifficulty + 5) *
+        10;
 
     return {
       time,
