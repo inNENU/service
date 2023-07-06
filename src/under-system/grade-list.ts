@@ -80,6 +80,31 @@ const gradeItemRegExp = /<tr.+?class="smartTr"[^>]*?>(.*?)<\/tr>/g;
 const gradeCellRegExp =
   /^(?:<td[^>]*?>[^<]*?<\/td>){3}<td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^>]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^>]*?)<\/td><td[^>]*?>(.*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td>/;
 const gradeNumberRegExp = /<a[^>]*?>([^<]*?)<\/a>/;
+
+const tableFieldsRegExp =
+  /<input type="hidden"\s+name\s*=\s*"tableFields"\s+id\s*=\s*"tableFields"\s+value="([^"]+?)">/;
+const sqlRegExp =
+  /<input\s+type="hidden"\s+name\s*=\s*"isSql"\s+id\s*=\s*"isSql"\s+value="(.*?)">/;
+// const where1RegExp =
+//   /<input\s+type="hidden"\s+name\s*=\s*"where1"\s+id\s*=\s*"where1"\s+value="(.*?)">/;
+// const where2RegExp =
+//   /<input\s+type="hidden"\s+name\s*=\s*"where2"\s+id\s*=\s*"where2"\s+value="(.*?)">/;
+// const beanNameRegExp =
+//   /<input\s+type="hidden"\s+name\s*=\s*"beanName"\s+id\s*=\s*"beanName"\s+value="(.*?)">/;
+const printPageSizeRegExp =
+  /<input\s+type="hidden"\s+name\s*=\s*"printPageSize"\s+id\s*=\s*"printPageSize"\s+value="(.*?)">/;
+const keyRegExp =
+  /<input\s+type="hidden"\s+name\s*=\s*"key"\s+id\s*=\s*"key"\s+value="(.*?)">/;
+
+const fieldRegExp =
+  /<input\s+type="hidden"\s+name\s*=\s*"field"\s+id\s*=\s*"field"\s+value="(.*?)">/;
+const totalPagesRegExp =
+  /<input\s+type="hidden"\s+name\s*=\s*"totalPages"\s+id\s*=\s*"totalPages"\s+value="(.*?)">/;
+const otherFieldsRegExp =
+  /<input\s+type="hidden"\s+name\s*=\s*"otherFields"\s+id\s*=\s*"otherFields"\s+value="(.*?)">/;
+const xsIdRegExp =
+  /<input\s+type="hidden"\s+name\s*=\s*"xsId"\s+id\s*=\s*"xsId"\s+value="(.*?)" \/>/;
+
 const courseTypes: Record<CourseType, string> = {
   通识教育必修课: "01",
   通识教育选修课: "02",
@@ -99,7 +124,7 @@ const getDisplayTime = (time: string): string => {
   return semester === "1" ? `${startYear}年秋季学期` : `${endYear}年春季学期`;
 };
 
-export const getGradeList = (content: string): GradeResult[] =>
+export const getGrades = (content: string): GradeResult[] =>
   Array.from(content.matchAll(gradeItemRegExp)).map(([, item]) => {
     const [
       ,
@@ -148,6 +173,34 @@ export const getGradeList = (content: string): GradeResult[] =>
       status,
     };
   });
+
+export const getGradeLists = async (
+  content: string
+): Promise<GradeResult[]> => {
+  const totalPages = totalPagesRegExp.exec(content)![1];
+
+  if (Number(totalPages) === 1) return getGrades(content);
+
+  const tableFields = tableFieldsRegExp.exec(content)![1];
+  const isSql = sqlRegExp.exec(content)![1];
+  // const beanName = beanNameRegExp.exec(content);
+  const printPageSize = printPageSizeRegExp.exec(content)![1];
+  const key = keyRegExp.exec(content)![1];
+  const field = fieldRegExp.exec(content)![1];
+
+  const params = new URLSearchParams({
+    tableFields,
+    isSql,
+    printPageSize,
+    key,
+    field,
+  });
+
+  const result = await fetch("");
+  const responseText = await result.text();
+
+  return getGrades(responseText);
+};
 
 export const underGradeListHandler: RequestHandler<
   EmptyObject,
@@ -205,7 +258,7 @@ export const underGradeListHandler: RequestHandler<
 
     const content = await response.text();
 
-    const gradeList = getGradeList(content);
+    const gradeList = await getGradeLists(content);
 
     return res.json(<UserGradeListSuccessResponse>{
       status: "success",
