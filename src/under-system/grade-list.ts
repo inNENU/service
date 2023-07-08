@@ -162,7 +162,7 @@ export const getGrades = (content: string, isJS = false): GradeResult[] =>
           );
 
       return {
-        time,
+        time: time.substring(2, time.length - 3),
         cid,
         name,
         difficulty: Number(difficulty) || 1,
