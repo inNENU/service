@@ -86,12 +86,6 @@ const tableFieldsRegExp =
   /<input type="hidden"\s+name\s*=\s*"tableFields"\s+id\s*=\s*"tableFields"\s+value="([^"]+?)">/;
 const sqlRegExp =
   /<input\s+type="hidden"\s+name\s*=\s*"isSql"\s+id\s*=\s*"isSql"\s+value="([^"]*?)">/;
-// const where1RegExp =
-//   /<input\s+type="hidden"\s+name\s*=\s*"where1"\s+id\s*=\s*"where1"\s+value="(.*?)">/;
-// const where2RegExp =
-//   /<input\s+type="hidden"\s+name\s*=\s*"where2"\s+id\s*=\s*"where2"\s+value="(.*?)">/;
-// const beanNameRegExp =
-// /<input\s+type="hidden"\s+name\s*=\s*"beanName"\s+id\s*=\s*"beanName"\s+value="(.*?)">/;
 const printPageSizeRegExp =
   /<input\s+type="hidden"\s+name\s*=\s*"printPageSize"\s+id\s*=\s*"printPageSize"\s+value="([^"]*?)">/;
 const keyRegExp =
@@ -200,7 +194,6 @@ export const getGradeLists = async (
 
   const tableFields = tableFieldsRegExp.exec(content)![1];
   const isSql = sqlRegExp.exec(content)![1];
-  // const beanName = beanNameRegExp.exec(content);
   const printPageSize = String(printPageSizeRegExp.exec(content)?.[1]);
   const key = String(keyRegExp.exec(content)?.[1]);
   const keyCode = String(keyCodeRegExp.exec(content)?.[1]);
@@ -214,37 +207,16 @@ export const getGradeLists = async (
 
   for (let page = 2; page <= totalPages; page++) {
     const params = new URLSearchParams({
-      // check_object_id: "",
-      // check_object_name: "",
-      // Field1: "a.xh",
-      // HH1: "like",
-      // SValue1: "",
-      // AndOr1: "and",
-      // Field2: "a.xh",
-      // HH2: "like",
-      // SValue2: "",
       xsId,
-      // where1: "null",
-      // where2: "null",
-      // OrderBy: "",
       keyCode,
-      isOutJoin: "false",
       PageNum: page.toString(),
-      // oldSelectRow: "",
       printHQL,
       ...(sqlString ? { sqlString } : {}),
-      // sqlArgs: "",
       isSql,
-      // beanName: "",
       printPageSize,
       key,
       field,
       totalPages: totalPages.toString(),
-      // ZdSzCode: "",
-      // ZdSzCodeValue: "",
-      // ZdSzValueTemp: "",
-      // ZDSXkeydm: "",
-      // PlAction: "",
       tableFields,
       otherFields,
     });
@@ -265,9 +237,6 @@ export const getGradeLists = async (
         method: "POST",
         headers,
         body: params.toString(),
-        // .replace(/%40/g, "@")
-        // .replace(/%0A/g, "%0D%0A")
-        // .replace(/!/g, "%21"),
       },
     );
 
