@@ -36,17 +36,19 @@ export const customEncryptAES = (password: string, key: string): string => {
   }).toString();
 };
 
-export interface LoginSuccessResponse {
+export interface AuthLoginSuccessResponse {
   status: "success";
   cookies: Cookie[];
   location: string;
 }
 
-export interface LoginFailedResponse extends CommonFailedResponse {
+export interface AuthLoginFailedResponse extends CommonFailedResponse {
   type: "captcha" | "wrong" | "unknown";
 }
 
-export type LoginResponse = LoginSuccessResponse | LoginFailedResponse;
+export type AuthLoginResponse =
+  | AuthLoginSuccessResponse
+  | AuthLoginFailedResponse;
 
 export const AUTH_SERVER = "https://authserver.nenu.edu.cn";
 export const WEB_VPN_AUTH_SERVER = "https://authserver-443.webvpn.nenu.edu.cn";
@@ -57,11 +59,11 @@ const COMMON_HEADERS = {
   ...EDGE_USER_AGENT_HEADERS,
 };
 
-export const login = async (
+export const authLogin = async (
   { id, password }: LoginOptions,
   service = "",
   webVPN = false,
-): Promise<LoginResponse> => {
+): Promise<AuthLoginResponse> => {
   const server = webVPN ? WEB_VPN_AUTH_SERVER : AUTH_SERVER;
 
   const url = `${server}/authserver/login${
@@ -200,7 +202,7 @@ export const login = async (
   }
 
   console.error("Unknown status", response.status);
-  console.error("Reponse", await response.text());
+  console.error("Response", await response.text());
 
   return {
     status: "failed",
@@ -209,7 +211,7 @@ export const login = async (
   };
 };
 
-export const loginHandler: RequestHandler<
+export const authLoginHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
   LoginOptions
@@ -218,10 +220,13 @@ export const loginHandler: RequestHandler<
     const { id, password } = req.body;
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const data = await login({ id, password });
+    const data = await authLogin({ id, password });
 
     return res.json(data);
   } catch (err) {
-    return res.json(<LoginFailedResponse>{ status: "failed", msg: "参数错误" });
+    return res.json(<AuthLoginFailedResponse>{
+      status: "failed",
+      msg: "参数错误",
+    });
   }
 };

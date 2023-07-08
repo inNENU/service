@@ -8,7 +8,7 @@ import morgan from "morgan";
 import {
   changePasswordHandler,
   infoHandler,
-  loginHandler,
+  authLoginHandler,
 } from "./auth/index.js";
 import {
   enrollPlanHandler,
@@ -46,7 +46,7 @@ app.get("/", (_req, res) => {
 
 app.post("/auth/change-password", changePasswordHandler);
 app.patch("/auth/change-password", changePasswordHandler);
-app.post("/auth/login", loginHandler);
+app.post("/auth/login", authLoginHandler);
 app.post("/auth/info", infoHandler);
 
 app.post("/under-system/course-table", underCourseTableHandler);

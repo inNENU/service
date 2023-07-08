@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-export interface LibraryPeopleReponse {
+export interface LibraryPeopleResponse {
   benbu: number;
   jingyue: number;
 }

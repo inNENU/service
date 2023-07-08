@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { customEncryptAES, login, saltRegExp } from "./login.js";
+import { customEncryptAES, authLogin, saltRegExp } from "./login.js";
 import type { EmptyObject, LoginOptions } from "../typings.js";
 import { getCookieHeader } from "../utils/cookie.js";
 
@@ -82,7 +82,7 @@ export const changePasswordHandler: RequestHandler<
 
     console.log("Getting params", req.body);
 
-    const result = await login({ id, password });
+    const result = await authLogin({ id, password });
 
     if (result.status === "success") {
       const authCookieHeader = getCookieHeader(result.cookies);

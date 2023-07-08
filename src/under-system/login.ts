@@ -1,8 +1,8 @@
 import type { RequestHandler } from "express";
 import type { Cookie } from "set-cookie-parser";
 
-import type { LoginFailedResponse } from "../auth/login.js";
-import { WEB_VPN_AUTH_SERVER, login } from "../auth/login.js";
+import type { AuthLoginFailedResponse } from "../auth/login.js";
+import { WEB_VPN_AUTH_SERVER, authLogin } from "../auth/login.js";
 import type { EmptyObject, LoginOptions } from "../typings.js";
 import {
   IE_8_USER_AGENT,
@@ -18,7 +18,7 @@ export interface UnderSystemLoginSuccessResponse {
 
 export type UnderSystemLoginResponse =
   | UnderSystemLoginSuccessResponse
-  | LoginFailedResponse;
+  | AuthLoginFailedResponse;
 
 const COMMON_HEADERS = {
   "User-Agent":
@@ -28,7 +28,7 @@ const COMMON_HEADERS = {
 export const underSystemLogin = async (
   options: LoginOptions,
 ): Promise<UnderSystemLoginResponse> => {
-  const result = await login(
+  const result = await authLogin(
     options,
     "http://dsjx.nenu.edu.cn:80/Logon.do?method=logonjz",
     true,
@@ -37,7 +37,7 @@ export const underSystemLogin = async (
   if (result.status !== "success") {
     console.error(result.msg);
 
-    return <LoginFailedResponse>{
+    return <AuthLoginFailedResponse>{
       status: "failed",
       type: result.type,
       msg: result.msg,
@@ -71,7 +71,7 @@ export const underSystemLogin = async (
   );
 
   if (ticketResponse.status !== 302)
-    return <LoginFailedResponse>{
+    return <AuthLoginFailedResponse>{
       status: "failed",
       type: "unknown",
       msg: "登录失败",
@@ -107,7 +107,7 @@ export const underSystemLoginHandler: RequestHandler<
   try {
     return res.json(await underSystemLogin(req.body));
   } catch (err) {
-    res.json(<LoginFailedResponse>{
+    res.json(<AuthLoginFailedResponse>{
       status: "failed",
       msg: (<Error>err).message,
     });

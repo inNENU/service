@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 import type { Cookie } from "set-cookie-parser";
 
-import { login } from "./login.js";
+import { authLogin } from "./login.js";
 import type { EmptyObject, LoginOptions } from "../typings.js";
 import { getCookieHeader } from "../utils/cookie.js";
 
@@ -87,7 +87,7 @@ export const infoHandler: RequestHandler<
   try {
     if ("cookies" in req.body) return res.json(await getInfo(req.body.cookies));
 
-    const result = await login(req.body);
+    const result = await authLogin(req.body);
 
     if (result.status === "success")
       return res.json(await getInfo(result.cookies));
