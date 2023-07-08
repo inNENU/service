@@ -6,9 +6,9 @@ import express from "express";
 import morgan from "morgan";
 
 import {
+  authLoginHandler,
   changePasswordHandler,
   infoHandler,
-  authLoginHandler,
 } from "./auth/index.js";
 import {
   enrollPlanHandler,
@@ -30,6 +30,7 @@ import {
   underGradeListHandler,
   underSystemLoginHandler,
 } from "./under-system/index.js";
+import { vpnLoginHandler } from "./vpn/index.js";
 import { weatherHandler } from "./weather/handler.js";
 
 const app = express();
@@ -65,6 +66,8 @@ app.post("/select/search", searchHandler);
 app.post("/select/student-amount", studentAmountHandler);
 app.delete("/select/process", processHandler);
 app.put("/select/process", processHandler);
+
+app.post("/vpn/login", vpnLoginHandler);
 
 app.get("/library/people", libraryPeopleHandler);
 app.get("/qrcode", qrCodeHandler);

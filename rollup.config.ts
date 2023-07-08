@@ -8,6 +8,7 @@ const external = [
   "dotenv",
   "express",
   "iconv-lite",
+  "morgan",
   "qrcode",
   "set-cookie-parser",
 ];
