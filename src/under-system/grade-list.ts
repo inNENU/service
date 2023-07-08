@@ -77,6 +77,7 @@ export type UserGradeListResponse =
   | UserGradeListFailedResponse;
 
 const gradeItemRegExp = /<tr.+?class="smartTr"[^>]*?>(.*?)<\/tr>/g;
+const jsGradeItemRegExp = /<tr.+?class=\\"smartTr\\"[^>]*?>(.*?)<\/tr>/g;
 const gradeCellRegExp =
   /^(?:<td[^>]*?>[^<]*?<\/td>){3}<td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^>]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^>]*?)<\/td><td[^>]*?>(.*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td>/;
 const gradeNumberRegExp = /<a[^>]*?>([^<]*?)<\/a>/;
@@ -132,55 +133,59 @@ const getDisplayTime = (time: string): string => {
   return semester === "1" ? `${startYear}年秋季学期` : `${endYear}年春季学期`;
 };
 
-export const getGrades = (content: string): GradeResult[] =>
-  Array.from(content.matchAll(gradeItemRegExp)).map(([, item]) => {
-    const [
-      ,
-      time,
-      cid,
-      name,
-      difficulty,
-      grade,
-      gradePoint,
-      mark = "",
-      courseType,
-      commonType,
-      shortCourseType,
-      hours,
-      point,
-      examType,
-      reLearn,
-      status,
-    ] = Array.from(gradeCellRegExp.exec(item)!).map((item) =>
-      item.replace(/&nbsp;/g, " ").trim(),
-    );
+export const getGrades = (content: string, isJS = false): GradeResult[] =>
+  Array.from(content.matchAll(isJS ? jsGradeItemRegExp : gradeItemRegExp)).map(
+    ([, item]) => {
+      const [
+        ,
+        time,
+        cid,
+        name,
+        difficulty,
+        grade,
+        gradePoint,
+        mark = "",
+        courseType,
+        commonType,
+        shortCourseType,
+        hours,
+        point,
+        examType,
+        reLearn,
+        status,
+      ] = Array.from(gradeCellRegExp.exec(item)!).map((item) =>
+        item.replace(/&nbsp;/g, " ").trim(),
+      );
 
-    const actualDifficulty = Number(difficulty) || 1;
-    const actualGrade = grade
-      ? Number(gradeNumberRegExp.exec(grade)) ||
-        Math.round(Number(gradePoint) / Number(point) / actualDifficulty + 5) *
-          10
-      : Math.round(Number(gradePoint) / Number(point) / actualDifficulty + 5) *
-        10;
+      const actualDifficulty = Number(difficulty) || 1;
+      const actualGrade = grade
+        ? Number(gradeNumberRegExp.exec(grade)) ||
+          Math.round(
+            Number(gradePoint) / Number(point) / actualDifficulty + 5,
+          ) * 10
+        : Math.round(
+            Number(gradePoint) / Number(point) / actualDifficulty + 5,
+          ) * 10;
 
-    return {
-      time,
-      cid,
-      name,
-      difficulty: Number(difficulty) || 1,
-      grade: actualGrade,
-      gradePoint: Number(gradePoint),
-      mark,
-      courseType,
-      commonType,
-      shortCourseType,
-      hours: hours ? Number(hours) : null,
-      point: Number(point),
-      examType,
-      reLearn: reLearn ? getDisplayTime(reLearn) : "",
-      status,
-    };
-  });
+      return {
+        time,
+        cid,
+        name,
+        difficulty: Number(difficulty) || 1,
+        grade: actualGrade,
+        gradePoint: Number(gradePoint),
+        mark,
+        courseType,
+        commonType,
+        shortCourseType,
+        hours: hours ? Number(hours) : null,
+        point: Number(point),
+        examType,
+        reLearn: reLearn ? getDisplayTime(reLearn) : "",
+        status,
+      };
+    },
+  );
 
 export const getGradeLists = async (
   cookies: Cookie[],
@@ -189,7 +194,7 @@ export const getGradeLists = async (
   const grades = getGrades(content);
   const totalPages = Number(totalPagesRegExp.exec(content)![1]);
 
-  console.log(totalPages);
+  console.log("Total pages:", totalPages);
 
   if (totalPages === 1) return grades;
 
@@ -268,9 +273,7 @@ export const getGradeLists = async (
 
     const responseText = await response.text();
 
-    const newGrades = getGrades(responseText);
-
-    // console.log(newGrades);
+    const newGrades = getGrades(responseText, true);
 
     grades.push(...newGrades);
   }
@@ -330,7 +333,7 @@ export const underGradeListHandler: RequestHandler<
       },
     );
 
-    console.log(response.status);
+    console.log("Status:", response.status);
 
     const content = await response.text();
 
