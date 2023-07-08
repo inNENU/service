@@ -96,7 +96,7 @@ export const enrollPlanHandler: RequestHandler<
       });
     }
 
-    console.log("Getting", planInfo);
+    console.log(`Getting ${planInfo.length} items`);
 
     return res.json(<EnrollPlanSuccessResponse>{
       status: "success",

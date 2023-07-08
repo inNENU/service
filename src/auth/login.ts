@@ -76,14 +76,13 @@ export const authLogin = async (
     service ? `?service=${encodeURIComponent(service)}` : ""
   }`;
 
-  console.log("Login url:", url);
-
   const loginPageResponse = await fetch(url, {
     headers: { ...COMMON_HEADERS, Cookie: getCookieHeader(cookies) },
   });
 
   currentCookies.push(...getCookies(loginPageResponse));
 
+  console.log("Login url:", url);
   console.log("Getting cookie:", cookies);
 
   const content = await loginPageResponse.text();
@@ -95,7 +94,7 @@ export const authLogin = async (
   const _eventId = content.match(/name="_eventId" value="(.*?)"/)![1];
   const rmShown = content.match(/name="rmShown" value="(.*?)"/)![1];
 
-  console.log("Parsing", { salt, lt, dllt, execution, _eventId, rmShown });
+  console.debug("Parsing", { salt, lt, dllt, execution, _eventId, rmShown });
 
   const captchaCheckResponse = await fetch(
     `${server}/authserver/needCaptcha.html?username=${id}&pwdEncrypt2=pwdEncryptSalt&_=${Date.now()}`,

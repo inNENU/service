@@ -106,13 +106,11 @@ export const historyGradeHandler: RequestHandler<
         if (historyInfo.length > 0) historyInfos.push(historyInfo);
       }
 
-      const results = { titles, items: historyInfos };
-
-      console.log("Getting", results);
+      console.log(`Getting ${historyInfos.length} items`);
 
       return res.json(<EnrollGradeSuccessResponse>{
         status: "success",
-        data: results,
+        data: { titles, items: historyInfos },
       });
     }
 
