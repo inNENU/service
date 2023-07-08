@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { customEncryptAES, authLogin, saltRegExp } from "./login.js";
+import { authLogin, customEncryptAES, saltRegExp } from "./login.js";
 import type { EmptyObject, LoginOptions } from "../typings.js";
 import { getCookieHeader } from "../utils/cookie.js";
 
