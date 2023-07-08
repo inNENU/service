@@ -155,11 +155,11 @@ export const getGrades = (content: string, isJS = false): GradeResult[] =>
       const actualGrade = grade
         ? Number(gradeNumberRegExp.exec(grade)) ||
           Math.round(
-            Number(gradePoint) / Number(point) / actualDifficulty + 5,
-          ) * 10
+            (Number(gradePoint) / Number(point) / actualDifficulty) * 10 + 50,
+          )
         : Math.round(
-            Number(gradePoint) / Number(point) / actualDifficulty + 5,
-          ) * 10;
+            (Number(gradePoint) / Number(point) / actualDifficulty) * 10 + 50,
+          );
 
       return {
         time,
