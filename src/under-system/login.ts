@@ -9,6 +9,8 @@ import {
   getCookieHeader,
   getCookies,
 } from "../utils/index.js";
+import type { VPNLoginFailedResponse } from "../vpn/login.js";
+import { vpnLogin } from "../vpn/login.js";
 
 export interface UnderSystemLoginSuccessResponse {
   status: "success";
@@ -18,7 +20,8 @@ export interface UnderSystemLoginSuccessResponse {
 
 export type UnderSystemLoginResponse =
   | UnderSystemLoginSuccessResponse
-  | AuthLoginFailedResponse;
+  | AuthLoginFailedResponse
+  | VPNLoginFailedResponse;
 
 const COMMON_HEADERS = {
   "User-Agent":
@@ -28,11 +31,15 @@ const COMMON_HEADERS = {
 export const underSystemLogin = async (
   options: LoginOptions,
 ): Promise<UnderSystemLoginResponse> => {
-  const result = await authLogin(
-    options,
-    "http://dsjx.nenu.edu.cn:80/Logon.do?method=logonjz",
-    true,
-  );
+  const vpnLoginResult = await vpnLogin(options);
+
+  if (vpnLoginResult.status === "failed") return vpnLoginResult;
+
+  const result = await authLogin(options, {
+    service: "http://dsjx.nenu.edu.cn:80/",
+    webVPN: true,
+    cookies: vpnLoginResult.cookies,
+  });
 
   if (result.status !== "success") {
     console.error(result.msg);
@@ -44,12 +51,13 @@ export const underSystemLogin = async (
     };
   }
 
-  const authCookies = result.cookies.filter(
-    (item) => item.name === "iPlanetDirectoryPro",
-  );
+  const authCookies = [
+    ...vpnLoginResult.cookies,
+    result.cookies.find((item) => item.name === "iPlanetDirectoryPro")!,
+  ];
 
   const ticketHeaders = {
-    Cookie: getCookieHeader(authCookies),
+    Cookie: getCookieHeader([...vpnLoginResult.cookies, ...authCookies]),
     Referer: WEB_VPN_AUTH_SERVER,
     ...COMMON_HEADERS,
   };

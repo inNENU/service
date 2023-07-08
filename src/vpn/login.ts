@@ -76,7 +76,6 @@ export const vpnLogin = async ({
     redirect: "manual",
   });
 
-  // const resultContent = await response.text();
   const location = loginResponse.headers.get("Location");
 
   initialCookies.push(...getCookies(loginResponse));

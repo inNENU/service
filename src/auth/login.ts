@@ -59,11 +59,17 @@ const COMMON_HEADERS = {
   ...EDGE_USER_AGENT_HEADERS,
 };
 
+export interface AuthLoginOptions {
+  service?: string;
+  webVPN?: boolean;
+  cookies?: Cookie[];
+}
+
 export const authLogin = async (
   { id, password }: LoginOptions,
-  service = "",
-  webVPN = false,
+  { service = "", webVPN = false, cookies = [] }: AuthLoginOptions = {},
 ): Promise<AuthLoginResponse> => {
+  const currentCookies = [...cookies];
   const server = webVPN ? WEB_VPN_AUTH_SERVER : AUTH_SERVER;
 
   const url = `${server}/authserver/login${
@@ -73,10 +79,10 @@ export const authLogin = async (
   console.log("Login url:", url);
 
   const loginPageResponse = await fetch(url, {
-    headers: COMMON_HEADERS,
+    headers: { ...COMMON_HEADERS, Cookie: getCookieHeader(cookies) },
   });
 
-  const cookies = getCookies(loginPageResponse);
+  currentCookies.push(...getCookies(loginPageResponse));
 
   console.log("Getting cookie:", cookies);
 
@@ -96,7 +102,7 @@ export const authLogin = async (
     {
       headers: {
         Cookie: getCookieHeader([
-          ...cookies,
+          ...currentCookies,
           {
             name: "org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE",
             value: "zh_CN",
@@ -123,7 +129,7 @@ export const authLogin = async (
     "Content-Type": "application/x-www-form-urlencoded",
     Cookie: [
       getCookieHeader([
-        ...cookies,
+        ...currentCookies,
         {
           name: "org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE",
           value: "zh_CN",
@@ -167,10 +173,10 @@ export const authLogin = async (
   const resultContent = await response.text();
   const location = response.headers.get("Location");
 
-  cookies.push(...getCookies(response));
+  currentCookies.push(...getCookies(response));
 
   console.log(`Request ends with ${response.status}`, location);
-  console.log("Login cookies:", cookies);
+  console.log("Login cookies:", currentCookies);
 
   if (response.status === 200)
     if (resultContent.includes("您提供的用户名或者密码有误"))
@@ -196,7 +202,7 @@ export const authLogin = async (
 
     return {
       status: "success",
-      cookies,
+      cookies: currentCookies,
       location: location!,
     };
   }
