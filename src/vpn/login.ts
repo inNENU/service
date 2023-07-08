@@ -1,6 +1,8 @@
 import type { RequestHandler } from "express";
 import type { Cookie } from "set-cookie-parser";
 
+import type { AuthLoginFailedResponse } from "../auth/login.js";
+import { authLogin } from "../auth/login.js";
 import type {
   CommonFailedResponse,
   EmptyObject,
@@ -24,23 +26,101 @@ export interface VPNLoginFailedResponse extends CommonFailedResponse {
   type: "locked" | "wrong" | "unknown";
 }
 
-export type VPNLoginResponse = VPNLoginSuccessResponse | VPNLoginFailedResponse;
+export type VPNLoginResponse =
+  | VPNLoginSuccessResponse
+  | VPNLoginFailedResponse
+  | AuthLoginFailedResponse;
 
 export const VPN_SERVER = "https://webvpn.nenu.edu.cn";
+const LOGIN_URL = `${VPN_SERVER}/users/sign_in`;
+const CAS_LOGIN_URL = `${VPN_SERVER}/users/auth/cas`;
 
 const COMMON_HEADERS = {
   DNT: "1",
   "Upgrade-Insecure-Requests": "1",
+  "Sec-Fetch-Site": "same-origin",
+  "Sec-Fetch-Mode": "navigate",
+  "Sec-Fetch-User": "?1",
+  "Sec-Fetch-Dest": "document",
   ...EDGE_USER_AGENT_HEADERS,
+};
+
+export const vpnCASLogin = async ({
+  id,
+  password,
+}: LoginOptions): Promise<VPNLoginResponse> => {
+  const casResponse = await fetch(CAS_LOGIN_URL, {
+    headers: COMMON_HEADERS,
+    redirect: "manual",
+  });
+
+  const casCookies = getCookies(casResponse);
+
+  if (casResponse.status === 302) {
+    const authResult = await authLogin(
+      { id, password },
+      {
+        service:
+          "https://webvpn.nenu.edu.cn/users/auth/cas/callback?url=https%3A%2F%2Fwebvpn.nenu.edu.cn%2Fusers%2Fsign_in",
+      },
+    );
+
+    if (authResult.status === "failed") return authResult;
+
+    const callbackReponse = await fetch(authResult.location, {
+      headers: {
+        Cookie: getCookieHeader([...casCookies, ...authResult.cookies]),
+      },
+      redirect: "manual",
+    });
+
+    const sessionCookie = getCookies(callbackReponse).find(
+      ({ name }) => name === "_astraeus_session",
+    )!;
+    const location = callbackReponse.headers.get("Location");
+
+    if (callbackReponse.status === 302) {
+      if (location === LOGIN_URL)
+        return {
+          status: "failed",
+          type: "locked",
+          msg: "短时间内登录过多，小程序服务器已被屏蔽。请稍后重试",
+        };
+
+      if (location === `${VPN_SERVER}/vpn_key/update`) {
+        const keyResponse = await fetch(`${VPN_SERVER}/vpn_key/update`, {
+          headers: {
+            Cookie: getCookieHeader([sessionCookie]),
+          },
+        });
+
+        const cookies = getCookies(keyResponse);
+
+        const webVpnCookies = [
+          cookies.find(({ name }) => name === "_webvpn_key")!,
+          cookies.find(({ name }) => name === "webvpn_username")!,
+        ];
+
+        return {
+          status: "success",
+          cookies: webVpnCookies,
+        };
+      }
+    }
+  }
+
+  return {
+    status: "failed",
+    type: "unknown",
+    msg: "未知错误",
+  };
 };
 
 export const vpnLogin = async ({
   id,
   password,
 }: LoginOptions): Promise<VPNLoginResponse> => {
-  const url = `${VPN_SERVER}/users/sign_in`;
-
-  const loginPageResponse = await fetch(url, {
+  const loginPageResponse = await fetch(LOGIN_URL, {
     headers: COMMON_HEADERS,
   });
 
@@ -66,7 +146,7 @@ export const vpnLogin = async ({
 
   const body = new URLSearchParams(params).toString();
 
-  const loginResponse = await fetch(url, {
+  const loginResponse = await fetch(LOGIN_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -83,7 +163,14 @@ export const vpnLogin = async ({
   console.log(`Request ends with ${loginResponse.status}`, location);
   console.log("Login cookies:", initialCookies);
 
-  if (loginResponse.status === 302)
+  if (loginResponse.status === 302) {
+    if (location === LOGIN_URL)
+      return {
+        status: "failed",
+        type: "locked",
+        msg: "短时间内登录过多，小程序服务器已被屏蔽。请稍后重试",
+      };
+
     if (location === `${VPN_SERVER}/vpn_key/update`) {
       const keyResponse = await fetch(`${VPN_SERVER}/vpn_key/update`, {
         headers: {
@@ -106,6 +193,7 @@ export const vpnLogin = async ({
         cookies: webVpnCookies,
       };
     }
+  }
 
   if (loginResponse.status === 200) {
     const response = await loginResponse.text();
@@ -133,6 +221,26 @@ export const vpnLogin = async ({
     type: "unknown",
     msg: "未知错误",
   };
+};
+
+export const vpnCASLoginHandler: RequestHandler<
+  EmptyObject,
+  EmptyObject,
+  LoginOptions
+> = async (req, res) => {
+  try {
+    const { id, password } = req.body;
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const data = await vpnCASLogin({ id, password });
+
+    return res.json(data);
+  } catch (err) {
+    return res.json(<VPNLoginFailedResponse>{
+      status: "failed",
+      msg: "参数错误",
+    });
+  }
 };
 
 export const vpnLoginHandler: RequestHandler<

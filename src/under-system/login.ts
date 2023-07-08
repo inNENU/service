@@ -10,7 +10,7 @@ import {
   getCookies,
 } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/login.js";
-import { vpnLogin } from "../vpn/login.js";
+import { vpnCASLogin } from "../vpn/login.js";
 
 export interface UnderSystemLoginSuccessResponse {
   status: "success";
@@ -31,7 +31,7 @@ const COMMON_HEADERS = {
 export const underSystemLogin = async (
   options: LoginOptions,
 ): Promise<UnderSystemLoginResponse> => {
-  const vpnLoginResult = await vpnLogin(options);
+  const vpnLoginResult = await vpnCASLogin(options);
 
   if (vpnLoginResult.status === "failed") return vpnLoginResult;
 

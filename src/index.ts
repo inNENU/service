@@ -30,7 +30,7 @@ import {
   underGradeListHandler,
   underSystemLoginHandler,
 } from "./under-system/index.js";
-import { vpnLoginHandler } from "./vpn/index.js";
+import { vpnCASLoginHandler, vpnLoginHandler } from "./vpn/index.js";
 import { weatherHandler } from "./weather/handler.js";
 
 const app = express();
@@ -67,6 +67,7 @@ app.post("/select/student-amount", studentAmountHandler);
 app.delete("/select/process", processHandler);
 app.put("/select/process", processHandler);
 
+app.post("/vpn/cas-login", vpnCASLoginHandler);
 app.post("/vpn/login", vpnLoginHandler);
 
 app.get("/library/people", libraryPeopleHandler);
