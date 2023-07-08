@@ -18,13 +18,13 @@ export interface GetUnderAdmissionResponse {
 
 const getCaptcha = async (): Promise<GetUnderAdmissionResponse> => {
   const imageResponse = await fetch(
-    "http://bkzsw.nenu.edu.cn/include/webgetcode.php?width=85&height=28&sitex=15&sitey=6"
+    "http://bkzsw.nenu.edu.cn/include/webgetcode.php?width=85&height=28&sitex=15&sitey=6",
   );
 
   const cookies = getCookies(imageResponse);
 
   const base64Image = `data:image/png;base64,${Buffer.from(
-    await imageResponse.arrayBuffer()
+    await imageResponse.arrayBuffer(),
   ).toString("base64")}`;
 
   const infoResponse = await fetch(
@@ -33,20 +33,22 @@ const getCaptcha = async (): Promise<GetUnderAdmissionResponse> => {
       headers: {
         Cookie: getCookieHeader(cookies),
       },
-    }
+    },
   );
 
   const infoBody = await infoResponse.text();
 
   const [, notice] = /<td colspan="2" align="left">截止 (.*?)<\/td>/.exec(
-    infoBody
+    infoBody,
   )!;
 
   return {
     cookies,
     info: ["name", "id", "testId"],
     captcha: base64Image,
-    notice: "部分省份信息正在录入中，点击查看详情",
+    notice: infoBody.includes("东北师范大学2022年普通高考录取结果查询")
+      ? "目前招生办暂无 2023 年查询方式，此查询返回的是 2022 年结果"
+      : "部分省份信息正在录入中，点击查看详情",
     detail: {
       title: "录取信息",
       content: notice.replace(/<br>/g, "\n"),
@@ -96,14 +98,14 @@ const getInfo = async ({
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: params.toString(),
-    }
+    },
   );
 
   const content = await response.text();
 
   const errorResult =
     /<script language="javascript">alert\("(.*)"\);history.back\(-1\);<\/script>/.exec(
-      content
+      content,
     );
 
   if (errorResult)
@@ -114,27 +116,27 @@ const getInfo = async ({
 
   // eslint-disable-next-line no-irregular-whitespace
   const province = /<td align="right">省　　份：<\/td>\s*?<td>(.*?)<\/td>/.exec(
-    content
+    content,
   )![1];
   const [, school, major] =
     /<td colspan="3" align="center"><font color="#FF0000" style="font-size:16px;"><p>恭喜你，你已经被我校 <\/p><p>(.*?)&nbsp;&nbsp;(.*?)&nbsp;&nbsp;专业录取！<\/p><\/font><\/td>/.exec(
-      content
+      content,
     )!;
   const address =
     /<td align="right">通讯书邮寄地址：<\/td>\s*?<td colspan="2" align="left">(.*?)<\/td>/.exec(
-      content
+      content,
     );
   const postCode =
     /<td align="right">邮政编码：<\/td>\s*?<td align="left">(.*?)<\/td>/.exec(
-      content
+      content,
     );
   const receiver =
     /<td align="right">收&nbsp;&nbsp;件&nbsp;&nbsp;人：<\/td>\s*?<td align="left">(.*?)<\/td>/.exec(
-      content
+      content,
     );
   const phone =
     /<td align="right">联系电话：<\/td>\s*?<td align="left">(.*?)<\/td>/.exec(
-      content
+      content,
     );
   const expressNumber = /id="emsdh">(.*?)<\/a>/.exec(content);
 

@@ -26,12 +26,12 @@ const COMMON_HEADERS = {
 };
 
 export const underSystemLogin = async (
-  options: LoginOptions
+  options: LoginOptions,
 ): Promise<UnderSystemLoginResponse> => {
   const result = await login(
     options,
     "http://dsjx.nenu.edu.cn:80/Logon.do?method=logonjz",
-    true
+    true,
   );
 
   if (result.status !== "success") {
@@ -45,7 +45,7 @@ export const underSystemLogin = async (
   }
 
   const authCookies = result.cookies.filter(
-    (item) => item.name === "iPlanetDirectoryPro"
+    (item) => item.name === "iPlanetDirectoryPro",
   );
 
   const ticketHeaders = {
@@ -67,7 +67,7 @@ export const underSystemLogin = async (
     "ticket",
     ticketResponse.status,
     ticketResponse.headers.get("Location"),
-    await ticketResponse.text()
+    await ticketResponse.text(),
   );
 
   if (ticketResponse.status !== 302)

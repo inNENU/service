@@ -29,7 +29,7 @@ const getInfo = async ({
 
   const captchaID =
     /<input type="hidden" name="csrf_test_name" value="(.*?)" \/>/.exec(
-      mainContent
+      mainContent,
     )![1];
 
   const cookies = getCookies(mainPageResponse)!;
@@ -63,37 +63,37 @@ const getInfo = async ({
 
   const testID =
     /<li class="label_short">考生编号：<\/li>\s*<li class="bz">(.*?)<\/li>/.exec(
-      content
+      content,
     )![1];
 
   const way =
     /<li class="label_short">获取方式：<\/li>\s*<li class="bz">(.*?)<\/li>/.exec(
-      content
+      content,
     )![1];
 
   const address =
     /<li class="label_short">通信地址：<\/li>\s*<li class="bz" style="width:300px">(.*?)<\/li>/.exec(
-      content
+      content,
     )![1];
 
   const phone =
     /<li class="label_short">移动电话：<\/li>\s*<li class="bz">(.*?)<\/li>/.exec(
-      content
+      content,
     )![1];
 
   const others =
     /<li class="label_short">其他电话：<\/li>\s*<li class="bz">(.*?)<\/li>/.exec(
-      content
+      content,
     )![1];
 
   const receiver =
     /<li class="label_short">收 件 人：<\/li>\s*<li class="bz">(.*?)<\/li>/.exec(
-      content
+      content,
     )![1];
 
   const expressId =
     /<li class="label_short">详情单号：<\/li>\s*<li class="bz"><a href='http:\/\/www.ems.com.cn' target='_blank'>(.*?)<\/a><\/li>/.exec(
-      content
+      content,
     )![1];
 
   const info = [

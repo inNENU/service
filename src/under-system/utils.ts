@@ -12,14 +12,14 @@ export const getSessionId = async (cookies: Cookie[]): Promise<string> => {
           "https://dsjx.webvpn.nenu.edu.cn/framework/menuleft.jsp?fater=&winid=win1",
         "User-Agent": IE_8_USER_AGENT,
       },
-    }
+    },
   );
 
   console.log(sessionIdResponse.status);
   const sessionIdContent = await sessionIdResponse.text();
 
   const sessionId = /dwr.engine._origScriptSessionId = "(.*?)";/.exec(
-    sessionIdContent
+    sessionIdContent,
   )![1];
 
   console.log("Getting new sessionId", sessionId);

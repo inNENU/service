@@ -93,7 +93,7 @@ export const historyGradeHandler: RequestHandler<
       while ((historyMatch = enrollGradeItemReg.exec(content))) {
         const enrollItems = historyMatch[1].replace(
           /<!--[\s\S]*?-->/g,
-          () => ""
+          () => "",
         );
 
         const historyInfo: HistoryGradeInfoItem = [];

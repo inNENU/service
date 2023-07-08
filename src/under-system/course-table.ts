@@ -39,9 +39,9 @@ const getCourses = (content: string): TableItem =>
             time,
             location,
           }
-        )
-      )
-    )
+        ),
+      ),
+    ),
   );
 
 interface UserCourseTableExtraOptions {
@@ -51,8 +51,8 @@ interface UserCourseTableExtraOptions {
   time: string;
 }
 
-export type UserCourseTableOptions =
-  | (LoginOptions | CookieOptions) & UserCourseTableExtraOptions;
+export type UserCourseTableOptions = (LoginOptions | CookieOptions) &
+  UserCourseTableExtraOptions;
 
 export interface UserCourseTableSuccessResponse {
   status: "success";
@@ -108,7 +108,7 @@ export const underCourseTableHandler: RequestHandler<
       `https://dsjx.webvpn.nenu.edu.cn/tkglAction.do?${params.toString()}`,
       {
         headers,
-      }
+      },
     );
 
     console.log(response.status);

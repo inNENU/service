@@ -9,21 +9,21 @@ export const getCookies = (res: Response): Cookie[] =>
 
 export const joinCookies = (
   cookies: Cookie[],
-  newCookies: Cookie[]
+  newCookies: Cookie[],
 ): Cookie[] => {
   const joined = [...cookies, ...newCookies];
 
   return joined.filter(
     ({ name }, index) =>
       // eslint-disable-next-line
-      joined.findLastIndex((item) => item.name === name) === index
+      joined.findLastIndex((item) => item.name === name) === index,
   );
 };
 export const getCookieHeader = (cookies: Cookie[]): string => {
   const finalCookies = cookies.filter(
     ({ name }, index) =>
       // eslint-disable-next-line
-      cookies.findLastIndex((item) => item.name === name) === index
+      cookies.findLastIndex((item) => item.name === name) === index,
   );
 
   const cookieHeader = finalCookies

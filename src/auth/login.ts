@@ -60,7 +60,7 @@ const COMMON_HEADERS = {
 export const login = async (
   { id, password }: LoginOptions,
   service = "",
-  webVPN = false
+  webVPN = false,
 ): Promise<LoginResponse> => {
   const server = webVPN ? WEB_VPN_AUTH_SERVER : AUTH_SERVER;
 
@@ -103,7 +103,7 @@ export const login = async (
         ...COMMON_HEADERS,
         Referer: `${server}/authserver/login`,
       },
-    }
+    },
   );
 
   const needCaptcha = await (<Promise<boolean>>captchaCheckResponse.json());
@@ -159,7 +159,7 @@ export const login = async (
       headers: new Headers(headers),
       body,
       redirect: "manual",
-    }
+    },
   );
 
   const resultContent = await response.text();

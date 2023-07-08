@@ -99,7 +99,7 @@ export const weatherHandler: RequestHandler = async (_req, res) => {
   const { data } = <WeatherData>(
     await (
       await fetch(
-        "https://wis.qq.com/weather/common?source=xw&weather_type=observe|rise|air|forecast_1h|forecast_24h|index|alarm|limit|tips&province=吉林&city=长春&county=南关"
+        "https://wis.qq.com/weather/common?source=xw&weather_type=observe|rise|air|forecast_1h|forecast_24h|index|alarm|limit|tips&province=吉林&city=长春&county=南关",
       )
     ).json()
   );
@@ -119,7 +119,7 @@ export const weatherHandler: RequestHandler = async (_req, res) => {
   const hourForecast = [];
 
   const sortedForecast1H = Object.entries(data.forecast_1h).sort(
-    ([keyA], [keyB]) => Number(keyA) - Number(keyB)
+    ([keyA], [keyB]) => Number(keyA) - Number(keyB),
   );
 
   res.json({ ...data, alarm });

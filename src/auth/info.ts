@@ -35,7 +35,7 @@ export const getInfo = async (cookies: Cookie[]): Promise<InfoResponse> => {
       headers: {
         Cookie: getCookieHeader(cookies),
       },
-    }
+    },
   );
 
   const userNameResponseText = await userNameResponse.text();
@@ -57,7 +57,7 @@ export const getInfo = async (cookies: Cookie[]): Promise<InfoResponse> => {
       headers: {
         Cookie: getCookieHeader(cookies),
       },
-    }
+    },
   );
 
   const emailResponseText = await emailResponse.text();

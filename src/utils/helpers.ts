@@ -6,5 +6,5 @@ export const isString = (value: unknown): value is string =>
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const isPlainObject = <T extends Record<string, any>>(
-  value: unknown
+  value: unknown,
 ): value is T => Object.prototype.toString.call(value) === "[object Object]";

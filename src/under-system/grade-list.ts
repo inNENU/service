@@ -119,7 +119,7 @@ export const getGradeList = (content: string): GradeResult[] =>
       reLearn,
       status,
     ] = Array.from(gradeCellRegExp.exec(item)!).map((item) =>
-      item.replace(/&nbsp;/g, " ").trim()
+      item.replace(/&nbsp;/g, " ").trim(),
     );
 
     const actualDifficulty = Number(difficulty) || 1;
@@ -198,7 +198,7 @@ export const underGradeListHandler: RequestHandler<
         method: "POST",
         headers,
         body: params.toString(),
-      }
+      },
     );
 
     console.log(response.status);

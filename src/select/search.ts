@@ -113,7 +113,7 @@ export const searchHandler: RequestHandler<
           name: kcmc,
           office: kkdw,
           type: szklb,
-        })
+        }),
       );
 
       console.log(`Getting ${courses.length} courses`);

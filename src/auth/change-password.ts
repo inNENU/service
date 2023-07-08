@@ -57,14 +57,14 @@ export const changePasswordHandler: RequestHandler<
             "map['passwordAgain']": customEncryptAES(newPassword, salt),
             "map['captchaResponse']": captcha,
           }),
-        }
+        },
       );
 
       const changePasswordResponseText = await changePasswordResponse.text();
 
       console.log(
         `Status ${changePasswordResponse.status}, getting:`,
-        changePasswordResponseText
+        changePasswordResponseText,
       );
 
       if (changePasswordResponseText.includes("个人密码修改成功"))
@@ -94,7 +94,7 @@ export const changePasswordHandler: RequestHandler<
           headers: {
             Cookie: authCookieHeader,
           },
-        }
+        },
       );
 
       const passwordPageContent = await passwordChangePageResponse.text();
@@ -111,7 +111,7 @@ export const changePasswordHandler: RequestHandler<
             Referer:
               "https://authserver.nenu.edu.cn/authserver/userAttributesEdit.do",
           },
-        }
+        },
       );
 
       const recaptchaImage = await recaptchaResponse.arrayBuffer();

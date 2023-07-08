@@ -14,7 +14,7 @@ export const libraryPeopleHandler: RequestHandler = async (_, res) => {
     console.log(responseText);
 
     const [, benbu, jingyue] = responseText.match(
-      /<p><span>本部<\/span><span>(\d+)<\/span><\/p>\s+<p><span>净月<\/span><span>(\d+)<\/span><\/p>/
+      /<p><span>本部<\/span><span>(\d+)<\/span><\/p>\s+<p><span>净月<\/span><span>(\d+)<\/span><\/p>/,
     )!;
 
     res.json({

@@ -77,7 +77,7 @@ export const selectLoginHandler: RequestHandler<
         return res.json(<SelectLoginSuccessResponse>{
           status: "success",
           cookies: getCookies(loginResponse).map(
-            ({ name, value }) => `${name}=${value}`
+            ({ name, value }) => `${name}=${value}`,
           ),
           server,
         });
