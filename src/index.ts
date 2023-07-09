@@ -28,6 +28,7 @@ import {
 import {
   underCourseTableHandler,
   underGradeListHandler,
+  underSystemCheckHandler,
   underSystemLoginHandler,
 } from "./under-system/index.js";
 import { vpnCASLoginHandler, vpnLoginHandler } from "./vpn/index.js";
@@ -58,9 +59,10 @@ app.patch("/auth/change-password", changePasswordHandler);
 app.post("/auth/login", authLoginHandler);
 app.post("/auth/info", infoHandler);
 
+app.post("/under-system/login", underSystemLoginHandler);
+app.post("/under-system/check", underSystemCheckHandler);
 app.post("/under-system/course-table", underCourseTableHandler);
 app.post("/under-system/grade-list", underGradeListHandler);
-app.post("/under-system/login", underSystemLoginHandler);
 
 app.post("/enroll/grade", historyGradeHandler);
 app.post("/enroll/plan", enrollPlanHandler);

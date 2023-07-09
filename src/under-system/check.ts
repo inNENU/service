@@ -1,8 +1,21 @@
 import type { RequestHandler } from "express";
 
-import type { AuthLoginFailedResponse } from "../auth/login.js";
-import type { CookieOptions, EmptyObject } from "../typings.js";
+import type {
+  CommonFailedResponse,
+  CookieOptions,
+  EmptyObject,
+} from "../typings.js";
 import { getCookieHeader } from "../utils/cookie.js";
+import { IE_8_USER_AGENT } from "../utils/ua.js";
+
+export interface CookieVerifySuccessResponse {
+  status: "success";
+  valid: boolean;
+}
+
+export type CookieVerifyResponse =
+  | CookieVerifySuccessResponse
+  | CommonFailedResponse;
 
 export const underSystemCheckHandler: RequestHandler<
   EmptyObject,
@@ -14,26 +27,28 @@ export const underSystemCheckHandler: RequestHandler<
       "https://dsjx.webvpn.nenu.edu.cn/framework/main.jsp",
       {
         headers: {
-          Cookies: getCookieHeader(req.body.cookies),
+          Cookie: getCookieHeader(req.body.cookies),
+          "User-Agent": IE_8_USER_AGENT,
         },
+        redirect: "manual",
       },
     );
 
     if (response.status === 200)
-      return res.json({
+      return res.json(<CookieVerifySuccessResponse>{
         status: "success",
-        type: "valid",
+        valid: true,
       });
 
-    return res.json({
+    return res.json(<CookieVerifySuccessResponse>{
       status: "success",
-      type: "invalid",
+      valid: false,
     });
   } catch (err) {
     const { message } = <Error>err;
 
     console.error(err);
-    res.json(<AuthLoginFailedResponse>{
+    res.json(<CommonFailedResponse>{
       status: "failed",
       msg: message,
     });
