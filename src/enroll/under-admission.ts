@@ -38,9 +38,10 @@ const getCaptcha = async (): Promise<GetUnderAdmissionResponse> => {
 
   const infoBody = await infoResponse.text();
 
-  const [, notice] = /<td colspan="2" align="left">截止 (.*?)<\/td>/.exec(
-    infoBody,
-  )!;
+  const [, notice] =
+    /<td colspan="2" align="left">(.*?)<\/td>\s*<\/tr>\s*<\/tbody>/.exec(
+      infoBody,
+    ) || [];
 
   return {
     cookies,
@@ -51,7 +52,7 @@ const getCaptcha = async (): Promise<GetUnderAdmissionResponse> => {
       : "部分省份信息正在录入中，点击查看详情",
     detail: {
       title: "录取信息",
-      content: notice.replace(/<br>/g, "\n"),
+      content: notice.replace(/<br>/g, "\n").replace(/<\/?font[^>]*>/g, ""),
     },
   };
 };
