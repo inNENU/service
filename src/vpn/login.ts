@@ -67,19 +67,26 @@ export const vpnCASLogin = async ({
 
     if (authResult.status === "failed") return authResult;
 
-    const callbackReponse = await fetch(authResult.location, {
+    const callbackResponse = await fetch(authResult.location, {
       headers: {
         Cookie: getCookieHeader([...casCookies, ...authResult.cookies]),
       },
       redirect: "manual",
     });
 
-    const sessionCookie = getCookies(callbackReponse).find(
+    if (callbackResponse.status === 500)
+      return {
+        status: "failed",
+        type: "unknown",
+        msg: "学校 WebVPN 服务崩溃，请稍后重试。",
+      };
+
+    const sessionCookie = getCookies(callbackResponse).find(
       ({ name }) => name === "_astraeus_session",
     )!;
-    const location = callbackReponse.headers.get("Location");
+    const location = callbackResponse.headers.get("Location");
 
-    if (callbackReponse.status === 302) {
+    if (callbackResponse.status === 302) {
       if (location === LOGIN_URL)
         return {
           status: "failed",
@@ -108,6 +115,13 @@ export const vpnCASLogin = async ({
       }
     }
   }
+
+  if (casResponse.status === 500)
+    return {
+      status: "failed",
+      type: "unknown",
+      msg: "学校 WebVPN 服务崩溃，请稍后重试。",
+    };
 
   return {
     status: "failed",

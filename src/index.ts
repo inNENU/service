@@ -36,6 +36,14 @@ import { weatherHandler } from "./weather/handler.js";
 const app = express();
 const port = process.env.PORT ? Number(process.env.PORT) : 8080;
 
+const originalFetch = fetch;
+
+global.fetch = (url, options): Promise<globalThis.Response> => {
+  console.log("Fetching", url);
+
+  return originalFetch(url, options);
+};
+
 app.use(cookieParser());
 app.use(compression());
 app.use(bodyParser.json());
