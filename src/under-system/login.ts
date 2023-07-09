@@ -115,9 +115,12 @@ export const underSystemLoginHandler: RequestHandler<
   try {
     return res.json(await underSystemLogin(req.body));
   } catch (err) {
+    const { message } = <Error>err;
+
+    console.error(err);
     res.json(<AuthLoginFailedResponse>{
       status: "failed",
-      msg: (<Error>err).message,
+      msg: message,
     });
   }
 };

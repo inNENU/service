@@ -82,7 +82,6 @@ export const authLogin = async (
 
   currentCookies.push(...getCookies(loginPageResponse));
 
-  console.log("Login url:", url);
   console.log("Getting cookie:", cookies);
 
   const content = await loginPageResponse.text();
@@ -93,8 +92,6 @@ export const authLogin = async (
   const execution = content.match(/name="execution" value="(.*?)"/)![1];
   const _eventId = content.match(/name="_eventId" value="(.*?)"/)![1];
   const rmShown = content.match(/name="rmShown" value="(.*?)"/)![1];
-
-  console.debug("Parsing", { salt, lt, dllt, execution, _eventId, rmShown });
 
   const captchaCheckResponse = await fetch(
     `${server}/authserver/needCaptcha.html?username=${id}&pwdEncrypt2=pwdEncryptSalt&_=${Date.now()}`,
@@ -151,9 +148,6 @@ export const authLogin = async (
     rmShown,
     rememberMe: "on",
   };
-
-  console.log("Headers", headers);
-  console.log("Params", params);
 
   const body = new URLSearchParams(params).toString();
 

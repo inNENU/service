@@ -94,9 +94,12 @@ export const selectLoginHandler: RequestHandler<
       msg: "请传入必须参数",
     });
   } catch (err) {
+    const { message } = <Error>err;
+
+    console.error(err);
     res.json(<SelectLoginFailedResponse>{
       status: "failed",
-      msg: (<Error>err).message,
+      msg: message,
     });
   }
 };

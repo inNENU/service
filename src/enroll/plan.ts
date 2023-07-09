@@ -44,6 +44,9 @@ export type EnrollPlanResponse =
 const enrollItemReg =
   /<tr class='RowTr'>\s+<td align='center'>(.*?)<\/td>\s+<td align='center'>(.*?)<\/td>\s+<td align='center'>(.*?)<\/td>\s+<td align='center'>(.*?)<\/td>\s+<td align='center'>(.*?)<\/td>\s+<td align='center'>(.*?)<\/td>\s*<td align='center'>(.*?)<\/td>\s*<\/tr>/g;
 
+const ENROLL_PLAN_URL =
+  "http://bkzsw.nenu.edu.cn/col_000018_000171_action_Enrollment.html";
+
 export const enrollPlanHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
@@ -52,8 +55,6 @@ export const enrollPlanHandler: RequestHandler<
   try {
     const { majorType, planType, province, reformType, year } = req.body;
 
-    const url =
-      "http://bkzsw.nenu.edu.cn/col_000018_000171_action_Enrollment.html";
     const options = {
       nianfen: year,
       shengfen: province,
@@ -62,13 +63,11 @@ export const enrollPlanHandler: RequestHandler<
       kelei: reformType,
     };
 
-    console.log("Receiving options:", options);
-
     const params = new URLSearchParams(options).toString();
 
     console.log("Requesting enroll plan with params:", params);
 
-    const searchResponse = await fetch(`${url}`, {
+    const searchResponse = await fetch(ENROLL_PLAN_URL, {
       method: "POST",
       headers: new Headers({
         "Content-Type": "application/x-www-form-urlencoded",
@@ -103,9 +102,12 @@ export const enrollPlanHandler: RequestHandler<
       data: planInfo,
     });
   } catch (err) {
+    const { message } = <Error>err;
+
+    console.error(err);
     res.json(<EnrollPlanFailedResponse>{
       status: "failed",
-      msg: (<Error>err).message,
+      msg: message,
     });
   }
 };

@@ -30,9 +30,12 @@ export const underSystemCheckHandler: RequestHandler<
       type: "invalid",
     });
   } catch (err) {
+    const { message } = <Error>err;
+
+    console.error(err);
     res.json(<AuthLoginFailedResponse>{
       status: "failed",
-      msg: (<Error>err).message,
+      msg: message,
     });
   }
 };

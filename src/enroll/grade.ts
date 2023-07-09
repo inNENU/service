@@ -41,6 +41,9 @@ const enrollGradeItemReg = /<tr class="RowTr">([\s\S]+?)<\/tr>/g;
 
 const enrollGradeItemInfoReg = /<td align="center">(.*?)<\/td>/g;
 
+const HISTORY_GRADE_URL =
+  "http://bkzsw.nenu.edu.cn//col_000018_000170_action_Fraction.html";
+
 export const historyGradeHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
@@ -49,8 +52,6 @@ export const historyGradeHandler: RequestHandler<
   try {
     const { majorType, planType, province, reformType, year } = req.body;
 
-    const url =
-      "http://bkzsw.nenu.edu.cn//col_000018_000170_action_Fraction.html";
     const options = {
       nianfen: year,
       shengfen: province,
@@ -59,13 +60,11 @@ export const historyGradeHandler: RequestHandler<
       kelei: reformType,
     };
 
-    console.log("Receiving options:", options);
-
     const params = new URLSearchParams(options).toString();
 
     console.log("Requesting history grade with params:", params);
 
-    const searchResponse = await fetch(`${url}`, {
+    const searchResponse = await fetch(HISTORY_GRADE_URL, {
       method: "POST",
       headers: new Headers({
         "Content-Type": "application/x-www-form-urlencoded",
@@ -119,9 +118,12 @@ export const historyGradeHandler: RequestHandler<
       msg: "获取数据失败，请重试",
     });
   } catch (err) {
+    const { message } = <Error>err;
+
+    console.error(err);
     res.json(<EnrollGradeFailedResponse>{
       status: "failed",
-      msg: (<Error>err).message,
+      msg: message,
     });
   }
 };

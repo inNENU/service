@@ -70,7 +70,7 @@ export const qrCodeHandler: RequestHandler<
   try {
     const { appID, page } = req.query;
 
-    console.log("Requesting", req.query);
+    console.log("Requesting qrcode with", req.query);
 
     if (!appIDInfo[appID])
       return res.json({
@@ -111,9 +111,13 @@ export const qrCodeHandler: RequestHandler<
 
     return res.end(image);
   } catch (err) {
+    const { message } = <Error>err;
+
+    console.error(err);
+
     res.json({
       status: "failed",
-      msg: (<Error>err).message,
+      msg: message,
     });
   }
 };

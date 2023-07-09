@@ -27,12 +27,11 @@ const getInfo = async ({
 
   const mainContent = await mainPageResponse.text();
 
+  const cookies = getCookies(mainPageResponse)!;
   const captchaID =
     /<input type="hidden" name="csrf_test_name" value="(.*?)" \/>/.exec(
       mainContent,
     )![1];
-
-  const cookies = getCookies(mainPageResponse)!;
 
   console.log("Getting cookies", cookies);
 
@@ -145,9 +144,12 @@ export const postAdmissionHandler: RequestHandler<
   try {
     res.json(await getInfo(req.body));
   } catch (err) {
-    res.json({
+    const { message } = <Error>err;
+
+    console.error(err);
+    res.json(<CommonFailedResponse>{
       status: "failed",
-      msg: "查询服务出错",
+      msg: message,
     });
   }
 };

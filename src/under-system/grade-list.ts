@@ -313,9 +313,12 @@ export const underGradeListHandler: RequestHandler<
       data: gradeList,
     });
   } catch (err) {
+    const { message } = <Error>err;
+
+    console.error(err);
     res.json(<AuthLoginFailedResponse>{
       status: "failed",
-      msg: (<Error>err).message,
+      msg: message,
     });
   }
 };

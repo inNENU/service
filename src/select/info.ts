@@ -239,8 +239,6 @@ export const selectInfoHandler: RequestHandler<
       sfkxk: "1",
     }).toString();
 
-    console.log("get");
-
     const response = await fetch(`${server}xk/getXkInfo?${urlParams}`, {
       method: "GET",
       headers: new Headers({
@@ -249,8 +247,6 @@ export const selectInfoHandler: RequestHandler<
     });
 
     const documentContent = await readResponseContent(response);
-
-    console.log(documentContent);
 
     if (documentContent.includes("不在选课时间范围内，无法选课!"))
       return res.json(<SelectInfoFailedResponse>{
@@ -294,9 +290,12 @@ export const selectInfoHandler: RequestHandler<
       courseOffices: coursesOfficeStore.state,
     });
   } catch (err) {
+    const { message } = <Error>err;
+
+    console.error(err);
     res.json(<SelectInfoFailedResponse>{
       status: "failed",
-      msg: (<Error>err).message,
+      msg: message,
     });
   }
 };

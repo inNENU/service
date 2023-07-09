@@ -100,8 +100,6 @@ export const changePasswordHandler: RequestHandler<
       const passwordPageContent = await passwordChangePageResponse.text();
       const salt = saltRegExp.exec(passwordPageContent)![1];
 
-      console.log("Getting salt", salt);
-
       const recaptchaResponse = await fetch(
         `https://authserver.nenu.edu.cn/authserver/captcha.html?ts=${new Date().getMilliseconds()}`,
         {

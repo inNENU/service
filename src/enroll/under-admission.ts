@@ -38,8 +38,8 @@ const getCaptcha = async (): Promise<GetUnderAdmissionResponse> => {
 
   const infoBody = await infoResponse.text();
 
-  const [, notice] =
-    /<td colspan="2" align="left">(.*?)<\/td>\s*<\/tr>\s*<\/tbody>/.exec(
+  const [, notice = ""] =
+    /<td colspan="2" align="left">(.*?)<\/td>\s*<\/tr>\s*<\/table>/.exec(
       infoBody,
     ) || [];
 
@@ -89,7 +89,7 @@ const getInfo = async ({
   });
 
   console.log("Getting params", params);
-  console.log("Header", getCookieHeader(cookies));
+
   const response = await fetch(
     "http://bkzsw.nenu.edu.cn/col_000018_000169_action_Entrance.html",
     {
@@ -204,9 +204,12 @@ export const underAdmissionHandler: RequestHandler = async (req, res) => {
     else if (req.method === "POST")
       res.json(await getInfo(<UnderAdmissionPostOptions>req.body));
   } catch (err) {
-    res.json({
+    const { message } = <Error>err;
+
+    console.error(err);
+    res.json(<CommonFailedResponse>{
       status: "failed",
-      msg: "查询服务出错",
+      msg: message,
     });
   }
 };
