@@ -198,7 +198,14 @@ const getInfo = async ({
 };
 
 export const underAdmissionHandler: RequestHandler = async (req, res) => {
-  if (req.method === "GET") res.json(await getCaptcha());
-  else if (req.method === "POST")
-    res.json(await getInfo(<UnderAdmissionPostOptions>req.body));
+  try {
+    if (req.method === "GET") res.json(await getCaptcha());
+    else if (req.method === "POST")
+      res.json(await getInfo(<UnderAdmissionPostOptions>req.body));
+  } catch (err) {
+    res.json({
+      status: "failed",
+      msg: "查询服务出错",
+    });
+  }
 };

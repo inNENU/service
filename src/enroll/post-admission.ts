@@ -142,5 +142,12 @@ export const postAdmissionHandler: RequestHandler<
   EmptyObject,
   PostAdmissionPostOptions
 > = async (req, res) => {
-  res.json(await getInfo(req.body));
+  try {
+    res.json(await getInfo(req.body));
+  } catch (err) {
+    res.json({
+      status: "failed",
+      msg: "查询服务出错",
+    });
+  }
 };
