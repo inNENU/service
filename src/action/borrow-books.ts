@@ -57,6 +57,10 @@ export interface BorrowBookData {
   status: string;
   /** 条形码 */
   barcode: string;
+  /** 借出时间 */
+  loanDate: string;
+  /** 到期时间 */
+  dueDate: string;
   /** 位置 */
   location: string;
   /** 书架号 */
@@ -70,6 +74,10 @@ export interface BorrowBookData {
 const getBookData = ({
   title,
   author,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  loan_date,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  due_date,
   // eslint-disable-next-line @typescript-eslint/naming-convention
   item_barcode,
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -87,6 +95,8 @@ const getBookData = ({
 }: RawBorrowBookData): BorrowBookData => ({
   name: title,
   author,
+  loanDate: loan_date,
+  dueDate: due_date,
   year: Number(publication_year),
   barcode: item_barcode,
   location: location_code.name,
