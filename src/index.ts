@@ -5,6 +5,7 @@ import type { Response } from "express";
 import express from "express";
 import morgan from "morgan";
 
+import { actionCheckHandler, actionLoginHandler } from "./action/index.js";
 import {
   authLoginHandler,
   changePasswordHandler,
@@ -53,6 +54,9 @@ app.use(morgan("common"));
 app.get("/", (_req, res) => {
   res.json({ status: "ok" });
 });
+
+app.post("/action/login", actionLoginHandler);
+app.post("/action/check", actionCheckHandler);
 
 app.post("/auth/change-password", changePasswordHandler);
 app.patch("/auth/change-password", changePasswordHandler);
