@@ -10,6 +10,7 @@ import {
   actionLoginHandler,
   borrowBooksHandler,
   cardBalanceHandler,
+  personInfoHandler,
 } from "./action/index.js";
 import {
   authLoginHandler,
@@ -64,6 +65,7 @@ app.post("/action/login", actionLoginHandler);
 app.post("/action/check", actionCheckHandler);
 app.post("/action/borrow-books", borrowBooksHandler);
 app.post("/action/card-balance", cardBalanceHandler);
+app.post("/action/info", personInfoHandler);
 
 app.post("/auth/change-password", changePasswordHandler);
 app.patch("/auth/change-password", changePasswordHandler);

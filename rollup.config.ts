@@ -1,3 +1,5 @@
+import commonjs from "@rollup/plugin-commonjs";
+import { nodeResolve } from "@rollup/plugin-node-resolve";
 import esbuild from "rollup-plugin-esbuild";
 
 const external = [
@@ -23,7 +25,10 @@ export default [
         sourcemap: true,
       },
     ],
+    inlineDynamicImports: true,
     plugins: [
+      nodeResolve({ preferBuiltins: true }),
+      commonjs(),
       esbuild({
         charset: "utf8",
         minify: true,
