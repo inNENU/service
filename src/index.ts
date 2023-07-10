@@ -5,7 +5,11 @@ import type { Response } from "express";
 import express from "express";
 import morgan from "morgan";
 
-import { actionCheckHandler, actionLoginHandler } from "./action/index.js";
+import {
+  actionCheckHandler,
+  actionLoginHandler,
+  borrowBooksHandler,
+} from "./action/index.js";
 import {
   authLoginHandler,
   changePasswordHandler,
@@ -57,6 +61,7 @@ app.get("/", (_req, res) => {
 
 app.post("/action/login", actionLoginHandler);
 app.post("/action/check", actionCheckHandler);
+app.post("/action/borrow-books", borrowBooksHandler);
 
 app.post("/auth/change-password", changePasswordHandler);
 app.patch("/auth/change-password", changePasswordHandler);
