@@ -42,10 +42,13 @@ export const actionLogin = async (
     };
   }
 
-  const authCookies = [
-    ...vpnLoginResult.cookies,
-    result.cookies.find((item) => item.name === "iPlanetDirectoryPro")!,
-  ];
+  const authCookies = vpnLoginResult.cookies;
+
+  const authCookie = result.cookies.find(
+    (item) => item.name === "iPlanetDirectoryPro",
+  );
+
+  if (authCookie) authCookies.push(authCookie);
 
   const ticketHeaders = {
     Cookie: getCookieHeader([...vpnLoginResult.cookies, ...authCookies]),
