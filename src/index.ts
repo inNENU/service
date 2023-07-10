@@ -9,6 +9,7 @@ import {
   actionCheckHandler,
   actionLoginHandler,
   borrowBooksHandler,
+  cardBalanceHandler,
 } from "./action/index.js";
 import {
   authLoginHandler,
@@ -62,6 +63,7 @@ app.get("/", (_req, res) => {
 app.post("/action/login", actionLoginHandler);
 app.post("/action/check", actionCheckHandler);
 app.post("/action/borrow-books", borrowBooksHandler);
+app.post("/action/card-balance", cardBalanceHandler);
 
 app.post("/auth/change-password", changePasswordHandler);
 app.patch("/auth/change-password", changePasswordHandler);

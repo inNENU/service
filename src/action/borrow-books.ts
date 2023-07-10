@@ -120,7 +120,7 @@ export type BorrowBooksResponse =
 export const borrowBooksHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  LoginOptions | CookieOptions
+  BorrowBooksOptions
 > = async (req, res) => {
   try {
     let cookies: Cookie[] = [];
