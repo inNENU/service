@@ -96,8 +96,11 @@ const getBookData = ({
   status: item_policy.description,
 });
 
+export type BorrowBooksOptions = LoginOptions | CookieOptions;
+
 export interface BorrowBooksSuccessResponse {
   status: "success";
+  data: BorrowBookData[];
 }
 
 export type BorrowBooksResponse =
