@@ -106,6 +106,7 @@ export const underSystemLogin = async (
     });
 
     return <UnderSystemLoginSuccessResponse>{
+      success: true,
       status: "success",
       cookies: authCookies,
     };

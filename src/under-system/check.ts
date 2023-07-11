@@ -28,11 +28,13 @@ export const underSystemCheckHandler: RequestHandler<
 
     if (response.status === 200)
       return res.json(<CookieVerifySuccessResponse>{
+        success: true,
         status: "success",
         valid: true,
       });
 
     return res.json(<CookieVerifySuccessResponse>{
+      success: true,
       status: "success",
       valid: false,
     });
@@ -41,6 +43,7 @@ export const underSystemCheckHandler: RequestHandler<
 
     console.error(err);
     res.json(<CommonFailedResponse>{
+      success: false,
       status: "failed",
       msg: message,
     });

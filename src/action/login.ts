@@ -34,10 +34,11 @@ export const actionLogin = async (
     cookies: vpnLoginResult.cookies,
   });
 
-  if (result.status !== "success") {
+  if (!result.success) {
     console.error(result.msg);
 
     return <AuthLoginFailedResponse>{
+      success: false,
       status: "failed",
       type: result.type,
       msg: result.msg,

@@ -66,6 +66,8 @@ export interface GradeResult {
 }
 
 export interface UserGradeListSuccessResponse {
+  success: true;
+  /** @deprecated */
   status: "success";
   data: GradeResult[];
 }
@@ -317,6 +319,7 @@ export const underGradeListHandler: RequestHandler<
 
     console.error(err);
     res.json(<AuthLoginFailedResponse>{
+      success: false,
       status: "failed",
       msg: message,
     });

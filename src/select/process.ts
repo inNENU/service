@@ -113,6 +113,7 @@ export const processHandler: RequestHandler<
 
         if (msg === "选课成功")
           return res.json(<ProcessSuccessResponse>{
+            success: true,
             status: "success",
             msg,
           });

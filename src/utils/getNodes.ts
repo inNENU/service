@@ -51,6 +51,7 @@ const handleNode = async (
           text: ` (${node.attribs.href})`,
         });
 
+      // resolve img source for img tag
       if (node.name === "img" && attrs["src"] && options.getImage) {
         const result = await options.getImage?.(attrs["src"]);
 

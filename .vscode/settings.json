@@ -1,4 +1,4 @@
 {
   "cSpell.words": ["wechat", "qq", "qrcode"],
-  "prettier.prettierPath": "./node_modules/prettier/"
+  "prettier.prettierPath": "./node_modules/prettier"
 }

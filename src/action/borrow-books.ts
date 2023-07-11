@@ -18,7 +18,7 @@ interface RawBorrowBookData extends Record<string, unknown> {
   author: string;
   publication_year: string;
   item_barcode: string;
-  process_status: "RENEW" | string;
+  process_status: "NORMAL" | "RENEW";
   location_code: {
     value: string;
     name: string;
