@@ -13,6 +13,8 @@ import type { VPNLoginFailedResponse } from "../vpn/login.js";
 import { vpnCASLogin } from "../vpn/login.js";
 
 export interface UnderSystemLoginSuccessResponse {
+  success: true;
+  /** @deprecated */
   status: "success";
 
   cookies: Cookie[];
@@ -33,7 +35,7 @@ export const underSystemLogin = async (
 ): Promise<UnderSystemLoginResponse> => {
   const vpnLoginResult = await vpnCASLogin(options);
 
-  if (vpnLoginResult.status === "failed") return vpnLoginResult;
+  if (!vpnLoginResult.success) return vpnLoginResult;
 
   const result = await authLogin(options, {
     service: "http://dsjx.nenu.edu.cn:80/",
@@ -45,16 +47,20 @@ export const underSystemLogin = async (
     console.error(result.msg);
 
     return <AuthLoginFailedResponse>{
+      success: false,
       status: "failed",
       type: result.type,
       msg: result.msg,
     };
   }
 
-  const authCookies = [
-    ...vpnLoginResult.cookies,
-    result.cookies.find((item) => item.name === "iPlanetDirectoryPro")!,
-  ];
+  const authCookies = vpnLoginResult.cookies;
+
+  const authCookie = result.cookies.find(
+    (item) => item.name === "iPlanetDirectoryPro",
+  );
+
+  if (authCookie) authCookies.push(authCookie);
 
   const ticketHeaders = {
     Cookie: getCookieHeader([...vpnLoginResult.cookies, ...authCookies]),
@@ -80,6 +86,7 @@ export const underSystemLogin = async (
 
   if (ticketResponse.status !== 302)
     return <AuthLoginFailedResponse>{
+      success: false,
       status: "failed",
       type: "unknown",
       msg: "登录失败",
@@ -104,7 +111,12 @@ export const underSystemLogin = async (
     };
   }
 
-  return { status: "failed", type: "unknown", msg: "登录失败" };
+  return {
+    success: false,
+    status: "failed",
+    type: "unknown",
+    msg: "登录失败",
+  };
 };
 
 export const underSystemLoginHandler: RequestHandler<
@@ -119,6 +131,7 @@ export const underSystemLoginHandler: RequestHandler<
 
     console.error(err);
     res.json(<AuthLoginFailedResponse>{
+      success: false,
       status: "failed",
       msg: message,
     });
