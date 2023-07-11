@@ -268,7 +268,7 @@ export const underGradeListHandler: RequestHandler<
     } else {
       const result = await underSystemLogin(req.body);
 
-      if (result.status === "failed") return res.json(result);
+      if (!result.success) return res.json(result);
 
       ({ cookies } = result);
     }
@@ -301,6 +301,7 @@ export const underGradeListHandler: RequestHandler<
     const gradeList = await getGradeLists(cookies, content);
 
     return res.json(<UserGradeListSuccessResponse>{
+      success: true,
       status: "success",
       data: gradeList,
     });

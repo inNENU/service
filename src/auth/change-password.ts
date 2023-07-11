@@ -61,10 +61,7 @@ export const changePasswordHandler: RequestHandler<
 
       const changePasswordResponseText = await changePasswordResponse.text();
 
-      console.log(
-        `Status ${changePasswordResponse.status}, getting:`,
-        changePasswordResponseText,
-      );
+      console.log(`Getting:`, changePasswordResponseText);
 
       if (changePasswordResponseText.includes("个人密码修改成功"))
         return res.json(<ChangePasswordSuccessResponse>{

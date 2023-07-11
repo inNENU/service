@@ -207,7 +207,6 @@ export const authLogin = async (
     };
   }
 
-  console.error("Unknown status", response.status);
   console.error("Response", await response.text());
 
   return {

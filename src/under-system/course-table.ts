@@ -80,7 +80,7 @@ export const underCourseTableHandler: RequestHandler<
     } else {
       const result = await underSystemLogin(req.body);
 
-      if (result.status === "failed") return res.json(result);
+      if (!result.success) return res.json(result);
 
       ({ cookies } = result);
     }

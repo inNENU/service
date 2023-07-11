@@ -43,7 +43,7 @@ export const underSystemLogin = async (
     cookies: vpnLoginResult.cookies,
   });
 
-  if (result.status !== "success") {
+  if (!result.success) {
     console.error(result.msg);
 
     return <AuthLoginFailedResponse>{

@@ -236,7 +236,6 @@ export const vpnLogin = async ({
       };
   }
 
-  console.error("Unknown status", loginResponse.status);
   console.error("Response", await loginResponse.text());
 
   return {
