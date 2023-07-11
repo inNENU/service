@@ -32,8 +32,12 @@ interface RawNoticeListData {
 }
 
 export type NoticeListOptions = (LoginOptions | CookieOptions) & {
-  limit: number;
-  page: number;
+  /** @default 20 */
+  limit?: number;
+  /** @default 1 */
+  page?: number;
+  /** @default "notice" */
+  type?: "notice" | "news";
 };
 
 export interface NoticeItem {
@@ -77,7 +81,7 @@ export const noticeListHandler: RequestHandler<
   NoticeListOptions
 > = async (req, res) => {
   try {
-    const { limit = 20, page = 1 } = req.body;
+    const { limit = 20, page = 1, type = "notice" } = req.body;
     let cookies: Cookie[] = [];
 
     if ("cookies" in req.body) {
@@ -99,7 +103,7 @@ export const noticeListHandler: RequestHandler<
     };
 
     const params = new URLSearchParams({
-      type: "notice",
+      type,
       _search: "false",
       nd: new Date().getTime().toString(),
       limit: limit.toString(),
