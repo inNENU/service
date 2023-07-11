@@ -10,7 +10,7 @@ import type {
   LoginOptions,
 } from "../typings.js";
 import type { Node } from "../utils/getNodes.js";
-import { getNodes } from "../utils/getNodes.js";
+import { getRichTextNodes } from "../utils/getNodes.js";
 import { getCookieHeader } from "../utils/index.js";
 
 const titleRegExp = /var title = '(.*?)';/;
@@ -93,7 +93,7 @@ export const noticeHandler: RequestHandler<
       from,
       time,
       pageView: Number(pageView),
-      content: await getNodes(content, {
+      content: await getRichTextNodes(content, {
         // TODO: Support image
         getImage: () => null,
       }),

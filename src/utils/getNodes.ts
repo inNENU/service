@@ -35,7 +35,10 @@ const handleNode = async (
     if (config) {
       const attrs = Object.fromEntries(
         node.attributes
-          .filter(({ name }) => name === "class" || config[1]?.includes(name))
+          .filter(
+            ({ name }) =>
+              ["class", "style"].includes(name) || config[1]?.includes(name),
+          )
           .map<[string, string]>(({ name, value }) => [name, value]),
       );
       const children = (
@@ -72,7 +75,7 @@ const handleNode = async (
   return null;
 };
 
-export const getNodes = async (
+export const getRichTextNodes = async (
   content: string,
   options: GetNodeOptions,
 ): Promise<Node[]> => {
