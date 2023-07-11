@@ -9,11 +9,9 @@ import type {
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
+import type { Node } from "../utils/getNodes.js";
+import { getNodes } from "../utils/getNodes.js";
 import { getCookieHeader } from "../utils/index.js";
-
-export type NoticeOptions = (LoginOptions | CookieOptions) & {
-  noticeID: string;
-};
 
 const titleRegExp = /var title = '(.*?)';/;
 const fromRegExp = /var ly = '(.*?)'/;
@@ -23,13 +21,17 @@ const pageViewRegExp =
 const contentRegExp =
   /<div class="read" id="WBNR">\s+([\s\S]*?)\s+<\/div>\s+<p id="zrbj"/;
 
+export type NoticeOptions = (LoginOptions | CookieOptions) & {
+  noticeID: string;
+};
+
 export interface NoticeSuccessResponse {
   status: "success";
   title: string;
   author: string;
   from: string;
   pageView: number;
-  content: string;
+  content: Node[];
 }
 
 export type NoticeResponse = NoticeSuccessResponse | CommonFailedResponse;
@@ -60,14 +62,13 @@ export const noticeHandler: RequestHandler<
       ({ cookies } = result);
     }
 
-    const response = await fetch(
-      `https://m-443.webvpn.nenu.edu.cn/page/viewNews?ID=${noticeID}`,
-      {
-        headers: {
-          Cookie: getCookieHeader(cookies),
-        },
+    const url = `https://m-443.webvpn.nenu.edu.cn/page/viewNews?ID=${noticeID}`;
+
+    const response = await fetch(url, {
+      headers: {
+        Cookie: getCookieHeader(cookies),
       },
-    );
+    });
 
     console.log(response.status);
 
@@ -85,7 +86,10 @@ export const noticeHandler: RequestHandler<
       author,
       from,
       pageView: Number(pageView),
-      content,
+      content: await getNodes(content, {
+        // TODO: Support image
+        getImage: () => null,
+      }),
     });
   } catch (err) {
     const { message } = <Error>err;
