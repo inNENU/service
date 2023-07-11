@@ -6,7 +6,8 @@ import { ALLOWED_TAGS } from "../config/allowedTags";
 const $ = load("");
 
 export interface GetNodeOptions {
-  getImage: (src: string) => Promise<string | null> | string | null;
+  getLinkText?: (link: string) => Promise<string | null> | string | null;
+  getImageSrc?: (src: string) => Promise<string | null> | string | null;
 }
 
 export interface ElementNode {
@@ -48,15 +49,21 @@ const handleNode = async (
       ).filter((item): item is Node => item !== null);
 
       // append link for anchor tag
-      if (node.name === "a" && node.attribs.href)
-        children.push({
-          type: "text",
-          text: ` (${node.attribs.href})`,
-        });
+      if (node.name === "a" && node.attribs.href) {
+        const text = options.getLinkText
+          ? await options.getLinkText(node.attribs.href)
+          : ` (${node.attribs.href})`;
+
+        if (text)
+          children.push({
+            type: "text",
+            text,
+          });
+      }
 
       // resolve img source for img tag
-      if (node.name === "img" && attrs["src"] && options.getImage) {
-        const result = await options.getImage?.(attrs["src"]);
+      if (node.name === "img" && attrs["src"] && options.getImageSrc) {
+        const result = await options.getImageSrc?.(attrs["src"]);
 
         if (result === null) return null;
 

@@ -94,8 +94,13 @@ export const noticeHandler: RequestHandler<
       time,
       pageView: Number(pageView),
       content: await getRichTextNodes(content, {
+        getLinkText: (link) =>
+          link.startsWith("https://m-443.webvpn.nenu.edu.cn") ||
+          link.startsWith("https://my.webvpn.nenu.edu.cn")
+            ? null
+            : link,
         // TODO: Support image
-        getImage: () => null,
+        getImageSrc: () => null,
       }),
     });
   } catch (err) {
