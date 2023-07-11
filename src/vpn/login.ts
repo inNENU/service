@@ -153,7 +153,7 @@ export const vpnLogin = async ({
 
   const authenticityToken = authenticityTokenRegExp.exec(content)![1];
 
-  const params = {
+  const params = new URLSearchParams({
     utf8: "✓",
     authenticity_token: authenticityToken,
     "user[login]": id.toString(),
@@ -161,11 +161,9 @@ export const vpnLogin = async ({
     "user[dymatice_code]": "unknown",
     "user[otp_with_capcha]": "false",
     commit: "登录 Login",
-  };
+  });
 
-  console.log("Params", params);
-
-  const body = new URLSearchParams(params).toString();
+  console.log("Requesting with params:", params);
 
   const loginResponse = await fetch(LOGIN_URL, {
     method: "POST",
@@ -173,7 +171,7 @@ export const vpnLogin = async ({
       "Content-Type": "application/x-www-form-urlencoded",
       Cookie: getCookieHeader(initialCookies),
     },
-    body,
+    body: params.toString(),
     redirect: "manual",
   });
 
@@ -181,7 +179,7 @@ export const vpnLogin = async ({
 
   initialCookies.push(...getCookies(loginResponse));
 
-  console.log(`Request ends with ${loginResponse.status}`, location);
+  console.log("Request location:", location);
   console.log("Login cookies:", initialCookies);
 
   if (loginResponse.status === 302) {

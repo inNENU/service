@@ -15,7 +15,6 @@ export const getSessionId = async (cookies: Cookie[]): Promise<string> => {
     },
   );
 
-  console.log(sessionIdResponse.status);
   const sessionIdContent = await sessionIdResponse.text();
 
   const sessionId = /dwr.engine._origScriptSessionId = "(.*?)";/.exec(

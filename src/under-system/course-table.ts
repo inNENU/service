@@ -31,15 +31,12 @@ const getCourses = (content: string): TableItem =>
   [...content.matchAll(courseRowRegExp)].map(([, rowContent]) =>
     [...rowContent.matchAll(courseCellRegExp)].map(([, cell]) =>
       [...cell.matchAll(classRegExp)].map(
-        ([, name, teacher, time, location]) => (
-          console.log(name, teacher, time, location),
-          {
-            name,
-            teacher,
-            time,
-            location,
-          }
-        ),
+        ([, name, teacher, time, location]) => ({
+          name,
+          teacher,
+          time,
+          location,
+        }),
       ),
     ),
   );
@@ -96,24 +93,18 @@ export const underCourseTableHandler: RequestHandler<
       xs0101id: id.toString(),
     });
 
-    console.log("Using params", params);
-
-    const headers = {
-      Cookie: getCookieHeader(cookies),
-      Referer: `https://dsjx.webvpn.nenu.edu.cn/tkglAction.do?method=kbxxXs&tktime=${getTimeStamp().toString()}`,
-      "User-Agent": IE_8_USER_AGENT,
-    };
-
-    console.log("Using headers", headers);
+    console.log("Requesting with params:", params);
 
     const response = await fetch(
       `https://dsjx.webvpn.nenu.edu.cn/tkglAction.do?${params.toString()}`,
       {
-        headers,
+        headers: {
+          Cookie: getCookieHeader(cookies),
+          Referer: `https://dsjx.webvpn.nenu.edu.cn/tkglAction.do?method=kbxxXs&tktime=${getTimeStamp().toString()}`,
+          "User-Agent": IE_8_USER_AGENT,
+        },
       },
     );
-
-    console.log(response.status);
 
     const content = await response.text();
 

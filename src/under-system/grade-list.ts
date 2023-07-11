@@ -223,21 +223,17 @@ export const getGradeLists = async (
       otherFields,
     });
 
-    const headers = {
-      Cookie: getCookieHeader(cookies),
-      "Content-Type": "application/x-www-form-urlencoded",
-      Referer:
-        "https://dsjx.webvpn.nenu.edu.cn/xszqcjglAction.do?method=queryxscj",
-      "User-Agent": IE_8_USER_AGENT,
-    };
-
-    console.log("Using headers", headers);
-
     const response = await fetch(
       `https://dsjx.webvpn.nenu.edu.cn/xszqcjglAction.do?method=queryxscj`,
       {
         method: "POST",
-        headers,
+        headers: {
+          Cookie: getCookieHeader(cookies),
+          "Content-Type": "application/x-www-form-urlencoded",
+          Referer:
+            "https://dsjx.webvpn.nenu.edu.cn/xszqcjglAction.do?method=queryxscj",
+          "User-Agent": IE_8_USER_AGENT,
+        },
         body: params.toString(),
       },
     );
@@ -285,26 +281,20 @@ export const underGradeListHandler: RequestHandler<
       ok: "",
     });
 
-    console.log("Using params", params);
-
-    const headers = {
-      Cookie: getCookieHeader(cookies),
-      Referer: `https://dsjx.webvpn.nenu.educn/jiaowu/cjgl/xszq/query_xscj.jsp?tktime=${getTimeStamp()}`,
-      "User-Agent": IE_8_USER_AGENT,
-    };
-
-    console.log("Using headers", headers);
+    console.log("Requesting with params:", params);
 
     const response = await fetch(
       `https://dsjx.webvpn.nenu.edu.cn/xszqcjglAction.do?method=queryxscj`,
       {
         method: "POST",
-        headers,
+        headers: {
+          Cookie: getCookieHeader(cookies),
+          Referer: `https://dsjx.webvpn.nenu.educn/jiaowu/cjgl/xszq/query_xscj.jsp?tktime=${getTimeStamp()}`,
+          "User-Agent": IE_8_USER_AGENT,
+        },
         body: params.toString(),
       },
     );
-
-    console.log("Status:", response.status);
 
     const content = await response.text();
 

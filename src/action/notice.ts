@@ -76,8 +76,6 @@ export const noticeHandler: RequestHandler<
       },
     });
 
-    console.log(response.status);
-
     const responseText = await response.text();
 
     const title = titleRegExp.exec(responseText)![1];

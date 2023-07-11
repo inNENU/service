@@ -98,8 +98,6 @@ export const noticeListHandler: RequestHandler<
         "https://m-443.webvpn.nenu.edu.cn//basicInfo/studentPageTurn?type=lifeschool",
     };
 
-    console.log("Using headers", headers);
-
     const params = new URLSearchParams({
       type: "notice",
       _search: "false",
@@ -116,8 +114,6 @@ export const noticeListHandler: RequestHandler<
         body: params.toString(),
       },
     );
-
-    console.log(response.status);
 
     const { data, pageIndex, pageSize, totalCount, totalPage } = <
       RawNoticeListData

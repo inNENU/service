@@ -29,7 +29,7 @@ export const selectLoginHandler: RequestHandler<
     if (isPlainObject(body) && isNumber(body.id) && isString(body.password)) {
       const { id, password } = body;
 
-      console.log("Login with id:", id, "password:", password);
+      console.log("Login with", id, password);
 
       const mainPageResponse = await fetch("http://xk.nenu.edu.cn");
 
@@ -76,7 +76,7 @@ export const selectLoginHandler: RequestHandler<
       if (loginResponse.status === 302) {
         const cookies = getCookies(loginResponse);
 
-        console.log("Login success, getting cookie:", cookies);
+        console.log("Getting cookie:", cookies);
 
         return res.json(<SelectLoginSuccessResponse>{
           success: true,

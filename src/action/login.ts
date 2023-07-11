@@ -69,7 +69,6 @@ export const actionLogin = async (
 
   console.log(
     "ticket",
-    ticketResponse.status,
     ticketResponse.headers.get("Location"),
     await ticketResponse.text(),
   );

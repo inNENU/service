@@ -42,7 +42,7 @@ export const processHandler: RequestHandler<
       jx0404id: id,
     }).toString();
 
-    console.log(`Getting ${url} with ${params}`);
+    console.log("Requesting with params:", params);
 
     const response = await fetch(url, {
       method: "POST",
@@ -52,8 +52,6 @@ export const processHandler: RequestHandler<
       },
       body: params,
     });
-
-    console.log("Response ends with", response.status);
 
     const rawData = await response.text();
 

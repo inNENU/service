@@ -48,10 +48,12 @@ const port = process.env.PORT ? Number(process.env.PORT) : 8080;
 
 const originalFetch = fetch;
 
-global.fetch = (url, options): Promise<globalThis.Response> => {
-  console.log("Fetching", url);
+global.fetch = async (url, options): Promise<globalThis.Response> => {
+  const response = await originalFetch(url, options);
 
-  return originalFetch(url, options);
+  console.log("Fetching", url, `with ${response.status}`);
+
+  return response;
 };
 
 app.use(cookieParser());

@@ -144,16 +144,10 @@ export const borrowBooksHandler: RequestHandler<
         "https://m-443.webvpn.nenu.edu.cn//basicInfo/studentPageTurn?type=lifestudying&tg=bookborrow",
     };
 
-    console.log("Using headers", headers);
-
     const response = await fetch(
       "https://m-443.webvpn.nenu.edu.cn/basicInfo/getBookBorrow",
-      {
-        headers,
-      },
+      { headers },
     );
-
-    console.log(response.status);
 
     const data = <RawBorrowBooksData>await response.json();
 

@@ -171,7 +171,7 @@ export const authLogin = async (
 
   currentCookies.push(...getCookies(response));
 
-  console.log(`Request ends with ${response.status}`, location);
+  console.log(`Request location:`, location);
   console.log("Login cookies:", currentCookies);
 
   if (response.status === 200)
