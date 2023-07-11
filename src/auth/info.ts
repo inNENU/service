@@ -2,10 +2,16 @@ import type { RequestHandler } from "express";
 import type { Cookie } from "set-cookie-parser";
 
 import { authLogin } from "./login.js";
-import type { EmptyObject, LoginOptions } from "../typings.js";
+import type {
+  CommonFailedResponse,
+  EmptyObject,
+  LoginOptions,
+} from "../typings.js";
 import { getCookieHeader } from "../utils/cookie.js";
 
 export interface InfoSuccessResponse {
+  success: true;
+  /** @deprecated */
   status: "success";
 
   /** 用户姓名 */
@@ -15,12 +21,7 @@ export interface InfoSuccessResponse {
   email: string;
 }
 
-export interface InfoFailedResponse {
-  status: "failed";
-  msg: string;
-}
-
-export type InfoResponse = InfoSuccessResponse | InfoFailedResponse;
+export type InfoResponse = InfoSuccessResponse | CommonFailedResponse;
 
 const userNameRegexp =
   /class="auth_username">\s+<span>\s+<span>\s+(.*?)\s+<\/span>/;
@@ -45,7 +46,8 @@ export const getInfo = async (cookies: Cookie[]): Promise<InfoResponse> => {
   console.log("Getting username", userName);
 
   if (!userName)
-    return <InfoFailedResponse>{
+    return <CommonFailedResponse>{
+      success: false,
       status: "failed",
       msg: "获取姓名失败",
     };
@@ -67,12 +69,14 @@ export const getInfo = async (cookies: Cookie[]): Promise<InfoResponse> => {
   console.log("Getting email name", emailName);
 
   if (typeof emailName !== "string")
-    return <InfoFailedResponse>{
+    return <CommonFailedResponse>{
+      success: false,
       status: "failed",
       msg: "获取邮箱失败",
     };
 
   return <InfoSuccessResponse>{
+    success: true,
     status: "success",
     name: userName,
     email: emailName ? `${emailName}@nenu.edu.cn` : "未设置邮箱",
@@ -89,14 +93,18 @@ export const infoHandler: RequestHandler<
 
     const result = await authLogin(req.body);
 
-    if (result.status === "success")
-      return res.json(await getInfo(result.cookies));
+    if (result.success) return res.json(await getInfo(result.cookies));
 
-    return res.json(<InfoResponse>{
+    return res.json(<CommonFailedResponse>{
+      success: false,
       status: "failed",
       msg: "登录失败",
     });
   } catch (err) {
-    return res.json(<InfoFailedResponse>{ status: "failed", msg: "参数错误" });
+    return res.json(<CommonFailedResponse>{
+      success: false,
+      status: "failed",
+      msg: "参数错误",
+    });
   }
 };

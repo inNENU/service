@@ -36,20 +36,6 @@ export const customEncryptAES = (password: string, key: string): string => {
   }).toString();
 };
 
-export interface AuthLoginSuccessResponse {
-  status: "success";
-  cookies: Cookie[];
-  location: string;
-}
-
-export interface AuthLoginFailedResponse extends CommonFailedResponse {
-  type: "captcha" | "wrong" | "unknown";
-}
-
-export type AuthLoginResponse =
-  | AuthLoginSuccessResponse
-  | AuthLoginFailedResponse;
-
 export const AUTH_SERVER = "https://authserver.nenu.edu.cn";
 export const WEB_VPN_AUTH_SERVER = "https://authserver-443.webvpn.nenu.edu.cn";
 
@@ -64,6 +50,22 @@ export interface AuthLoginOptions {
   webVPN?: boolean;
   cookies?: Cookie[];
 }
+
+export interface AuthLoginSuccessResponse {
+  success: true;
+  /** @deprecated */
+  status: "success";
+  cookies: Cookie[];
+  location: string;
+}
+
+export interface AuthLoginFailedResponse extends CommonFailedResponse {
+  type: "captcha" | "wrong" | "unknown";
+}
+
+export type AuthLoginResponse =
+  | AuthLoginSuccessResponse
+  | AuthLoginFailedResponse;
 
 export const authLogin = async (
   { id, password }: LoginOptions,
@@ -116,6 +118,7 @@ export const authLogin = async (
 
   if (needCaptcha)
     return {
+      success: false,
       status: "failed",
       type: "captcha",
       msg: "需要验证码",
@@ -174,26 +177,30 @@ export const authLogin = async (
   if (response.status === 200)
     if (resultContent.includes("您提供的用户名或者密码有误"))
       return {
+        success: false,
         status: "failed",
         type: "wrong",
         msg: "用户名或密码错误",
       };
-    else if (resultContent.includes("请输入验证码"))
-      return {
-        status: "failed",
-        type: "captcha",
-        msg: "需要验证码",
-      };
+  if (resultContent.includes("请输入验证码"))
+    return {
+      success: false,
+      status: "failed",
+      type: "captcha",
+      msg: "需要验证码",
+    };
 
   if (response.status === 302) {
     if (location === `${server}/authserver/login`)
       return {
+        success: false,
         status: "failed",
         type: "wrong",
         msg: "用户名或密码错误",
       };
 
     return {
+      success: true,
       status: "success",
       cookies: currentCookies,
       location: location!,
@@ -204,6 +211,7 @@ export const authLogin = async (
   console.error("Response", await response.text());
 
   return {
+    success: false,
     status: "failed",
     type: "unknown",
     msg: "未知错误",
@@ -224,6 +232,7 @@ export const authLoginHandler: RequestHandler<
     return res.json(data);
   } catch (err) {
     return res.json(<AuthLoginFailedResponse>{
+      success: false,
       status: "failed",
       msg: "参数错误",
     });

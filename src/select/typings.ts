@@ -1,3 +1,5 @@
+import type { CommonFailedResponse } from "../typings";
+
 export interface SelectBaseOptions {
   /**
    * Cookie
@@ -10,11 +12,9 @@ export interface SelectBaseOptions {
 }
 
 export interface SelectBaseSuccessResponse {
+  success: true;
+  /** @deprecated */
   status: "success";
 }
 
-export interface SelectBaseFailedResponse {
-  status: "failed";
-  /** 错误信息 */
-  msg: string;
-}
+export type SelectBaseFailedResponse = CommonFailedResponse;

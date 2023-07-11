@@ -57,6 +57,8 @@ const getNoticeItem = ({
 });
 
 export interface NoticeListSuccessResponse {
+  success: true;
+  /** @deprecated */
   status: "success";
   data: NoticeItem[];
   pageIndex: number;
@@ -83,7 +85,7 @@ export const noticeListHandler: RequestHandler<
     } else {
       const result = await actionLogin(req.body);
 
-      if (result.status === "failed") return res.json(result);
+      if (!result.success) return res.json(result);
 
       ({ cookies } = result);
     }
@@ -123,6 +125,7 @@ export const noticeListHandler: RequestHandler<
 
     if (data.length)
       return res.json(<NoticeListSuccessResponse>{
+        success: true,
         status: "success",
         data: data.map(getNoticeItem),
         pageIndex,
@@ -132,6 +135,7 @@ export const noticeListHandler: RequestHandler<
       });
 
     return res.json(<AuthLoginFailedResponse>{
+      success: false,
       status: "failed",
       msg: JSON.stringify(data),
     });
@@ -140,6 +144,7 @@ export const noticeListHandler: RequestHandler<
 
     console.error(err);
     res.json(<AuthLoginFailedResponse>{
+      success: false,
       status: "failed",
       msg: message,
     });

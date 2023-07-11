@@ -1,7 +1,11 @@
 import type { RequestHandler } from "express";
 
 import { authLogin, customEncryptAES, saltRegExp } from "./login.js";
-import type { EmptyObject, LoginOptions } from "../typings.js";
+import type {
+  CommonFailedResponse,
+  EmptyObject,
+  LoginOptions,
+} from "../typings.js";
 import { getCookieHeader } from "../utils/cookie.js";
 
 export interface ChangePasswordOptions {
@@ -18,17 +22,12 @@ export interface ChangePasswordOptions {
 }
 
 export interface ChangePasswordSuccessResponse {
-  status: "success";
-}
-
-export interface ChangePasswordFailedResponse {
-  status: "failed";
-  msg: string;
+  success: true;
 }
 
 export type ChangePasswordResponse =
   | ChangePasswordSuccessResponse
-  | ChangePasswordFailedResponse;
+  | CommonFailedResponse;
 
 export const changePasswordHandler: RequestHandler<
   EmptyObject,
@@ -69,10 +68,11 @@ export const changePasswordHandler: RequestHandler<
 
       if (changePasswordResponseText.includes("个人密码修改成功"))
         return res.json(<ChangePasswordSuccessResponse>{
-          status: "success",
+          success: true,
         });
 
-      return res.json(<ChangePasswordFailedResponse>{
+      return res.json(<CommonFailedResponse>{
+        success: false,
         status: "failed",
         msg: "修改失败",
       });
@@ -84,7 +84,7 @@ export const changePasswordHandler: RequestHandler<
 
     const result = await authLogin({ id, password });
 
-    if (result.status === "success") {
+    if (result.success) {
       const authCookieHeader = getCookieHeader(result.cookies);
 
       const passwordChangePageResponse = await fetch(
@@ -124,12 +124,14 @@ export const changePasswordHandler: RequestHandler<
       return res.end(Buffer.from(recaptchaImage));
     }
 
-    return res.json(<ChangePasswordFailedResponse>{
+    return res.json(<CommonFailedResponse>{
+      success: false,
       status: "failed",
       msg: "登录失败",
     });
   } catch (err) {
-    return res.json(<ChangePasswordFailedResponse>{
+    return res.json(<CommonFailedResponse>{
+      success: false,
       status: "failed",
       msg: "参数错误",
     });

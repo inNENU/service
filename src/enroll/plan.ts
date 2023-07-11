@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import type { EmptyObject } from "../typings";
+import type { CommonFailedResponse, EmptyObject } from "../typings";
 
 export interface EnrollPlanOptions {
   year: string;
@@ -28,18 +28,15 @@ export interface EnrollPlanInfo {
 }
 
 export interface EnrollPlanSuccessResponse {
+  success: true;
+  /** @deprecated */
   status: "success";
   data: EnrollPlanInfo[];
 }
 
-export interface EnrollPlanFailedResponse {
-  status: "failed";
-  msg: string;
-}
-
 export type EnrollPlanResponse =
   | EnrollPlanSuccessResponse
-  | EnrollPlanFailedResponse;
+  | CommonFailedResponse;
 
 const enrollItemReg =
   /<tr class='RowTr'>\s+<td align='center'>(.*?)<\/td>\s+<td align='center'>(.*?)<\/td>\s+<td align='center'>(.*?)<\/td>\s+<td align='center'>(.*?)<\/td>\s+<td align='center'>(.*?)<\/td>\s+<td align='center'>(.*?)<\/td>\s*<td align='center'>(.*?)<\/td>\s*<\/tr>/g;
@@ -98,6 +95,7 @@ export const enrollPlanHandler: RequestHandler<
     console.log(`Getting ${planInfo.length} items`);
 
     return res.json(<EnrollPlanSuccessResponse>{
+      success: true,
       status: "success",
       data: planInfo,
     });
@@ -105,7 +103,8 @@ export const enrollPlanHandler: RequestHandler<
     const { message } = <Error>err;
 
     console.error(err);
-    res.json(<EnrollPlanFailedResponse>{
+    res.json(<CommonFailedResponse>{
+      success: false,
       status: "failed",
       msg: message,
     });

@@ -9,6 +9,8 @@ import type { VPNLoginFailedResponse } from "../vpn/login.js";
 import { vpnCASLogin } from "../vpn/login.js";
 
 export interface ActionLoginSuccessResponse {
+  success: true;
+  /** @deprecated */
   status: "success";
 
   cookies: Cookie[];
@@ -24,7 +26,7 @@ export const actionLogin = async (
 ): Promise<ActionLoginResponse> => {
   const vpnLoginResult = await vpnCASLogin(options);
 
-  if (vpnLoginResult.status === "failed") return vpnLoginResult;
+  if (!vpnLoginResult.success) return vpnLoginResult;
 
   const result = await authLogin(options, {
     service: "https://m-443.webvpn.nenu.edu.cn/portal_main/toPortalPage",
@@ -73,6 +75,7 @@ export const actionLogin = async (
 
   if (ticketResponse.status !== 302)
     return <AuthLoginFailedResponse>{
+      success: false,
       status: "failed",
       type: "unknown",
       msg: "登录失败",
@@ -86,11 +89,17 @@ export const actionLogin = async (
     )
   )
     return <ActionLoginSuccessResponse>{
+      success: true,
       status: "success",
       cookies: authCookies,
     };
 
-  return { status: "failed", type: "unknown", msg: "登录失败" };
+  return <AuthLoginFailedResponse>{
+    success: false,
+    status: "failed",
+    type: "unknown",
+    msg: "登录失败",
+  };
 };
 
 export const actionLoginHandler: RequestHandler<
@@ -105,6 +114,7 @@ export const actionLoginHandler: RequestHandler<
 
     console.error(err);
     res.json(<AuthLoginFailedResponse>{
+      success: false,
       status: "failed",
       msg: message,
     });

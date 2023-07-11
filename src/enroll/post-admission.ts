@@ -9,6 +9,8 @@ export interface PostAdmissionPostOptions {
 }
 
 export interface PostAdmissionSuccessResponse {
+  success: true;
+  /** @deprecated */
   status: "success";
   info: { text: string; value: string }[];
 }
@@ -56,6 +58,7 @@ const getInfo = async ({
 
   if (/<button type="submit" >查询<\/button>/.test(content))
     return {
+      success: false,
       status: "failed",
       msg: "暂无信息",
     };
@@ -131,6 +134,7 @@ const getInfo = async ({
   ];
 
   return {
+    success: true,
     status: "success",
     info,
   };
@@ -148,6 +152,7 @@ export const postAdmissionHandler: RequestHandler<
 
     console.error(err);
     res.json(<CommonFailedResponse>{
+      success: false,
       status: "failed",
       msg: message,
     });

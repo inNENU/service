@@ -22,6 +22,9 @@ export const libraryPeopleHandler: RequestHandler = async (_, res) => {
   } catch (err) {
     console.error(err);
 
-    res.status(500).end();
+    res.status(500).end({
+      success: false,
+      msg: "获取失败",
+    });
   }
 };

@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 import { toBuffer } from "qrcode";
 
 import { appIDInfo } from "./config/appID.js";
+import type { CommonFailedResponse } from "./typings.js";
 import { getWechatAccessToken } from "./utils/wechatAccessToken.js";
 
 export interface WechatQRCodeOptions {
@@ -23,14 +24,13 @@ export interface WechatQRCodeError {
 }
 
 export interface QRCodeSuccessResponse {
+  success: true;
+  /** @deprecated */
   status: "success";
   image: string;
 }
 
-export interface QRCodeFailedResponse {
-  status: "failed";
-  msg: string;
-}
+export type QRCodeResponse = QRCodeSuccessResponse | CommonFailedResponse;
 
 const getWechatQRCode = async (
   accessToken: string,
@@ -73,7 +73,8 @@ export const qrCodeHandler: RequestHandler<
     console.log("Requesting qrcode with", req.query);
 
     if (!appIDInfo[appID])
-      return res.json({
+      return res.json(<CommonFailedResponse>{
+        success: false,
         status: "failed",
         msg: "AppID 非法",
       });
@@ -96,7 +97,8 @@ export const qrCodeHandler: RequestHandler<
         return res.end(image);
       }
 
-      return res.json({
+      return res.json(<CommonFailedResponse>{
+        success: false,
         status: "failed",
         msg: image.errmsg,
       });
@@ -115,7 +117,8 @@ export const qrCodeHandler: RequestHandler<
 
     console.error(err);
 
-    res.json({
+    res.json(<CommonFailedResponse>{
+      success: false,
       status: "failed",
       msg: message,
     });

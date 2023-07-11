@@ -28,6 +28,8 @@ export type NoticeOptions = (LoginOptions | CookieOptions) & {
 };
 
 export interface NoticeSuccessResponse {
+  success: true;
+  /** @deprecated */
   status: "success";
   title: string;
   author: string;
@@ -48,7 +50,8 @@ export const noticeHandler: RequestHandler<
     const { noticeID } = req.body;
 
     if (!noticeID)
-      return res.json({
+      return res.json(<CommonFailedResponse>{
+        success: false,
         status: "failed",
         msg: "ID is required",
       });
@@ -60,7 +63,7 @@ export const noticeHandler: RequestHandler<
     } else {
       const result = await actionLogin(req.body);
 
-      if (result.status === "failed") return res.json(result);
+      if (!result.success) return res.json(result);
 
       ({ cookies } = result);
     }
@@ -85,6 +88,7 @@ export const noticeHandler: RequestHandler<
     const content = contentRegExp.exec(responseText)![1];
 
     return res.json(<NoticeSuccessResponse>{
+      success: true,
       status: "success",
       title,
       author,
@@ -101,6 +105,7 @@ export const noticeHandler: RequestHandler<
 
     console.error(err);
     res.json(<AuthLoginFailedResponse>{
+      success: false,
       status: "failed",
       msg: message,
     });

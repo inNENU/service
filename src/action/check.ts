@@ -34,11 +34,15 @@ export const actionCheckHandler: RequestHandler<
 
         if (result.success)
           return res.json(<CookieVerifySuccessResponse>{
+            success: true,
+            /** @deprecated */
             status: "success",
             valid: true,
           });
       } catch (err) {
         return res.json(<CookieVerifySuccessResponse>{
+          success: true,
+          /** @deprecated */
           status: "success",
           valid: false,
         });
@@ -48,6 +52,8 @@ export const actionCheckHandler: RequestHandler<
     }
 
     return res.json(<CookieVerifySuccessResponse>{
+      success: true,
+      /** @deprecated */
       status: "success",
       valid: false,
     });
@@ -56,6 +62,7 @@ export const actionCheckHandler: RequestHandler<
 
     console.error(err);
     res.json(<CommonFailedResponse>{
+      success: false,
       status: "failed",
       msg: message,
     });

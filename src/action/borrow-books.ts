@@ -109,6 +109,8 @@ const getBookData = ({
 export type BorrowBooksOptions = LoginOptions | CookieOptions;
 
 export interface BorrowBooksSuccessResponse {
+  success: true;
+  /** @deprecated */
   status: "success";
   data: BorrowBookData[];
 }
@@ -130,7 +132,7 @@ export const borrowBooksHandler: RequestHandler<
     } else {
       const result = await actionLogin(req.body);
 
-      if (result.status === "failed") return res.json(result);
+      if (!result.success) return res.json(result);
 
       ({ cookies } = result);
     }
@@ -157,11 +159,13 @@ export const borrowBooksHandler: RequestHandler<
 
     if (data.success)
       return res.json(<BorrowBooksSuccessResponse>{
+        success: true,
         status: "success",
         data: data.data.map(getBookData),
       });
 
     return res.json(<BorrowBooksSuccessResponse>{
+      success: true,
       status: "success",
       data: [],
     });
@@ -170,6 +174,7 @@ export const borrowBooksHandler: RequestHandler<
 
     console.error(err);
     res.json(<AuthLoginFailedResponse>{
+      success: false,
       status: "failed",
       msg: message,
     });

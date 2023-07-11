@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import type { EmptyObject } from "../typings";
+import type { CommonFailedResponse, EmptyObject } from "../typings";
 
 export interface HistoryGradeOptions {
   year: string;
@@ -18,18 +18,15 @@ export interface HistoryGradeResult {
 }
 
 export interface EnrollGradeSuccessResponse {
+  success: true;
+  /** @deprecated */
   status: "success";
   data: HistoryGradeResult;
 }
 
-export interface EnrollGradeFailedResponse {
-  status: "failed";
-  msg: string;
-}
-
 export type EnrollGradeResponse =
   | EnrollGradeSuccessResponse
-  | EnrollGradeFailedResponse;
+  | CommonFailedResponse;
 
 const enrollGradeTitleReg =
   /<tr class="RowTr"\s+bgcolor="#f5f5f5">([\s\S]+?)<\/tr>/g;
@@ -108,12 +105,14 @@ export const historyGradeHandler: RequestHandler<
       console.log(`Getting ${historyInfos.length} items`);
 
       return res.json(<EnrollGradeSuccessResponse>{
+        success: true,
         status: "success",
         data: { titles, items: historyInfos },
       });
     }
 
-    return res.json(<EnrollGradeFailedResponse>{
+    return res.json(<CommonFailedResponse>{
+      success: false,
       status: "failed",
       msg: "获取数据失败，请重试",
     });
@@ -121,7 +120,8 @@ export const historyGradeHandler: RequestHandler<
     const { message } = <Error>err;
 
     console.error(err);
-    res.json(<EnrollGradeFailedResponse>{
+    res.json(<CommonFailedResponse>{
+      success: false,
       status: "failed",
       msg: message,
     });

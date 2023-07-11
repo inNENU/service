@@ -66,6 +66,7 @@ export const processHandler: RequestHandler<
         coursesStore.setState([]);
 
         return res.json(<ProcessFailedResponse>{
+          success: false,
           status: "failed",
           msg,
           type: "relogin",
@@ -74,6 +75,7 @@ export const processHandler: RequestHandler<
 
       if (msg === "您的账号在其它地方登录")
         return res.json(<ProcessFailedResponse>{
+          success: false,
           status: "failed",
           msg,
           type: "relogin",
@@ -82,6 +84,7 @@ export const processHandler: RequestHandler<
       if (method === "DELETE") {
         if (msg.includes("退选成功"))
           return res.json(<ProcessSuccessResponse>{
+            success: true,
             status: "success",
             msg,
           });
@@ -94,6 +97,7 @@ export const processHandler: RequestHandler<
           msg.includes("学分")
         )
           return res.json(<ProcessFailedResponse>{
+            success: false,
             status: "failed",
             msg,
             type: "forbid",
@@ -101,6 +105,7 @@ export const processHandler: RequestHandler<
 
         if (msg.endsWith("上课时间冲突"))
           return res.json({
+            success: false,
             status: "failed",
             msg,
             type: "conflict",
@@ -113,14 +118,23 @@ export const processHandler: RequestHandler<
           });
       }
 
-      return res.json(<ProcessFailedResponse>{ status: "failed", msg });
+      return res.json(<ProcessFailedResponse>{
+        success: false,
+        status: "failed",
+        msg,
+      });
     } catch (err) {
       console.error(err);
-      res.json(<ProcessFailedResponse>{ status: "failed", msg: "参数有误" });
+      res.json(<ProcessFailedResponse>{
+        success: false,
+        status: "failed",
+        msg: "参数有误",
+      });
     }
   } catch (err) {
     console.error(err);
     res.json(<ProcessFailedResponse>{
+      success: false,
       status: "failed",
       msg: (<Error>err).message,
     });

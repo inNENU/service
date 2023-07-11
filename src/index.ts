@@ -33,6 +33,7 @@ import {
   selectLoginHandler,
   studentAmountHandler,
 } from "./select/index.js";
+import type { CommonFailedResponse } from "./typings.js";
 import {
   underCourseTableHandler,
   underGradeListHandler,
@@ -59,7 +60,7 @@ app.use(bodyParser.json());
 app.use(morgan("common"));
 
 app.get("/", (_req, res) => {
-  res.json({ status: "ok" });
+  res.json({ success: true });
 });
 
 app.post("/action/login", actionLoginHandler);
@@ -104,7 +105,11 @@ app.get("/weather", weatherHandler);
 app.use((err: Error, req, res: Response, _next: () => void) => {
   console.error(err.stack);
 
-  res.status(500).send("我们出了问题! 请联系 Mr.Hope");
+  res.status(500).send(<CommonFailedResponse>{
+    success: false,
+    status: "failed",
+    msg: "我们出了问题! 请联系 Mr.Hope",
+  });
 });
 
 app.listen(port, () => {

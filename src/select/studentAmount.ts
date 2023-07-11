@@ -71,6 +71,7 @@ export const studentAmountHandler: RequestHandler<
 
     if (rawData.match(/\s+<!DOCTYPE html/))
       return res.json(<StudentAmountFailedResponse>{
+        success: false,
         status: "failed",
         msg: "请重新登录",
         type: "relogin",
@@ -84,10 +85,15 @@ export const studentAmountHandler: RequestHandler<
         amount: rs,
       }));
 
-      res.json(<StudentAmountSuccessResponse>{ status: "success", data });
+      res.json(<StudentAmountSuccessResponse>{
+        success: true,
+        status: "success",
+        data,
+      });
     } catch (err) {
       console.error(err);
       res.json(<StudentAmountFailedResponse>{
+        success: false,
         status: "failed",
         msg: (<Error>err).message,
       });
@@ -95,6 +101,7 @@ export const studentAmountHandler: RequestHandler<
   } catch (err) {
     console.error(err);
     res.json(<StudentAmountFailedResponse>{
+      success: false,
       status: "failed",
       msg: (<Error>err).message,
     });
