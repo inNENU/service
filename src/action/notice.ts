@@ -16,6 +16,8 @@ import { getCookieHeader } from "../utils/index.js";
 const titleRegExp = /var title = '(.*?)';/;
 const fromRegExp = /var ly = '(.*?)'/;
 const authorRegExp = /var wz = '(.*?)'/;
+const timeRegExp =
+  /<span style="margin: 0 10px;font-size: 13px;color: #787878;font-family: 'Microsoft YaHei';">\s+时间：(.*?)(?:&nbsp)*?\s+<\/span>/;
 const pageViewRegExp =
   /<span style="margin: 0 10px;font-size: 13px;color: #787878;font-family: 'Microsoft YaHei';">\s+阅览：(\d+)\s+<\/span>/;
 const contentRegExp =
@@ -29,6 +31,7 @@ export interface NoticeSuccessResponse {
   status: "success";
   title: string;
   author: string;
+  time: string;
   from: string;
   pageView: number;
   content: Node[];
@@ -76,6 +79,7 @@ export const noticeHandler: RequestHandler<
 
     const title = titleRegExp.exec(responseText)![1];
     const author = authorRegExp.exec(responseText)![1];
+    const time = timeRegExp.exec(responseText)![1];
     const from = fromRegExp.exec(responseText)![1];
     const pageView = pageViewRegExp.exec(responseText)![1];
     const content = contentRegExp.exec(responseText)![1];
@@ -85,6 +89,7 @@ export const noticeHandler: RequestHandler<
       title,
       author,
       from,
+      time,
       pageView: Number(pageView),
       content: await getNodes(content, {
         // TODO: Support image
