@@ -1,83 +1,50 @@
 import type { RequestHandler } from "express";
 
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
+import type { Node } from "../utils/index.js";
+import { getRichTextNodes } from "../utils/index.js";
 
-const bodyRegExp = /<tbody>([\s\S]*?)<\/tbody>/;
-const totalPageRegExp = /_simple_list_gotopage_fun\((\d+),/;
-const pageViewsRegExp =
-  /\[(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\],"wbnews", /;
-const noticeItemRegExp =
-  /<a href="(?:\.\.\/)+([^"]+)"[^>]+>([^>]+)<\/a>\s*<\/h2>\s*<\/td>\s*<td class="news-table-department">\s*<span id="sou1">([^>]*)<\/span>\s*<\/td>\s*<td class="news-table-date">\s+<span>([^>]*)<\/span>/g;
-const newsItemRegExp =
-  /<a href="(?:\.\.\/)+([^"]+)"[^>]+>([^>]+)<\/a>\s*<\/h2>\s*<\/td>\s*<td class="news-table-department">\s*<span id="sou1">([^>]*)<\/span>\s*<\/td>\s*<td class="news-table-date">\s+<span>([^>]*)<\/span>/g;
+const bodyRegExp =
+  /<div class="article-info">([\s\S]*?)<div class="info-aside">/;
+const titleRegExp =
+  /<h1 class="arti-title">([\s\S]*?)(<br \/><span class="arti-subtitle">.*?<\/span>)?<\/h1>/;
+const timeRegExp = /<span class="arti-update">时间：([^<]*)<\/span>/;
+const fromRegExp = /<span class="arti-update">供稿单位：([^<]*)<\/span>/;
+const authorRegExp = /<span class="arti-update">撰稿：([^<]*)<\/span>/;
+const editorRegExp = /<span>网络编辑：<em>([^<]+?)<\/em><\/span>/;
+const contentRegExp =
+  /<div class="v_news_content">([\s\S]+?)<\/div><\/div><div id="div_vote_id">/;
+const pageViewsParamRegExp = /_showDynClicks\("wbnews",\s*(\d+),\s*(\d+)\)/;
 
 export interface MainInfoOptions {
-  /** @default 1 */
-  page?: number;
-  totalPage?: number;
-  type: "notice" | "news" | "academic";
-}
-
-export interface InfoItem {
-  title: string;
-  from: string;
-  time: string;
   url: string;
-  pageViews: number;
 }
 
 export interface MainInfoSuccessResponse {
   success: true;
   /** @deprecated */
   status: "success";
-  data: InfoItem[];
-  page: number;
-  totalPage: number;
+  title: string;
+  time: string;
+  from?: string;
+  author?: string;
+  editor?: string;
+  pageViews: number;
+  content: Node[];
 }
 
 export type MainInfoResponse = MainInfoSuccessResponse | CommonFailedResponse;
 
-const type2ID = {
-  notice: "tzgg",
-  news: "dsxw1",
-  academic: "xshd1",
-};
-
-const totalPageState: Record<string, number> = {};
-
 export const mainInfoHandler: RequestHandler<
+  EmptyObject,
   EmptyObject,
   EmptyObject,
   MainInfoOptions
 > = async (req, res) => {
   try {
-    const { type, page = 1, totalPage = totalPageState[type] || 0 } = req.body;
+    const { url } = req.query;
 
-    if (!["news", "notice", "academic"].includes(type))
-      return res.json(<CommonFailedResponse>{
-        success: false,
-        status: "failed",
-        msg: "type 参数错误",
-      });
-
-    if (
-      Math.round(page) !== page ||
-      page < 1 ||
-      (page !== 1 && page > totalPage)
-    )
-      return res.json(<CommonFailedResponse>{
-        success: false,
-        status: "failed",
-        msg: "page 参数错误",
-      });
-
-    const response = await fetch(
-      totalPage && page !== 1
-        ? `https://www.nenu.edu.cn/index/${type2ID[type]}/${
-            totalPage - page
-          }.htm`
-        : `https://www.nenu.edu.cn/index/${type2ID[type]}.htm`,
-    );
+    const response = await fetch(`https://www.nenu.edu.cn/${url}`);
 
     if (response.status !== 200)
       return res.json(<CommonFailedResponse>{
@@ -88,27 +55,30 @@ export const mainInfoHandler: RequestHandler<
 
     const text = await response.text();
 
-    totalPageState[type] = Number(totalPageRegExp.exec(text)![1]);
+    const body = bodyRegExp.exec(text)![1];
+    const title = titleRegExp.exec(body)![1];
+    const time = timeRegExp.exec(body)![1];
+    const content = contentRegExp.exec(body)![1];
+    const [, owner, clickID] = pageViewsParamRegExp.exec(body)!;
 
-    const pageViews = pageViewsRegExp.exec(text)!.slice(1).map(Number);
-    const data = Array.from(
-      bodyRegExp
-        .exec(text)![1]
-        .matchAll(type === "notice" ? noticeItemRegExp : newsItemRegExp),
-    ).map(([, url, title, from, time], index) => ({
-      url,
-      title,
-      from,
-      time,
-      pageViews: pageViews[index],
-    }));
+    const from = fromRegExp.exec(body)?.[1];
+    const author = authorRegExp.exec(body)?.[1];
+    const editor = editorRegExp.exec(body)?.[1];
+
+    const pageViewResponse = await fetch(
+      `https://www.nenu.edu.cn/system/resource/code/news/click/dynclicks.jsp?clickid=${clickID}&owner=${owner}&clicktype=wbnews`,
+    );
 
     return res.json(<MainInfoSuccessResponse>{
       success: true,
       status: "success",
-      data,
-      page,
-      totalPage: totalPageState[type],
+      title,
+      time,
+      from,
+      author,
+      editor,
+      pageViews: Number(await pageViewResponse.text()),
+      content: await getRichTextNodes(content),
     });
   } catch (err) {
     const { message } = <Error>err;
