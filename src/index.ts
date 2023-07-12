@@ -25,6 +25,7 @@ import {
   underAdmissionHandler,
 } from "./enroll/index.js";
 import { libraryPeopleHandler } from "./library/people.js";
+import { mainInfoHandler } from "./main/index.js";
 import { qrCodeHandler } from "./qrcode.js";
 import {
   processHandler,
@@ -81,6 +82,8 @@ app.post("/under-system/login", underSystemLoginHandler);
 app.post("/under-system/check", underSystemCheckHandler);
 app.post("/under-system/course-table", underCourseTableHandler);
 app.post("/under-system/grade-list", underGradeListHandler);
+
+app.post("/main/info", mainInfoHandler);
 
 app.post("/enroll/grade", historyGradeHandler);
 app.post("/enroll/plan", enrollPlanHandler);
