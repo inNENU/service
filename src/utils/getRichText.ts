@@ -5,9 +5,24 @@ import { ALLOWED_TAGS } from "../config/allowedTags";
 
 const $ = load("");
 
+export const getText = (content: string | AnyNode[]): string => {
+  const nodes =
+    typeof content === "string" ? $.parseHTML(content) || [] : content;
+
+  return nodes
+    .map((node) => {
+      if (node.type === "text") return node.data;
+      if ("childNodes" in node) return getText(node.childNodes);
+
+      return "";
+    })
+    .join("");
+};
+
 export interface GetNodeOptions {
   getLinkText?: (link: string) => Promise<string | null> | string | null;
   getImageSrc?: (src: string) => Promise<string | null> | string | null;
+  getClass?: (tag: string, className: string) => string | null;
 }
 
 export interface ElementNode {
@@ -54,11 +69,8 @@ const handleNode = async (
           ? await options.getLinkText(node.attribs.href)
           : ` (${node.attribs.href})`;
 
-        if (text)
-          children.push({
-            type: "text",
-            text,
-          });
+        if (text && text !== getText(node.childNodes))
+          children.push({ type: "text", text });
       }
 
       // resolve img source for img tag
@@ -68,6 +80,14 @@ const handleNode = async (
         if (result === null) return null;
 
         attrs.src = result;
+      }
+
+      if (options.getClass) {
+        const className = options.getClass(node.name, attrs["class"] || "");
+
+        if (className === null) delete attrs["class"];
+        else if (Array.isArray(className)) attrs["class"] = className.join(" ");
+        else attrs["class"] = className;
       }
 
       return {

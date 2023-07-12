@@ -9,7 +9,7 @@ import type {
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import type { Node } from "../utils/getNodes.js";
+import type { Node } from "../utils/getRichText.js";
 import { getCookieHeader, getRichTextNodes } from "../utils/index.js";
 
 const titleRegExp = /var title = '(.*?)';/;

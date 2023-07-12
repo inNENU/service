@@ -2,12 +2,11 @@ import type { RequestHandler } from "express";
 
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 import type { Node } from "../utils/index.js";
-import { getRichTextNodes } from "../utils/index.js";
+import { getRichTextNodes, getText } from "../utils/index.js";
 
 const bodyRegExp =
-  /<div class="article-info">([\s\S]*?)<div class="info-aside">/;
-const titleRegExp =
-  /<h1 class="arti-title">([\s\S]*?)(<br \/><span class="arti-subtitle">.*?<\/span>)?<\/h1>/;
+  /<div class="article-info">([\s\S]*?)<div class="wrapper" id="footer">/;
+const titleRegExp = /<h1 class="arti-title">([\s\S]*?)<\/h1>/;
 const timeRegExp = /<span class="arti-update">时间：([^<]*)<\/span>/;
 const fromRegExp = /<span class="arti-update">供稿单位：([^<]*)<\/span>/;
 const authorRegExp = /<span class="arti-update">撰稿：([^<]*)<\/span>/;
@@ -72,13 +71,22 @@ export const mainInfoHandler: RequestHandler<
     return res.json(<MainInfoSuccessResponse>{
       success: true,
       status: "success",
-      title,
+      title: getText(title),
       time,
       from,
       author,
       editor,
       pageView: Number(await pageViewResponse.text()),
-      content: await getRichTextNodes(content),
+      content: await getRichTextNodes(content, {
+        getClass: (tag, className) =>
+          tag === "img"
+            ? className
+              ? `img ${className}`
+              : "img"
+            : className ?? null,
+        getImageSrc: (src) =>
+          src.startsWith("/") ? `https://www.nenu.edu.cn${src}` : src,
+      }),
     });
   } catch (err) {
     const { message } = <Error>err;
