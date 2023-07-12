@@ -10,8 +10,7 @@ import type {
   LoginOptions,
 } from "../typings.js";
 import type { Node } from "../utils/getNodes.js";
-import { getRichTextNodes } from "../utils/getNodes.js";
-import { getCookieHeader } from "../utils/index.js";
+import { getCookieHeader, getRichTextNodes } from "../utils/index.js";
 
 const titleRegExp = /var title = '(.*?)';/;
 const fromRegExp = /var ly = '(.*?)'/;

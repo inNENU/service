@@ -84,7 +84,7 @@ const handleNode = async (
 
 export const getRichTextNodes = async (
   content: string,
-  options: GetNodeOptions,
+  options: GetNodeOptions = {},
 ): Promise<Node[]> => {
   const rootNodes = $.parseHTML(content) || [];
 
