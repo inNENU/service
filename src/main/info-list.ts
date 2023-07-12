@@ -11,11 +11,13 @@ const noticeItemRegExp =
 const newsItemRegExp =
   /<a href="(?:\.\.\/)+([^"]+)"[^>]+>([^<]+)<\/a>\s*<\/h2>\s*<\/td>\s*<td class="news-table-department">\s*<span id="sou1">([^<]*)<\/span>\s*<\/td>\s*<td class="news-table-date">\s+<span>([^<]*)<\/span>/g;
 
+export type MainInfoType = "notice" | "news" | "academic";
+
 export interface MainInfoListOptions {
   /** @default 1 */
   page?: number;
   totalPage?: number;
-  type: "notice" | "news" | "academic";
+  type: MainInfoType;
 }
 
 export interface InfoItem {
