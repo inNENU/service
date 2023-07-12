@@ -14,7 +14,7 @@ const authorRegExp = /<span class="arti-update">撰稿：([^<]*)<\/span>/;
 const editorRegExp = /<span>网络编辑：<em>([^<]+?)<\/em><\/span>/;
 const contentRegExp =
   /<div class="v_news_content">([\s\S]+?)<\/div><\/div><div id="div_vote_id">/;
-const pageViewsParamRegExp = /_showDynClicks\("wbnews",\s*(\d+),\s*(\d+)\)/;
+const pageViewParamRegExp = /_showDynClicks\("wbnews",\s*(\d+),\s*(\d+)\)/;
 
 export interface MainInfoOptions {
   url: string;
@@ -29,7 +29,7 @@ export interface MainInfoSuccessResponse {
   from?: string;
   author?: string;
   editor?: string;
-  pageViews: number;
+  pageView: number;
   content: Node[];
 }
 
@@ -59,7 +59,7 @@ export const mainInfoHandler: RequestHandler<
     const title = titleRegExp.exec(body)![1];
     const time = timeRegExp.exec(body)![1];
     const content = contentRegExp.exec(body)![1];
-    const [, owner, clickID] = pageViewsParamRegExp.exec(body)!;
+    const [, owner, clickID] = pageViewParamRegExp.exec(body)!;
 
     const from = fromRegExp.exec(body)?.[1];
     const author = authorRegExp.exec(body)?.[1];
@@ -77,7 +77,7 @@ export const mainInfoHandler: RequestHandler<
       from,
       author,
       editor,
-      pageViews: Number(await pageViewResponse.text()),
+      pageView: Number(await pageViewResponse.text()),
       content: await getRichTextNodes(content),
     });
   } catch (err) {

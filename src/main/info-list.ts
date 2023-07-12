@@ -4,7 +4,7 @@ import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 
 const bodyRegExp = /<tbody>([\s\S]*?)<\/tbody>/;
 const totalPageRegExp = /_simple_list_gotopage_fun\((\d+),/;
-const pageViewsRegExp =
+const pageViewRegExp =
   /\[(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\],"wbnews", /;
 const noticeItemRegExp =
   /<a href="(?:\.\.\/)+([^"]+)"[^>]+>([^<]+)<\/a>\s*<\/h2>\s*<\/td>\s*<td class="news-table-department">\s*<span id="sou1">([^<]*)<\/span>\s*<\/td>\s*<td class="news-table-date">\s+<span>([^<]*)<\/span>/g;
@@ -25,7 +25,7 @@ export interface InfoItem {
   from: string;
   time: string;
   url: string;
-  pageViews: number;
+  pageView: number;
 }
 
 export interface MainInfoListSuccessResponse {
@@ -94,7 +94,7 @@ export const mainInfoListHandler: RequestHandler<
 
     totalPageState[type] = Number(totalPageRegExp.exec(text)![1]);
 
-    const pageViews = pageViewsRegExp.exec(text)!.slice(1).map(Number);
+    const pageView = pageViewRegExp.exec(text)!.slice(1).map(Number);
     const data = Array.from(
       bodyRegExp
         .exec(text)![1]
@@ -104,7 +104,7 @@ export const mainInfoListHandler: RequestHandler<
       title,
       from,
       time,
-      pageViews: pageViews[index],
+      pageView: pageView[index],
     }));
 
     return res.json(<MainInfoListSuccessResponse>{
