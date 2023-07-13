@@ -4,7 +4,12 @@ import type { Cookie } from "set-cookie-parser";
 import { underSystemLogin } from "./login.js";
 import { getTimeStamp } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import type { CookieOptions, EmptyObject, LoginOptions } from "../typings.js";
+import type {
+  CommonFailedResponse,
+  CookieOptions,
+  EmptyObject,
+  LoginOptions,
+} from "../typings.js";
 import { IE_8_USER_AGENT, getCookieHeader } from "../utils/index.js";
 
 type CourseType =
@@ -297,6 +302,13 @@ export const underGradeListHandler: RequestHandler<
     );
 
     const content = await response.text();
+
+    if (content.includes("评教未完成，不能查询成绩！"))
+      return res.json(<CommonFailedResponse>{
+        success: false,
+        status: "failed",
+        msg: "评教未完成，不能查询成绩！",
+      });
 
     const gradeList = await getGradeLists(cookies, content);
 
