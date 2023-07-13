@@ -187,7 +187,7 @@ export const authLogin = async (
       success: false,
       status: "failed",
       type: "captcha",
-      msg: "需要验证码",
+      msg: "需要验证码，请访问官网统一身份认证网页进行登录。成功登录后即可消除验证码。",
     };
 
   if (response.status === 302) {
