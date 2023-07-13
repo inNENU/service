@@ -37,6 +37,16 @@ interface UserGradeListExtraOptions {
 export type UserGradeListOptions = (LoginOptions | CookieOptions) &
   UserGradeListExtraOptions;
 
+export interface ScoreDetail {
+  score: number;
+  percent: number;
+}
+
+export interface GradeDetail {
+  usual: ScoreDetail[];
+  exam: ScoreDetail;
+}
+
 export interface GradeResult {
   /** 修读时间 */
   time: string;
@@ -48,6 +58,8 @@ export interface GradeResult {
   difficulty: number;
   /** 分数 */
   grade: number;
+  /** 分数详情 */
+  gradeDetail: GradeDetail | null;
   /** 绩点成绩 */
   gradePoint: number;
   /** 成绩标志 */
@@ -87,7 +99,9 @@ const gradeItemRegExp = /<tr.+?class="smartTr"[^>]*?>(.*?)<\/tr>/g;
 const jsGradeItemRegExp = /<tr.+?class=\\"smartTr\\"[^>]*?>(.*?)<\/tr>/g;
 const gradeCellRegExp =
   /^(?:<td[^>]*?>[^<]*?<\/td>){3}<td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^>]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^>]*?)<\/td><td[^>]*?>(.*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td>/;
-const gradeNumberRegExp = /<a[^>]*?>([^<]*?)<\/a>/;
+const gradeRegExp = /<a.*?JsMod\('([^']*?)'.*?>([^<]*?)<\/a>/;
+const gradeDetailRegExp =
+  /<tr.*class="smartTr"[^>]+><td[^>]*>([^<]*)<\/td><td[^>]*>([^<]*)<\/td><td[^>]*>([^<]*)<\/td><td[^>]*>([^<]*)<\/td><td[^>]*>([^<]*)<\/td><td[^>]*>([^<]*)<\/td><td[^>]*>([^<]*)<\/td><td[^>]*>([^<]*)<\/td><\/tr>/;
 
 const tableFieldsRegExp =
   /<input type="hidden"\s+name\s*=\s*"tableFields"\s+id\s*=\s*"tableFields"\s+value="([^"]+?)">/;
@@ -115,7 +129,7 @@ const otherFieldsRegExp =
 const xsIdRegExp =
   /<input\s+type="hidden"\s+name\s*=\s*"xsId"\s+id\s*=\s*"xsId"\s+value="([^"]*?)" \/>/;
 
-const courseTypes: Record<CourseType, string> = {
+const COURSE_TYPES: Record<CourseType, string> = {
   通识教育必修课: "01",
   通识教育选修课: "02",
   专业教育必修课: "03",
@@ -128,15 +142,34 @@ const courseTypes: Record<CourseType, string> = {
   教师教育选修课: "12",
 };
 
+const SERVER = "https://dsjx.webvpn.nenu.edu.cn";
+
 const getDisplayTime = (time: string): string => {
   const [startYear, endYear, semester] = time.split("-");
 
   return semester === "1" ? `${startYear}年秋季学期` : `${endYear}年春季学期`;
 };
 
-export const getGrades = (content: string, isJS = false): GradeResult[] =>
-  Array.from(content.matchAll(isJS ? jsGradeItemRegExp : gradeItemRegExp)).map(
-    ([, item]) => {
+const getScoreDetail = (content: string): ScoreDetail | null => {
+  if (!content.match(/[\d.]+\/\d+%/) || content === "0/0%") return null;
+
+  const [score, percent] = content.split("/");
+
+  return {
+    score: Number(score),
+    percent: Number(percent.replace("%", "")),
+  };
+};
+
+export const getGrades = (
+  cookies: Cookie[],
+  content: string,
+  isJS = false,
+): Promise<GradeResult[]> =>
+  Promise.all(
+    Array.from(
+      content.matchAll(isJS ? jsGradeItemRegExp : gradeItemRegExp),
+    ).map(async ([, item]) => {
       const [
         ,
         time,
@@ -157,16 +190,47 @@ export const getGrades = (content: string, isJS = false): GradeResult[] =>
       ] = Array.from(gradeCellRegExp.exec(item)!).map((item) =>
         item.replace(/&nbsp;/g, " ").trim(),
       );
+      const [, gradeLink, gradeNumber] = gradeRegExp.exec(grade) || [];
+
+      console.log(gradeLink, gradeNumber);
 
       const actualDifficulty = Number(difficulty) || 1;
-      const actualGrade = grade
-        ? Number(gradeNumberRegExp.exec(grade)![1]) ||
-          Math.round(
-            (Number(gradePoint) / Number(point) / actualDifficulty) * 10 + 50,
-          )
-        : Math.round(
-            (Number(gradePoint) / Number(point) / actualDifficulty) * 10 + 50,
-          );
+
+      const actualGrade =
+        gradeNumber && !Number.isNaN(Number(gradeNumber))
+          ? Number(gradeNumber)
+          : Math.round(
+              (Number(gradePoint) / Number(point) / actualDifficulty) * 10 + 50,
+            );
+
+      let gradeDetail: GradeDetail | null = null;
+
+      if (gradeLink) {
+        const gradeDetailResponse = await fetch(
+          `${SERVER}${gradeLink}&tktime=${getTimeStamp()}`,
+          {
+            headers: {
+              Cookie: getCookieHeader(cookies),
+            },
+          },
+        );
+
+        const content = await gradeDetailResponse.text();
+
+        if (gradeDetailResponse.status === 200) {
+          const [, grade1, grade2, grade3, grade4, grade5, grade6, examGrade] =
+            gradeDetailRegExp.exec(content)!;
+
+          const usualGrades = [grade1, grade2, grade3, grade4, grade5, grade6]
+            .map((item) => getScoreDetail(item))
+            .filter((item): item is ScoreDetail => !!item);
+
+          gradeDetail = {
+            usual: usualGrades,
+            exam: getScoreDetail(examGrade)!,
+          };
+        }
+      }
 
       return {
         time: time.substring(2, time.length - 3),
@@ -174,6 +238,7 @@ export const getGrades = (content: string, isJS = false): GradeResult[] =>
         name,
         difficulty: Number(difficulty) || 1,
         grade: actualGrade,
+        gradeDetail,
         gradePoint: actualGrade < 60 ? 0 : Number(gradePoint),
         mark,
         courseType,
@@ -185,14 +250,14 @@ export const getGrades = (content: string, isJS = false): GradeResult[] =>
         reLearn: reLearn ? getDisplayTime(reLearn) : "",
         status,
       };
-    },
+    }),
   );
 
 export const getGradeLists = async (
   cookies: Cookie[],
   content: string,
 ): Promise<GradeResult[]> => {
-  const grades = getGrades(content);
+  const grades = await getGrades(cookies, content);
   const totalPages = Number(totalPagesRegExp.exec(content)![1]);
 
   console.log("Total pages:", totalPages);
@@ -229,14 +294,13 @@ export const getGradeLists = async (
     });
 
     const response = await fetch(
-      `https://dsjx.webvpn.nenu.edu.cn/xszqcjglAction.do?method=queryxscj`,
+      `${SERVER}/xszqcjglAction.do?method=queryxscj`,
       {
         method: "POST",
         headers: {
           Cookie: getCookieHeader(cookies),
           "Content-Type": "application/x-www-form-urlencoded",
-          Referer:
-            "https://dsjx.webvpn.nenu.edu.cn/xszqcjglAction.do?method=queryxscj",
+          Referer: `${SERVER}/xszqcjglAction.do?method=queryxscj`,
           "User-Agent": IE_8_USER_AGENT,
         },
         body: params.toString(),
@@ -245,7 +309,7 @@ export const getGradeLists = async (
 
     const responseText = await response.text();
 
-    const newGrades = getGrades(responseText, true);
+    const newGrades = await getGrades(cookies, responseText, true);
 
     grades.push(...newGrades);
   }
@@ -280,7 +344,7 @@ export const underGradeListHandler: RequestHandler<
 
     const params = new URLSearchParams({
       kksj: time,
-      kcxz: courseType ? courseTypes[courseType] || "" : "",
+      kcxz: courseType ? COURSE_TYPES[courseType] || "" : "",
       kcmc: name,
       xsfs: gradeType === "best" ? "zhcj" : gradeType === "all" ? "qbcj" : "",
       ok: "",
@@ -289,12 +353,13 @@ export const underGradeListHandler: RequestHandler<
     console.log("Requesting with params:", params);
 
     const response = await fetch(
-      `https://dsjx.webvpn.nenu.edu.cn/xszqcjglAction.do?method=queryxscj`,
+      `${SERVER}/xszqcjglAction.do?method=queryxscj`,
       {
         method: "POST",
         headers: {
           Cookie: getCookieHeader(cookies),
-          Referer: `https://dsjx.webvpn.nenu.educn/jiaowu/cjgl/xszq/query_xscj.jsp?tktime=${getTimeStamp()}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+          Referer: `${SERVER}/jiaowu/cjgl/xszq/query_xscj.jsp?tktime=${getTimeStamp()}`,
           "User-Agent": IE_8_USER_AGENT,
         },
         body: params.toString(),
