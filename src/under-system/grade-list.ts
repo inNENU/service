@@ -169,7 +169,7 @@ export const getGrades = (content: string, isJS = false): GradeResult[] =>
         name,
         difficulty: Number(difficulty) || 1,
         grade: actualGrade,
-        gradePoint: Number(gradePoint),
+        gradePoint: actualGrade < 60 ? 0 : Number(gradePoint),
         mark,
         courseType,
         commonType,
