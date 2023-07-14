@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
-import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 import { MAIN_URL } from "./utils.js";
+import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 
 const listBodyRegExp = /<tbody>([\s\S]*?)<\/tbody>/;
 const totalPageRegExp = /_simple_list_gotopage_fun\((\d+),/;
@@ -47,7 +47,6 @@ const type2ID = {
   news: "dsxw1",
   academic: "xshd1",
 };
-
 
 const totalPageState: Record<string, number> = {};
 

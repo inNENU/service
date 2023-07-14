@@ -1,13 +1,11 @@
 import type { AnyNode } from "cheerio";
-import { load } from "cheerio";
 
+import { parseHTML } from "./parser.js";
 import { ALLOWED_TAGS } from "../config/allowedTags";
-
-const $ = load("");
 
 export const getText = (content: string | AnyNode[]): string => {
   const nodes =
-    typeof content === "string" ? $.parseHTML(content) || [] : content;
+    typeof content === "string" ? parseHTML(content) || [] : content;
 
   return nodes
     .map((node) => {
@@ -106,7 +104,7 @@ export const getRichTextNodes = async (
   content: string,
   options: GetNodeOptions = {},
 ): Promise<Node[]> => {
-  const rootNodes = $.parseHTML(content) || [];
+  const rootNodes = parseHTML(content) || [];
 
   return (
     await Promise.all(rootNodes.map((node) => handleNode(node, options)))

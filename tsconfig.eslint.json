@@ -19,5 +19,5 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "rollup.config.ts"]
+  "include": ["src", "scripts", "rollup.config.ts"]
 }
