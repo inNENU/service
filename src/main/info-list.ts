@@ -5,7 +5,7 @@ import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 const bodyRegExp = /<tbody>([\s\S]*?)<\/tbody>/;
 const totalPageRegExp = /_simple_list_gotopage_fun\((\d+),/;
 const pageViewRegExp =
-  /\[(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\],"wbnews", /;
+  /\[(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\],"wbnews", (\d+)\)/;
 const noticeItemRegExp =
   /<a href="(?:\.\.\/)+([^"]+)"[^>]+>([^<]+)<\/a>\s*<\/h2>\s*<\/td>\s*<td class="news-table-department">\s*<span id="sou1">([^<]*)<\/span>\s*<\/td>\s*<td class="news-table-date">\s+<span>([^<]*)<\/span>/g;
 const newsItemRegExp =
@@ -47,6 +47,8 @@ const type2ID = {
   academic: "xshd1",
 };
 
+const SERVER = "https://www.nenu.edu.cn";
+
 const totalPageState: Record<string, number> = {};
 
 export const mainInfoListHandler: RequestHandler<
@@ -77,10 +79,8 @@ export const mainInfoListHandler: RequestHandler<
 
     const response = await fetch(
       totalPage && page !== 1
-        ? `https://www.nenu.edu.cn/index/${type2ID[type]}/${
-            totalPage - page
-          }.htm`
-        : `https://www.nenu.edu.cn/index/${type2ID[type]}.htm`,
+        ? `${SERVER}/index/${type2ID[type]}/${totalPage - page}.htm`
+        : `${SERVER}/index/${type2ID[type]}.htm`,
     );
 
     if (response.status !== 200)
@@ -94,7 +94,18 @@ export const mainInfoListHandler: RequestHandler<
 
     totalPageState[type] = Number(totalPageRegExp.exec(text)![1]);
 
-    const pageView = pageViewRegExp.exec(text)!.slice(1).map(Number);
+    const matched = pageViewRegExp.exec(text)!.slice(1).map(Number);
+
+    const owner = matched.pop();
+
+    const pageViewResponse = await fetch(
+      `${SERVER}/system/resource/code/news/click/dynclicksbatch.jsp?clickids=${matched.join(
+        ",",
+      )}&owner=${owner}&clicktype=wbnews`,
+    );
+
+    const pageViews = (await pageViewResponse.text()).split(",").map(Number);
+
     const data = Array.from(
       bodyRegExp
         .exec(text)![1]
@@ -104,7 +115,7 @@ export const mainInfoListHandler: RequestHandler<
       title,
       from,
       time,
-      pageView: pageView[index],
+      pageView: pageViews[index],
     }));
 
     return res.json(<MainInfoListSuccessResponse>{
