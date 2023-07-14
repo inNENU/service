@@ -44,7 +44,7 @@ export interface ScoreDetail {
 
 export interface GradeDetail {
   usual: ScoreDetail[];
-  exam: ScoreDetail;
+  exam: ScoreDetail | null;
 }
 
 export interface GradeResult {
@@ -191,9 +191,6 @@ export const getGrades = (
         item.replace(/&nbsp;/g, " ").trim(),
       );
       const [, gradeLink, gradeNumber] = gradeRegExp.exec(grade) || [];
-
-      console.log(gradeLink, gradeNumber);
-
       const actualDifficulty = Number(difficulty) || 1;
 
       const actualGrade =
@@ -218,17 +215,30 @@ export const getGrades = (
         const content = await gradeDetailResponse.text();
 
         if (gradeDetailResponse.status === 200) {
-          const [, grade1, grade2, grade3, grade4, grade5, grade6, examGrade] =
-            gradeDetailRegExp.exec(content)!;
+          const matched = gradeDetailRegExp.exec(content);
 
-          const usualGrades = [grade1, grade2, grade3, grade4, grade5, grade6]
-            .map((item) => getScoreDetail(item))
-            .filter((item): item is ScoreDetail => !!item);
+          if (matched) {
+            const [
+              ,
+              grade1,
+              grade2,
+              grade3,
+              grade4,
+              grade5,
+              grade6,
+              examGrade,
+            ] = matched;
+            const usualGrades = [grade1, grade2, grade3, grade4, grade5, grade6]
+              .map((item) => getScoreDetail(item))
+              .filter((item): item is ScoreDetail => !!item);
+            const exam = getScoreDetail(examGrade);
 
-          gradeDetail = {
-            usual: usualGrades,
-            exam: getScoreDetail(examGrade)!,
-          };
+            if (exam || usualGrades.length)
+              gradeDetail = {
+                usual: usualGrades,
+                exam,
+              };
+          }
         }
       }
 
