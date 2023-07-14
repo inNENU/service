@@ -1,7 +1,6 @@
 import type { RequestHandler } from "express";
-import type { Cookie } from "set-cookie-parser";
 
-import type { CommonFailedResponse } from "../typings.js";
+import type { CommonFailedResponse, Cookie } from "../typings.js";
 import { getCookieHeader, getCookies } from "../utils/index.js";
 
 export interface GetUnderAdmissionResponse {

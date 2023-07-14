@@ -1,5 +1,6 @@
-import type { Cookie } from "set-cookie-parser";
 import { parse, splitCookiesString } from "set-cookie-parser";
+
+import type { Cookie } from "../typings.js";
 
 export const parseCookieValue = (cookieHeader: string): string =>
   cookieHeader.split(";")[0].trim();

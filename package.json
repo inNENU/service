@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "rollup -c rollup.config.ts --configPlugin esbuild",
+    "bundle:cookie": "rollup -c scripts/cookie.ts --configPlugin esbuild",
     "bundle:parser": "rollup -c scripts/parser.ts --configPlugin esbuild",
     "debug": "pnpm build && node dist/index.js",
     "dev": "cross-env tsx src/index.ts",

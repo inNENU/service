@@ -1,11 +1,10 @@
 import type { RequestHandler } from "express";
-import type { Cookie } from "set-cookie-parser";
 
 import { SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
-import type { EmptyObject, LoginOptions } from "../typings.js";
+import type { Cookie, EmptyObject, LoginOptions } from "../typings.js";
 import { getCookieHeader, getCookies } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/login.js";
 import { vpnCASLogin } from "../vpn/login.js";

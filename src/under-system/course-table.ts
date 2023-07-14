@@ -1,11 +1,15 @@
 import type { RequestHandler } from "express";
-import type { Cookie } from "set-cookie-parser";
 
 import { underSystemLogin } from "./login.js";
 import { SERVER, getTimeStamp } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { semesterStartTime } from "../config/semester-start-time.js";
-import type { CookieOptions, EmptyObject, LoginOptions } from "../typings.js";
+import type {
+  Cookie,
+  CookieOptions,
+  EmptyObject,
+  LoginOptions,
+} from "../typings.js";
 import { IE_8_USER_AGENT, getCookieHeader } from "../utils/index.js";
 
 export interface ClassItem {

@@ -1,10 +1,10 @@
 import CryptoJS from "crypto-js";
 import type { RequestHandler } from "express";
-import type { Cookie } from "set-cookie-parser";
 
 import { AUTH_SERVER, WEB_VPN_AUTH_SERVER } from "./utils.js";
 import type {
   CommonFailedResponse,
+  Cookie,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";

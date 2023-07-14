@@ -1,10 +1,10 @@
 import type { RequestHandler } from "express";
-import type { Cookie } from "set-cookie-parser";
 
 import { authLogin } from "./login.js";
 import { AUTH_SERVER } from "./utils.js";
 import type {
   CommonFailedResponse,
+  Cookie,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";

@@ -5,10 +5,10 @@ import esbuild from "rollup-plugin-esbuild";
 
 export default [
   {
-    input: "./src/module/parser.ts",
+    input: "./src/module/cookie.ts",
     output: [
       {
-        file: "./dist/parser.js",
+        file: "./dist/cookie.js",
         format: "cjs",
         sourcemap: true,
       },
@@ -24,10 +24,10 @@ export default [
     ],
   },
   {
-    input: "./src/module/parser.ts",
+    input: "./src/module/cookie.ts",
     output: [
       {
-        file: "./dist/parser.d.ts",
+        file: "./dist/cookie.d.ts",
         format: "esm",
         sourcemap: true,
       },
