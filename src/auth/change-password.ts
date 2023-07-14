@@ -1,6 +1,7 @@
 import type { RequestHandler } from "express";
 
 import { authLogin, customEncryptAES, saltRegExp } from "./login.js";
+import { AUTH_SERVER } from "./utils.js";
 import type {
   CommonFailedResponse,
   EmptyObject,
@@ -43,7 +44,7 @@ export const changePasswordHandler: RequestHandler<
       console.log("Getting params", req.body);
 
       const changePasswordResponse = await fetch(
-        "https://authserver.nenu.edu.cn/authserver/passwordChange.do",
+        `${AUTH_SERVER}/authserver/passwordChange.do`,
         {
           method: "POST",
           headers: {
@@ -85,7 +86,7 @@ export const changePasswordHandler: RequestHandler<
       const authCookieHeader = getCookieHeader(result.cookies);
 
       const passwordChangePageResponse = await fetch(
-        "https://authserver.nenu.edu.cn/authserver/passwordChange.do",
+        `${AUTH_SERVER}/authserver/passwordChange.do`,
         {
           method: "GET",
           headers: {
@@ -98,13 +99,12 @@ export const changePasswordHandler: RequestHandler<
       const salt = saltRegExp.exec(passwordPageContent)![1];
 
       const recaptchaResponse = await fetch(
-        `https://authserver.nenu.edu.cn/authserver/captcha.html?ts=${new Date().getMilliseconds()}`,
+        `${AUTH_SERVER}/authserver/captcha.html?ts=${new Date().getMilliseconds()}`,
         {
           method: "GET",
           headers: {
             Cookie: authCookieHeader,
-            Referer:
-              "https://authserver.nenu.edu.cn/authserver/userAttributesEdit.do",
+            Referer: `${AUTH_SERVER}/authserver/userAttributesEdit.do`,
           },
         },
       );

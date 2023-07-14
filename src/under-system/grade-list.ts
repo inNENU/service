@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 import type { Cookie } from "set-cookie-parser";
 
 import { underSystemLogin } from "./login.js";
-import { getTimeStamp } from "./utils.js";
+import { SERVER, getTimeStamp } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type {
   CommonFailedResponse,
@@ -141,8 +141,6 @@ const COURSE_TYPES: Record<CourseType, string> = {
   教师教育必修课: "11",
   教师教育选修课: "12",
 };
-
-const SERVER = "https://dsjx.webvpn.nenu.edu.cn";
 
 const getDisplayTime = (time: string): string => {
   const [startYear, endYear, semester] = time.split("-");

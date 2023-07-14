@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 import type { Cookie } from "set-cookie-parser";
 
 import { authLogin } from "./login.js";
+import { AUTH_SERVER } from "./utils.js";
 import type {
   CommonFailedResponse,
   EmptyObject,
@@ -29,15 +30,12 @@ const userNameRegexp =
 const inputRegExp = /id="alias".*?value="(.*?)"/;
 
 export const getInfo = async (cookies: Cookie[]): Promise<InfoResponse> => {
-  const userNameResponse = await fetch(
-    "https://authserver.nenu.edu.cn/authserver/index.do",
-    {
-      method: "GET",
-      headers: {
-        Cookie: getCookieHeader(cookies),
-      },
+  const userNameResponse = await fetch(`${AUTH_SERVER}/authserver/index.do`, {
+    method: "GET",
+    headers: {
+      Cookie: getCookieHeader(cookies),
     },
-  );
+  });
 
   const userNameResponseText = await userNameResponse.text();
 
@@ -53,7 +51,7 @@ export const getInfo = async (cookies: Cookie[]): Promise<InfoResponse> => {
     };
 
   const emailResponse = await fetch(
-    "https://authserver.nenu.edu.cn/authserver/userAttributesEdit.do",
+    `${AUTH_SERVER}/authserver/userAttributesEdit.do`,
     {
       method: "GET",
       headers: {

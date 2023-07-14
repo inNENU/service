@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 import type { Cookie } from "set-cookie-parser";
 
 import { actionLogin } from "./login.js";
+import { SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type {
   CommonFailedResponse,
@@ -67,7 +68,7 @@ export const noticeHandler: RequestHandler<
       ({ cookies } = result);
     }
 
-    const url = `https://m-443.webvpn.nenu.edu.cn/page/viewNews?ID=${noticeID}`;
+    const url = `${SERVER}/page/viewNews?ID=${noticeID}`;
 
     const response = await fetch(url, {
       headers: {
@@ -94,7 +95,7 @@ export const noticeHandler: RequestHandler<
       pageView: Number(pageView),
       content: await getRichTextNodes(content, {
         getLinkText: (link) =>
-          link.startsWith("https://m-443.webvpn.nenu.edu.cn") ||
+          link.startsWith(SERVER) ||
           link.startsWith("https://my.webvpn.nenu.edu.cn")
             ? null
             : link,

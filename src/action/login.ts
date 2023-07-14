@@ -1,8 +1,10 @@
 import type { RequestHandler } from "express";
 import type { Cookie } from "set-cookie-parser";
 
+import { SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
-import { WEB_VPN_AUTH_SERVER, authLogin } from "../auth/login.js";
+import { authLogin } from "../auth/login.js";
+import { WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
 import type { EmptyObject, LoginOptions } from "../typings.js";
 import { getCookieHeader, getCookies } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/login.js";
@@ -29,7 +31,7 @@ export const actionLogin = async (
   if (!vpnLoginResult.success) return vpnLoginResult;
 
   const result = await authLogin(options, {
-    service: "https://m-443.webvpn.nenu.edu.cn/portal_main/toPortalPage",
+    service: `${SERVER}/portal_main/toPortalPage`,
     webVPN: true,
     cookies: vpnLoginResult.cookies,
   });
@@ -83,11 +85,7 @@ export const actionLogin = async (
 
   const finalLocation = ticketResponse.headers.get("Location");
 
-  if (
-    finalLocation?.startsWith(
-      "https://m-443.webvpn.nenu.edu.cn/portal_main/toPortalPage",
-    )
-  )
+  if (finalLocation?.startsWith(`${SERVER}/portal_main/toPortalPage`))
     return <ActionLoginSuccessResponse>{
       success: true,
       status: "success",

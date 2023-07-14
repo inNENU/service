@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 import type { Cookie } from "set-cookie-parser";
 
 import { actionLogin } from "./login.js";
+import { SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type {
   CommonFailedResponse,
@@ -55,20 +56,16 @@ export const cardBalanceHandler: RequestHandler<
       ({ cookies } = result);
     }
 
-    const response = await fetch(
-      "https://m-443.webvpn.nenu.edu.cn/soapBasic/postSoap",
-      {
-        method: "POST",
-        headers: {
-          Accept: "application/json, text/javascript, */*; q=0.01",
-          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-          Cookie: getCookieHeader(cookies),
-          Referer:
-            "https://m-443.webvpn.nenu.edu.cn//basicInfo/studentPageTurn?type=lifeschool",
-        },
-        body: "serviceAddress=wis-apis%2Fsoap%2F00001_00083_01_02_20181210185800&serviceSource=ds2&params=%7B%22xgh%22%3Anull%7D",
+    const response = await fetch(`${SERVER}/soapBasic/postSoap`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json, text/javascript, */*; q=0.01",
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        Cookie: getCookieHeader(cookies),
+        Referer: `${SERVER}/basicInfo/studentPageTurn?type=lifeschool`,
       },
-    );
+      body: "serviceAddress=wis-apis%2Fsoap%2F00001_00083_01_02_20181210185800&serviceSource=ds2&params=%7B%22xgh%22%3Anull%7D",
+    });
 
     const data = <RawCardBalanceData>await response.json();
 

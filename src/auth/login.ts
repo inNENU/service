@@ -2,6 +2,7 @@ import CryptoJS from "crypto-js";
 import type { RequestHandler } from "express";
 import type { Cookie } from "set-cookie-parser";
 
+import { AUTH_SERVER, WEB_VPN_AUTH_SERVER } from "./utils.js";
 import type {
   CommonFailedResponse,
   EmptyObject,
@@ -35,9 +36,6 @@ export const customEncryptAES = (password: string, key: string): string => {
     padding: CryptoJS.pad.Pkcs7,
   }).toString();
 };
-
-export const AUTH_SERVER = "https://authserver.nenu.edu.cn";
-export const WEB_VPN_AUTH_SERVER = "https://authserver-443.webvpn.nenu.edu.cn";
 
 const COMMON_HEADERS = {
   DNT: "1",

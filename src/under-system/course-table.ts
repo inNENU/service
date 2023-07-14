@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 import type { Cookie } from "set-cookie-parser";
 
 import { underSystemLogin } from "./login.js";
-import { getTimeStamp } from "./utils.js";
+import { SERVER, getTimeStamp } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { semesterStartTime } from "../config/semester-start-time.js";
 import type { CookieOptions, EmptyObject, LoginOptions } from "../typings.js";
@@ -96,11 +96,11 @@ export const underCourseTableHandler: RequestHandler<
     console.log("Requesting with params:", params);
 
     const response = await fetch(
-      `https://dsjx.webvpn.nenu.edu.cn/tkglAction.do?${params.toString()}`,
+      `${SERVER}/tkglAction.do?${params.toString()}`,
       {
         headers: {
           Cookie: getCookieHeader(cookies),
-          Referer: `https://dsjx.webvpn.nenu.edu.cn/tkglAction.do?method=kbxxXs&tktime=${getTimeStamp().toString()}`,
+          Referer: `${SERVER}/tkglAction.do?method=kbxxXs&tktime=${getTimeStamp().toString()}`,
           "User-Agent": IE_8_USER_AGENT,
         },
       },

@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 import type { Cookie } from "set-cookie-parser";
 
 import { actionLogin } from "./login.js";
+import { SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type {
   CommonFailedResponse,
@@ -140,14 +141,12 @@ export const borrowBooksHandler: RequestHandler<
     const headers = {
       Accept: "application/json, text/javascript, */*; q=0.01",
       Cookie: getCookieHeader(cookies),
-      Referer:
-        "https://m-443.webvpn.nenu.edu.cn//basicInfo/studentPageTurn?type=lifestudying&tg=bookborrow",
+      Referer: `${SERVER}/basicInfo/studentPageTurn?type=lifestudying&tg=bookborrow`,
     };
 
-    const response = await fetch(
-      "https://m-443.webvpn.nenu.edu.cn/basicInfo/getBookBorrow",
-      { headers },
-    );
+    const response = await fetch(`${SERVER}/basicInfo/getBookBorrow`, {
+      headers,
+    });
 
     const data = <RawBorrowBooksData>await response.json();
 

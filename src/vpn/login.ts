@@ -62,8 +62,7 @@ export const vpnCASLogin = async ({
     const authResult = await authLogin(
       { id, password },
       {
-        service:
-          "https://webvpn.nenu.edu.cn/users/auth/cas/callback?url=https%3A%2F%2Fwebvpn.nenu.edu.cn%2Fusers%2Fsign_in",
+        service: `${VPN_SERVER}/users/auth/cas/callback?url=https%3A%2F%2Fwebvpn.nenu.edu.cn%2Fusers%2Fsign_in`,
       },
     );
 

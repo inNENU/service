@@ -1,8 +1,10 @@
 import type { RequestHandler } from "express";
 import type { Cookie } from "set-cookie-parser";
 
+import { SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
-import { WEB_VPN_AUTH_SERVER, authLogin } from "../auth/login.js";
+import { authLogin } from "../auth/login.js";
+import { WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
 import type { EmptyObject, LoginOptions } from "../typings.js";
 import {
   IE_8_USER_AGENT,
@@ -94,12 +96,12 @@ export const underSystemLogin = async (
   const finalLocation = ticketResponse.headers.get("Location");
 
   if (finalLocation?.includes(";jsessionid=")) {
-    await fetch("https://dsjx.webvpn.nenu.edu.cn/Logon.do?method=logonBySSO", {
+    await fetch(`${SERVER}/Logon.do?method=logonBySSO`, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
         Cookie: getCookieHeader(authCookies),
-        Referer: "https://dsjx.webvpn.nenu.edu.cn/framework/main.jsp",
+        Referer: `${SERVER}/framework/main.jsp`,
         "User-Agent": IE_8_USER_AGENT,
       },
     });

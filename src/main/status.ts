@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 
+import { MAIN_URL } from "./utils.js";
 import type { CommonFailedResponse } from "../typings.js";
 import type { Node } from "../utils/index.js";
 import { getRichTextNodes } from "../utils/index.js";
@@ -19,7 +20,7 @@ export type MainStatusResponse =
 
 export const mainStatusHandler: RequestHandler = async (_, res) => {
   try {
-    const response = await fetch("https://www.nenu.edu.cn/xxgk1/xqtj1.htm");
+    const response = await fetch(`${MAIN_URL}/xxgk1/xqtj1.htm`);
 
     if (response.status !== 200)
       return res.json(<CommonFailedResponse>{

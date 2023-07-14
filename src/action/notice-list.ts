@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 import type { Cookie } from "set-cookie-parser";
 
 import { actionLogin } from "./login.js";
+import { SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type {
   CommonFailedResponse,
@@ -98,8 +99,7 @@ export const noticeListHandler: RequestHandler<
       Accept: "application/json, text/javascript, */*; q=0.01",
       "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
       Cookie: getCookieHeader(cookies),
-      Referer:
-        "https://m-443.webvpn.nenu.edu.cn//basicInfo/studentPageTurn?type=lifeschool",
+      Referer: `${SERVER}/basicInfo/studentPageTurn?type=lifeschool`,
     };
 
     const params = new URLSearchParams({
@@ -110,14 +110,11 @@ export const noticeListHandler: RequestHandler<
       page: page.toString(),
     });
 
-    const response = await fetch(
-      "https://m-443.webvpn.nenu.edu.cn/page/queryList",
-      {
-        method: "POST",
-        headers,
-        body: params.toString(),
-      },
-    );
+    const response = await fetch(`${SERVER}/page/queryList`, {
+      method: "POST",
+      headers,
+      body: params.toString(),
+    });
 
     const { data, pageIndex, pageSize, totalCount, totalPage } = <
       RawNoticeListData

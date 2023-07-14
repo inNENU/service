@@ -1,30 +1,4 @@
-import type { Cookie } from "set-cookie-parser";
-
-import { IE_8_USER_AGENT, getCookieHeader } from "../utils/index.js";
-
-export const getSessionId = async (cookies: Cookie[]): Promise<string> => {
-  const sessionIdResponse = await fetch(
-    "https://dsjx.webvpn.nenu.edu.cn/dwr/engine.js",
-    {
-      headers: {
-        Cookie: getCookieHeader(cookies),
-        Referer:
-          "https://dsjx.webvpn.nenu.edu.cn/framework/menuleft.jsp?fater=&winid=win1",
-        "User-Agent": IE_8_USER_AGENT,
-      },
-    },
-  );
-
-  const sessionIdContent = await sessionIdResponse.text();
-
-  const sessionId = /dwr.engine._origScriptSessionId = "(.*?)";/.exec(
-    sessionIdContent,
-  )![1];
-
-  console.log("Getting new sessionId", sessionId);
-
-  return sessionId;
-};
+export const SERVER = "https://dsjx.webvpn.nenu.edu.cn";
 
 // IE always rounds the time to the nearest 100ms
 export const getTimeStamp = (): number => {

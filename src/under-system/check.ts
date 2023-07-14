@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 
+import { SERVER } from "./utils.js";
 import type {
   CommonFailedResponse,
   CookieOptions,
@@ -16,7 +17,7 @@ export const underSystemCheckHandler: RequestHandler<
 > = async (req, res) => {
   try {
     const response = await fetch(
-      "https://dsjx.webvpn.nenu.edu.cn/framework/grxx_edit.jsp?winid=win2",
+      `${SERVER}/framework/grxx_edit.jsp?winid=win2`,
       {
         headers: {
           Cookie: getCookieHeader(req.body.cookies),
