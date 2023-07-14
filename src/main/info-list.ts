@@ -1,8 +1,9 @@
 import type { RequestHandler } from "express";
 
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
+import { MAIN_URL } from "./utils.js";
 
-const bodyRegExp = /<tbody>([\s\S]*?)<\/tbody>/;
+const listBodyRegExp = /<tbody>([\s\S]*?)<\/tbody>/;
 const totalPageRegExp = /_simple_list_gotopage_fun\((\d+),/;
 const pageViewRegExp =
   /\[(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\],"wbnews", (\d+)\)/;
@@ -47,7 +48,6 @@ const type2ID = {
   academic: "xshd1",
 };
 
-const SERVER = "https://www.nenu.edu.cn";
 
 const totalPageState: Record<string, number> = {};
 
@@ -79,8 +79,8 @@ export const mainInfoListHandler: RequestHandler<
 
     const response = await fetch(
       totalPage && page !== 1
-        ? `${SERVER}/index/${type2ID[type]}/${totalPage - page}.htm`
-        : `${SERVER}/index/${type2ID[type]}.htm`,
+        ? `${MAIN_URL}/index/${type2ID[type]}/${totalPage - page}.htm`
+        : `${MAIN_URL}/index/${type2ID[type]}.htm`,
     );
 
     if (response.status !== 200)
@@ -99,7 +99,7 @@ export const mainInfoListHandler: RequestHandler<
     const owner = matched.pop();
 
     const pageViewResponse = await fetch(
-      `${SERVER}/system/resource/code/news/click/dynclicksbatch.jsp?clickids=${matched.join(
+      `${MAIN_URL}/system/resource/code/news/click/dynclicksbatch.jsp?clickids=${matched.join(
         ",",
       )}&owner=${owner}&clicktype=wbnews`,
     );
@@ -107,7 +107,7 @@ export const mainInfoListHandler: RequestHandler<
     const pageViews = (await pageViewResponse.text()).split(",").map(Number);
 
     const data = Array.from(
-      bodyRegExp
+      listBodyRegExp
         .exec(text)![1]
         .matchAll(type === "notice" ? noticeItemRegExp : newsItemRegExp),
     ).map(([, url, title, from, time], index) => ({

@@ -1,17 +1,18 @@
 import type { RequestHandler } from "express";
 
+import { MAIN_URL } from "./utils.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 import type { Node } from "../utils/index.js";
 import { getRichTextNodes, getText } from "../utils/index.js";
 
-const bodyRegExp =
+const infoBodyRegExp =
   /<div class="article-info">([\s\S]*?)<div class="wrapper" id="footer">/;
-const titleRegExp = /<h1 class="arti-title">([\s\S]*?)<\/h1>/;
-const timeRegExp = /<span class="arti-update">时间：([^<]*)<\/span>/;
-const fromRegExp = /<span class="arti-update">供稿单位：([^<]*)<\/span>/;
-const authorRegExp = /<span class="arti-update">撰稿：([^<]*)<\/span>/;
-const editorRegExp = /<span>网络编辑：<em>([^<]+?)<\/em><\/span>/;
-const contentRegExp =
+const infoTitleRegExp = /<h1 class="arti-title">([\s\S]*?)<\/h1>/;
+const infoTimeRegExp = /<span class="arti-update">时间：([^<]*)<\/span>/;
+const infoFromRegExp = /<span class="arti-update">供稿单位：([^<]*)<\/span>/;
+const infoAuthorRegExp = /<span class="arti-update">撰稿：([^<]*)<\/span>/;
+const infoEditorRegExp = /<span>网络编辑：<em>([^<]+?)<\/em><\/span>/;
+const infoContentRegExp =
   /<div class="v_news_content">([\s\S]+?)<\/div><\/div><div id="div_vote_id">/;
 const pageViewParamRegExp = /_showDynClicks\("wbnews",\s*(\d+),\s*(\d+)\)/;
 
@@ -43,7 +44,7 @@ export const mainInfoHandler: RequestHandler<
   try {
     const { url } = req.query;
 
-    const response = await fetch(`https://www.nenu.edu.cn/${url}`);
+    const response = await fetch(`${MAIN_URL}/${url}`);
 
     if (response.status !== 200)
       return res.json(<CommonFailedResponse>{
@@ -54,18 +55,18 @@ export const mainInfoHandler: RequestHandler<
 
     const text = await response.text();
 
-    const body = bodyRegExp.exec(text)![1];
-    const title = titleRegExp.exec(body)![1];
-    const time = timeRegExp.exec(body)![1];
-    const content = contentRegExp.exec(body)![1];
+    const body = infoBodyRegExp.exec(text)![1];
+    const title = infoTitleRegExp.exec(body)![1];
+    const time = infoTimeRegExp.exec(body)![1];
+    const content = infoContentRegExp.exec(body)![1];
     const [, owner, clickID] = pageViewParamRegExp.exec(body)!;
 
-    const from = fromRegExp.exec(body)?.[1];
-    const author = authorRegExp.exec(body)?.[1];
-    const editor = editorRegExp.exec(body)?.[1];
+    const from = infoFromRegExp.exec(body)?.[1];
+    const author = infoAuthorRegExp.exec(body)?.[1];
+    const editor = infoEditorRegExp.exec(body)?.[1];
 
     const pageViewResponse = await fetch(
-      `https://www.nenu.edu.cn/system/resource/code/news/click/dynclicks.jsp?clickid=${clickID}&owner=${owner}&clicktype=wbnews`,
+      `${MAIN_URL}/system/resource/code/news/click/dynclicks.jsp?clickid=${clickID}&owner=${owner}&clicktype=wbnews`,
     );
 
     return res.json(<MainInfoSuccessResponse>{
@@ -84,8 +85,7 @@ export const mainInfoHandler: RequestHandler<
               ? `img ${className}`
               : "img"
             : className ?? null,
-        getImageSrc: (src) =>
-          src.startsWith("/") ? `https://www.nenu.edu.cn${src}` : src,
+        getImageSrc: (src) => (src.startsWith("/") ? `${MAIN_URL}${src}` : src),
       }),
     });
   } catch (err) {
