@@ -16,7 +16,7 @@ export const underSystemCheckHandler: RequestHandler<
 > = async (req, res) => {
   try {
     const response = await fetch(
-      "https://dsjx.webvpn.nenu.edu.cn/framework/main.jsp",
+      "https://dsjx.webvpn.nenu.edu.cn/framework/grxx_edit.jsp?winid=win2",
       {
         headers: {
           Cookie: getCookieHeader(req.body.cookies),
@@ -26,12 +26,22 @@ export const underSystemCheckHandler: RequestHandler<
       },
     );
 
-    if (response.status === 200)
+    if (response.status === 200) {
+      const text = await response.text();
+
+      if (text.includes("您登录后过长时间没有操作或您的用户名已经在别处登录！"))
+        return res.json(<CookieVerifySuccessResponse>{
+          success: true,
+          status: "success",
+          valid: false,
+        });
+
       return res.json(<CookieVerifySuccessResponse>{
         success: true,
         status: "success",
         valid: true,
       });
+    }
 
     return res.json(<CookieVerifySuccessResponse>{
       success: true,
