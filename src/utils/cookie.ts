@@ -2,9 +2,6 @@ import { parse, splitCookiesString } from "set-cookie-parser";
 
 import type { Cookie } from "../typings.js";
 
-export const parseCookieValue = (cookieHeader: string): string =>
-  cookieHeader.split(";")[0].trim();
-
 export const getCookies = (res: Response): Cookie[] =>
   parse(splitCookiesString(res.headers.get("set-cookie") || ""));
 
@@ -20,6 +17,7 @@ export const joinCookies = (
       joined.findLastIndex((item) => item.name === name) === index,
   );
 };
+
 export const getCookieHeader = (cookies: Cookie[]): string => {
   const finalCookies = cookies.filter(
     ({ name }, index) =>
