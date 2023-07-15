@@ -106,33 +106,26 @@ export const searchHandler: RequestHandler<
         type: "relogin",
       });
 
-    try {
-      const courses = (<Record<string, string>[]>JSON.parse(rawData)).map(
-        ({ kch, kcmc, kkdw, szklb }) => ({
-          id: kch,
-          name: kcmc,
-          office: kkdw,
-          type: szklb,
-        }),
-      );
+    const courses = (<Record<string, string>[]>JSON.parse(rawData)).map(
+      ({ kch, kcmc, kkdw, szklb }) => ({
+        id: kch,
+        name: kcmc,
+        office: kkdw,
+        type: szklb,
+      }),
+    );
 
-      console.log(`Getting ${courses.length} courses`);
+    console.log(`Getting ${courses.length} courses`);
 
-      res.json(<SelectSearchSuccessResponse>{
-        success: true,
+    res.json(<SelectSearchSuccessResponse>{
+      success: true,
 
-        courses,
-      });
-    } catch (err) {
-      console.error(err);
-      res.json(<SelectSearchFailedResponse>{
-        success: false,
-        msg: (<Error>err).message,
-      });
-    }
+      courses,
+    });
   } catch (err) {
     console.error(err);
-    res.json(<SelectSearchFailedResponse>{
+
+    return res.json(<SelectSearchFailedResponse>{
       success: false,
       msg: (<Error>err).message,
     });

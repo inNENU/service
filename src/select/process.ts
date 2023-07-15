@@ -118,17 +118,23 @@ export const processHandler: RequestHandler<
         msg,
       });
     } catch (err) {
+      const { message } = <Error>err;
+
       console.error(err);
-      res.json(<ProcessFailedResponse>{
+
+      return res.json(<ProcessFailedResponse>{
         success: false,
-        msg: "参数有误",
+        msg: message,
       });
     }
   } catch (err) {
+    const { message } = <Error>err;
+
     console.error(err);
+
     res.json(<ProcessFailedResponse>{
       success: false,
-      msg: (<Error>err).message,
+      msg: message,
     });
   }
 };

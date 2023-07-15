@@ -238,9 +238,13 @@ export const authLoginHandler: RequestHandler<
 
     return res.json(result);
   } catch (err) {
-    return res.json(<AuthLoginFailedResult>{
+    const { message } = <Error>err;
+
+    console.error(err);
+
+    return res.json(<CommonFailedResponse>{
       success: false,
-      msg: "参数错误",
+      msg: message,
     });
   }
 };

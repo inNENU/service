@@ -219,9 +219,13 @@ export const vpnCASLoginHandler: RequestHandler<
 
     return res.json(data);
   } catch (err) {
+    const { message } = <Error>err;
+
+    console.error(err);
+
     return res.json(<VPNLoginFailedResult>{
       success: false,
-      msg: "参数错误",
+      msg: message,
     });
   }
 };

@@ -124,9 +124,13 @@ export const changePasswordHandler: RequestHandler<
       msg: "登录失败",
     });
   } catch (err) {
+    const { message } = <Error>err;
+
+    console.error(err);
+
     return res.json(<CommonFailedResponse>{
       success: false,
-      msg: "参数错误",
+      msg: message,
     });
   }
 };

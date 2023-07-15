@@ -74,26 +74,18 @@ export const studentAmountHandler: RequestHandler<
         type: "relogin",
       });
 
-    try {
-      const data: StudentAmountData[] = (<StudentAmountRaw[]>(
-        JSON.parse(rawData)
-      )).map(({ jx0404id, rs }) => ({
-        cid: jx0404id,
-        amount: rs,
-      }));
+    const data: StudentAmountData[] = (<StudentAmountRaw[]>(
+      JSON.parse(rawData)
+    )).map(({ jx0404id, rs }) => ({
+      cid: jx0404id,
+      amount: rs,
+    }));
 
-      res.json(<StudentAmountSuccessResponse>{
-        success: true,
+    res.json(<StudentAmountSuccessResponse>{
+      success: true,
 
-        data,
-      });
-    } catch (err) {
-      console.error(err);
-      res.json(<StudentAmountFailedResponse>{
-        success: false,
-        msg: (<Error>err).message,
-      });
-    }
+      data,
+    });
   } catch (err) {
     console.error(err);
     res.json(<StudentAmountFailedResponse>{
