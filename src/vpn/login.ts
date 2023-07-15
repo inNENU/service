@@ -228,6 +228,7 @@ export const vpnCASLoginHandler: RequestHandler<
 
 export interface VPNLoginSuccessResponse {
   success: true;
+  /** @deprecated */
   cookies: CookieType[];
 }
 
@@ -246,13 +247,20 @@ export const vpnLoginHandler: RequestHandler<
 
     const result = await vpnLogin({ id, password });
 
-    if (result.success)
+    if (result.success) {
+      const cookies = result.cookieStore
+        .getAllCookies()
+        .map((item) => item.toJSON());
+
+      cookies.forEach(({ name, value, ...rest }) => {
+        res.cookie(name, value, rest);
+      });
+
       return res.json(<VPNLoginSuccessResponse>{
         success: true,
-        cookies: result.cookieStore
-          .getAllCookies()
-          .map((item) => item.toJSON()),
+        cookies,
       });
+    }
 
     return res.json(result);
   } catch (err) {

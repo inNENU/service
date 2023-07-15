@@ -200,6 +200,7 @@ export const authLogin = async (
 
 export interface AuthLoginSuccessResponse {
   success: true;
+  /** @deprecated */
   cookies: CookieType[];
   location: string;
 }
@@ -219,14 +220,21 @@ export const authLoginHandler: RequestHandler<
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const result = await authLogin({ id, password });
 
-    if (result.success)
+    if (result.success) {
+      const cookies = result.cookieStore
+        .getAllCookies()
+        .map((item) => item.toJSON());
+
+      cookies.forEach(({ name, value, ...rest }) => {
+        res.cookie(name, value, rest);
+      });
+
       return res.json(<AuthLoginSuccessResponse>{
         success: true,
-        cookies: result.cookieStore
-          .getAllCookies()
-          .map((item) => item.toJSON()),
+        cookies,
         location: result.location,
       });
+    }
 
     return res.json(result);
   } catch (err) {

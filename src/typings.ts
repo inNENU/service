@@ -36,7 +36,7 @@ export interface CookieType {
   /**
    * indicates a cookie ought not to be sent along with cross-site requests
    */
-  sameSite?: string | undefined;
+  sameSite?: boolean | "lax" | "strict" | "none" | undefined;
 }
 
 export type EmptyObject = Record<never, never>;

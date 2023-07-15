@@ -87,6 +87,7 @@ export const actionLogin = async (
 
 export interface ActionLoginSuccessResponse {
   success: true;
+  /** @deprecated */
   cookies: CookieType[];
 }
 
@@ -103,13 +104,20 @@ export const actionLoginHandler: RequestHandler<
   try {
     const result = await actionLogin(req.body);
 
-    if (result.success)
+    if (result.success) {
+      const cookies = result.cookieStore
+        .getAllCookies()
+        .map((item) => item.toJSON());
+
+      cookies.forEach(({ name, value, ...rest }) => {
+        res.cookie(name, value, rest);
+      });
+
       return res.json(<ActionLoginSuccessResponse>{
         success: true,
-        cookies: result.cookieStore
-          .getAllCookies()
-          .map((item) => item.toJSON()),
+        cookies,
       });
+    }
 
     return res.json(result);
   } catch (err) {

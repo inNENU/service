@@ -106,6 +106,7 @@ export const underSystemLogin = async (
 
 export interface UnderSystemLoginSuccessResponse {
   success: true;
+  /** @deprecated */
   cookies: CookieType[];
 }
 
@@ -122,13 +123,20 @@ export const underSystemLoginHandler: RequestHandler<
   try {
     const result = await underSystemLogin(req.body);
 
-    if (result.success)
+    if (result.success) {
+      const cookies = result.cookieStore
+        .getAllCookies()
+        .map((item) => item.toJSON());
+
+      cookies.forEach(({ name, value, ...rest }) => {
+        res.cookie(name, value, rest);
+      });
+
       return res.json(<UnderSystemLoginSuccessResponse>{
         success: true,
-        cookies: result.cookieStore
-          .getAllCookies()
-          .map((item) => item.toJSON()),
+        cookies,
       });
+    }
 
     return res.json(result);
   } catch (err) {
