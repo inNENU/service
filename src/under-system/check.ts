@@ -17,7 +17,7 @@ export const underSystemCheckHandler: RequestHandler<
 > = async (req, res) => {
   try {
     const response = await fetch(
-      `${SERVER}/framework/grxx_edit.jsp?winid=win2`,
+      `${SERVER}/framework/userInfo_edit.jsp?winid=win6`,
       {
         headers: {
           Cookie: getCookieHeader(req.body.cookies),
