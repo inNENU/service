@@ -27,7 +27,7 @@ export default [
     plugins: [
       esbuild({
         charset: "utf8",
-        minify: true,
+        minify: process.env.NODE_ENV !== "debug",
         target: "node18",
       }),
     ],

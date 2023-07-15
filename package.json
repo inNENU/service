@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rollup -c rollup.config.ts --configPlugin esbuild",
     "bundle:parser": "rollup -c scripts/parser.ts --configPlugin esbuild",
-    "debug": "pnpm build && node dist/index.js",
+    "debug": "cross-env NODE_ENV=debug pnpm build && node dist/index.js",
     "dev": "cross-env tsx src/index.ts",
     "lint": "prettier --check --write . && eslint . --ext .ts --fix",
     "lint:check": "prettier --check . && eslint . --ext .ts",
@@ -24,6 +24,7 @@
     "@types/qrcode": "1.5.1",
     "@types/set-cookie-parser": "2.4.2",
     "body-parser": "1.20.2",
+    "cross-env":"7.0.3",
     "cheerio": "1.0.0-rc.12",
     "compression": "1.7.4",
     "cookie-parser": "1.4.6",

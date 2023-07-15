@@ -94,7 +94,7 @@ export type UserGradeListResponse =
   | UserGradeListSuccessResponse
   | AuthLoginFailedResult;
 
-const gradeItemRegExp = /<tr.+?class="smartTr"[^>]*?>(.*?)<\/tr>/g;
+const gradeItemRegExp = /<tr.+?class="smartTr"[^>]*?>([\s\S]*?)<\/tr>/g;
 const jsGradeItemRegExp = /<tr.+?class=\\"smartTr\\"[^>]*?>(.*?)<\/tr>/g;
 const gradeCellRegExp =
   /^(?:<td[^>]*?>[^<]*?<\/td>){3}<td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^>]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^>]*?)<\/td><td[^>]*?>(.*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td>/;
@@ -140,6 +140,9 @@ const COURSE_TYPES: Record<CourseType, string> = {
   教师教育必修课: "11",
   教师教育选修课: "12",
 };
+const DEFAULT_FIELD =
+  "学号:1:1:90:a.xh,姓名:2:1:110:a.xm,开课学期:3:1:120:a.xqmc,课程编号:14:1:120:a.kcbh,课程名称:4:1:130:a.kcmc,难度系数:18:1:70:ndxs,总成绩:5:1:70:a.zcj,学分绩点:19:1:70:jd,成绩标志:6:1:90:cjbsmc,课程性质:7:1:110:kcxzmc,通选课类别:20:1:90:txklb,课程类别:8:1:90:kclbmc,学时:9:1:70:a.zxs,学分:10:1:70:a.xf,考试性质:11:1:100:ksxzmc,补重学期:15:1:100:a.bcxq,审核状态:17:1:100:shzt";
+const DEFAULT_OTHER_FIELD = "null";
 const QUERY_URL = `${SERVER}/xszqcjglAction.do?method=queryxscj`;
 
 const getDisplayTime = (time: string): string => {
@@ -168,6 +171,7 @@ export const getGrades = (
     Array.from(
       content.matchAll(isJS ? jsGradeItemRegExp : gradeItemRegExp),
     ).map(async ([, item]) => {
+      console.log(item, gradeCellRegExp.exec(item)!);
       const [
         ,
         time,
@@ -264,12 +268,20 @@ export const getGradeLists = async (
   cookieStore: CookieStore,
   content: string,
 ): Promise<GradeResult[]> => {
-  const grades = await getGrades(cookieStore, content);
+  // We force writing these 2 field to ensure we care getting the default table structure
+  const field = String(fieldRegExp.exec(content)?.[1]);
+  const otherFields = String(otherFieldsRegExp.exec(content)?.[1]);
   const totalPages = Number(totalPagesRegExp.exec(content)![1]);
+
+  // users are editing them, so the main page must be refetched
+  const shouldRefetch =
+    field !== DEFAULT_FIELD || otherFields !== DEFAULT_OTHER_FIELD;
+
+  const grades = shouldRefetch ? [] : await getGrades(cookieStore, content);
 
   console.log("Total pages:", totalPages);
 
-  if (totalPages === 1) return grades;
+  if (totalPages === 1 && !shouldRefetch) return grades;
 
   const tableFields = tableFieldsRegExp.exec(content)![1];
   const isSql = sqlRegExp.exec(content)![1];
@@ -280,11 +292,10 @@ export const getGradeLists = async (
     String(printHQLInputRegExp.exec(content)?.[1]) ||
     String(printHQLJSRegExp.exec(content)?.[1]);
   const sqlString = sqlStringRegExp.exec(content)?.[1];
-  const field = String(fieldRegExp.exec(content)?.[1]);
-  const otherFields = String(otherFieldsRegExp.exec(content)?.[1]);
+
   const xsId = xsIdRegExp.exec(content)![1];
 
-  for (let page = 2; page <= totalPages; page++) {
+  for (let page = shouldRefetch ? 1 : 2; page <= totalPages; page++) {
     const params = new URLSearchParams({
       xsId,
       keyCode,
@@ -296,8 +307,8 @@ export const getGradeLists = async (
       key,
       field,
       totalPages: totalPages.toString(),
-      tableFields,
-      otherFields,
+      tableFields: DEFAULT_FIELD,
+      otherFields: DEFAULT_OTHER_FIELD,
     });
 
     const response = await fetch(QUERY_URL, {
