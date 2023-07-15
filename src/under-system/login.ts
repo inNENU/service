@@ -1,27 +1,23 @@
 import type { RequestHandler } from "express";
 
 import { SERVER } from "./utils.js";
-import type { AuthLoginFailedResponse } from "../auth/login.js";
+import type { AuthLoginFailedResult } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
-import type { Cookie, EmptyObject, LoginOptions } from "../typings.js";
-import {
-  IE_8_USER_AGENT,
-  getCookieHeader,
-  getCookies,
-} from "../utils/index.js";
-import type { VPNLoginFailedResponse } from "../vpn/login.js";
+import type { CookieType, EmptyObject, LoginOptions } from "../typings.js";
+import { CookieStore, IE_8_USER_AGENT } from "../utils/index.js";
+import type { VPNLoginFailedResult } from "../vpn/login.js";
 import { vpnCASLogin } from "../vpn/login.js";
 
-export interface UnderSystemLoginSuccessResponse {
+export interface UnderSystemLoginSuccessResult {
   success: true;
-  cookies: Cookie[];
+  cookieStore: CookieStore;
 }
 
-export type UnderSystemLoginResponse =
-  | UnderSystemLoginSuccessResponse
-  | AuthLoginFailedResponse
-  | VPNLoginFailedResponse;
+export type UnderSystemLoginResult =
+  | UnderSystemLoginSuccessResult
+  | AuthLoginFailedResult
+  | VPNLoginFailedResult;
 
 const COMMON_HEADERS = {
   "User-Agent":
@@ -30,37 +26,30 @@ const COMMON_HEADERS = {
 
 export const underSystemLogin = async (
   options: LoginOptions,
-): Promise<UnderSystemLoginResponse> => {
-  const vpnLoginResult = await vpnCASLogin(options);
+  cookieStore = new CookieStore(),
+): Promise<UnderSystemLoginResult> => {
+  const vpnLoginResult = await vpnCASLogin(options, cookieStore);
 
   if (!vpnLoginResult.success) return vpnLoginResult;
 
   const result = await authLogin(options, {
     service: "http://dsjx.nenu.edu.cn:80/",
     webVPN: true,
-    cookies: vpnLoginResult.cookies,
+    cookieStore,
   });
 
   if (!result.success) {
     console.error(result.msg);
 
-    return <AuthLoginFailedResponse>{
+    return <AuthLoginFailedResult>{
       success: false,
       type: result.type,
       msg: result.msg,
     };
   }
 
-  const authCookies = vpnLoginResult.cookies;
-
-  const authCookie = result.cookies.find(
-    (item) => item.name === "iPlanetDirectoryPro",
-  );
-
-  if (authCookie) authCookies.push(authCookie);
-
   const ticketHeaders = {
-    Cookie: getCookieHeader([...vpnLoginResult.cookies, ...authCookies]),
+    Cookie: cookieStore.getHeader(result.location),
     Referer: WEB_VPN_AUTH_SERVER,
     ...COMMON_HEADERS,
   };
@@ -72,7 +61,7 @@ export const underSystemLogin = async (
     redirect: "manual",
   });
 
-  authCookies.push(...getCookies(ticketResponse));
+  cookieStore.applyResponse(ticketResponse, result.location);
 
   console.log(
     "ticket",
@@ -81,7 +70,7 @@ export const underSystemLogin = async (
   );
 
   if (ticketResponse.status !== 302)
-    return <AuthLoginFailedResponse>{
+    return <AuthLoginFailedResult>{
       success: false,
       type: "unknown",
       msg: "登录失败",
@@ -90,19 +79,21 @@ export const underSystemLogin = async (
   const finalLocation = ticketResponse.headers.get("Location");
 
   if (finalLocation?.includes(";jsessionid=")) {
-    await fetch(`${SERVER}/Logon.do?method=logonBySSO`, {
+    const ssoUrl = `${SERVER}/Logon.do?method=logonBySSO`;
+
+    await fetch(ssoUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
-        Cookie: getCookieHeader(authCookies),
+        Cookie: cookieStore.getHeader(ssoUrl),
         Referer: `${SERVER}/framework/main.jsp`,
         "User-Agent": IE_8_USER_AGENT,
       },
     });
 
-    return <UnderSystemLoginSuccessResponse>{
+    return <UnderSystemLoginSuccessResult>{
       success: true,
-      cookies: authCookies,
+      cookieStore,
     };
   }
 
@@ -113,18 +104,38 @@ export const underSystemLogin = async (
   };
 };
 
+export interface UnderSystemLoginSuccessResponse {
+  success: true;
+  cookies: CookieType[];
+}
+
+export type UnderSystemLoginResponse =
+  | UnderSystemLoginSuccessResponse
+  | AuthLoginFailedResult
+  | VPNLoginFailedResult;
+
 export const underSystemLoginHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
   LoginOptions
 > = async (req, res) => {
   try {
-    return res.json(await underSystemLogin(req.body));
+    const result = await underSystemLogin(req.body);
+
+    if (result.success)
+      return res.json(<UnderSystemLoginSuccessResponse>{
+        success: true,
+        cookies: result.cookieStore
+          .getAllCookies()
+          .map((item) => item.toJSON()),
+      });
+
+    return res.json(result);
   } catch (err) {
     const { message } = <Error>err;
 
     console.error(err);
-    res.json(<AuthLoginFailedResponse>{
+    res.json(<AuthLoginFailedResult>{
       success: false,
       msg: message,
     });

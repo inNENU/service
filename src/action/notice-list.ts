@@ -2,15 +2,14 @@ import type { RequestHandler } from "express";
 
 import { actionLogin } from "./login.js";
 import { SERVER } from "./utils.js";
-import type { AuthLoginFailedResponse } from "../auth/index.js";
+import type { AuthLoginFailedResult } from "../auth/index.js";
 import type {
   CommonFailedResponse,
-  Cookie,
   CookieOptions,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import { getCookieHeader } from "../utils/index.js";
+import { CookieStore, getCookieItems } from "../utils/index.js";
 
 interface RawNoticeItem {
   LLCS: number;
@@ -81,22 +80,23 @@ export const noticeListHandler: RequestHandler<
 > = async (req, res) => {
   try {
     const { limit = 20, page = 1, type = "notice" } = req.body;
-    let cookies: Cookie[] = [];
+    const cookieStore = new CookieStore();
 
-    if ("cookies" in req.body) {
-      ({ cookies } = req.body);
-    } else {
-      const result = await actionLogin(req.body);
+    if (!req.headers.cookie)
+      if ("cookies" in req.body) {
+        cookieStore.apply(getCookieItems(req.body.cookies));
+      } else {
+        const result = await actionLogin(req.body, cookieStore);
 
-      if (!result.success) return res.json(result);
+        if (!result.success) return res.json(result);
+      }
 
-      ({ cookies } = result);
-    }
+    const queryUrl = `${SERVER}/page/queryList`;
 
     const headers = {
       Accept: "application/json, text/javascript, */*; q=0.01",
       "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-      Cookie: getCookieHeader(cookies),
+      Cookie: req.headers.cookie || cookieStore.getHeader(queryUrl),
       Referer: `${SERVER}/basicInfo/studentPageTurn?type=lifeschool`,
     };
 
@@ -108,7 +108,7 @@ export const noticeListHandler: RequestHandler<
       page: page.toString(),
     });
 
-    const response = await fetch(`${SERVER}/page/queryList`, {
+    const response = await fetch(queryUrl, {
       method: "POST",
       headers,
       body: params.toString(),
@@ -128,7 +128,7 @@ export const noticeListHandler: RequestHandler<
         totalPage,
       });
 
-    return res.json(<AuthLoginFailedResponse>{
+    return res.json(<AuthLoginFailedResult>{
       success: false,
       msg: JSON.stringify(data),
     });
@@ -136,7 +136,7 @@ export const noticeListHandler: RequestHandler<
     const { message } = <Error>err;
 
     console.error(err);
-    res.json(<AuthLoginFailedResponse>{
+    res.json(<AuthLoginFailedResult>{
       success: false,
       msg: message,
     });

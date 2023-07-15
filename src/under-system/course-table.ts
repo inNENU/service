@@ -2,15 +2,14 @@ import type { RequestHandler } from "express";
 
 import { underSystemLogin } from "./login.js";
 import { SERVER, getTimeStamp } from "./utils.js";
-import type { AuthLoginFailedResponse } from "../auth/index.js";
+import type { AuthLoginFailedResult } from "../auth/index.js";
 import { semesterStartTime } from "../config/semester-start-time.js";
-import type {
-  Cookie,
-  CookieOptions,
-  EmptyObject,
-  LoginOptions,
-} from "../typings.js";
-import { IE_8_USER_AGENT, getCookieHeader } from "../utils/index.js";
+import type { CookieOptions, EmptyObject, LoginOptions } from "../typings.js";
+import {
+  CookieStore,
+  IE_8_USER_AGENT,
+  getCookieItems,
+} from "../utils/index.js";
 
 export interface ClassItem {
   name: string;
@@ -52,8 +51,9 @@ interface UserCourseTableExtraOptions {
   time: string;
 }
 
-export type UserCourseTableOptions = (LoginOptions | CookieOptions) &
-  UserCourseTableExtraOptions;
+export type UserCourseTableOptions =
+  | ((LoginOptions | CookieOptions) & UserCourseTableExtraOptions)
+  | UserCourseTableExtraOptions;
 
 export interface UserCourseTableSuccessResponse {
   success: true;
@@ -61,7 +61,7 @@ export interface UserCourseTableSuccessResponse {
   startTime: string;
 }
 
-export type UserCourseTableFailedResponse = AuthLoginFailedResponse;
+export type UserCourseTableFailedResponse = AuthLoginFailedResult;
 
 export type UserCourseTableResponse =
   | UserCourseTableSuccessResponse
@@ -73,19 +73,21 @@ export const underCourseTableHandler: RequestHandler<
   UserCourseTableOptions
 > = async (req, res) => {
   try {
-    let cookies: Cookie[] = [];
+    const cookieStore = new CookieStore();
 
     const { id, time } = req.body;
 
-    if ("cookies" in req.body) {
-      ({ cookies } = req.body);
-    } else {
-      const result = await underSystemLogin(req.body);
+    if (!req.headers.cookie)
+      if ("cookies" in req.body) {
+        cookieStore.apply(getCookieItems(req.body.cookies));
+      } else {
+        const result = await underSystemLogin(
+          <LoginOptions>req.body,
+          cookieStore,
+        );
 
-      if (!result.success) return res.json(result);
-
-      ({ cookies } = result);
-    }
+        if (!result.success) return res.json(result);
+      }
 
     const params = new URLSearchParams({
       method: "goListKbByXs",
@@ -97,11 +99,13 @@ export const underCourseTableHandler: RequestHandler<
 
     console.log("Requesting with params:", params);
 
+    const url = `${SERVER}/tkglAction.do?${params.toString()}`;
+
     const response = await fetch(
       `${SERVER}/tkglAction.do?${params.toString()}`,
       {
         headers: {
-          Cookie: getCookieHeader(cookies),
+          Cookie: req.headers.cookie || cookieStore.getHeader(url),
           Referer: `${SERVER}/tkglAction.do?method=kbxxXs&tktime=${getTimeStamp().toString()}`,
           "User-Agent": IE_8_USER_AGENT,
         },
@@ -121,7 +125,7 @@ export const underCourseTableHandler: RequestHandler<
     const { message } = <Error>err;
 
     console.error(err);
-    res.json(<AuthLoginFailedResponse>{
+    res.json(<AuthLoginFailedResult>{
       success: false,
       msg: message,
     });

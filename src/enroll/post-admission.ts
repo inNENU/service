@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
-import { getCookieHeader, getCookies } from "../utils/cookie.js";
+import { CookieStore } from "../utils/index.js";
 
 export interface PostAdmissionPostOptions {
   name: string;
@@ -21,19 +21,19 @@ const getInfo = async ({
   id,
   name,
 }: PostAdmissionPostOptions): Promise<PostAdmissionResponse> => {
+  const cookieStore = new CookieStore();
   const mainPageResponse = await fetch("https://yzb.nenu.edu.cn/yjs/sslq/", {
     method: "GET",
   });
 
+  cookieStore.applyResponse(mainPageResponse, "yzb.nenu.edu.cn");
+
   const mainContent = await mainPageResponse.text();
 
-  const cookies = getCookies(mainPageResponse)!;
   const captchaID =
     /<input type="hidden" name="csrf_test_name" value="(.*?)" \/>/.exec(
       mainContent,
     )![1];
-
-  console.log("Getting cookies", cookies);
 
   const params = new URLSearchParams({
     csrf_test_name: captchaID,
@@ -43,10 +43,12 @@ const getInfo = async ({
 
   console.log("Getting params", params);
 
-  const response = await fetch("https://yzb.nenu.edu.cn/yjs/sslq_result/2023", {
+  const searchUrl = "https://yzb.nenu.edu.cn/yjs/sslq_result/2023";
+
+  const response = await fetch(searchUrl, {
     method: "POST",
     headers: {
-      Cookie: getCookieHeader(cookies),
+      Cookie: cookieStore.getHeader(searchUrl),
       "Content-Type": "application/x-www-form-urlencoded",
     },
     body: params.toString(),

@@ -7,7 +7,6 @@ import type {
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import { getCookieHeader } from "../utils/cookie.js";
 
 export interface ChangePasswordOptions {
   /** 认证 Cookie */
@@ -82,14 +81,14 @@ export const changePasswordHandler: RequestHandler<
     const result = await authLogin({ id, password });
 
     if (result.success) {
-      const authCookieHeader = getCookieHeader(result.cookies);
+      const changePassWordUrl = `${AUTH_SERVER}/authserver/passwordChange.do`;
 
       const passwordChangePageResponse = await fetch(
         `${AUTH_SERVER}/authserver/passwordChange.do`,
         {
           method: "GET",
           headers: {
-            Cookie: authCookieHeader,
+            Cookie: result.cookieStore.getHeader(changePassWordUrl),
           },
         },
       );
@@ -102,7 +101,7 @@ export const changePasswordHandler: RequestHandler<
         {
           method: "GET",
           headers: {
-            Cookie: authCookieHeader,
+            Cookie: result.cookieStore.getHeader(changePassWordUrl),
             Referer: `${AUTH_SERVER}/authserver/userAttributesEdit.do`,
           },
         },
@@ -110,7 +109,7 @@ export const changePasswordHandler: RequestHandler<
 
       const recaptchaImage = await recaptchaResponse.arrayBuffer();
 
-      res.set("auth-cookies", authCookieHeader);
+      res.set("auth-cookies", result.cookieStore.getHeader(changePassWordUrl));
       res.set("salt", salt);
 
       recaptchaResponse.headers.forEach((value, key) => {

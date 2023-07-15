@@ -7,7 +7,7 @@ import type {
 } from "./typings.js";
 import type { EmptyObject, LoginOptions } from "../typings.js";
 import {
-  getCookies,
+  getResponseCookies,
   isNumber,
   isPlainObject,
   isString,
@@ -73,14 +73,14 @@ export const selectLoginHandler: RequestHandler<
       });
 
       if (loginResponse.status === 302) {
-        const cookies = getCookies(loginResponse);
+        const cookies = getResponseCookies(loginResponse);
 
         console.log("Getting cookie:", cookies);
 
         return res.json(<SelectLoginSuccessResponse>{
           success: true,
 
-          cookies: getCookies(loginResponse).map(
+          cookies: getResponseCookies(loginResponse).map(
             ({ name, value }) => `${name}=${value}`,
           ),
           server,

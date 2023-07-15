@@ -64,9 +64,9 @@ export const enrollPlanHandler: RequestHandler<
 
     const searchResponse = await fetch(ENROLL_PLAN_URL, {
       method: "POST",
-      headers: new Headers({
+      headers: {
         "Content-Type": "application/x-www-form-urlencoded",
-      }),
+      },
       body: params,
     });
 

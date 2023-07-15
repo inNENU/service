@@ -7,8 +7,7 @@ import type {
   CookieVerifySuccessResponse,
   EmptyObject,
 } from "../typings.js";
-import { getCookieHeader } from "../utils/cookie.js";
-import { IE_8_USER_AGENT } from "../utils/ua.js";
+import { IE_8_USER_AGENT, cookies2Header } from "../utils/index.js";
 
 export const underSystemCheckHandler: RequestHandler<
   EmptyObject,
@@ -20,7 +19,7 @@ export const underSystemCheckHandler: RequestHandler<
       `${SERVER}/framework/userInfo_edit.jsp?winid=win6`,
       {
         headers: {
-          Cookie: getCookieHeader(req.body.cookies),
+          Cookie: req.headers.cookie ?? cookies2Header(req.body.cookies),
           "User-Agent": IE_8_USER_AGENT,
         },
         redirect: "manual",

@@ -61,9 +61,9 @@ export const historyGradeHandler: RequestHandler<
 
     const searchResponse = await fetch(HISTORY_GRADE_URL, {
       method: "POST",
-      headers: new Headers({
+      headers: {
         "Content-Type": "application/x-www-form-urlencoded",
-      }),
+      },
       body: params,
     });
 

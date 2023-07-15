@@ -4,11 +4,11 @@ import { authLogin } from "./login.js";
 import { AUTH_SERVER } from "./utils.js";
 import type {
   CommonFailedResponse,
-  Cookie,
+  CookieType,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import { getCookieHeader } from "../utils/cookie.js";
+import { cookies2Header } from "../utils/index.js";
 
 export interface InfoSuccessResponse {
   success: true;
@@ -27,11 +27,13 @@ const userNameRegexp =
 
 const inputRegExp = /id="alias".*?value="(.*?)"/;
 
-export const getInfo = async (cookies: Cookie[]): Promise<InfoResponse> => {
+export const getBasicInfo = async (
+  cookieHeader: string,
+): Promise<InfoResponse> => {
   const userNameResponse = await fetch(`${AUTH_SERVER}/authserver/index.do`, {
     method: "GET",
     headers: {
-      Cookie: getCookieHeader(cookies),
+      Cookie: cookieHeader,
     },
   });
 
@@ -52,7 +54,7 @@ export const getInfo = async (cookies: Cookie[]): Promise<InfoResponse> => {
     {
       method: "GET",
       headers: {
-        Cookie: getCookieHeader(cookies),
+        Cookie: cookieHeader,
       },
     },
   );
@@ -79,14 +81,23 @@ export const getInfo = async (cookies: Cookie[]): Promise<InfoResponse> => {
 export const infoHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  LoginOptions | { cookies: Cookie[] }
+  LoginOptions | { cookies: CookieType[] }
 > = async (req, res) => {
   try {
-    if ("cookies" in req.body) return res.json(await getInfo(req.body.cookies));
+    if (req.headers.cookie)
+      return res.json(await getBasicInfo(req.headers.cookie));
+
+    if ("cookies" in req.body)
+      return res.json(await getBasicInfo(cookies2Header(req.body.cookies)));
 
     const result = await authLogin(req.body);
 
-    if (result.success) return res.json(await getInfo(result.cookies));
+    if (result.success)
+      return res.json(
+        await getBasicInfo(
+          result.cookieStore.getHeader(`${AUTH_SERVER}/authserver/`),
+        ),
+      );
 
     return res.json(<CommonFailedResponse>{
       success: false,

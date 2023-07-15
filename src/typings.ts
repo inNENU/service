@@ -1,4 +1,4 @@
-export interface Cookie {
+export interface CookieType {
   /**
    * cookie name
    */
@@ -49,7 +49,7 @@ export interface LoginOptions {
 }
 
 export interface CookieOptions {
-  cookies: Cookie[];
+  cookies: CookieType[];
 }
 
 export interface CommonFailedResponse {

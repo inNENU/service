@@ -1,9 +1,8 @@
 import type { RequestHandler } from "express";
-import type { Cookie } from "set-cookie-parser";
 
 import { actionLogin } from "./login.js";
 import { SERVER } from "./utils.js";
-import type { AuthLoginFailedResponse } from "../auth/index.js";
+import type { AuthLoginFailedResult } from "../auth/index.js";
 import type {
   CommonFailedResponse,
   CookieOptions,
@@ -11,7 +10,11 @@ import type {
   LoginOptions,
 } from "../typings.js";
 import type { Node } from "../utils/getRichText.js";
-import { getCookieHeader, getRichTextNodes } from "../utils/index.js";
+import {
+  CookieStore,
+  getCookieItems,
+  getRichTextNodes,
+} from "../utils/index.js";
 
 const titleRegExp = /var title = '(.*?)';/;
 const fromRegExp = /var ly = '(.*?)'/;
@@ -53,23 +56,22 @@ export const noticeHandler: RequestHandler<
         msg: "ID is required",
       });
 
-    let cookies: Cookie[] = [];
+    const cookieStore = new CookieStore();
 
-    if ("cookies" in req.body) {
-      ({ cookies } = req.body);
-    } else {
-      const result = await actionLogin(req.body);
+    if (!req.headers.cookie)
+      if ("cookies" in req.body) {
+        cookieStore.apply(getCookieItems(req.body.cookies));
+      } else {
+        const result = await actionLogin(req.body, cookieStore);
 
-      if (!result.success) return res.json(result);
-
-      ({ cookies } = result);
-    }
+        if (!result.success) return res.json(result);
+      }
 
     const url = `${SERVER}/page/viewNews?ID=${noticeID}`;
 
     const response = await fetch(url, {
       headers: {
-        Cookie: getCookieHeader(cookies),
+        Cookie: req.headers.cookie || cookieStore.getHeader(url),
       },
     });
 
@@ -103,7 +105,7 @@ export const noticeHandler: RequestHandler<
     const { message } = <Error>err;
 
     console.error(err);
-    res.json(<AuthLoginFailedResponse>{
+    res.json(<AuthLoginFailedResult>{
       success: false,
       msg: message,
     });

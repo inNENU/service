@@ -4,14 +4,14 @@ import type { RequestHandler } from "express";
 import { AUTH_SERVER, WEB_VPN_AUTH_SERVER } from "./utils.js";
 import type {
   CommonFailedResponse,
-  Cookie,
+  CookieType,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
 import {
+  CookieStore,
   EDGE_USER_AGENT_HEADERS,
-  getCookieHeader,
-  getCookies,
+  getDomain,
 } from "../utils/index.js";
 
 export const saltRegExp = /var pwdDefaultEncryptSalt = "(.*)";/;
@@ -46,28 +46,29 @@ const COMMON_HEADERS = {
 export interface AuthLoginOptions {
   service?: string;
   webVPN?: boolean;
-  cookies?: Cookie[];
+  cookieStore?: CookieStore;
 }
 
-export interface AuthLoginSuccessResponse {
+export interface AuthLoginSuccessResult {
   success: true;
-  cookies: Cookie[];
+  cookieStore: CookieStore;
   location: string;
 }
 
-export interface AuthLoginFailedResponse extends CommonFailedResponse {
+export interface AuthLoginFailedResult extends CommonFailedResponse {
   type: "captcha" | "wrong" | "unknown";
 }
 
-export type AuthLoginResponse =
-  | AuthLoginSuccessResponse
-  | AuthLoginFailedResponse;
+export type AuthLoginResult = AuthLoginSuccessResult | AuthLoginFailedResult;
 
 export const authLogin = async (
   { id, password }: LoginOptions,
-  { service = "", webVPN = false, cookies = [] }: AuthLoginOptions = {},
-): Promise<AuthLoginResponse> => {
-  const currentCookies = [...cookies];
+  {
+    service = "",
+    webVPN = false,
+    cookieStore = new CookieStore(),
+  }: AuthLoginOptions = {},
+): Promise<AuthLoginResult> => {
   const server = webVPN ? WEB_VPN_AUTH_SERVER : AUTH_SERVER;
 
   const url = `${server}/authserver/login${
@@ -75,12 +76,10 @@ export const authLogin = async (
   }`;
 
   const loginPageResponse = await fetch(url, {
-    headers: { ...COMMON_HEADERS, Cookie: getCookieHeader(cookies) },
+    headers: { ...COMMON_HEADERS, Cookie: cookieStore.getHeader(server) },
   });
 
-  currentCookies.push(...getCookies(loginPageResponse));
-
-  console.log("Getting cookie:", cookies);
+  cookieStore.applyResponse(loginPageResponse, server);
 
   const content = await loginPageResponse.text();
 
@@ -91,17 +90,17 @@ export const authLogin = async (
   const _eventId = content.match(/name="_eventId" value="(.*?)"/)![1];
   const rmShown = content.match(/name="rmShown" value="(.*?)"/)![1];
 
+  cookieStore.set({
+    name: "org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE",
+    value: "zh_CN",
+    domain: getDomain(server),
+  });
+
   const captchaCheckResponse = await fetch(
     `${server}/authserver/needCaptcha.html?username=${id}&pwdEncrypt2=pwdEncryptSalt&_=${Date.now()}`,
     {
       headers: {
-        Cookie: getCookieHeader([
-          ...currentCookies,
-          {
-            name: "org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE",
-            value: "zh_CN",
-          },
-        ]),
+        Cookie: cookieStore.getHeader(server),
         ...COMMON_HEADERS,
         Referer: `${server}/authserver/login`,
       },
@@ -121,15 +120,7 @@ export const authLogin = async (
 
   const headers = {
     "Content-Type": "application/x-www-form-urlencoded",
-    Cookie: [
-      getCookieHeader([
-        ...currentCookies,
-        {
-          name: "org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE",
-          value: "zh_CN",
-        },
-      ]),
-    ].join("; "),
+    Cookie: cookieStore.getHeader(server),
     "Sec-Fetch-Site": "same-origin",
     "Sec-Fetch-Mode": "navigate",
     "Sec-Fetch-User": "?1",
@@ -164,10 +155,10 @@ export const authLogin = async (
   const resultContent = await response.text();
   const location = response.headers.get("Location");
 
-  currentCookies.push(...getCookies(response));
+  cookieStore.applyResponse(response, server);
 
   console.log(`Request location:`, location);
-  console.log("Login cookies:", currentCookies);
+  console.log("Login cookies:", cookieStore.getCookiesMap(server));
 
   if (response.status === 200)
     if (resultContent.includes("您提供的用户名或者密码有误"))
@@ -193,7 +184,7 @@ export const authLogin = async (
 
     return {
       success: true,
-      cookies: currentCookies,
+      cookieStore,
       location: location!,
     };
   }
@@ -207,6 +198,16 @@ export const authLogin = async (
   };
 };
 
+export interface AuthLoginSuccessResponse {
+  success: true;
+  cookies: CookieType[];
+  location: string;
+}
+
+export type AuthLoginResponse =
+  | AuthLoginSuccessResponse
+  | AuthLoginFailedResult;
+
 export const authLoginHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
@@ -216,11 +217,20 @@ export const authLoginHandler: RequestHandler<
     const { id, password } = req.body;
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const data = await authLogin({ id, password });
+    const result = await authLogin({ id, password });
 
-    return res.json(data);
+    if (result.success)
+      return res.json(<AuthLoginSuccessResponse>{
+        success: true,
+        cookies: result.cookieStore
+          .getAllCookies()
+          .map((item) => item.toJSON()),
+        location: result.location,
+      });
+
+    return res.json(result);
   } catch (err) {
-    return res.json(<AuthLoginFailedResponse>{
+    return res.json(<AuthLoginFailedResult>{
       success: false,
       msg: "参数错误",
     });

@@ -1,65 +1,52 @@
 import type { RequestHandler } from "express";
 
-import type { AuthLoginFailedResponse } from "../auth/login.js";
+import { VPN_DOMAIN, VPN_SERVER } from "./utils.js";
+import type { AuthLoginFailedResult } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import type {
   CommonFailedResponse,
-  Cookie,
+  CookieType,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import {
-  EDGE_USER_AGENT_HEADERS,
-  getCookieHeader,
-  getCookies,
-} from "../utils/index.js";
+import { CookieStore } from "../utils/index.js";
 
 const authenticityTokenRegExp =
   /<input\s+type="hidden"\s+name="authenticity_token" value="(.*?)" \/>/;
 
-export interface VPNLoginSuccessResponse {
+const LOGIN_URL = `${VPN_SERVER}/users/sign_in`;
+const CAS_LOGIN_URL = `${VPN_SERVER}/users/auth/cas`;
+const UPDATE_KEY_URL = `${VPN_SERVER}/vpn_key/update`;
+
+export interface VPNLoginSuccessResult {
   success: true;
-  cookies: Cookie[];
+  cookieStore: CookieStore;
 }
 
-export interface VPNLoginFailedResponse extends CommonFailedResponse {
+export interface VPNLoginFailedResult extends CommonFailedResponse {
   type: "locked" | "wrong" | "unknown";
 }
 
-export type VPNLoginResponse =
-  | VPNLoginSuccessResponse
-  | VPNLoginFailedResponse
-  | AuthLoginFailedResponse;
+export type VPNLoginResult =
+  | VPNLoginSuccessResult
+  | VPNLoginFailedResult
+  | AuthLoginFailedResult;
 
-export const VPN_SERVER = "https://webvpn.nenu.edu.cn";
-const LOGIN_URL = `${VPN_SERVER}/users/sign_in`;
-const CAS_LOGIN_URL = `${VPN_SERVER}/users/auth/cas`;
-
-const COMMON_HEADERS = {
-  DNT: "1",
-  "Upgrade-Insecure-Requests": "1",
-  "Sec-Fetch-Site": "same-origin",
-  "Sec-Fetch-Mode": "navigate",
-  "Sec-Fetch-User": "?1",
-  "Sec-Fetch-Dest": "document",
-  ...EDGE_USER_AGENT_HEADERS,
-};
-
-export const vpnCASLogin = async ({
-  id,
-  password,
-}: LoginOptions): Promise<VPNLoginResponse> => {
+export const vpnCASLogin = async (
+  { id, password }: LoginOptions,
+  cookieStore = new CookieStore(),
+): Promise<VPNLoginResult> => {
   const casResponse = await fetch(CAS_LOGIN_URL, {
-    headers: COMMON_HEADERS,
     redirect: "manual",
   });
 
-  const casCookies = getCookies(casResponse);
+  cookieStore.applyResponse(casResponse, VPN_DOMAIN);
 
   if (casResponse.status === 302) {
     const authResult = await authLogin(
       { id, password },
       {
+        cookieStore,
         service: `${VPN_SERVER}/users/auth/cas/callback?url=https%3A%2F%2Fwebvpn.nenu.edu.cn%2Fusers%2Fsign_in`,
       },
     );
@@ -68,7 +55,7 @@ export const vpnCASLogin = async ({
 
     const callbackResponse = await fetch(authResult.location, {
       headers: {
-        Cookie: getCookieHeader([...casCookies, ...authResult.cookies]),
+        Cookie: cookieStore.getHeader(authResult.location),
       },
       redirect: "manual",
     });
@@ -80,9 +67,8 @@ export const vpnCASLogin = async ({
         msg: "学校 WebVPN 服务崩溃，请稍后重试。",
       };
 
-    const sessionCookie = getCookies(callbackResponse).find(
-      ({ name }) => name === "_astraeus_session",
-    )!;
+    cookieStore.applyResponse(callbackResponse, authResult.location);
+
     const location = callbackResponse.headers.get("Location");
 
     if (callbackResponse.status === 302) {
@@ -93,23 +79,18 @@ export const vpnCASLogin = async ({
           msg: "短时间内登录过多，小程序服务器已被屏蔽。请稍后重试",
         };
 
-      if (location === `${VPN_SERVER}/vpn_key/update`) {
-        const keyResponse = await fetch(`${VPN_SERVER}/vpn_key/update`, {
+      if (location === UPDATE_KEY_URL) {
+        const keyResponse = await fetch(UPDATE_KEY_URL, {
           headers: {
-            Cookie: getCookieHeader([sessionCookie]),
+            Cookie: cookieStore.getHeader(UPDATE_KEY_URL),
           },
         });
 
-        const cookies = getCookies(keyResponse);
-
-        const webVpnCookies = [
-          cookies.find(({ name }) => name === "_webvpn_key")!,
-          cookies.find(({ name }) => name === "webvpn_username")!,
-        ];
+        cookieStore.applyResponse(keyResponse, VPN_DOMAIN);
 
         return {
           success: true,
-          cookies: webVpnCookies,
+          cookieStore,
         };
       }
     }
@@ -129,17 +110,13 @@ export const vpnCASLogin = async ({
   };
 };
 
-export const vpnLogin = async ({
-  id,
-  password,
-}: LoginOptions): Promise<VPNLoginResponse> => {
-  const loginPageResponse = await fetch(LOGIN_URL, {
-    headers: COMMON_HEADERS,
-  });
+export const vpnLogin = async (
+  { id, password }: LoginOptions,
+  cookieStore = new CookieStore(),
+): Promise<VPNLoginResult> => {
+  const loginPageResponse = await fetch(LOGIN_URL);
 
-  const initialCookies = getCookies(loginPageResponse);
-
-  console.log("Getting cookie:", initialCookies);
+  cookieStore.applyResponse(loginPageResponse, VPN_SERVER);
 
   const content = await loginPageResponse.text();
 
@@ -161,7 +138,7 @@ export const vpnLogin = async ({
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
-      Cookie: getCookieHeader(initialCookies),
+      Cookie: cookieStore.getHeader(LOGIN_URL),
     },
     body: params.toString(),
     redirect: "manual",
@@ -169,10 +146,9 @@ export const vpnLogin = async ({
 
   const location = loginResponse.headers.get("Location");
 
-  initialCookies.push(...getCookies(loginResponse));
+  cookieStore.applyResponse(loginResponse, VPN_SERVER);
 
   console.log("Request location:", location);
-  console.log("Login cookies:", initialCookies);
 
   if (loginResponse.status === 302) {
     if (location === LOGIN_URL)
@@ -182,27 +158,18 @@ export const vpnLogin = async ({
         msg: "短时间内登录过多，小程序服务器已被屏蔽。请稍后重试",
       };
 
-    if (location === `${VPN_SERVER}/vpn_key/update`) {
-      const keyResponse = await fetch(`${VPN_SERVER}/vpn_key/update`, {
+    if (location === UPDATE_KEY_URL) {
+      const keyResponse = await fetch(UPDATE_KEY_URL, {
         headers: {
-          Cookie: getCookieHeader([
-            ...initialCookies,
-            ...getCookies(loginResponse),
-          ]),
+          Cookie: cookieStore.getHeader(UPDATE_KEY_URL),
         },
       });
 
-      const cookies = getCookies(keyResponse);
-
-      const webVpnCookies = [
-        cookies.find(({ name }) => name === "_webvpn_key")!,
-        cookies.find(({ name }) => name === "webvpn_username")!,
-      ];
+      cookieStore.applyResponse(keyResponse, VPN_SERVER);
 
       return {
         success: true,
-
-        cookies: webVpnCookies,
+        cookieStore,
       };
     }
   }
@@ -242,17 +209,32 @@ export const vpnCASLoginHandler: RequestHandler<
   try {
     const { id, password } = req.body;
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const data = await vpnCASLogin({ id, password });
+
+    if (data.success)
+      return res.json(<VPNLoginSuccessResponse>{
+        success: true,
+        cookies: data.cookieStore.getAllCookies().map((item) => item.toJSON()),
+      });
 
     return res.json(data);
   } catch (err) {
-    return res.json(<VPNLoginFailedResponse>{
+    return res.json(<VPNLoginFailedResult>{
       success: false,
       msg: "参数错误",
     });
   }
 };
+
+export interface VPNLoginSuccessResponse {
+  success: true;
+  cookies: CookieType[];
+}
+
+export type VPNLoginResponse =
+  | VPNLoginSuccessResponse
+  | AuthLoginFailedResult
+  | VPNLoginFailedResult;
 
 export const vpnLoginHandler: RequestHandler<
   EmptyObject,
@@ -262,12 +244,19 @@ export const vpnLoginHandler: RequestHandler<
   try {
     const { id, password } = req.body;
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const data = await vpnLogin({ id, password });
+    const result = await vpnLogin({ id, password });
 
-    return res.json(data);
+    if (result.success)
+      return res.json(<VPNLoginSuccessResponse>{
+        success: true,
+        cookies: result.cookieStore
+          .getAllCookies()
+          .map((item) => item.toJSON()),
+      });
+
+    return res.json(result);
   } catch (err) {
-    return res.json(<VPNLoginFailedResponse>{
+    return res.json(<VPNLoginFailedResult>{
       success: false,
       msg: "参数错误",
     });

@@ -1,10 +1,10 @@
 import type { RequestHandler } from "express";
 
-import type { CommonFailedResponse, Cookie } from "../typings.js";
-import { getCookieHeader, getCookies } from "../utils/index.js";
+import type { CommonFailedResponse, CookieType } from "../typings.js";
+import { cookies2Header, getResponseCookies } from "../utils/index.js";
 
 export interface GetUnderAdmissionResponse {
-  cookies: Cookie[];
+  cookies: CookieType[];
   /** 填写信息 */
   info: string[];
   /** 验证码 */
@@ -20,7 +20,7 @@ const getCaptcha = async (): Promise<GetUnderAdmissionResponse> => {
     "http://bkzsw.nenu.edu.cn/include/webgetcode.php?width=85&height=28&sitex=15&sitey=6",
   );
 
-  const cookies = getCookies(imageResponse);
+  const cookies = getResponseCookies(imageResponse);
 
   const base64Image = `data:image/png;base64,${Buffer.from(
     await imageResponse.arrayBuffer(),
@@ -30,7 +30,7 @@ const getCaptcha = async (): Promise<GetUnderAdmissionResponse> => {
     "http://bkzsw.nenu.edu.cn/col_000018_000169.html",
     {
       headers: {
-        Cookie: getCookieHeader(cookies),
+        Cookie: cookies2Header(cookies),
       },
     },
   );
@@ -61,7 +61,7 @@ export interface UnderAdmissionPostOptions {
   name: string;
   id: string;
   testId: string;
-  cookies: Cookie[];
+  cookies: CookieType[];
 }
 
 export interface UnderAdmissionSuccessResponse {
@@ -94,7 +94,7 @@ const getInfo = async ({
     {
       method: "POST",
       headers: {
-        Cookie: getCookieHeader(cookies),
+        Cookie: cookies2Header(cookies),
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: params.toString(),

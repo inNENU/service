@@ -7,8 +7,7 @@ import type {
   CookieVerifySuccessResponse,
   EmptyObject,
 } from "../typings.js";
-import { getCookieHeader } from "../utils/cookie.js";
-import { IE_8_USER_AGENT } from "../utils/ua.js";
+import { IE_8_USER_AGENT, cookies2Header } from "../utils/index.js";
 
 export const actionCheckHandler: RequestHandler<
   EmptyObject,
@@ -20,7 +19,7 @@ export const actionCheckHandler: RequestHandler<
       method: "POST",
       headers: {
         Accept: "application/json, text/javascript, */*; q=0.01",
-        Cookie: getCookieHeader(req.body.cookies),
+        Cookie: req.headers.cookie || cookies2Header(req.body.cookies),
         "User-Agent": IE_8_USER_AGENT,
       },
       redirect: "manual",

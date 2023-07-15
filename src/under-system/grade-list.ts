@@ -2,15 +2,18 @@ import type { RequestHandler } from "express";
 
 import { underSystemLogin } from "./login.js";
 import { SERVER, getTimeStamp } from "./utils.js";
-import type { AuthLoginFailedResponse } from "../auth/index.js";
+import type { AuthLoginFailedResult } from "../auth/index.js";
 import type {
   CommonFailedResponse,
-  Cookie,
   CookieOptions,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import { IE_8_USER_AGENT, getCookieHeader } from "../utils/index.js";
+import {
+  CookieStore,
+  IE_8_USER_AGENT,
+  getCookieItems,
+} from "../utils/index.js";
 
 type CourseType =
   | "通识教育必修课"
@@ -87,11 +90,9 @@ export interface UserGradeListSuccessResponse {
   data: GradeResult[];
 }
 
-export type UserGradeListFailedResponse = AuthLoginFailedResponse;
-
 export type UserGradeListResponse =
   | UserGradeListSuccessResponse
-  | UserGradeListFailedResponse;
+  | AuthLoginFailedResult;
 
 const gradeItemRegExp = /<tr.+?class="smartTr"[^>]*?>(.*?)<\/tr>/g;
 const jsGradeItemRegExp = /<tr.+?class=\\"smartTr\\"[^>]*?>(.*?)<\/tr>/g;
@@ -139,6 +140,7 @@ const COURSE_TYPES: Record<CourseType, string> = {
   教师教育必修课: "11",
   教师教育选修课: "12",
 };
+const QUERY_URL = `${SERVER}/xszqcjglAction.do?method=queryxscj`;
 
 const getDisplayTime = (time: string): string => {
   const [startYear, endYear, semester] = time.split("-");
@@ -158,7 +160,7 @@ const getScoreDetail = (content: string): ScoreDetail | null => {
 };
 
 export const getGrades = (
-  cookies: Cookie[],
+  cookieStore: CookieStore,
   content: string,
   isJS = false,
 ): Promise<GradeResult[]> =>
@@ -199,14 +201,13 @@ export const getGrades = (
       let gradeDetail: GradeDetail | null = null;
 
       if (gradeLink) {
-        const gradeDetailResponse = await fetch(
-          `${SERVER}${gradeLink}&tktime=${getTimeStamp()}`,
-          {
-            headers: {
-              Cookie: getCookieHeader(cookies),
-            },
+        const gradeUrl = `${SERVER}${gradeLink}&tktime=${getTimeStamp()}`;
+
+        const gradeDetailResponse = await fetch(gradeUrl, {
+          headers: {
+            Cookie: cookieStore.getHeader(gradeUrl),
           },
-        );
+        });
 
         const content = await gradeDetailResponse.text();
 
@@ -260,10 +261,10 @@ export const getGrades = (
   );
 
 export const getGradeLists = async (
-  cookies: Cookie[],
+  cookieStore: CookieStore,
   content: string,
 ): Promise<GradeResult[]> => {
-  const grades = await getGrades(cookies, content);
+  const grades = await getGrades(cookieStore, content);
   const totalPages = Number(totalPagesRegExp.exec(content)![1]);
 
   console.log("Total pages:", totalPages);
@@ -299,23 +300,20 @@ export const getGradeLists = async (
       otherFields,
     });
 
-    const response = await fetch(
-      `${SERVER}/xszqcjglAction.do?method=queryxscj`,
-      {
-        method: "POST",
-        headers: {
-          Cookie: getCookieHeader(cookies),
-          "Content-Type": "application/x-www-form-urlencoded",
-          Referer: `${SERVER}/xszqcjglAction.do?method=queryxscj`,
-          "User-Agent": IE_8_USER_AGENT,
-        },
-        body: params.toString(),
+    const response = await fetch(QUERY_URL, {
+      method: "POST",
+      headers: {
+        Cookie: cookieStore.getHeader(QUERY_URL),
+        "Content-Type": "application/x-www-form-urlencoded",
+        Referer: QUERY_URL,
+        "User-Agent": IE_8_USER_AGENT,
       },
-    );
+      body: params.toString(),
+    });
 
     const responseText = await response.text();
 
-    const newGrades = await getGrades(cookies, responseText, true);
+    const newGrades = await getGrades(cookieStore, responseText, true);
 
     grades.push(...newGrades);
   }
@@ -329,7 +327,7 @@ export const underGradeListHandler: RequestHandler<
   UserGradeListOptions
 > = async (req, res) => {
   try {
-    let cookies: Cookie[] = [];
+    const cookieStore = new CookieStore();
 
     const {
       time = "",
@@ -339,13 +337,11 @@ export const underGradeListHandler: RequestHandler<
     } = req.body;
 
     if ("cookies" in req.body) {
-      ({ cookies } = req.body);
+      cookieStore.apply(getCookieItems(req.body.cookies));
     } else {
-      const result = await underSystemLogin(req.body);
+      const result = await underSystemLogin(req.body, cookieStore);
 
       if (!result.success) return res.json(result);
-
-      ({ cookies } = result);
     }
 
     const params = new URLSearchParams({
@@ -358,19 +354,16 @@ export const underGradeListHandler: RequestHandler<
 
     console.log("Requesting with params:", params);
 
-    const response = await fetch(
-      `${SERVER}/xszqcjglAction.do?method=queryxscj`,
-      {
-        method: "POST",
-        headers: {
-          Cookie: getCookieHeader(cookies),
-          "Content-Type": "application/x-www-form-urlencoded",
-          Referer: `${SERVER}/jiaowu/cjgl/xszq/query_xscj.jsp?tktime=${getTimeStamp()}`,
-          "User-Agent": IE_8_USER_AGENT,
-        },
-        body: params.toString(),
+    const response = await fetch(QUERY_URL, {
+      method: "POST",
+      headers: {
+        Cookie: cookieStore.getHeader(QUERY_URL),
+        "Content-Type": "application/x-www-form-urlencoded",
+        Referer: `${SERVER}/jiaowu/cjgl/xszq/query_xscj.jsp?tktime=${getTimeStamp()}`,
+        "User-Agent": IE_8_USER_AGENT,
       },
-    );
+      body: params.toString(),
+    });
 
     const content = await response.text();
 
@@ -380,7 +373,7 @@ export const underGradeListHandler: RequestHandler<
         msg: "评教未完成，不能查询成绩！",
       });
 
-    const gradeList = await getGradeLists(cookies, content);
+    const gradeList = await getGradeLists(cookieStore, content);
 
     return res.json(<UserGradeListSuccessResponse>{
       success: true,
@@ -391,7 +384,7 @@ export const underGradeListHandler: RequestHandler<
     const { message } = <Error>err;
 
     console.error(err);
-    res.json(<AuthLoginFailedResponse>{
+    res.json(<AuthLoginFailedResult>{
       success: false,
       msg: message,
     });
