@@ -46,7 +46,8 @@ const getCourses = (content: string): TableItem =>
 
 interface UserCourseTableExtraOptions {
   /** 学号 */
-  id: number;
+  // Comment as not required
+  // id: number;
   /** 查询时间 */
   time: string;
 }
@@ -75,7 +76,7 @@ export const underCourseTableHandler: RequestHandler<
   try {
     const cookieStore = new CookieStore();
 
-    const { id, time } = req.body;
+    const { time } = req.body;
 
     if (!req.headers.cookie)
       if ("cookies" in req.body) {
@@ -94,7 +95,8 @@ export const underCourseTableHandler: RequestHandler<
       istsxx: "no",
       xnxqh: time,
       zc: "",
-      xs0101id: id.toString(),
+      // Not required
+      // xs0101id: id.toString(),
     });
 
     console.log("Requesting with params:", params);

@@ -163,7 +163,7 @@ const getScoreDetail = (content: string): ScoreDetail | null => {
 };
 
 export const getGrades = (
-  cookieStore: CookieStore,
+  cookieHeader: string,
   content: string,
   isJS = false,
 ): Promise<GradeResult[]> =>
@@ -209,7 +209,7 @@ export const getGrades = (
 
         const gradeDetailResponse = await fetch(gradeUrl, {
           headers: {
-            Cookie: cookieStore.getHeader(gradeUrl),
+            Cookie: cookieHeader,
           },
         });
 
@@ -265,7 +265,7 @@ export const getGrades = (
   );
 
 export const getGradeLists = async (
-  cookieStore: CookieStore,
+  cookieHeader: string,
   content: string,
 ): Promise<GradeResult[]> => {
   // We force writing these 2 field to ensure we care getting the default table structure
@@ -277,7 +277,7 @@ export const getGradeLists = async (
   const shouldRefetch =
     tableFields !== DEFAULT_TABLE_FIELD || otherFields !== DEFAULT_OTHER_FIELD;
 
-  const grades = shouldRefetch ? [] : await getGrades(cookieStore, content);
+  const grades = shouldRefetch ? [] : await getGrades(cookieHeader, content);
 
   console.log("Total pages:", totalPages);
 
@@ -314,7 +314,7 @@ export const getGradeLists = async (
     const response = await fetch(QUERY_URL, {
       method: "POST",
       headers: {
-        Cookie: cookieStore.getHeader(QUERY_URL),
+        Cookie: cookieHeader,
         "Content-Type": "application/x-www-form-urlencoded",
         Referer: QUERY_URL,
         "User-Agent": IE_8_USER_AGENT,
@@ -324,7 +324,7 @@ export const getGradeLists = async (
 
     const responseText = await response.text();
 
-    const newGrades = await getGrades(cookieStore, responseText, true);
+    const newGrades = await getGrades(cookieHeader, responseText, true);
 
     grades.push(...newGrades);
   }
@@ -347,13 +347,14 @@ export const underGradeListHandler: RequestHandler<
       gradeType = "all",
     } = req.body;
 
-    if ("cookies" in req.body) {
-      cookieStore.apply(getCookieItems(req.body.cookies));
-    } else {
-      const result = await underSystemLogin(req.body, cookieStore);
+    if (!req.headers.cookie)
+      if ("cookies" in req.body) {
+        cookieStore.apply(getCookieItems(req.body.cookies));
+      } else {
+        const result = await underSystemLogin(req.body, cookieStore);
 
-      if (!result.success) return res.json(result);
-    }
+        if (!result.success) return res.json(result);
+      }
 
     const params = new URLSearchParams({
       kksj: time,
@@ -365,10 +366,11 @@ export const underGradeListHandler: RequestHandler<
 
     console.log("Requesting with params:", params);
 
+    const cookieHeader = req.headers.cookie || cookieStore.getHeader(QUERY_URL);
     const response = await fetch(QUERY_URL, {
       method: "POST",
       headers: {
-        Cookie: cookieStore.getHeader(QUERY_URL),
+        Cookie: cookieHeader,
         "Content-Type": "application/x-www-form-urlencoded",
         Referer: `${SERVER}/jiaowu/cjgl/xszq/query_xscj.jsp?tktime=${getTimeStamp()}`,
         "User-Agent": IE_8_USER_AGENT,
@@ -384,7 +386,7 @@ export const underGradeListHandler: RequestHandler<
         msg: "评教未完成，不能查询成绩！",
       });
 
-    const gradeList = await getGradeLists(cookieStore, content);
+    const gradeList = await getGradeLists(cookieHeader, content);
 
     return res.json(<UserGradeListSuccessResponse>{
       success: true,
