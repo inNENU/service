@@ -111,8 +111,6 @@ export type BorrowBooksOptions = LoginOptions | CookieOptions;
 
 export interface BorrowBooksSuccessResponse {
   success: true;
-  /** @deprecated */
-  status: "success";
   data: BorrowBookData[];
 }
 
@@ -153,13 +151,11 @@ export const borrowBooksHandler: RequestHandler<
     if (data.success)
       return res.json(<BorrowBooksSuccessResponse>{
         success: true,
-        status: "success",
         data: data.data.map(getBookData),
       });
 
     return res.json(<BorrowBooksSuccessResponse>{
       success: true,
-      status: "success",
       data: [],
     });
   } catch (err) {
@@ -168,7 +164,6 @@ export const borrowBooksHandler: RequestHandler<
     console.error(err);
     res.json(<AuthLoginFailedResponse>{
       success: false,
-      status: "failed",
       msg: message,
     });
   }

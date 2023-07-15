@@ -29,8 +29,6 @@ export type CardBalanceOptions = LoginOptions | CookieOptions;
 
 export interface CardBalanceSuccessResponse {
   success: true;
-  /** @deprecated */
-  status: "success";
   data: number;
 }
 
@@ -72,13 +70,11 @@ export const cardBalanceHandler: RequestHandler<
     if (data.success)
       return res.json(<CardBalanceSuccessResponse>{
         success: true,
-        status: "success",
         data: Number(data.demo.items.item[0].kye) / 100,
       });
 
     return res.json(<AuthLoginFailedResponse>{
       success: false,
-      status: "failed",
       msg: JSON.stringify(data),
     });
   } catch (err) {
@@ -87,7 +83,6 @@ export const cardBalanceHandler: RequestHandler<
     console.error(err);
     res.json(<AuthLoginFailedResponse>{
       success: false,
-      status: "failed",
       msg: message,
     });
   }

@@ -19,8 +19,6 @@ const authenticityTokenRegExp =
 
 export interface VPNLoginSuccessResponse {
   success: true;
-  /** @deprecated */
-  status: "success";
   cookies: Cookie[];
 }
 
@@ -78,7 +76,6 @@ export const vpnCASLogin = async ({
     if (callbackResponse.status === 500)
       return {
         success: false,
-        status: "failed",
         type: "unknown",
         msg: "学校 WebVPN 服务崩溃，请稍后重试。",
       };
@@ -92,7 +89,6 @@ export const vpnCASLogin = async ({
       if (location === LOGIN_URL)
         return {
           success: false,
-          status: "failed",
           type: "locked",
           msg: "短时间内登录过多，小程序服务器已被屏蔽。请稍后重试",
         };
@@ -113,7 +109,6 @@ export const vpnCASLogin = async ({
 
         return {
           success: true,
-          status: "success",
           cookies: webVpnCookies,
         };
       }
@@ -123,14 +118,12 @@ export const vpnCASLogin = async ({
   if (casResponse.status === 500)
     return {
       success: false,
-      status: "failed",
       type: "unknown",
       msg: "学校 WebVPN 服务崩溃，请稍后重试。",
     };
 
   return {
     success: false,
-    status: "failed",
     type: "unknown",
     msg: "未知错误",
   };
@@ -185,7 +178,6 @@ export const vpnLogin = async ({
     if (location === LOGIN_URL)
       return {
         success: false,
-        status: "failed",
         type: "locked",
         msg: "短时间内登录过多，小程序服务器已被屏蔽。请稍后重试",
       };
@@ -209,7 +201,7 @@ export const vpnLogin = async ({
 
       return {
         success: true,
-        status: "success",
+
         cookies: webVpnCookies,
       };
     }
@@ -221,7 +213,6 @@ export const vpnLogin = async ({
     if (response.includes("用户名或密码错误, 超过五次将被锁定。"))
       return {
         success: false,
-        status: "failed",
         type: "wrong",
         msg: "用户名或密码错误, 超过五次将被锁定。",
       };
@@ -229,7 +220,6 @@ export const vpnLogin = async ({
     if (response.includes("您的帐号已被锁定, 请在十分钟后再尝试。"))
       return {
         success: false,
-        status: "failed",
         type: "locked",
         msg: "您的帐号已被锁定, 请在十分钟后再尝试。",
       };
@@ -239,7 +229,6 @@ export const vpnLogin = async ({
 
   return {
     success: false,
-    status: "failed",
     type: "unknown",
     msg: "未知错误",
   };
@@ -260,7 +249,6 @@ export const vpnCASLoginHandler: RequestHandler<
   } catch (err) {
     return res.json(<VPNLoginFailedResponse>{
       success: false,
-      status: "failed",
       msg: "参数错误",
     });
   }
@@ -281,7 +269,6 @@ export const vpnLoginHandler: RequestHandler<
   } catch (err) {
     return res.json(<VPNLoginFailedResponse>{
       success: false,
-      status: "failed",
       msg: "参数错误",
     });
   }

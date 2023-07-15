@@ -39,7 +39,6 @@ export const selectLoginHandler: RequestHandler<
       if (typeof id !== "number")
         return res.json({
           success: false,
-          status: "failed",
           msg: "学号必须为数字",
         });
 
@@ -80,7 +79,7 @@ export const selectLoginHandler: RequestHandler<
 
         return res.json(<SelectLoginSuccessResponse>{
           success: true,
-          status: "success",
+
           cookies: getCookies(loginResponse).map(
             ({ name, value }) => `${name}=${value}`,
           ),
@@ -90,14 +89,12 @@ export const selectLoginHandler: RequestHandler<
 
       return res.json(<SelectLoginFailedResponse>{
         success: false,
-        status: "failed",
         msg: "用户名或密码错误",
       });
     }
 
     return res.json(<SelectLoginFailedResponse>{
       success: false,
-      status: "failed",
       msg: "请传入必须参数",
     });
   } catch (err) {
@@ -106,7 +103,6 @@ export const selectLoginHandler: RequestHandler<
     console.error(err);
     res.json(<SelectLoginFailedResponse>{
       success: false,
-      status: "failed",
       msg: message,
     });
   }

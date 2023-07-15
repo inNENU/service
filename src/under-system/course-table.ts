@@ -57,8 +57,6 @@ export type UserCourseTableOptions = (LoginOptions | CookieOptions) &
 
 export interface UserCourseTableSuccessResponse {
   success: true;
-  /** @deprecated */
-  status: "success";
   data: TableItem;
   startTime: string;
 }
@@ -116,7 +114,6 @@ export const underCourseTableHandler: RequestHandler<
 
     return res.json(<UserCourseTableSuccessResponse>{
       success: true,
-      status: "success",
       data: tableData,
       startTime: semesterStartTime[time],
     });
@@ -126,7 +123,6 @@ export const underCourseTableHandler: RequestHandler<
     console.error(err);
     res.json(<AuthLoginFailedResponse>{
       success: false,
-      status: "failed",
       msg: message,
     });
   }

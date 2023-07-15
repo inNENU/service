@@ -12,8 +12,6 @@ import { getCookieHeader } from "../utils/cookie.js";
 
 export interface InfoSuccessResponse {
   success: true;
-  /** @deprecated */
-  status: "success";
 
   /** 用户姓名 */
   name: string;
@@ -46,7 +44,6 @@ export const getInfo = async (cookies: Cookie[]): Promise<InfoResponse> => {
   if (!userName)
     return <CommonFailedResponse>{
       success: false,
-      status: "failed",
       msg: "获取姓名失败",
     };
 
@@ -69,13 +66,11 @@ export const getInfo = async (cookies: Cookie[]): Promise<InfoResponse> => {
   if (typeof emailName !== "string")
     return <CommonFailedResponse>{
       success: false,
-      status: "failed",
       msg: "获取邮箱失败",
     };
 
   return <InfoSuccessResponse>{
     success: true,
-    status: "success",
     name: userName,
     email: emailName ? `${emailName}@nenu.edu.cn` : "未设置邮箱",
   };
@@ -95,13 +90,11 @@ export const infoHandler: RequestHandler<
 
     return res.json(<CommonFailedResponse>{
       success: false,
-      status: "failed",
       msg: "登录失败",
     });
   } catch (err) {
     return res.json(<CommonFailedResponse>{
       success: false,
-      status: "failed",
       msg: "参数错误",
     });
   }

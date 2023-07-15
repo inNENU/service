@@ -102,7 +102,6 @@ export const searchHandler: RequestHandler<
     if (rawData.match(/\s+<!DOCTYPE html/))
       return res.json(<SelectSearchFailedResponse>{
         success: false,
-        status: "failed",
         msg: "请重新登录",
         type: "relogin",
       });
@@ -121,14 +120,13 @@ export const searchHandler: RequestHandler<
 
       res.json(<SelectSearchSuccessResponse>{
         success: true,
-        status: "success",
+
         courses,
       });
     } catch (err) {
       console.error(err);
       res.json(<SelectSearchFailedResponse>{
         success: false,
-        status: "failed",
         msg: (<Error>err).message,
       });
     }
@@ -136,7 +134,6 @@ export const searchHandler: RequestHandler<
     console.error(err);
     res.json(<SelectSearchFailedResponse>{
       success: false,
-      status: "failed",
       msg: (<Error>err).message,
     });
   }

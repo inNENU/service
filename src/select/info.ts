@@ -251,7 +251,6 @@ export const selectInfoHandler: RequestHandler<
     if (documentContent.includes("不在选课时间范围内，无法选课!"))
       return res.json(<SelectInfoFailedResponse>{
         success: false,
-        status: "failed",
         msg: "不在选课时间范围内，无法选课!",
       });
 
@@ -278,7 +277,7 @@ export const selectInfoHandler: RequestHandler<
 
     return res.json(<SelectInfoSuccessResponse>{
       success: true,
-      status: "success",
+
       ...paramsStore.state!,
       currentLocation,
       currentGrade,
@@ -297,7 +296,6 @@ export const selectInfoHandler: RequestHandler<
     console.error(err);
     res.json(<SelectInfoFailedResponse>{
       success: false,
-      status: "failed",
       msg: message,
     });
   }

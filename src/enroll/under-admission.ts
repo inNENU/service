@@ -66,8 +66,6 @@ export interface UnderAdmissionPostOptions {
 
 export interface UnderAdmissionSuccessResponse {
   success: true;
-  /** @deprecated */
-  status: "success";
   info: { text: string; value: string }[];
 }
 
@@ -113,7 +111,6 @@ const getInfo = async ({
   if (errorResult)
     return {
       success: false,
-      status: "failed",
       msg: errorResult[1],
     };
 
@@ -196,7 +193,6 @@ const getInfo = async ({
 
   return {
     success: true,
-    status: "success",
     info,
   };
 };
@@ -212,7 +208,6 @@ export const underAdmissionHandler: RequestHandler = async (req, res) => {
     console.error(err);
     res.json(<CommonFailedResponse>{
       success: false,
-      status: "failed",
       msg: message,
     });
   }

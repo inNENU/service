@@ -29,8 +29,6 @@ export type NoticeOptions = (LoginOptions | CookieOptions) & {
 
 export interface NoticeSuccessResponse {
   success: true;
-  /** @deprecated */
-  status: "success";
   title: string;
   author: string;
   time: string;
@@ -52,7 +50,6 @@ export const noticeHandler: RequestHandler<
     if (!noticeID)
       return res.json(<CommonFailedResponse>{
         success: false,
-        status: "failed",
         msg: "ID is required",
       });
 
@@ -87,7 +84,6 @@ export const noticeHandler: RequestHandler<
 
     return res.json(<NoticeSuccessResponse>{
       success: true,
-      status: "success",
       title,
       author,
       from,
@@ -109,7 +105,6 @@ export const noticeHandler: RequestHandler<
     console.error(err);
     res.json(<AuthLoginFailedResponse>{
       success: false,
-      status: "failed",
       msg: message,
     });
   }

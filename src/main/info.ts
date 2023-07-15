@@ -22,8 +22,6 @@ export interface MainInfoOptions {
 
 export interface MainInfoSuccessResponse {
   success: true;
-  /** @deprecated */
-  status: "success";
   title: string;
   time: string;
   from?: string;
@@ -49,7 +47,6 @@ export const mainInfoHandler: RequestHandler<
     if (response.status !== 200)
       return res.json(<CommonFailedResponse>{
         success: false,
-        status: "failed",
         msg: "请求失败",
       });
 
@@ -71,7 +68,6 @@ export const mainInfoHandler: RequestHandler<
 
     return res.json(<MainInfoSuccessResponse>{
       success: true,
-      status: "success",
       title: getText(title),
       time,
       from,
@@ -94,7 +90,6 @@ export const mainInfoHandler: RequestHandler<
     console.error(err);
     res.json(<CommonFailedResponse>{
       success: false,
-      status: "failed",
       msg: message,
     });
   }

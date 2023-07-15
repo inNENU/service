@@ -71,7 +71,6 @@ export const changePasswordHandler: RequestHandler<
 
       return res.json(<CommonFailedResponse>{
         success: false,
-        status: "failed",
         msg: "修改失败",
       });
     }
@@ -123,13 +122,11 @@ export const changePasswordHandler: RequestHandler<
 
     return res.json(<CommonFailedResponse>{
       success: false,
-      status: "failed",
       msg: "登录失败",
     });
   } catch (err) {
     return res.json(<CommonFailedResponse>{
       success: false,
-      status: "failed",
       msg: "参数错误",
     });
   }

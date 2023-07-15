@@ -13,8 +13,6 @@ export interface SelectBaseOptions {
 
 export interface SelectBaseSuccessResponse {
   success: true;
-  /** @deprecated */
-  status: "success";
 }
 
 export type SelectBaseFailedResponse = CommonFailedResponse;

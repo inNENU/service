@@ -54,15 +54,11 @@ export interface CookieOptions {
 
 export interface CommonFailedResponse {
   success: false;
-  /** @deprecated */
-  status: "failed";
   msg: string;
 }
 
 export interface CookieVerifySuccessResponse {
   success: true;
-  /** @deprecated */
-  status: "success";
   valid: boolean;
 }
 

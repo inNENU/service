@@ -19,8 +19,6 @@ export interface HistoryGradeResult {
 
 export interface EnrollGradeSuccessResponse {
   success: true;
-  /** @deprecated */
-  status: "success";
   data: HistoryGradeResult;
 }
 
@@ -106,14 +104,12 @@ export const historyGradeHandler: RequestHandler<
 
       return res.json(<EnrollGradeSuccessResponse>{
         success: true,
-        status: "success",
         data: { titles, items: historyInfos },
       });
     }
 
     return res.json(<CommonFailedResponse>{
       success: false,
-      status: "failed",
       msg: "获取数据失败，请重试",
     });
   } catch (err) {
@@ -122,7 +118,6 @@ export const historyGradeHandler: RequestHandler<
     console.error(err);
     res.json(<CommonFailedResponse>{
       success: false,
-      status: "failed",
       msg: message,
     });
   }

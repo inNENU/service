@@ -25,8 +25,6 @@ export interface WechatQRCodeError {
 
 export interface QRCodeSuccessResponse {
   success: true;
-  /** @deprecated */
-  status: "success";
   image: string;
 }
 
@@ -75,7 +73,6 @@ export const qrCodeHandler: RequestHandler<
     if (!appIDInfo[appID])
       return res.json(<CommonFailedResponse>{
         success: false,
-        status: "failed",
         msg: "AppID 非法",
       });
 
@@ -99,7 +96,6 @@ export const qrCodeHandler: RequestHandler<
 
       return res.json(<CommonFailedResponse>{
         success: false,
-        status: "failed",
         msg: image.errmsg,
       });
     }
@@ -119,7 +115,6 @@ export const qrCodeHandler: RequestHandler<
 
     res.json(<CommonFailedResponse>{
       success: false,
-      status: "failed",
       msg: message,
     });
   }

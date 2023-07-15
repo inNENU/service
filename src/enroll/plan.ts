@@ -29,8 +29,6 @@ export interface EnrollPlanInfo {
 
 export interface EnrollPlanSuccessResponse {
   success: true;
-  /** @deprecated */
-  status: "success";
   data: EnrollPlanInfo[];
 }
 
@@ -96,7 +94,6 @@ export const enrollPlanHandler: RequestHandler<
 
     return res.json(<EnrollPlanSuccessResponse>{
       success: true,
-      status: "success",
       data: planInfo,
     });
   } catch (err) {
@@ -105,7 +102,6 @@ export const enrollPlanHandler: RequestHandler<
     console.error(err);
     res.json(<CommonFailedResponse>{
       success: false,
-      status: "failed",
       msg: message,
     });
   }

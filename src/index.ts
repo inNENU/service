@@ -118,7 +118,6 @@ app.use((err: Error, req, res: Response, _next: () => void) => {
 
   res.status(500).send(<CommonFailedResponse>{
     success: false,
-    status: "failed",
     msg: "我们出了问题! 请联系 Mr.Hope",
   });
 });

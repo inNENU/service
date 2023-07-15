@@ -31,8 +31,6 @@ export interface InfoItem {
 
 export interface MainInfoListSuccessResponse {
   success: true;
-  /** @deprecated */
-  status: "success";
   data: InfoItem[];
   page: number;
   totalPage: number;
@@ -61,7 +59,6 @@ export const mainInfoListHandler: RequestHandler<
     if (!["news", "notice", "academic"].includes(type))
       return res.json(<CommonFailedResponse>{
         success: false,
-        status: "failed",
         msg: "type 参数错误",
       });
 
@@ -72,7 +69,6 @@ export const mainInfoListHandler: RequestHandler<
     )
       return res.json(<CommonFailedResponse>{
         success: false,
-        status: "failed",
         msg: "page 参数错误",
       });
 
@@ -85,7 +81,6 @@ export const mainInfoListHandler: RequestHandler<
     if (response.status !== 200)
       return res.json(<CommonFailedResponse>{
         success: false,
-        status: "failed",
         msg: "请求失败",
       });
 
@@ -119,7 +114,6 @@ export const mainInfoListHandler: RequestHandler<
 
     return res.json(<MainInfoListSuccessResponse>{
       success: true,
-      status: "success",
       data,
       page,
       totalPage: totalPageState[type],
@@ -130,7 +124,6 @@ export const mainInfoListHandler: RequestHandler<
     console.error(err);
     res.json(<CommonFailedResponse>{
       success: false,
-      status: "failed",
       msg: message,
     });
   }

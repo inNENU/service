@@ -9,8 +9,6 @@ const contentRegExp = /<div id="vsb_content">([\s\S]+?)<\/div>/;
 
 export interface MainStatusSuccessResponse {
   success: true;
-  /** @deprecated */
-  status: "success";
   data: Node[];
 }
 
@@ -25,7 +23,6 @@ export const mainStatusHandler: RequestHandler = async (_, res) => {
     if (response.status !== 200)
       return res.json(<CommonFailedResponse>{
         success: false,
-        status: "failed",
         msg: "请求失败",
       });
 
@@ -33,7 +30,7 @@ export const mainStatusHandler: RequestHandler = async (_, res) => {
 
     return res.json(<MainStatusSuccessResponse>{
       success: true,
-      status: "success",
+
       data: await getRichTextNodes(contentRegExp.exec(text)![1].trim()),
     });
   } catch (err) {
@@ -42,7 +39,6 @@ export const mainStatusHandler: RequestHandler = async (_, res) => {
     console.error(err);
     res.json(<CommonFailedResponse>{
       success: false,
-      status: "failed",
       msg: message,
     });
   }

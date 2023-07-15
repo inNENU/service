@@ -15,9 +15,6 @@ import { vpnCASLogin } from "../vpn/login.js";
 
 export interface UnderSystemLoginSuccessResponse {
   success: true;
-  /** @deprecated */
-  status: "success";
-
   cookies: Cookie[];
 }
 
@@ -49,7 +46,6 @@ export const underSystemLogin = async (
 
     return <AuthLoginFailedResponse>{
       success: false,
-      status: "failed",
       type: result.type,
       msg: result.msg,
     };
@@ -87,7 +83,6 @@ export const underSystemLogin = async (
   if (ticketResponse.status !== 302)
     return <AuthLoginFailedResponse>{
       success: false,
-      status: "failed",
       type: "unknown",
       msg: "登录失败",
     };
@@ -107,14 +102,12 @@ export const underSystemLogin = async (
 
     return <UnderSystemLoginSuccessResponse>{
       success: true,
-      status: "success",
       cookies: authCookies,
     };
   }
 
   return {
     success: false,
-    status: "failed",
     type: "unknown",
     msg: "登录失败",
   };
@@ -133,7 +126,6 @@ export const underSystemLoginHandler: RequestHandler<
     console.error(err);
     res.json(<AuthLoginFailedResponse>{
       success: false,
-      status: "failed",
       msg: message,
     });
   }

@@ -51,8 +51,6 @@ export interface AuthLoginOptions {
 
 export interface AuthLoginSuccessResponse {
   success: true;
-  /** @deprecated */
-  status: "success";
   cookies: Cookie[];
   location: string;
 }
@@ -117,7 +115,6 @@ export const authLogin = async (
   if (needCaptcha)
     return {
       success: false,
-      status: "failed",
       type: "captcha",
       msg: "需要验证码",
     };
@@ -176,14 +173,12 @@ export const authLogin = async (
     if (resultContent.includes("您提供的用户名或者密码有误"))
       return {
         success: false,
-        status: "failed",
         type: "wrong",
         msg: "用户名或密码错误",
       };
   if (resultContent.includes("请输入验证码"))
     return {
       success: false,
-      status: "failed",
       type: "captcha",
       msg: "需要验证码，请访问官网统一身份认证网页进行登录。成功登录后即可消除验证码。",
     };
@@ -192,14 +187,12 @@ export const authLogin = async (
     if (location === `${server}/authserver/login`)
       return {
         success: false,
-        status: "failed",
         type: "wrong",
         msg: "用户名或密码错误",
       };
 
     return {
       success: true,
-      status: "success",
       cookies: currentCookies,
       location: location!,
     };
@@ -209,7 +202,6 @@ export const authLogin = async (
 
   return {
     success: false,
-    status: "failed",
     type: "unknown",
     msg: "未知错误",
   };
@@ -230,7 +222,6 @@ export const authLoginHandler: RequestHandler<
   } catch (err) {
     return res.json(<AuthLoginFailedResponse>{
       success: false,
-      status: "failed",
       msg: "参数错误",
     });
   }

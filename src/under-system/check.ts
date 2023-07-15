@@ -33,20 +33,17 @@ export const underSystemCheckHandler: RequestHandler<
       if (text.includes("您登录后过长时间没有操作或您的用户名已经在别处登录！"))
         return res.json(<CookieVerifySuccessResponse>{
           success: true,
-          status: "success",
           valid: false,
         });
 
       return res.json(<CookieVerifySuccessResponse>{
         success: true,
-        status: "success",
         valid: true,
       });
     }
 
     return res.json(<CookieVerifySuccessResponse>{
       success: true,
-      status: "success",
       valid: false,
     });
   } catch (err) {
@@ -55,7 +52,6 @@ export const underSystemCheckHandler: RequestHandler<
     console.error(err);
     res.json(<CommonFailedResponse>{
       success: false,
-      status: "failed",
       msg: message,
     });
   }

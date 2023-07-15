@@ -84,8 +84,6 @@ export interface GradeResult {
 
 export interface UserGradeListSuccessResponse {
   success: true;
-  /** @deprecated */
-  status: "success";
   data: GradeResult[];
 }
 
@@ -379,7 +377,6 @@ export const underGradeListHandler: RequestHandler<
     if (content.includes("评教未完成，不能查询成绩！"))
       return res.json(<CommonFailedResponse>{
         success: false,
-        status: "failed",
         msg: "评教未完成，不能查询成绩！",
       });
 
@@ -387,7 +384,7 @@ export const underGradeListHandler: RequestHandler<
 
     return res.json(<UserGradeListSuccessResponse>{
       success: true,
-      status: "success",
+
       data: gradeList,
     });
   } catch (err) {
@@ -396,7 +393,6 @@ export const underGradeListHandler: RequestHandler<
     console.error(err);
     res.json(<AuthLoginFailedResponse>{
       success: false,
-      status: "failed",
       msg: message,
     });
   }
