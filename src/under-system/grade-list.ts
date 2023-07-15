@@ -140,7 +140,7 @@ const COURSE_TYPES: Record<CourseType, string> = {
   教师教育必修课: "11",
   教师教育选修课: "12",
 };
-const DEFAULT_FIELD =
+const DEFAULT_TABLE_FIELD =
   "学号:1:1:90:a.xh,姓名:2:1:110:a.xm,开课学期:3:1:120:a.xqmc,课程编号:14:1:120:a.kcbh,课程名称:4:1:130:a.kcmc,难度系数:18:1:70:ndxs,总成绩:5:1:70:a.zcj,学分绩点:19:1:70:jd,成绩标志:6:1:90:cjbsmc,课程性质:7:1:110:kcxzmc,通选课类别:20:1:90:txklb,课程类别:8:1:90:kclbmc,学时:9:1:70:a.zxs,学分:10:1:70:a.xf,考试性质:11:1:100:ksxzmc,补重学期:15:1:100:a.bcxq,审核状态:17:1:100:shzt";
 const DEFAULT_OTHER_FIELD = "null";
 const QUERY_URL = `${SERVER}/xszqcjglAction.do?method=queryxscj`;
@@ -269,13 +269,13 @@ export const getGradeLists = async (
   content: string,
 ): Promise<GradeResult[]> => {
   // We force writing these 2 field to ensure we care getting the default table structure
-  const field = String(fieldRegExp.exec(content)?.[1]);
+  const tableFields = tableFieldsRegExp.exec(content)![1];
   const otherFields = String(otherFieldsRegExp.exec(content)?.[1]);
   const totalPages = Number(totalPagesRegExp.exec(content)![1]);
 
   // users are editing them, so the main page must be refetched
   const shouldRefetch =
-    field !== DEFAULT_FIELD || otherFields !== DEFAULT_OTHER_FIELD;
+    tableFields !== DEFAULT_TABLE_FIELD || otherFields !== DEFAULT_OTHER_FIELD;
 
   const grades = shouldRefetch ? [] : await getGrades(cookieStore, content);
 
@@ -283,7 +283,7 @@ export const getGradeLists = async (
 
   if (totalPages === 1 && !shouldRefetch) return grades;
 
-  const tableFields = tableFieldsRegExp.exec(content)![1];
+  const field = String(fieldRegExp.exec(content)?.[1]);
   const isSql = sqlRegExp.exec(content)![1];
   const printPageSize = String(printPageSizeRegExp.exec(content)?.[1]);
   const key = String(keyRegExp.exec(content)?.[1]);
@@ -307,7 +307,7 @@ export const getGradeLists = async (
       key,
       field,
       totalPages: totalPages.toString(),
-      tableFields: DEFAULT_FIELD,
+      tableFields: DEFAULT_TABLE_FIELD,
       otherFields: DEFAULT_OTHER_FIELD,
     });
 
