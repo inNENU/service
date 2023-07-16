@@ -92,7 +92,8 @@ export interface UserGradeListSuccessResponse {
 
 export type UserGradeListResponse =
   | UserGradeListSuccessResponse
-  | AuthLoginFailedResult;
+  | AuthLoginFailedResult
+  | CommonFailedResponse;
 
 const gradeItemRegExp = /<tr.+?class="smartTr"[^>]*?>([\s\S]*?)<\/tr>/g;
 const jsGradeItemRegExp = /<tr.+?class=\\"smartTr\\"[^>]*?>(.*?)<\/tr>/g;

@@ -108,7 +108,7 @@ export const underCourseTableHandler: RequestHandler<
       {
         headers: {
           Cookie: req.headers.cookie || cookieStore.getHeader(url),
-          Referer: `${SERVER}/tkglAction.do?method=kbxxXs&tktime=${getTimeStamp().toString()}`,
+          Referer: `${SERVER}/tkglAction.do?method=kbxxXs&tktime=${getTimeStamp()}`,
           "User-Agent": IE_8_USER_AGENT,
         },
       },
