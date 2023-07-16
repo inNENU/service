@@ -2,14 +2,14 @@ import type { RequestHandler } from "express";
 
 import { MAIN_URL } from "./utils.js";
 import type { CommonFailedResponse } from "../typings.js";
-import type { Node } from "../utils/index.js";
+import type { RichTextNode } from "../utils/index.js";
 import { getRichTextNodes } from "../utils/index.js";
 
 const contentRegExp = /<div id="vsb_content">([\s\S]+?)<\/div>/;
 
 export interface MainStatusSuccessResponse {
   success: true;
-  data: Node[];
+  data: RichTextNode[];
 }
 
 export type MainStatusResponse =

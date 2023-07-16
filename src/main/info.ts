@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 
 import { MAIN_URL } from "./utils.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
-import type { Node } from "../utils/index.js";
+import type { RichTextNode } from "../utils/index.js";
 import { getRichTextNodes, getText } from "../utils/index.js";
 
 const infoBodyRegExp =
@@ -28,7 +28,7 @@ export interface MainInfoSuccessResponse {
   author?: string;
   editor?: string;
   pageView: number;
-  content: Node[];
+  content: RichTextNode[];
 }
 
 export type MainInfoResponse = MainInfoSuccessResponse | CommonFailedResponse;
@@ -81,7 +81,12 @@ export const mainInfoHandler: RequestHandler<
               ? `img ${className}`
               : "img"
             : className ?? null,
-        getImageSrc: (src) => (src.startsWith("/") ? `${MAIN_URL}${src}` : src),
+        getImageSrc: (src) =>
+          src.includes("/fileTypeImages/")
+            ? null
+            : src.startsWith("/")
+            ? `${MAIN_URL}${src}`
+            : src,
       }),
     });
   } catch (err) {

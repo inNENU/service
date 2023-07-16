@@ -27,7 +27,7 @@ export interface ElementNode {
   type: "node";
   name: string;
   attrs?: Record<string, string>;
-  children?: Node[];
+  children?: RichTextNode[];
 }
 
 export interface TextNode {
@@ -35,12 +35,12 @@ export interface TextNode {
   text: string;
 }
 
-export type Node = ElementNode | TextNode;
+export type RichTextNode = ElementNode | TextNode;
 
 const handleNode = async (
   node: AnyNode,
   options: GetNodeOptions,
-): Promise<Node | null> => {
+): Promise<RichTextNode | null> => {
   if (node.type === "text") return { type: "text", text: node.data };
 
   if (node.type === "tag") {
@@ -59,7 +59,7 @@ const handleNode = async (
         await Promise.all(
           node.children.map((node) => handleNode(node, options)),
         )
-      ).filter((item): item is Node => item !== null);
+      ).filter((item): item is RichTextNode => item !== null);
 
       // append link for anchor tag
       if (node.name === "a" && node.attribs.href) {
@@ -101,12 +101,12 @@ const handleNode = async (
 };
 
 export const getRichTextNodes = async (
-  content: string,
+  content: string | AnyNode[],
   options: GetNodeOptions = {},
-): Promise<Node[]> => {
-  const rootNodes = parseHTML(content) || [];
+): Promise<RichTextNode[]> => {
+  const rootNodes = Array.isArray(content) ? content : parseHTML(content) || [];
 
   return (
     await Promise.all(rootNodes.map((node) => handleNode(node, options)))
-  ).filter((item): item is Node => item !== null);
+  ).filter((item): item is RichTextNode => item !== null);
 };

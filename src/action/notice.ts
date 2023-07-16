@@ -9,7 +9,7 @@ import type {
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import type { Node } from "../utils/getRichText.js";
+import type { RichTextNode } from "../utils/getRichText.js";
 import {
   CookieStore,
   getCookieItems,
@@ -37,7 +37,7 @@ export interface NoticeSuccessResponse {
   time: string;
   from: string;
   pageView: number;
-  content: Node[];
+  content: RichTextNode[];
 }
 
 export type NoticeResponse = NoticeSuccessResponse | CommonFailedResponse;
