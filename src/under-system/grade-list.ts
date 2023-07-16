@@ -33,7 +33,7 @@ interface UserGradeListExtraOptions {
   /** 课程名称 */
   name?: string;
   /** 课程性质 */
-  courseType?: CourseType;
+  courseType?: CourseType | "";
   gradeType?: "all" | "best";
 }
 
@@ -293,42 +293,48 @@ export const getGradeLists = async (
     String(printHQLInputRegExp.exec(content)?.[1]) ||
     String(printHQLJSRegExp.exec(content)?.[1]);
   const sqlString = sqlStringRegExp.exec(content)?.[1];
-
   const xsId = xsIdRegExp.exec(content)![1];
 
-  for (let page = shouldRefetch ? 1 : 2; page <= totalPages; page++) {
-    const params = new URLSearchParams({
-      xsId,
-      keyCode,
-      PageNum: page.toString(),
-      printHQL,
-      ...(sqlString ? { sqlString } : {}),
-      isSql,
-      printPageSize,
-      key,
-      field,
-      totalPages: totalPages.toString(),
-      tableFields: DEFAULT_TABLE_FIELD,
-      otherFields: DEFAULT_OTHER_FIELD,
-    });
+  const pages: number[] = [];
 
-    const response = await fetch(QUERY_URL, {
-      method: "POST",
-      headers: {
-        Cookie: cookieHeader,
-        "Content-Type": "application/x-www-form-urlencoded",
-        Referer: QUERY_URL,
-        "User-Agent": IE_8_USER_AGENT,
-      },
-      body: params.toString(),
-    });
+  for (let page = shouldRefetch ? 1 : 2; page <= totalPages; page++)
+    pages.push(page);
 
-    const responseText = await response.text();
+  await Promise.all(
+    pages.map(async (page) => {
+      const params = new URLSearchParams({
+        xsId,
+        keyCode,
+        PageNum: page.toString(),
+        printHQL,
+        ...(sqlString ? { sqlString } : {}),
+        isSql,
+        printPageSize,
+        key,
+        field,
+        totalPages: totalPages.toString(),
+        tableFields: DEFAULT_TABLE_FIELD,
+        otherFields: DEFAULT_OTHER_FIELD,
+      });
 
-    const newGrades = await getGrades(cookieHeader, responseText, true);
+      const response = await fetch(QUERY_URL, {
+        method: "POST",
+        headers: {
+          Cookie: cookieHeader,
+          "Content-Type": "application/x-www-form-urlencoded",
+          Referer: QUERY_URL,
+          "User-Agent": IE_8_USER_AGENT,
+        },
+        body: params.toString(),
+      });
 
-    grades.push(...newGrades);
-  }
+      const responseText = await response.text();
+
+      const newGrades = await getGrades(cookieHeader, responseText, true);
+
+      grades.push(...newGrades);
+    }),
+  );
 
   return grades;
 };
