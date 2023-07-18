@@ -14,6 +14,7 @@ import {
   noticeListHandler,
 } from "./action/index.js";
 import {
+  activateHandler,
   authLoginHandler,
   changePasswordHandler,
   infoHandler,
@@ -77,6 +78,8 @@ app.post("/action/card-balance", cardBalanceHandler);
 app.post("/action/notice", noticeHandler);
 app.post("/action/notice-list", noticeListHandler);
 
+app.get("/auth/activate", activateHandler);
+app.post("/auth/activate", activateHandler);
 app.post("/auth/change-password", changePasswordHandler);
 app.patch("/auth/change-password", changePasswordHandler);
 app.post("/auth/login", authLoginHandler);
