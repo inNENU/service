@@ -60,6 +60,7 @@ export const parseCookieHeader = (
   setCookieHeader: string,
   domain: string,
 ): CookieType[] =>
+  // @ts-ignore
   parse(splitCookiesString(setCookieHeader), {
     decodeValues: false,
   }).map((item) => ({
