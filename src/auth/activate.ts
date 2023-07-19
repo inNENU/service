@@ -133,7 +133,7 @@ interface CodeRawFailedResponse {
 export interface ActivatePhoneSmsOptions {
   type: "sms";
   activationId: string;
-  phone: string;
+  mobile: string;
 }
 
 export type ActivatePhoneSmsResponse =
@@ -141,7 +141,7 @@ export type ActivatePhoneSmsResponse =
   | ActivateFailedResponse;
 
 const sendSms = async (
-  { activationId, phone }: ActivatePhoneSmsOptions,
+  { activationId, mobile }: ActivatePhoneSmsOptions,
   cookieHeader: string,
 ): Promise<ActivatePhoneSmsResponse> => {
   const sendCodeResponse = await fetch(
@@ -154,7 +154,7 @@ const sendSms = async (
       },
       body: JSON.stringify({
         activationId,
-        phone,
+        mobile,
       }),
     },
   );
@@ -175,7 +175,7 @@ const sendSms = async (
 export interface ActivateBindPhoneOptions {
   type: "bind-phone";
   activationId: string;
-  phone: string;
+  mobile: string;
   code: string;
 }
 
@@ -199,7 +199,7 @@ export type ActivateBindPhoneResponse =
   | ActivateBindPhoneConflictResponse;
 
 const bindPhone = async (
-  { activationId, code, phone }: ActivateBindPhoneOptions,
+  { activationId, code, mobile }: ActivateBindPhoneOptions,
   cookieHeader: string,
 ): Promise<ActivateBindPhoneResponse> => {
   const response = await fetch(`${ACTIVATE_SERVER}/api/staff/activate/mobile`, {
@@ -208,7 +208,7 @@ const bindPhone = async (
       Cookie: cookieHeader,
       "Content-Type": "application/json;charset=UTF-8",
     },
-    body: JSON.stringify({ activationId, phone, checkCode: code }),
+    body: JSON.stringify({ activationId, mobile, checkCode: code }),
   });
 
   const content = <PhoneRawSuccessResponse | RawErrorResponse>(
@@ -237,7 +237,7 @@ const bindPhone = async (
 export interface ActivateReplacePhoneOptions {
   type: "replace-phone";
   activationId: string;
-  phone: string;
+  mobile: string;
   code: string;
 }
 
@@ -246,7 +246,7 @@ export type ActivateReplacePhoneResponse =
   | ActivateFailedResponse;
 
 const replacePhone = async (
-  { activationId, code, phone }: ActivateReplacePhoneOptions,
+  { activationId, code, mobile }: ActivateReplacePhoneOptions,
   cookieHeader: string,
 ): Promise<ActivateReplacePhoneResponse> => {
   const response = await fetch(
@@ -257,7 +257,7 @@ const replacePhone = async (
         Cookie: cookieHeader,
         "Content-Type": "application/json;charset=UTF-8",
       },
-      body: JSON.stringify({ activationId, phone, checkCode: code }),
+      body: JSON.stringify({ activationId, mobile, checkCode: code }),
     },
   );
 
