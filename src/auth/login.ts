@@ -175,7 +175,7 @@ export const authLogin = async (
         msg: "无法自动登录。请访问学校统一身份认证官网手动登录，成功登录后后即可继续自动登录。",
       };
 
-    if (resultContent.includes("该帐号已经被锁定，请点击“账号激活”"))
+    if (resultContent.includes("该帐号已经被锁定，请点击&ldquo;账号激活&rdquo;"))
       return {
         success: false,
         type: "locked",
