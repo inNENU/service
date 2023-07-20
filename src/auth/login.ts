@@ -56,7 +56,7 @@ export interface AuthLoginSuccessResult {
 }
 
 export interface AuthLoginFailedResult extends CommonFailedResponse {
-  type: "captcha" | "wrong" | "sso" | "unknown";
+  type: "captcha" | "wrong" | "sso" | "locked" | "unknown";
 }
 
 export type AuthLoginResult = AuthLoginSuccessResult | AuthLoginFailedResult;
@@ -173,6 +173,13 @@ export const authLogin = async (
         success: false,
         type: "captcha",
         msg: "无法自动登录。请访问学校统一身份认证官网手动登录，成功登录后后即可继续自动登录。",
+      };
+
+    if (resultContent.includes("该帐号已经被锁定，请点击“账号激活”"))
+      return {
+        success: false,
+        type: "locked",
+        msg: "该帐号已经被锁定，请使用小程序的“账号激活”功能",
       };
 
     if (
