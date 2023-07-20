@@ -166,11 +166,11 @@ const getScoreDetail = (content: string): ScoreDetail | null => {
 export const getGrades = (
   cookieHeader: string,
   content: string,
-  isJS = false
+  isJS = false,
 ): Promise<GradeResult[]> =>
   Promise.all(
     Array.from(
-      content.matchAll(isJS ? jsGradeItemRegExp : gradeItemRegExp)
+      content.matchAll(isJS ? jsGradeItemRegExp : gradeItemRegExp),
     ).map(async ([, item]) => {
       const [
         ,
@@ -190,7 +190,7 @@ export const getGrades = (
         reLearn,
         status,
       ] = Array.from(gradeCellRegExp.exec(item)!).map((item) =>
-        item.replace(/&nbsp;/g, " ").trim()
+        item.replace(/&nbsp;/g, " ").trim(),
       );
       const [, gradeLink, gradeNumber] = gradeRegExp.exec(grade) || [];
       const actualDifficulty = Number(difficulty) || 1;
@@ -199,7 +199,7 @@ export const getGrades = (
         gradeNumber && !Number.isNaN(Number(gradeNumber))
           ? Number(gradeNumber)
           : Math.round(
-              (Number(gradePoint) / Number(point) / actualDifficulty) * 10 + 50
+              (Number(gradePoint) / Number(point) / actualDifficulty) * 10 + 50,
             );
 
       let gradeDetail: GradeDetail | null = null;
@@ -261,12 +261,12 @@ export const getGrades = (
         reLearn: reLearn ? getDisplayTime(reLearn) : "",
         status,
       };
-    })
+    }),
   );
 
 export const getGradeLists = async (
   cookieHeader: string,
-  content: string
+  content: string,
 ): Promise<GradeResult[]> => {
   // We force writing these 2 field to ensure we care getting the default table structure
   const tableFields = tableFieldsRegExp.exec(content)![1];
@@ -332,7 +332,7 @@ export const getGradeLists = async (
       const newGrades = await getGrades(cookieHeader, responseText, true);
 
       grades.push(...newGrades);
-    })
+    }),
   );
 
   return grades;

@@ -290,14 +290,17 @@ const setPassword = async (
   { activationId, password }: ActivatePasswordOptions,
   cookieHeader: string,
 ): Promise<ActivatePasswordResponse> => {
-  const response = await fetch(`${ACTIVATE_SERVER}/api/staff/activate/mobile`, {
-    method: "POST",
-    headers: {
-      Cookie: cookieHeader,
-      "Content-Type": "application/json;charset=UTF-8",
+  const response = await fetch(
+    `${ACTIVATE_SERVER}/api/staff/activate/password`,
+    {
+      method: "POST",
+      headers: {
+        Cookie: cookieHeader,
+        "Content-Type": "application/json;charset=UTF-8",
+      },
+      body: JSON.stringify({ activationId, password }),
     },
-    body: JSON.stringify({ activationId, password }),
-  });
+  );
 
   const content = <ActivateRawSuccessResponse | RawErrorResponse>(
     await response.json()
