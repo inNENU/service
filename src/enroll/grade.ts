@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import type { CommonFailedResponse, EmptyObject } from "../typings";
+import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 
 export interface HistoryGradeOptions {
   year: string;
