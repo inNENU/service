@@ -168,14 +168,9 @@ export const authLogin = async (
         msg: "用户名或密码错误",
       };
 
-    if (resultContent.includes("请输入验证码"))
-      return {
-        success: false,
-        type: "captcha",
-        msg: "无法自动登录。请访问学校统一身份认证官网手动登录，成功登录后后即可继续自动登录。",
-      };
-
-    if (resultContent.includes("该帐号已经被锁定，请点击&ldquo;账号激活&rdquo;"))
+    if (
+      resultContent.includes("该帐号已经被锁定，请点击&ldquo;账号激活&rdquo;")
+    )
       return {
         success: false,
         type: "locked",
@@ -191,6 +186,13 @@ export const authLogin = async (
         success: false,
         type: "sso",
         msg: "您已开启单点登录，请访问学校统一身份认证官网，在个人设置中关闭单点登录后重试。",
+      };
+
+    if (resultContent.includes("请输入验证码"))
+      return {
+        success: false,
+        type: "captcha",
+        msg: "无法自动登录。请访问学校统一身份认证官网手动登录，成功登录后即可继续自动登录。",
       };
   }
 
