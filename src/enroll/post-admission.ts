@@ -54,6 +54,12 @@ const getInfo = async ({
     body: params.toString(),
   });
 
+  if (response.status !== 200)
+    return {
+      success: false,
+      msg: "查询已关闭",
+    };
+
   const content = await response.text();
 
   if (/<button type="submit" >查询<\/button>/.test(content))

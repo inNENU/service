@@ -22,9 +22,12 @@ const getCaptcha = async (): Promise<GetUnderAdmissionResponse> => {
 
   const cookies = getResponseCookies(imageResponse);
 
-  const base64Image = `data:image/png;base64,${Buffer.from(
-    await imageResponse.arrayBuffer(),
-  ).toString("base64")}`;
+  const base64Image =
+    imageResponse.status === 200
+      ? `data:image/png;base64,${Buffer.from(
+          await imageResponse.arrayBuffer(),
+        ).toString("base64")}`
+      : "";
 
   const infoResponse = await fetch(
     "http://bkzsw.nenu.edu.cn/col_000018_000169.html",
@@ -42,13 +45,17 @@ const getCaptcha = async (): Promise<GetUnderAdmissionResponse> => {
       infoBody,
     ) || [];
 
+  const isValid =
+    infoResponse.status === 200 &&
+    infoBody.includes("东北师范大学2023年普通高考录取结果查询");
+
   return {
     cookies,
-    info: ["name", "id", "testId"],
+    info: isValid ? ["name", "id", "testId"] : [],
     captcha: base64Image,
-    notice: infoBody.includes("东北师范大学2022年普通高考录取结果查询")
-      ? "目前招生办暂无 2023 年查询方式，此查询返回的是 2022 年结果"
-      : "部分省份信息正在录入中，点击查看详情",
+    notice: isValid
+      ? "部分省份信息正在录入中，点击查看详情"
+      : "目前招生办暂未提供 2023 年录取查询",
     detail: {
       title: "录取信息",
       content: notice.replace(/<br>/g, "\n").replace(/<\/?font[^>]*>/g, ""),
@@ -100,6 +107,12 @@ const getInfo = async ({
       body: params.toString(),
     },
   );
+
+  if (response.status === 404)
+    return {
+      success: false,
+      msg: "经研究决定，此功能暂不开放",
+    };
 
   const content = await response.text();
 

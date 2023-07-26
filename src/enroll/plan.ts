@@ -70,6 +70,12 @@ export const enrollPlanHandler: RequestHandler<
       body: params,
     });
 
+    if (searchResponse.status === 404)
+      return res.json(<CommonFailedResponse>{
+        success: false,
+        msg: "招生工作已结束，此功能暂不开放",
+      });
+
     const content = await searchResponse.text();
 
     const planInfo: EnrollPlanInfo[] = [];
