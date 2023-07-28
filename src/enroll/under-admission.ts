@@ -8,7 +8,7 @@ export interface UnderAdmissionPostOptions {
   testId: string;
 }
 
-interface RawEnrollResult {
+interface RawEnrollSuccessResult {
   name: string;
   institute: string;
   major: string;
@@ -16,6 +16,12 @@ interface RawEnrollResult {
   hasMailed: string;
   admissionMethod: string;
 }
+
+interface RawEnrollFailedResult {
+  code: -1;
+}
+
+type RawEnrollResult = RawEnrollSuccessResult | RawEnrollFailedResult;
 
 export interface UnderAdmissionSuccessResponse {
   success: true;
@@ -53,9 +59,17 @@ const getInfo = async ({
       msg: "查询通道已关闭",
     };
 
+  const result = <RawEnrollResult>await response.json();
+
+  if ("code" in result && result.code === -1)
+    return {
+      success: false,
+      msg: "查询失败",
+    };
+
   const { institute, major, mailCode, hasMailed, admissionMethod } = <
-    RawEnrollResult
-  >await response.json();
+    RawEnrollSuccessResult
+  >result;
 
   const info = [
     {
