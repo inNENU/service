@@ -1,74 +1,20 @@
 import type { RequestHandler } from "express";
 
-import type { CommonFailedResponse, CookieType } from "../typings.js";
-import { cookies2Header, getResponseCookies } from "../utils/index.js";
-
-export interface GetUnderAdmissionResponse {
-  cookies: CookieType[];
-  /** 填写信息 */
-  info: string[];
-  /** 验证码 */
-  captcha: string;
-  /** 通知 */
-  notice: string;
-  /** 详情 */
-  detail: { title: string; content: string } | null;
-}
-
-const getCaptcha = async (): Promise<GetUnderAdmissionResponse> => {
-  const imageResponse = await fetch(
-    "http://bkzsw.nenu.edu.cn/include/webgetcode.php?width=85&height=28&sitex=15&sitey=6",
-  );
-
-  const cookies = getResponseCookies(imageResponse);
-
-  const base64Image =
-    imageResponse.status === 200
-      ? `data:image/png;base64,${Buffer.from(
-          await imageResponse.arrayBuffer(),
-        ).toString("base64")}`
-      : "";
-
-  const infoResponse = await fetch(
-    "http://bkzsw.nenu.edu.cn/col_000018_000169.html",
-    {
-      headers: {
-        Cookie: cookies2Header(cookies),
-      },
-    },
-  );
-
-  const infoBody = await infoResponse.text();
-
-  const [, notice = ""] =
-    /<td colspan="2" align="left">(.*?)<\/td>\s*<\/tr>\s*<\/table>/.exec(
-      infoBody,
-    ) || [];
-
-  const isValid =
-    infoResponse.status === 200 &&
-    infoBody.includes("东北师范大学2023年普通高考录取结果查询");
-
-  return {
-    cookies,
-    info: isValid ? ["name", "id", "testId"] : [],
-    captcha: base64Image,
-    notice: isValid
-      ? "部分省份信息正在录入中，点击查看详情"
-      : "目前招生办暂未提供 2023 年录取查询",
-    detail: {
-      title: "录取信息",
-      content: notice.replace(/<br>/g, "\n").replace(/<\/?font[^>]*>/g, ""),
-    },
-  };
-};
+import type { CommonFailedResponse } from "../typings.js";
 
 export interface UnderAdmissionPostOptions {
-  captcha: string;
   name: string;
   id: string;
   testId: string;
-  cookies: CookieType[];
+}
+
+interface RawEnrollResult {
+  name: string;
+  institute: string;
+  major: string;
+  mailCode: string;
+  hasMailed: string;
+  admissionMethod: string;
 }
 
 export interface UnderAdmissionSuccessResponse {
@@ -81,77 +27,35 @@ export type UnderAdmissionResponse =
   | CommonFailedResponse;
 
 const getInfo = async ({
-  cookies,
   testId,
   id,
   name,
-  captcha,
 }: UnderAdmissionPostOptions): Promise<UnderAdmissionResponse> => {
-  const params = new URLSearchParams({
-    en_zkz: testId,
-    en_sfz: id,
-    en_xm: name,
-    en_code: captcha,
-  });
+  const params = {
+    name,
+    idCode: id,
+    stuCode: testId,
+  };
 
   console.log("Getting params", params);
 
-  const response = await fetch(
-    "http://bkzsw.nenu.edu.cn/col_000018_000169_action_Entrance.html",
-    {
-      method: "POST",
-      headers: {
-        Cookie: cookies2Header(cookies),
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: params.toString(),
+  const response = await fetch("http://bkzsw.nenu.edu.cn/query", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
     },
-  );
+    body: JSON.stringify(params),
+  });
 
-  if (response.status === 404)
+  if (response.status !== 200)
     return {
       success: false,
-      msg: "经研究决定，此功能暂不开放",
+      msg: "查询通道已关闭",
     };
 
-  const content = await response.text();
-
-  const errorResult =
-    /<script language="javascript">alert\("(.*)"\);history.back\(-1\);<\/script>/.exec(
-      content,
-    );
-
-  if (errorResult)
-    return {
-      success: false,
-      msg: errorResult[1],
-    };
-
-  // eslint-disable-next-line no-irregular-whitespace
-  const province = /<td align="right">省　　份：<\/td>\s*?<td>(.*?)<\/td>/.exec(
-    content,
-  )![1];
-  const [, school, major] =
-    /<td colspan="3" align="center"><font color="#FF0000" style="font-size:16px;"><p>恭喜你，你已经被我校 <\/p><p>(.*?)&nbsp;&nbsp;(.*?)&nbsp;&nbsp;专业录取！<\/p><\/font><\/td>/.exec(
-      content,
-    )!;
-  const address =
-    /<td align="right">通讯书邮寄地址：<\/td>\s*?<td colspan="2" align="left">(.*?)<\/td>/.exec(
-      content,
-    );
-  const postCode =
-    /<td align="right">邮政编码：<\/td>\s*?<td align="left">(.*?)<\/td>/.exec(
-      content,
-    );
-  const receiver =
-    /<td align="right">收&nbsp;&nbsp;件&nbsp;&nbsp;人：<\/td>\s*?<td align="left">(.*?)<\/td>/.exec(
-      content,
-    );
-  const phone =
-    /<td align="right">联系电话：<\/td>\s*?<td align="left">(.*?)<\/td>/.exec(
-      content,
-    );
-  const expressNumber = /id="emsdh">(.*?)<\/a>/.exec(content);
+  const { institute, major, mailCode, hasMailed, admissionMethod } = <
+    RawEnrollResult
+  >await response.json();
 
   const info = [
     {
@@ -163,8 +67,8 @@ const getInfo = async ({
       value: testId,
     },
     {
-      text: "省份",
-      value: province,
+      text: "招生方式",
+      value: admissionMethod,
     },
     {
       text: "录取专业",
@@ -172,37 +76,17 @@ const getInfo = async ({
     },
     {
       text: "所在学院",
-      value: school,
+      value: institute,
     },
     {
       text: "录取通知书单号",
-      value: expressNumber ? expressNumber[1] : "暂无",
+      value: mailCode,
+    },
+    {
+      text: "是否已寄出",
+      value: hasMailed ? "是" : "否",
     },
   ];
-
-  if (address)
-    info.push({
-      text: "通讯地址",
-      value: address[1],
-    });
-
-  if (postCode)
-    info.push({
-      text: "邮政编码",
-      value: postCode[1],
-    });
-
-  if (receiver)
-    info.push({
-      text: "收件人",
-      value: receiver[1],
-    });
-
-  if (phone)
-    info.push({
-      text: "联系电话",
-      value: phone[1],
-    });
 
   return {
     success: true,
@@ -212,9 +96,13 @@ const getInfo = async ({
 
 export const underAdmissionHandler: RequestHandler = async (req, res) => {
   try {
-    if (req.method === "GET") res.json(await getCaptcha());
-    else if (req.method === "POST")
-      res.json(await getInfo(<UnderAdmissionPostOptions>req.body));
+    // TODO: Remove
+    if (req.method === "GET")
+      res.json({
+        info: ["name", "id", "testId"],
+        captcha: "",
+      });
+    else res.json(await getInfo(<UnderAdmissionPostOptions>req.body));
   } catch (err) {
     const { message } = <Error>err;
 
