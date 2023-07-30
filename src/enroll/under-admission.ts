@@ -103,6 +103,9 @@ const getInfo = async ({
   ];
 
   return {
+    // TODO: Remove
+    // @ts-ignore
+    status: "success",
     success: true,
     info,
   };
