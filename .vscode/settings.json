@@ -1,4 +1,3 @@
 {
-  "cSpell.words": ["authserver", "nenu", "wechat", "qq", "qrcode"],
-  "prettier.prettierPath": "./node_modules/prettier"
+  "cSpell.words": ["authserver", "nenu", "wechat", "qq", "qrcode"]
 }
