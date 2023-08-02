@@ -16,7 +16,13 @@ export interface InfoSuccessResponse {
   /** 用户姓名 */
   name: string;
 
-  /** 用户邮箱 */
+  /** 登陆别名 */
+  alias: string;
+
+  /**
+   * 用户邮箱
+   * @deprecated
+   */
   email: string;
 }
 
@@ -28,7 +34,7 @@ const userNameRegexp =
 const inputRegExp = /id="alias".*?value="(.*?)"/;
 
 export const getBasicInfo = async (
-  cookieHeader: string,
+  cookieHeader: string
 ): Promise<InfoResponse> => {
   const userNameResponse = await fetch(`${AUTH_SERVER}/authserver/index.do`, {
     method: "GET",
@@ -49,32 +55,34 @@ export const getBasicInfo = async (
       msg: "获取姓名失败",
     };
 
-  const emailResponse = await fetch(
+  const aliasResponse = await fetch(
     `${AUTH_SERVER}/authserver/userAttributesEdit.do`,
     {
       method: "GET",
       headers: {
         Cookie: cookieHeader,
       },
-    },
+    }
   );
 
-  const emailResponseText = await emailResponse.text();
+  const aliasResponseText = await aliasResponse.text();
 
-  const emailName = inputRegExp.exec(emailResponseText)?.[1];
+  const alias = inputRegExp.exec(aliasResponseText)?.[1];
 
-  console.log("Getting email name", emailName);
+  console.log("Getting alias: ", alias);
 
-  if (typeof emailName !== "string")
+  if (typeof alias !== "string")
     return <CommonFailedResponse>{
       success: false,
-      msg: "获取邮箱失败",
+      msg: "获取别名失败",
     };
 
   return <InfoSuccessResponse>{
     success: true,
     name: userName,
-    email: emailName ? `${emailName}@nenu.edu.cn` : "未设置邮箱",
+    alias: alias || "未设置别名",
+    // TODO: Get real email
+    email: alias ? `${alias}@nenu.edu.cn` : "未设置邮箱",
   };
 };
 
@@ -95,13 +103,13 @@ export const infoHandler: RequestHandler<
     if (result.success)
       return res.json(
         await getBasicInfo(
-          result.cookieStore.getHeader(`${AUTH_SERVER}/authserver/`),
-        ),
+          result.cookieStore.getHeader(`${AUTH_SERVER}/authserver/`)
+        )
       );
 
     return res.json(<CommonFailedResponse>{
       success: false,
-      msg: "登录失败",
+      msg: "登录失败，无法获取信息。",
     });
   } catch (err) {
     const { message } = <Error>err;
