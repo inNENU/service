@@ -34,7 +34,7 @@ const getCaptcha = async (cookieStore: CookieStore): Promise<string> => {
         ...COMMON_HEADERS,
         Referer: `${AUTH_SERVER}/authserver/login`,
       },
-    }
+    },
   );
 
   const captcha = await captchaResponse.arrayBuffer();
@@ -51,7 +51,7 @@ const aliasRegExp = /id="alias".*?value="(.*?)"/;
 
 export const getAuthInit = async (
   id: string,
-  cookieStore = new CookieStore()
+  cookieStore = new CookieStore(),
 ): Promise<AuthInitInfoResult> => {
   const url = `${AUTH_SERVER}/authserver/login`;
 
@@ -84,7 +84,7 @@ export const getAuthInit = async (
         ...COMMON_HEADERS,
         Referer: `${AUTH_SERVER}/authserver/login`,
       },
-    }
+    },
   );
 
   cookieStore.applyResponse(captchaCheckResponse, AUTH_SERVER);
@@ -134,7 +134,7 @@ export type AuthInitResponse = AuthInitSuccessResponse | AuthInitFailedResponse;
 
 export const authInit = async (
   { password, salt, captcha, params }: AuthInitOptions,
-  cookieHeader: string
+  cookieHeader: string,
 ): Promise<AuthInitResponse> => {
   const cookieStore = new CookieStore();
   const url = `${AUTH_SERVER}/authserver/login`;
@@ -195,7 +195,7 @@ export const authInit = async (
 
     if (
       resultContent.includes(
-        "当前存在其他用户使用同一帐号登录，是否注销其他使用同一帐号的用户。"
+        "当前存在其他用户使用同一帐号登录，是否注销其他使用同一帐号的用户。",
       )
     )
       return {
