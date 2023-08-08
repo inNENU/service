@@ -1,46 +1,20 @@
-import CryptoJS from "crypto-js";
 import type { RequestHandler } from "express";
 
+import { authEncrypt, saltRegExp } from "./authEncrypt.js";
 import { AUTH_SERVER, WEB_VPN_AUTH_SERVER } from "./utils.js";
+import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
   CommonFailedResponse,
   CookieType,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import {
-  CookieStore,
-  EDGE_USER_AGENT_HEADERS,
-  getDomain,
-} from "../utils/index.js";
-
-export const saltRegExp = /var pwdDefaultEncryptSalt = "(.*)";/;
-
-const DICT = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678";
-const DICT_LENGTH = DICT.length;
-
-const getRandomString = (length: number): string =>
-  Array(length)
-    .fill(null)
-    .map(() => DICT.charAt(Math.floor(Math.random() * DICT_LENGTH)))
-    .join("");
-
-export const customEncryptAES = (password: string, key: string): string => {
-  const CONTENT = getRandomString(64) + password;
-  const SECRET_KEY = CryptoJS.enc.Utf8.parse(key);
-  const SECRET_IV = CryptoJS.enc.Utf8.parse(getRandomString(16));
-
-  return CryptoJS.AES.encrypt(CONTENT, SECRET_KEY, {
-    iv: SECRET_IV,
-    mode: CryptoJS.mode.CBC,
-    padding: CryptoJS.pad.Pkcs7,
-  }).toString();
-};
+import { CookieStore, getDomain } from "../utils/index.js";
 
 const COMMON_HEADERS = {
   DNT: "1",
   "Upgrade-Insecure-Requests": "1",
-  ...EDGE_USER_AGENT_HEADERS,
+  "User-Agent": "inNENU",
 };
 
 export interface AuthLoginOptions {
@@ -56,7 +30,7 @@ export interface AuthLoginSuccessResult {
 }
 
 export interface AuthLoginFailedResult extends CommonFailedResponse {
-  type: "captcha" | "wrong" | "sso" | "locked" | "unknown";
+  type: Exclude<LoginFailType, LoginFailType.WrongCaptcha>;
 }
 
 export type AuthLoginResult = AuthLoginSuccessResult | AuthLoginFailedResult;
@@ -107,6 +81,8 @@ export const authLogin = async (
     },
   );
 
+  cookieStore.applyResponse(captchaCheckResponse, server);
+
   const needCaptcha = await (<Promise<boolean>>captchaCheckResponse.json());
 
   console.log("Need captcha:", needCaptcha);
@@ -114,7 +90,8 @@ export const authLogin = async (
   if (needCaptcha)
     return {
       success: false,
-      type: "captcha",
+      type: LoginFailType.NeedCaptcha,
+      // TODO: update
       msg: "无法自动登录。请访问学校统一身份认证官网手动登录，成功登录后后即可继续自动登录。",
     };
 
@@ -129,7 +106,7 @@ export const authLogin = async (
   };
   const params = {
     username: id.toString(),
-    password: customEncryptAES(password, salt),
+    password: authEncrypt(password, salt),
     lt,
     dllt,
     execution,
@@ -140,17 +117,12 @@ export const authLogin = async (
 
   const body = new URLSearchParams(params).toString();
 
-  const response = await fetch(
-    `${server}/authserver/login${
-      service ? `?service=${encodeURIComponent(service)}` : ""
-    }`,
-    {
-      method: "POST",
-      headers: new Headers(headers),
-      body,
-      redirect: "manual",
-    },
-  );
+  const response = await fetch(url, {
+    method: "POST",
+    headers: new Headers(headers),
+    body,
+    redirect: "manual",
+  });
 
   const resultContent = await response.text();
   const location = response.headers.get("Location");
@@ -164,7 +136,7 @@ export const authLogin = async (
     if (resultContent.includes("您提供的用户名或者密码有误"))
       return {
         success: false,
-        type: "wrong",
+        type: LoginFailType.WrongPassword,
         msg: "用户名或密码错误",
       };
 
@@ -173,7 +145,7 @@ export const authLogin = async (
     )
       return {
         success: false,
-        type: "locked",
+        type: LoginFailType.AccountLocked,
         msg: "该帐号已经被锁定，请使用小程序的“账号激活”功能",
       };
 
@@ -184,15 +156,16 @@ export const authLogin = async (
     )
       return {
         success: false,
-        type: "sso",
+        type: LoginFailType.EnabledSSO,
         msg: "您已开启单点登录，请访问学校统一身份认证官网，在个人设置中关闭单点登录后重试。",
       };
 
     if (resultContent.includes("请输入验证码"))
       return {
         success: false,
-        type: "captcha",
-        msg: "无法自动登录。请访问学校统一身份认证官网手动登录，成功登录后即可继续自动登录。",
+        type: LoginFailType.NeedCaptcha,
+        // TODO: Update
+        msg: "无法自动登录。请访问学校统一身份认证官网手动登录，成功登录后后即可继续自动登录。",
       };
   }
 
@@ -200,7 +173,7 @@ export const authLogin = async (
     if (location === `${server}/authserver/login`)
       return {
         success: false,
-        type: "wrong",
+        type: LoginFailType.WrongPassword,
         msg: "用户名或密码错误",
       };
 
@@ -211,11 +184,11 @@ export const authLogin = async (
     };
   }
 
-  console.error("Response", resultContent);
+  console.error("Unknown login response: ", resultContent);
 
   return {
     success: false,
-    type: "unknown",
+    type: LoginFailType.Unknown,
     msg: "未知错误",
   };
 };
@@ -237,10 +210,7 @@ export const authLoginHandler: RequestHandler<
   LoginOptions
 > = async (req, res) => {
   try {
-    const { id, password } = req.body;
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const result = await authLogin({ id, password });
+    const result = await authLogin(req.body);
 
     if (result.success) {
       const cookies = result.cookieStore

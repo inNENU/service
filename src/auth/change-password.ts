@@ -1,6 +1,7 @@
 import type { RequestHandler } from "express";
 
-import { authLogin, customEncryptAES, saltRegExp } from "./login.js";
+import { authEncrypt, saltRegExp } from "./authEncrypt.js";
+import { authLogin } from "./login.js";
 import { AUTH_SERVER } from "./utils.js";
 import type {
   CommonFailedResponse,
@@ -51,9 +52,9 @@ export const changePasswordHandler: RequestHandler<
             "Content-Type": "application/x-www-form-urlencoded",
           },
           body: new URLSearchParams({
-            "map['password']": customEncryptAES(oldPassword, salt),
-            "map['newPassword']": customEncryptAES(newPassword, salt),
-            "map['passwordAgain']": customEncryptAES(newPassword, salt),
+            "map['password']": authEncrypt(oldPassword, salt),
+            "map['newPassword']": authEncrypt(newPassword, salt),
+            "map['passwordAgain']": authEncrypt(newPassword, salt),
             "map['captchaResponse']": captcha,
           }),
         },

@@ -15,6 +15,7 @@ import {
 } from "./action/index.js";
 import {
   activateHandler,
+  authInitHandler,
   authLoginHandler,
   changePasswordHandler,
   infoHandler,
@@ -82,6 +83,8 @@ app.get("/auth/activate", activateHandler);
 app.post("/auth/activate", activateHandler);
 app.post("/auth/change-password", changePasswordHandler);
 app.patch("/auth/change-password", changePasswordHandler);
+app.get("/auth/init", authInitHandler);
+app.post("/auth/init", authInitHandler);
 app.post("/auth/login", authLoginHandler);
 app.post("/auth/info", infoHandler);
 
