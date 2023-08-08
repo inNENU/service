@@ -171,7 +171,7 @@ export const authLogin = async (
     if (resultContent.includes("不允许使用认证服务来认证您访问的目标应用。"))
       return {
         success: false,
-        type: LoginFailType.NeedCaptcha,
+        type: LoginFailType.Forbidden,
         msg: "用户账号没有此服务权限。",
       };
   }
@@ -207,9 +207,11 @@ export interface AuthLoginSuccessResponse {
   location: string;
 }
 
+export type AuthLoginFailedResponse = AuthLoginFailedResult;
+
 export type AuthLoginResponse =
   | AuthLoginSuccessResponse
-  | AuthLoginFailedResult;
+  | AuthLoginFailedResponse;
 
 export const authLoginHandler: RequestHandler<
   EmptyObject,

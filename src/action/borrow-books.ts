@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 
 import { actionLogin } from "./login.js";
 import { SERVER } from "./utils.js";
-import type { AuthLoginFailedResult } from "../auth/index.js";
+import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type {
   CommonFailedResponse,
   CookieOptions,
@@ -115,6 +115,7 @@ export interface BorrowBooksSuccessResponse {
 
 export type BorrowBooksResponse =
   | BorrowBooksSuccessResponse
+  | AuthLoginFailedResponse
   | CommonFailedResponse;
 
 export const borrowBooksHandler: RequestHandler<
@@ -131,7 +132,7 @@ export const borrowBooksHandler: RequestHandler<
       } else {
         const result = await actionLogin(req.body, cookieStore);
 
-        if (!result.success) return res.json(result);
+        if (!result.success) return res.json(<AuthLoginFailedResponse>result);
       }
 
     const borrowBooksUrl = `${SERVER}/basicInfo/getBookBorrow`;
@@ -160,7 +161,7 @@ export const borrowBooksHandler: RequestHandler<
     const { message } = <Error>err;
 
     console.error(err);
-    res.json(<AuthLoginFailedResult>{
+    res.json(<CommonFailedResponse>{
       success: false,
       msg: message,
     });
