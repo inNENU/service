@@ -1,6 +1,7 @@
 import type { RequestHandler } from "express";
 
 import { authEncrypt, saltRegExp } from "./authEncrypt.js";
+import { getBasicInfo } from "./info.js";
 import { AUTH_SERVER } from "./utils.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
@@ -16,7 +17,7 @@ const COMMON_HEADERS = {
   "User-Agent": "inNENU",
 };
 
-export interface AuthInitInfoResult {
+export interface AuthInitResult {
   success: true;
   needCaptcha: boolean;
   cookieStore: CookieStore;
@@ -34,7 +35,7 @@ const getCaptcha = async (cookieStore: CookieStore): Promise<string> => {
         ...COMMON_HEADERS,
         Referer: `${AUTH_SERVER}/authserver/login`,
       },
-    },
+    }
   );
 
   const captcha = await captchaResponse.arrayBuffer();
@@ -44,10 +45,10 @@ const getCaptcha = async (cookieStore: CookieStore): Promise<string> => {
   return `data:image/png;base64,${Buffer.from(captcha).toString("base64")}`;
 };
 
-export const getAuthInit = async (
+export const authInit = async (
   id: string,
-  cookieStore = new CookieStore(),
-): Promise<AuthInitInfoResult> => {
+  cookieStore = new CookieStore()
+): Promise<AuthInitResult> => {
   const url = `${AUTH_SERVER}/authserver/login`;
 
   const loginPageResponse = await fetch(url, {
@@ -79,7 +80,7 @@ export const getAuthInit = async (
         ...COMMON_HEADERS,
         Referer: `${AUTH_SERVER}/authserver/login`,
       },
-    },
+    }
   );
 
   cookieStore.applyResponse(captchaCheckResponse, AUTH_SERVER);
@@ -100,7 +101,7 @@ export const getAuthInit = async (
 
   const captcha = needCaptcha ? await getCaptcha(cookieStore) : null;
 
-  return <AuthInitInfoResult>{
+  return <AuthInitResult>{
     success: true,
     needCaptcha,
     captcha,
@@ -110,27 +111,27 @@ export const getAuthInit = async (
   };
 };
 
-export interface AuthInitOptions extends LoginOptions {
+export interface AuthLoginOptions extends LoginOptions {
   params: Record<string, string>;
   salt: string;
   captcha: string;
 }
 
-export interface AuthInitSuccessResponse {
+export interface AuthLoginSuccessResult {
   success: true;
   cookieStore: CookieStore;
 }
 
-export interface AuthInitFailedResponse extends CommonFailedResponse {
+export interface AuthLoginFailedResponse extends CommonFailedResponse {
   type: LoginFailType;
 }
 
-export type AuthInitResponse = AuthInitSuccessResponse | AuthInitFailedResponse;
+export type AuthLoginResult = AuthLoginSuccessResult | AuthLoginFailedResponse;
 
-export const authInit = async (
-  { password, salt, captcha, params }: AuthInitOptions,
-  cookieHeader: string,
-): Promise<AuthInitResponse> => {
+export const authLogin = async (
+  { password, salt, captcha, params }: AuthLoginOptions,
+  cookieHeader: string
+): Promise<AuthLoginResult> => {
   const cookieStore = new CookieStore();
   const url = `${AUTH_SERVER}/authserver/login`;
 
@@ -190,7 +191,7 @@ export const authInit = async (
 
     if (
       resultContent.includes(
-        "当前存在其他用户使用同一帐号登录，是否注销其他使用同一帐号的用户。",
+        "当前存在其他用户使用同一帐号登录，是否注销其他使用同一帐号的用户。"
       )
     )
       return {
@@ -238,15 +239,29 @@ export interface AuthInitInfoResponse {
   salt: string;
 }
 
+export interface AuthInfo {
+  /** 用户姓名 */
+  name: string;
+
+  /** 登陆别名 */
+  alias: string;
+}
+
+export interface AuthInitResponse {
+  success: true;
+
+  info: AuthInfo | null;
+}
+
 export const authInitHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  AuthInitOptions,
+  AuthLoginOptions,
   { id: string }
 > = async (req, res) => {
   try {
     if (req.method === "GET") {
-      const result = await getAuthInit(req.query.id);
+      const result = await authInit(req.query.id);
 
       if (result.success) {
         const cookies = result.cookieStore
@@ -269,19 +284,24 @@ export const authInitHandler: RequestHandler<
       return res.json(result);
     }
 
-    const result = await authInit(req.body, req.headers.cookie!);
+    const result = await authLogin(req.body, req.headers.cookie!);
 
     if (result.success) {
-      const cookies = result.cookieStore
-        .getAllCookies()
-        .map((item) => item.toJSON());
+      const { cookieStore } = result;
+
+      const cookies = cookieStore.getAllCookies().map((item) => item.toJSON());
 
       cookies.forEach(({ name, value, ...rest }) => {
         res.cookie(name, value, rest);
       });
 
-      return res.json(<AuthInitInfoResponse>{
+      const info = await getBasicInfo(
+        cookieStore.getHeader(`${AUTH_SERVER}/authserver/`)
+      );
+
+      return res.json(<AuthInitResponse>{
         success: true,
+        info: info.success ? { name: info.name, alias: info.alias } : null,
       });
     }
 
