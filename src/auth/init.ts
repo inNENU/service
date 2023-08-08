@@ -44,11 +44,6 @@ const getCaptcha = async (cookieStore: CookieStore): Promise<string> => {
   return `data:image/png;base64,${Buffer.from(captcha).toString("base64")}`;
 };
 
-const nameRegexp =
-  /class="auth_username">\s+<span>\s+<span>\s+(.*?)\s+<\/span>/;
-
-const aliasRegExp = /id="alias".*?value="(.*?)"/;
-
 export const getAuthInit = async (
   id: string,
   cookieStore = new CookieStore(),
