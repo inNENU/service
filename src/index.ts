@@ -44,6 +44,7 @@ import type { CommonFailedResponse } from "./typings.js";
 import {
   underCourseTableHandler,
   underGradeListHandler,
+  underStudyArchiveHandler,
   underSystemCheckHandler,
   underSystemLoginHandler,
 } from "./under-system/index.js";
@@ -92,6 +93,7 @@ app.post("/under-system/login", underSystemLoginHandler);
 app.post("/under-system/check", underSystemCheckHandler);
 app.post("/under-system/course-table", underCourseTableHandler);
 app.post("/under-system/grade-list", underGradeListHandler);
+app.post("/under-system/study-archive", underStudyArchiveHandler);
 
 app.get("/main/info", mainInfoHandler);
 app.post("/main/info-list", mainInfoListHandler);

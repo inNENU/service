@@ -9,6 +9,12 @@ import type {
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
+import { underSystemLogin } from "../under-system/login.js";
+import type { StudyArchiveInfo } from "../under-system/study-archive.js";
+import {
+  STUDENT_ARCHIVE_QUERY_URL,
+  getStudyArchiveInfo,
+} from "../under-system/study-archive.js";
 import { CookieStore, getDomain } from "../utils/index.js";
 
 const COMMON_HEADERS = {
@@ -35,7 +41,7 @@ const getCaptcha = async (cookieStore: CookieStore): Promise<string> => {
         ...COMMON_HEADERS,
         Referer: `${AUTH_SERVER}/authserver/login`,
       },
-    }
+    },
   );
 
   const captcha = await captchaResponse.arrayBuffer();
@@ -47,7 +53,7 @@ const getCaptcha = async (cookieStore: CookieStore): Promise<string> => {
 
 export const authInit = async (
   id: string,
-  cookieStore = new CookieStore()
+  cookieStore = new CookieStore(),
 ): Promise<AuthInitResult> => {
   const url = `${AUTH_SERVER}/authserver/login`;
 
@@ -80,7 +86,7 @@ export const authInit = async (
         ...COMMON_HEADERS,
         Referer: `${AUTH_SERVER}/authserver/login`,
       },
-    }
+    },
   );
 
   cookieStore.applyResponse(captchaCheckResponse, AUTH_SERVER);
@@ -130,7 +136,7 @@ export type AuthLoginResult = AuthLoginSuccessResult | AuthLoginFailedResponse;
 
 export const authLogin = async (
   { password, salt, captcha, params }: AuthLoginOptions,
-  cookieHeader: string
+  cookieHeader: string,
 ): Promise<AuthLoginResult> => {
   const cookieStore = new CookieStore();
   const url = `${AUTH_SERVER}/authserver/login`;
@@ -191,7 +197,7 @@ export const authLogin = async (
 
     if (
       resultContent.includes(
-        "当前存在其他用户使用同一帐号登录，是否注销其他使用同一帐号的用户。"
+        "当前存在其他用户使用同一帐号登录，是否注销其他使用同一帐号的用户。",
       )
     )
       return {
@@ -239,7 +245,7 @@ export interface AuthInitInfoResponse {
   salt: string;
 }
 
-export interface AuthInfo {
+export interface AuthInfo extends Partial<StudyArchiveInfo> {
   /** 用户姓名 */
   name: string;
 
@@ -295,13 +301,36 @@ export const authInitHandler: RequestHandler<
         res.cookie(name, value, rest);
       });
 
-      const info = await getBasicInfo(
-        cookieStore.getHeader(`${AUTH_SERVER}/authserver/`)
+      let info: Partial<AuthInfo> = {};
+
+      const basicInfo = await getBasicInfo(
+        cookieStore.getHeader(`${AUTH_SERVER}/authserver/`),
       );
+
+      if (basicInfo.success) {
+        info.name = basicInfo.name;
+        info.alias = basicInfo.alias;
+      }
+
+      // 本科生
+      if (req.body.id.toString().charAt(4) === "0") {
+        const loginResult = await underSystemLogin({
+          id: req.body.id,
+          password: req.body.password,
+        });
+
+        if (loginResult.success) {
+          const studentInfo = await getStudyArchiveInfo(
+            loginResult.cookieStore.getHeader(STUDENT_ARCHIVE_QUERY_URL),
+          );
+
+          if (studentInfo.success) info = { ...info, ...studentInfo.info };
+        }
+      }
 
       return res.json(<AuthInitResponse>{
         success: true,
-        info: info.success ? { name: info.name, alias: info.alias } : null,
+        info,
       });
     }
 
