@@ -67,6 +67,8 @@ export interface StudyArchiveInfo {
 
   /** 学号 */
   id: number;
+  /** 年级 */
+  grade: number;
   /** 学院 */
   school: string;
   /** 专业 */
@@ -119,6 +121,7 @@ const getInfo = (content: string): StudyArchiveInfo => {
     birth,
 
     id: Number(id),
+    grade: Number(id.substring(0, 4)),
     school,
     major,
     majorType,
