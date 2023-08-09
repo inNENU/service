@@ -10,6 +10,8 @@ import type {
   LoginOptions,
 } from "../typings.js";
 import { CookieStore, getCookieItems } from "../utils/index.js";
+import type { AuthLoginFailedResponse } from "../auth/login.js";
+import { LoginFailType } from "../config/loginFailTypes.js";
 
 interface RawNoticeItem {
   LLCS: number;
@@ -112,7 +114,15 @@ export const noticeListHandler: RequestHandler<
       method: "POST",
       headers,
       body: params.toString(),
+      redirect: "manual",
     });
+
+    if (response.status === 302)
+      return res.json(<AuthLoginFailedResponse>{
+        success: false,
+        type: LoginFailType.Expired,
+        msg: "登录信息已过期，请重新登录",
+      });
 
     const { data, pageIndex, pageSize, totalCount, totalPage } = <
       RawNoticeListData

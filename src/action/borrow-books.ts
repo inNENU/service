@@ -3,6 +3,7 @@ import type { RequestHandler } from "express";
 import { actionLogin } from "./login.js";
 import { SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
+import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
   CommonFailedResponse,
   CookieOptions,
@@ -10,6 +11,8 @@ import type {
   LoginOptions,
 } from "../typings.js";
 import { CookieStore, getCookieItems } from "../utils/index.js";
+
+const BORROW_BOOKS_URL = `${SERVER}/basicInfo/getBookBorrow`;
 
 interface RawBorrowBookData extends Record<string, unknown> {
   due_date: string;
@@ -135,15 +138,21 @@ export const borrowBooksHandler: RequestHandler<
         if (!result.success) return res.json(<AuthLoginFailedResponse>result);
       }
 
-    const borrowBooksUrl = `${SERVER}/basicInfo/getBookBorrow`;
-
-    const response = await fetch(`${SERVER}/basicInfo/getBookBorrow`, {
+    const response = await fetch(BORROW_BOOKS_URL, {
       headers: {
         Accept: "application/json, text/javascript, */*; q=0.01",
-        Cookie: req.headers.cookie || cookieStore.getHeader(borrowBooksUrl),
+        Cookie: req.headers.cookie || cookieStore.getHeader(BORROW_BOOKS_URL),
         Referer: `${SERVER}/basicInfo/studentPageTurn?type=lifestudying&tg=bookborrow`,
       },
+      redirect: "manual",
     });
+
+    if (response.status === 302)
+      return res.json(<AuthLoginFailedResponse>{
+        success: false,
+        type: LoginFailType.Expired,
+        msg: "登录信息已过期，请重新登录",
+      });
 
     const data = <RawBorrowBooksData>await response.json();
 

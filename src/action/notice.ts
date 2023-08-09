@@ -15,6 +15,8 @@ import {
   getCookieItems,
   getRichTextNodes,
 } from "../utils/index.js";
+import type { AuthLoginFailedResponse } from "../auth/login.js";
+import { LoginFailType } from "../config/loginFailTypes.js";
 
 const titleRegExp = /var title = '(.*?)';/;
 const fromRegExp = /var ly = '(.*?)'/;
@@ -73,7 +75,15 @@ export const noticeHandler: RequestHandler<
       headers: {
         Cookie: req.headers.cookie || cookieStore.getHeader(url),
       },
+      redirect: "manual",
     });
+
+    if (response.status === 302)
+      return res.json(<AuthLoginFailedResponse>{
+        success: false,
+        type: LoginFailType.Expired,
+        msg: "登录信息已过期，请重新登录",
+      });
 
     const responseText = await response.text();
 

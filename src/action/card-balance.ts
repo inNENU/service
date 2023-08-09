@@ -3,6 +3,8 @@ import type { RequestHandler } from "express";
 import { actionLogin } from "./login.js";
 import { SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
+import type { AuthLoginFailedResponse } from "../auth/login.js";
+import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
   CommonFailedResponse,
   CookieOptions,
@@ -63,7 +65,15 @@ export const cardBalanceHandler: RequestHandler<
         Referer: `${SERVER}/basicInfo/studentPageTurn?type=lifeschool`,
       },
       body: "serviceAddress=wis-apis%2Fsoap%2F00001_00083_01_02_20181210185800&serviceSource=ds2&params=%7B%22xgh%22%3Anull%7D",
+      redirect: "manual",
     });
+
+    if (response.status === 302)
+      return res.json(<AuthLoginFailedResponse>{
+        success: false,
+        type: LoginFailType.Expired,
+        msg: "登录信息已过期，请重新登录",
+      });
 
     const data = <RawCardBalanceData>await response.json();
 

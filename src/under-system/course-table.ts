@@ -39,9 +39,9 @@ const getCourses = (content: string): TableItem =>
           teacher,
           time,
           location,
-        }),
-      ),
-    ),
+        })
+      )
+    )
   );
 
 interface UserCourseTableExtraOptions {
@@ -84,7 +84,7 @@ export const underCourseTableHandler: RequestHandler<
       } else {
         const result = await underSystemLogin(
           <LoginOptions>req.body,
-          cookieStore,
+          cookieStore
         );
 
         if (!result.success) return res.json(result);
@@ -95,24 +95,19 @@ export const underCourseTableHandler: RequestHandler<
       istsxx: "no",
       xnxqh: time,
       zc: "",
-      // Not required
-      // xs0101id: id.toString(),
     });
 
     console.log("Requesting with params:", params);
 
-    const url = `${SERVER}/tkglAction.do?${params.toString()}`;
+    const QUERY_URL = `${SERVER}/tkglAction.do?${params.toString()}`;
 
-    const response = await fetch(
-      `${SERVER}/tkglAction.do?${params.toString()}`,
-      {
-        headers: {
-          Cookie: req.headers.cookie || cookieStore.getHeader(url),
-          Referer: `${SERVER}/tkglAction.do?method=kbxxXs&tktime=${getTimeStamp()}`,
-          "User-Agent": IE_8_USER_AGENT,
-        },
+    const response = await fetch(QUERY_URL, {
+      headers: {
+        Cookie: req.headers.cookie || cookieStore.getHeader(QUERY_URL),
+        Referer: `${SERVER}/tkglAction.do?method=kbxxXs&tktime=${getTimeStamp()}`,
+        "User-Agent": IE_8_USER_AGENT,
       },
-    );
+    });
 
     const content = await response.text();
 

@@ -3,6 +3,7 @@ import type { RequestHandler } from "express";
 import { VPN_DOMAIN, VPN_SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
+import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
   CommonFailedResponse,
   CookieType,
@@ -24,7 +25,10 @@ export interface VPNLoginSuccessResult {
 }
 
 export interface VPNLoginFailedResult extends CommonFailedResponse {
-  type: "locked" | "wrong" | "unknown";
+  type:
+    | LoginFailType.AccountLocked
+    | LoginFailType.WrongPassword
+    | LoginFailType.Unknown;
 }
 
 export type VPNLoginResult =
@@ -34,7 +38,7 @@ export type VPNLoginResult =
 
 export const vpnCASLogin = async (
   { id, password }: LoginOptions,
-  cookieStore = new CookieStore(),
+  cookieStore = new CookieStore()
 ): Promise<VPNLoginResult> => {
   const casResponse = await fetch(CAS_LOGIN_URL, {
     redirect: "manual",
@@ -48,7 +52,7 @@ export const vpnCASLogin = async (
       {
         cookieStore,
         service: `${VPN_SERVER}/users/auth/cas/callback?url=https%3A%2F%2Fwebvpn.nenu.edu.cn%2Fusers%2Fsign_in`,
-      },
+      }
     );
 
     if (!authResult.success) return authResult;
@@ -63,7 +67,7 @@ export const vpnCASLogin = async (
     if (callbackResponse.status === 500)
       return {
         success: false,
-        type: "unknown",
+        type: LoginFailType.Unknown,
         msg: "学校 WebVPN 服务崩溃，请稍后重试。",
       };
 
@@ -75,8 +79,8 @@ export const vpnCASLogin = async (
       if (location === LOGIN_URL)
         return {
           success: false,
-          type: "locked",
-          msg: "短时间内登录过多，小程序服务器已被屏蔽。请稍后重试",
+          type: LoginFailType.AccountLocked,
+          msg: "短时间内失败登录过多，请 10 分钟后重试",
         };
 
       if (location === UPDATE_KEY_URL) {
@@ -99,20 +103,20 @@ export const vpnCASLogin = async (
   if (casResponse.status === 500)
     return {
       success: false,
-      type: "unknown",
+      type: LoginFailType.Unknown,
       msg: "学校 WebVPN 服务崩溃，请稍后重试。",
     };
 
   return {
     success: false,
-    type: "unknown",
+    type: LoginFailType.Unknown,
     msg: "未知错误",
   };
 };
 
 export const vpnLogin = async (
   { id, password }: LoginOptions,
-  cookieStore = new CookieStore(),
+  cookieStore = new CookieStore()
 ): Promise<VPNLoginResult> => {
   const loginPageResponse = await fetch(LOGIN_URL);
 
@@ -154,7 +158,7 @@ export const vpnLogin = async (
     if (location === LOGIN_URL)
       return {
         success: false,
-        type: "locked",
+        type: LoginFailType.AccountLocked,
         msg: "短时间内登录过多，小程序服务器已被屏蔽。请稍后重试",
       };
 
@@ -180,23 +184,23 @@ export const vpnLogin = async (
     if (response.includes("用户名或密码错误, 超过五次将被锁定。"))
       return {
         success: false,
-        type: "wrong",
+        type: LoginFailType.WrongPassword,
         msg: "用户名或密码错误, 超过五次将被锁定。",
       };
 
     if (response.includes("您的帐号已被锁定, 请在十分钟后再尝试。"))
       return {
         success: false,
-        type: "locked",
+        type: LoginFailType.AccountLocked,
         msg: "您的帐号已被锁定, 请在十分钟后再尝试。",
       };
   }
 
-  console.error("Response", await loginResponse.text());
+  console.error("Unknown VPN login response:", await loginResponse.text());
 
   return {
     success: false,
-    type: "unknown",
+    type: LoginFailType.Unknown,
     msg: "未知错误",
   };
 };
