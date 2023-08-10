@@ -57,6 +57,13 @@ export const authLogin = async (
 
   const content = await loginPageResponse.text();
 
+  if (content.includes("不允许使用认证服务来认证您访问的目标应用。"))
+    return {
+      success: false,
+      type: LoginFailType.Forbidden,
+      msg: "用户账号没有此服务权限。",
+    };
+
   const salt = saltRegExp.exec(content)![1];
   const lt = content.match(/name="lt" value="(.*?)"/)![1];
   const dllt = content.match(/name="dllt" value="(.*?)"/)![1];

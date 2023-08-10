@@ -301,7 +301,14 @@ export const authInitHandler: RequestHandler<
         res.cookie(name, value, rest);
       });
 
-      let info: Partial<AuthInfo> = {};
+      let info: Partial<AuthInfo> = {
+        name: "未知",
+        // FIXME: Compact code
+        id: req.body.id,
+        grade: Number(req.body.id.toString().substring(0, 4)),
+        school: "未知",
+        major: "未知",
+      };
 
       const basicInfo = await getBasicInfo(
         cookieStore.getHeader(`${AUTH_SERVER}/authserver/`),

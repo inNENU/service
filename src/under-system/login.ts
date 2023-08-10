@@ -8,6 +8,7 @@ import type { CookieType, EmptyObject, LoginOptions } from "../typings.js";
 import { CookieStore, IE_8_USER_AGENT } from "../utils/index.js";
 import type { VPNLoginFailedResult } from "../vpn/login.js";
 import { vpnCASLogin } from "../vpn/login.js";
+import { LoginFailType } from "../config/loginFailTypes.js";
 
 export interface UnderSystemLoginSuccessResult {
   success: true;
@@ -70,13 +71,20 @@ export const underSystemLogin = async (
   );
 
   if (ticketResponse.status !== 302)
-    return <AuthLoginFailedResult>{
+    return {
       success: false,
-      type: "unknown",
+      type: LoginFailType.Unknown,
       msg: "登录失败",
     };
 
   const finalLocation = ticketResponse.headers.get("Location");
+
+  if (finalLocation?.includes("http://wafnenu.nenu.edu.cn/offCampus.html"))
+    return {
+      success: false,
+      type: LoginFailType.Forbidden,
+      msg: "此账户无法登录本科教学服务系统",
+    };
 
   if (finalLocation?.includes(";jsessionid=")) {
     const ssoUrl = `${SERVER}/Logon.do?method=logonBySSO`;
@@ -99,7 +107,7 @@ export const underSystemLogin = async (
 
   return {
     success: false,
-    type: "unknown",
+    type: LoginFailType.Unknown,
     msg: "登录失败",
   };
 };

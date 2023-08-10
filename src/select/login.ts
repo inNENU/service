@@ -33,14 +33,14 @@ export const selectLoginHandler: RequestHandler<
 
       const mainPageResponse = await fetch("http://xk.nenu.edu.cn");
 
+      if (mainPageResponse.status !== 200)
+        return res.json(<SelectLoginFailedResponse>{
+          success: false,
+          msg: "无法连接到选课系统",
+        });
+
       const cookieHeader = mainPageResponse.headers.get("Set-Cookie")!;
       const content = await mainPageResponse.text();
-
-      if (typeof id !== "number")
-        return res.json({
-          success: false,
-          msg: "学号必须为数字",
-        });
 
       const servers = [];
       const serverReg = /;tmpKc\[0\] =\s+"(.*?)";/g;

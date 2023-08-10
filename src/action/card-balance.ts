@@ -77,11 +77,20 @@ export const cardBalanceHandler: RequestHandler<
 
     const data = <RawCardBalanceData>await response.json();
 
-    if (data.success)
-      return res.json(<CardBalanceSuccessResponse>{
-        success: true,
-        data: Number(data.demo.items.item[0].kye) / 100,
+    if (data.success) {
+      const balanceList = data.demo.items.item;
+
+      if (typeof balanceList[0]?.kye === "number")
+        return res.json(<CardBalanceSuccessResponse>{
+          success: true,
+          data: Number(data.demo.items.item[0].kye) / 100,
+        });
+
+      return res.json(<CommonFailedResponse>{
+        success: false,
+        msg: "暂无余额信息",
       });
+    }
 
     return res.json(<AuthLoginFailedResult>{
       success: false,
