@@ -33,7 +33,7 @@ export type QRCodeResponse = QRCodeSuccessResponse | CommonFailedResponse;
 const getWechatQRCode = async (
   accessToken: string,
   page: string,
-  scene: string
+  scene: string,
 ): Promise<Buffer | WechatQRCodeError> => {
   const response = await fetch(
     `https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=${accessToken}`,
@@ -45,7 +45,7 @@ const getWechatQRCode = async (
         // eslint-disable-next-line @typescript-eslint/naming-convention
         auto_color: true,
       }),
-    }
+    },
   );
 
   const image = Buffer.from(await response.arrayBuffer());
@@ -82,7 +82,7 @@ export const qrCodeHandler: RequestHandler<
       const image = await getWechatQRCode(
         wechatAccessToken,
         page,
-        (<WechatQRCodeOptions>req.query).scene
+        (<WechatQRCodeOptions>req.query).scene,
       );
 
       if (image instanceof Buffer) {

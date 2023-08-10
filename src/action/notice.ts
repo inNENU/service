@@ -3,6 +3,8 @@ import type { RequestHandler } from "express";
 import { actionLogin } from "./login.js";
 import { SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
+import type { AuthLoginFailedResponse } from "../auth/login.js";
+import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
   CommonFailedResponse,
   CookieOptions,
@@ -15,8 +17,6 @@ import {
   getCookieItems,
   getRichTextNodes,
 } from "../utils/index.js";
-import type { AuthLoginFailedResponse } from "../auth/login.js";
-import { LoginFailType } from "../config/loginFailTypes.js";
 
 const titleRegExp = /var title = '(.*?)';/;
 const fromRegExp = /var ly = '(.*?)'/;

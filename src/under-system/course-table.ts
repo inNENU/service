@@ -39,9 +39,9 @@ const getCourses = (content: string): TableItem =>
           teacher,
           time,
           location,
-        })
-      )
-    )
+        }),
+      ),
+    ),
   );
 
 interface UserCourseTableExtraOptions {
@@ -84,7 +84,7 @@ export const underCourseTableHandler: RequestHandler<
       } else {
         const result = await underSystemLogin(
           <LoginOptions>req.body,
-          cookieStore
+          cookieStore,
         );
 
         if (!result.success) return res.json(result);

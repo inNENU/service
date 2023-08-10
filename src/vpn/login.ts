@@ -38,7 +38,7 @@ export type VPNLoginResult =
 
 export const vpnCASLogin = async (
   { id, password }: LoginOptions,
-  cookieStore = new CookieStore()
+  cookieStore = new CookieStore(),
 ): Promise<VPNLoginResult> => {
   const casResponse = await fetch(CAS_LOGIN_URL, {
     redirect: "manual",
@@ -52,7 +52,7 @@ export const vpnCASLogin = async (
       {
         cookieStore,
         service: `${VPN_SERVER}/users/auth/cas/callback?url=https%3A%2F%2Fwebvpn.nenu.edu.cn%2Fusers%2Fsign_in`,
-      }
+      },
     );
 
     if (!authResult.success) return authResult;
@@ -116,7 +116,7 @@ export const vpnCASLogin = async (
 
 export const vpnLogin = async (
   { id, password }: LoginOptions,
-  cookieStore = new CookieStore()
+  cookieStore = new CookieStore(),
 ): Promise<VPNLoginResult> => {
   const loginPageResponse = await fetch(LOGIN_URL);
 
