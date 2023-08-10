@@ -4,11 +4,11 @@ import { SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
+import { LoginFailType } from "../config/loginFailTypes.js";
 import type { CookieType, EmptyObject, LoginOptions } from "../typings.js";
 import { CookieStore, IE_8_USER_AGENT } from "../utils/index.js";
 import type { VPNLoginFailedResult } from "../vpn/login.js";
 import { vpnCASLogin } from "../vpn/login.js";
-import { LoginFailType } from "../config/loginFailTypes.js";
 
 export interface UnderSystemLoginSuccessResult {
   success: true;
