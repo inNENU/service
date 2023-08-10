@@ -16,6 +16,7 @@ import {
   getStudyArchiveInfo,
 } from "../under-system/study-archive.js";
 import { CookieStore, getDomain } from "../utils/index.js";
+import { vpnLogin } from "../vpn/login.js";
 
 const COMMON_HEADERS = {
   DNT: "1",
@@ -301,11 +302,13 @@ export const authInitHandler: RequestHandler<
         res.cookie(name, value, rest);
       });
 
+      const { id } = req.body;
+      const grade = Number(id.toString().substring(0, 4));
       let info: Partial<AuthInfo> = {
-        name: "未知",
         // FIXME: Compact code
-        id: req.body.id,
-        grade: Number(req.body.id.toString().substring(0, 4)),
+        name: "未知",
+        id,
+        grade,
         school: "未知",
         major: "未知",
       };
@@ -321,11 +324,27 @@ export const authInitHandler: RequestHandler<
 
       // 本科生
       if (req.body.id.toString().charAt(4) === "0") {
-        const loginResult = await underSystemLogin({
+        let loginResult = await underSystemLogin({
           id: req.body.id,
           password: req.body.password,
         });
 
+        if (
+          "type" in loginResult &&
+          loginResult.type === LoginFailType.Forbidden
+        ) {
+          // Activate VPN by login
+          const vpnLoginResult = await vpnLogin(req.body);
+
+          if (vpnLoginResult.success)
+            loginResult = await underSystemLogin({
+              id: req.body.id,
+              password: req.body.password,
+            });
+          else console.error("VPN login failed", vpnLoginResult);
+        }
+
+        // 获得信息
         if (loginResult.success) {
           const studentInfo = await getStudyArchiveInfo(
             loginResult.cookieStore.getHeader(STUDENT_ARCHIVE_QUERY_URL),
