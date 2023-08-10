@@ -32,6 +32,7 @@ import {
   mainInfoListHandler,
   mainStatusHandler,
 } from "./main/index.js";
+import { mpLoginHandler } from "./mp/index.js";
 import { qrCodeHandler } from "./qrcode.js";
 import {
   processHandler,
@@ -114,6 +115,8 @@ app.put("/select/process", processHandler);
 
 app.post("/vpn/cas-login", vpnCASLoginHandler);
 app.post("/vpn/login", vpnLoginHandler);
+
+app.post("/mp/login", mpLoginHandler);
 
 app.get("/library/people", libraryPeopleHandler);
 app.get("/qrcode", qrCodeHandler);
