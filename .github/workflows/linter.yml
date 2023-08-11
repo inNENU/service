@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  deploy-gh-pages:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
