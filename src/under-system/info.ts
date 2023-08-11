@@ -51,7 +51,7 @@ const CANDIDATE_TYPE_REGEXP =
 export const STUDENT_ARCHIVE_QUERY_URL =
   "https://dsjx.webvpn.nenu.edu.cn/xszhxxAction.do?method=addStudentPic_xszc";
 
-export interface StudyArchiveInfo {
+export interface UnderStudentInfo {
   /** 姓名 */
   name: string;
   /** 性别 */
@@ -90,7 +90,7 @@ export interface StudyArchiveInfo {
   cultivateType: string;
 }
 
-const getInfo = (content: string): StudyArchiveInfo => {
+const getInfo = (content: string): UnderStudentInfo => {
   const name = NAME_REGEXP.exec(content)![1];
   const gender = <"男" | "女">GENDER_REGEXP.exec(content)![1];
   const people = PEOPLE_REGEXP.exec(content)![1];
@@ -125,7 +125,7 @@ const getInfo = (content: string): StudyArchiveInfo => {
     school,
     major,
     majorType,
-    inDate,
+    inDate: inDate.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3"),
 
     language,
     candidateId,
@@ -135,21 +135,21 @@ const getInfo = (content: string): StudyArchiveInfo => {
   };
 };
 
-export type StudyArchiveOptions = LoginOptions | CookieOptions;
+export type UnderInfoOptions = LoginOptions | CookieOptions;
 
-export interface StudyArchiveSuccessResponse {
+export interface UnderInfoSuccessResponse {
   success: true;
-  info: StudyArchiveInfo;
+  info: UnderStudentInfo;
 }
 
-export type StudyArchiveResponse =
-  | StudyArchiveSuccessResponse
+export type UnderInfoResponse =
+  | UnderInfoSuccessResponse
   | AuthLoginFailedResult
   | CommonFailedResponse;
 
-export const getStudyArchiveInfo = async (
+export const getUnderInfo = async (
   cookieHeader: string,
-): Promise<StudyArchiveResponse> => {
+): Promise<UnderInfoResponse> => {
   const response = await fetch(
     `${STUDENT_ARCHIVE_QUERY_URL}&tktime=${getTimeStamp()}`,
     {
@@ -167,7 +167,7 @@ export const getStudyArchiveInfo = async (
   if (content.includes("学生学籍卡片")) {
     const info = getInfo(content);
 
-    return <StudyArchiveSuccessResponse>{
+    return <UnderInfoSuccessResponse>{
       success: true,
       info,
     };
@@ -179,10 +179,10 @@ export const getStudyArchiveInfo = async (
   };
 };
 
-export const underStudyArchiveHandler: RequestHandler<
+export const underInfoHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  StudyArchiveOptions
+  UnderInfoOptions
 > = async (req, res) => {
   try {
     const cookieStore = new CookieStore();
@@ -199,7 +199,7 @@ export const underStudyArchiveHandler: RequestHandler<
     const cookieHeader =
       req.headers.cookie || cookieStore.getHeader(STUDENT_ARCHIVE_QUERY_URL);
 
-    return res.json(await getStudyArchiveInfo(cookieHeader));
+    return res.json(await getUnderInfo(cookieHeader));
   } catch (err) {
     const { message } = <Error>err;
 

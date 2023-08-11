@@ -4,17 +4,21 @@ import { authEncrypt, saltRegExp } from "./authEncrypt.js";
 import { getBasicInfo } from "./info.js";
 import { AUTH_SERVER } from "./utils.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
+import type { PostStudentInfo } from "../post-system/info.js";
+import { getPostInfo } from "../post-system/info.js";
+import { postSystemLogin } from "../post-system/login.js";
+import { MAIN_URL } from "../post-system/utils.js";
 import type {
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import { underSystemLogin } from "../under-system/login.js";
-import type { StudyArchiveInfo } from "../under-system/study-archive.js";
 import {
   STUDENT_ARCHIVE_QUERY_URL,
-  getStudyArchiveInfo,
-} from "../under-system/study-archive.js";
+  getUnderInfo,
+  underSystemLogin,
+} from "../under-system/index.js";
+import type { UnderStudentInfo } from "../under-system/info.js";
 import { CookieStore, getDomain } from "../utils/index.js";
 import { vpnLogin } from "../vpn/login.js";
 
@@ -246,7 +250,9 @@ export interface AuthInitInfoResponse {
   salt: string;
 }
 
-export interface AuthInfo extends Partial<StudyArchiveInfo> {
+export interface AuthInfo
+  extends Partial<UnderStudentInfo>,
+    Partial<PostStudentInfo> {
   /** 用户姓名 */
   name: string;
 
@@ -346,8 +352,37 @@ export const authInitHandler: RequestHandler<
 
         // 获得信息
         if (loginResult.success) {
-          const studentInfo = await getStudyArchiveInfo(
+          const studentInfo = await getUnderInfo(
             loginResult.cookieStore.getHeader(STUDENT_ARCHIVE_QUERY_URL),
+          );
+
+          if (studentInfo.success) info = { ...info, ...studentInfo.info };
+        }
+      } else {
+        let loginResult = await postSystemLogin({
+          id: req.body.id,
+          password: req.body.password,
+        });
+
+        if (
+          "type" in loginResult &&
+          loginResult.type === LoginFailType.Forbidden
+        ) {
+          // Activate VPN by login
+          const vpnLoginResult = await vpnLogin(req.body);
+
+          if (vpnLoginResult.success)
+            loginResult = await postSystemLogin({
+              id: req.body.id,
+              password: req.body.password,
+            });
+          else console.error("VPN login failed", vpnLoginResult);
+        }
+
+        // 获得信息
+        if (loginResult.success) {
+          const studentInfo = await getPostInfo(
+            loginResult.cookieStore.getHeader(MAIN_URL),
           );
 
           if (studentInfo.success) info = { ...info, ...studentInfo.info };

@@ -3,39 +3,25 @@ import type { RequestHandler } from "express";
 import { SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
-import { WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type { CookieType, EmptyObject, LoginOptions } from "../typings.js";
-import { CookieStore, IE_8_USER_AGENT } from "../utils/index.js";
-import type { VPNLoginFailedResult } from "../vpn/login.js";
-import { vpnCASLogin } from "../vpn/login.js";
+import { CookieStore } from "../utils/index.js";
 
-export interface UnderSystemLoginSuccessResult {
+export interface PostSystemLoginSuccessResult {
   success: true;
   cookieStore: CookieStore;
 }
 
-export type UnderSystemLoginResult =
-  | UnderSystemLoginSuccessResult
-  | AuthLoginFailedResult
-  | VPNLoginFailedResult;
+export type PostSystemLoginResult =
+  | PostSystemLoginSuccessResult
+  | AuthLoginFailedResult;
 
-const COMMON_HEADERS = {
-  "User-Agent":
-    "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 10.0; WOW64; Trident/7.0; .NET4.0C; .NET4.0E; .NET CLR 2.0.50727; .NET CLR 3.0.30729; .NET CLR 3.5.30729; Tablet PC 2.0)",
-};
-
-export const underSystemLogin = async (
+export const postSystemLogin = async (
   options: LoginOptions,
   cookieStore = new CookieStore(),
-): Promise<UnderSystemLoginResult> => {
-  const vpnLoginResult = await vpnCASLogin(options, cookieStore);
-
-  if (!vpnLoginResult.success) return vpnLoginResult;
-
+): Promise<PostSystemLoginResult> => {
   const result = await authLogin(options, {
-    service: "http://dsjx.nenu.edu.cn:80/",
-    webVPN: true,
+    service: `${SERVER}/HProg/yjsy/index_pc.php`,
     cookieStore,
   });
 
@@ -51,11 +37,7 @@ export const underSystemLogin = async (
 
   const ticketHeaders = {
     Cookie: cookieStore.getHeader(result.location),
-    Referer: WEB_VPN_AUTH_SERVER,
-    ...COMMON_HEADERS,
   };
-
-  console.log("Login location", result.location);
 
   const ticketResponse = await fetch(result.location, {
     headers: new Headers(ticketHeaders),
@@ -63,6 +45,12 @@ export const underSystemLogin = async (
   });
 
   cookieStore.applyResponse(ticketResponse, result.location);
+
+  console.log(
+    "ticket",
+    ticketResponse.headers.get("Location"),
+    await ticketResponse.text(),
+  );
 
   if (ticketResponse.status !== 302) {
     console.log("ticket response", await ticketResponse.text());
@@ -76,29 +64,23 @@ export const underSystemLogin = async (
 
   const finalLocation = ticketResponse.headers.get("Location");
 
-  console.log("location: ", finalLocation);
-
   if (finalLocation?.includes("http://wafnenu.nenu.edu.cn/offCampus.html"))
     return {
       success: false,
       type: LoginFailType.Forbidden,
-      msg: "此账户无法登录本科教学服务系统",
+      msg: "此账户无法登录研究生教学服务系统",
     };
 
-  if (finalLocation?.includes(";jsessionid=")) {
-    const ssoUrl = `${SERVER}/Logon.do?method=logonBySSO`;
-
-    await fetch(ssoUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Cookie: cookieStore.getHeader(ssoUrl),
-        Referer: `${SERVER}/framework/main.jsp`,
-        "User-Agent": IE_8_USER_AGENT,
-      },
+  if (finalLocation === "https://math127.nenu.edu.cn/HProg/yjsy/index_pc.php") {
+    const indexResponse = await fetch(finalLocation, {
+      headers: new Headers({
+        Cookie: cookieStore.getHeader(finalLocation),
+      }),
     });
 
-    return <UnderSystemLoginSuccessResult>{
+    cookieStore.applyResponse(indexResponse, finalLocation);
+
+    return <PostSystemLoginSuccessResult>{
       success: true,
       cookieStore,
     };
@@ -111,24 +93,23 @@ export const underSystemLogin = async (
   };
 };
 
-export interface UnderSystemLoginSuccessResponse {
+export interface PostSystemLoginSuccessResponse {
   success: true;
   /** @deprecated */
   cookies: CookieType[];
 }
 
-export type UnderSystemLoginResponse =
-  | UnderSystemLoginSuccessResponse
-  | AuthLoginFailedResult
-  | VPNLoginFailedResult;
+export type PostSystemLoginResponse =
+  | PostSystemLoginSuccessResponse
+  | AuthLoginFailedResult;
 
-export const underSystemLoginHandler: RequestHandler<
+export const postSystemLoginHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
   LoginOptions
 > = async (req, res) => {
   try {
-    const result = await underSystemLogin(req.body);
+    const result = await postSystemLogin(req.body);
 
     if (result.success) {
       const cookies = result.cookieStore
@@ -139,7 +120,7 @@ export const underSystemLoginHandler: RequestHandler<
         res.cookie(name, value, rest);
       });
 
-      return res.json(<UnderSystemLoginSuccessResponse>{
+      return res.json(<PostSystemLoginSuccessResponse>{
         success: true,
         cookies,
       });
