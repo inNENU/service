@@ -41,7 +41,7 @@ export interface PostStudentInfo {
   majorCode: number;
   /** 研究生类别 */
   type: string;
-  /** 研究生分类 */
+  /** 学生分类 */
   category: string;
   /** 入学日期 */
   inDate: string;

@@ -88,6 +88,8 @@ export interface UnderStudentInfo {
   province: string;
   /** 培养方式 */
   cultivateType: string;
+  /** 学生分类 */
+  category: string;
 }
 
 const getInfo = (content: string): UnderStudentInfo => {
@@ -132,6 +134,7 @@ const getInfo = (content: string): UnderStudentInfo => {
     candidateType,
     cultivateType,
     province,
+    category: "本科生",
   };
 };
 
