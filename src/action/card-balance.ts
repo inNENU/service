@@ -80,15 +80,12 @@ export const cardBalanceHandler: RequestHandler<
     if (data.success) {
       const balanceList = data.demo.items.item;
 
-      if (typeof balanceList[0]?.kye === "number")
-        return res.json(<CardBalanceSuccessResponse>{
-          success: true,
-          data: Number(data.demo.items.item[0].kye) / 100,
-        });
-
-      return res.json(<CommonFailedResponse>{
-        success: false,
-        msg: "暂无余额信息",
+      return res.json(<CardBalanceSuccessResponse>{
+        success: true,
+        data:
+          balanceList[0]?.kye === "number"
+            ? Number(balanceList[0].kye) / 100
+            : 0,
       });
     }
 
