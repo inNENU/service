@@ -5,15 +5,10 @@ import { getTimeStamp } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import type {
   CommonFailedResponse,
-  CookieOptions,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import {
-  CookieStore,
-  IE_8_USER_AGENT,
-  getCookieItems,
-} from "../utils/index.js";
+import { IE_8_USER_AGENT } from "../utils/index.js";
 
 const NAME_REGEXP =
   /<td>姓&nbsp;名<\/td>\s+<td colspan="3">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/;
@@ -138,8 +133,6 @@ const getInfo = (content: string): UnderStudentInfo => {
   };
 };
 
-export type UnderInfoOptions = LoginOptions | CookieOptions;
-
 export interface UnderInfoSuccessResponse {
   success: true;
   info: UnderStudentInfo;
@@ -185,22 +178,24 @@ export const getUnderInfo = async (
 export const underInfoHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  UnderInfoOptions
+  Partial<LoginOptions>
 > = async (req, res) => {
   try {
-    const cookieStore = new CookieStore();
+    let cookieHeader = req.headers.cookie;
 
-    if (!req.headers.cookie)
-      if ("cookies" in req.body) {
-        cookieStore.apply(getCookieItems(req.body.cookies));
-      } else {
-        const result = await underSystemLogin(req.body, cookieStore);
+    if (!cookieHeader) {
+      if (!req.body.id || !req.body.password)
+        return res.json(<CommonFailedResponse>{
+          success: false,
+          msg: "请提供账号密码",
+        });
 
-        if (!result.success) return res.json(result);
-      }
+      const result = await underSystemLogin(<LoginOptions>req.body);
 
-    const cookieHeader =
-      req.headers.cookie || cookieStore.getHeader(STUDENT_ARCHIVE_QUERY_URL);
+      if (!result.success) return res.json(result);
+
+      cookieHeader = result.cookieStore.getHeader(STUDENT_ARCHIVE_QUERY_URL);
+    }
 
     return res.json(await getUnderInfo(cookieHeader));
   } catch (err) {

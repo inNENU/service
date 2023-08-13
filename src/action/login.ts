@@ -1,9 +1,8 @@
 import type { RequestHandler } from "express";
 
 import { SERVER } from "./utils.js";
+import { WEB_VPN_AUTH_SERVER, authLogin } from "../auth/index.js";
 import type { AuthLoginFailedResult } from "../auth/login.js";
-import { authLogin } from "../auth/login.js";
-import { WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
 import type { CookieType, EmptyObject, LoginOptions } from "../typings.js";
 import { CookieStore } from "../utils/index.js";
 import type { VPNLoginFailedResult } from "../vpn/login.js";
@@ -43,15 +42,11 @@ export const actionLogin = async (
     };
   }
 
-  const ticketHeaders = {
-    Cookie: cookieStore.getHeader(result.location),
-    Referer: WEB_VPN_AUTH_SERVER,
-  };
-
-  console.log("ticket headers", ticketHeaders);
-
   const ticketResponse = await fetch(result.location, {
-    headers: new Headers(ticketHeaders),
+    headers: {
+      Cookie: cookieStore.getHeader(result.location),
+      Referer: WEB_VPN_AUTH_SERVER,
+    },
     redirect: "manual",
   });
 

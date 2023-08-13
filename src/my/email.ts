@@ -10,9 +10,8 @@ import type {
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import { CookieStore } from "../utils/index.js";
 
-// TODO: This can be inferred from app list
+// Note: This can be inferred from app list
 const APPLY_MAIL_APP_ID = "GRYXSQ";
 const APPLY_MAIL_APP_KEY = "b0bd57d10d6540948c7cd6b4441d4ab3";
 
@@ -27,7 +26,6 @@ export type ActivateEmailOptions = LoginOptions &
         suffix: number;
         taskId: string;
         instanceId: string;
-        cookieHeader: string;
       }
   );
 
@@ -39,7 +37,6 @@ interface RawAccountList {
 export interface InitEmailSuccessResponse {
   success: true;
   data: string[];
-  cookieHeader: string;
   taskId: string;
   instanceId: string;
 }
@@ -61,26 +58,21 @@ export const emailHandler: RequestHandler<
 > = async (req, res) => {
   try {
     const { id, type } = req.body;
+    let cookieHeader = req.headers.cookie;
 
-    const cookieStore = new CookieStore();
-
-    if (!req.headers.cookie) {
-      const result = await myLogin(req.body, cookieStore);
+    if (!cookieHeader) {
+      const result = await myLogin(req.body);
 
       if (!result.success) return res.json(result);
+      cookieHeader = result.cookieStore.getHeader(SERVER);
     }
+
+    const info = await getInfo(cookieHeader);
+
+    if (!info.success) return res.json(info);
 
     if (type === "set") {
       const { name, password, phone, suffix, taskId, instanceId } = req.body;
-
-      let { cookieHeader } = req.body;
-
-      if (!cookieHeader) {
-        const result = await myLogin(req.body);
-
-        if (!result.success) return res.json(result);
-        cookieHeader = result.cookieStore.getHeader(SERVER);
-      }
 
       // TODO: add something
       const checkMailAccountResponse = await fetch(
@@ -93,7 +85,7 @@ export const emailHandler: RequestHandler<
             Cookie: cookieHeader,
           },
           body: `mailBoxName=${name}`,
-        }
+        },
       );
 
       const checkResult = <{ suc: boolean }>(
@@ -105,10 +97,6 @@ export const emailHandler: RequestHandler<
           success: false,
           msg: "邮箱账户已存在",
         });
-
-      const info = await getInfo(cookieHeader);
-
-      if (!info.success) return res.json(info);
 
       const setMailResponse = await fetch(
         `${SERVER}/dynamicDrawForm/submitAndSend`,
@@ -141,7 +129,7 @@ export const emailHandler: RequestHandler<
             YXHZ: suffix?.toString() ?? "",
             MM: password,
           }),
-        }
+        },
       );
 
       const setMailResult = <{ success: boolean }>await setMailResponse.json();
@@ -159,21 +147,15 @@ export const emailHandler: RequestHandler<
       });
     }
 
-    let orgCode = 0;
-    let identify = "";
-
-    const checkMailResponse = await fetch(
-      "https://my.webvpn.nenu.edu.cn/Gryxsq/checkMailBox",
-      {
-        method: "POST",
-        headers: {
-          Accept: "application/json, text/javascript, */*; q=0.01",
-          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-          Cookie: cookieStore.getHeader(SERVER),
-        },
-        body: `userId=${id}`,
-      }
-    );
+    const checkMailResponse = await fetch(`${SERVER}/Gryxsq/checkMailBox`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json, text/javascript, */*; q=0.01",
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        Cookie: cookieHeader,
+      },
+      body: `userId=${id}`,
+    });
 
     const checkResult = <{ flag: boolean }>await checkMailResponse.json();
 
@@ -189,51 +171,30 @@ export const emailHandler: RequestHandler<
       id,
       processId: APPLY_MAIL_APP_ID,
       processKey: APPLY_MAIL_APP_KEY,
-      orgCode,
-      identify,
-      cookieHeader: cookieStore.getHeader(SERVER),
+      identify: info.data.type,
+      cookieHeader,
     });
 
     if (processResult.success === false) return res.json(processResult);
 
     const { taskId, instanceId } = processResult;
-    // const { taskId, instanceId, realFormPath } = processResult;
 
-    // const url = new URL(`${SERVER}${realFormPath}`);
-
-    // const params = {
-    //   f: url.searchParams.get("f")!,
-    //   TASK_ID_: taskId,
-    //   PROC_INST_ID_: instanceId,
-    //   b: "null",
-    // };
-
-    // const formResponse = await fetch(`${url.origin}${url.pathname}`, {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/x-www-form-urlencoded",
-    //     Cookie: cookieStore.getHeader(SERVER),
-    //   },
-    //   body: new URLSearchParams(params),
-    // });
-
-    // const formContent = await formResponse.text();
-
-    const accountListUrl = `${SERVER}/sysform/getSelectOption?random=${Math.random()}`;
-
-    const accountListResponse = await fetch(accountListUrl, {
-      method: "POST",
-      headers: {
-        Accept: "application/json, text/javascript, */*; q=0.01",
-        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-        Cookie: cookieStore.getHeader(SERVER),
+    const accountListResponse = await fetch(
+      `${SERVER}/sysform/getSelectOption?random=${Math.random()}`,
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json, text/javascript, */*; q=0.01",
+          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+          Cookie: cookieHeader,
+        },
+        body: new URLSearchParams({
+          beanId: "GryxsqService",
+          method: "getAccountList",
+          paramStr: "{}",
+        }),
       },
-      body: new URLSearchParams({
-        beanId: "GryxsqService",
-        method: "getAccountList",
-        paramStr: "{}",
-      }).toString(),
-    });
+    );
 
     const accountListResult = <RawAccountList>await accountListResponse.json();
 
@@ -243,7 +204,6 @@ export const emailHandler: RequestHandler<
         data: accountListResult.data
           .map(({ value }) => value)
           .filter((item) => Boolean(item)),
-        cookieHeader: cookieStore.getHeader(SERVER),
         taskId,
         instanceId,
       });

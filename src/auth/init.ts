@@ -27,8 +27,9 @@ const COMMON_HEADERS = {
   "Upgrade-Insecure-Requests": "1",
   "User-Agent": "inNENU",
 };
+const LOGIN_URL = `${AUTH_SERVER}/authserver/login`;
 
-export interface AuthInitResult {
+export interface AuthInitInfo {
   success: true;
   needCaptcha: boolean;
   cookieStore: CookieStore;
@@ -56,10 +57,10 @@ const getCaptcha = async (cookieStore: CookieStore): Promise<string> => {
   return `data:image/png;base64,${Buffer.from(captcha).toString("base64")}`;
 };
 
-export const authInit = async (
+export const getAuthInit = async (
   id: string,
   cookieStore = new CookieStore(),
-): Promise<AuthInitResult> => {
+): Promise<AuthInitInfo> => {
   const url = `${AUTH_SERVER}/authserver/login`;
 
   const loginPageResponse = await fetch(url, {
@@ -112,7 +113,7 @@ export const authInit = async (
 
   const captcha = needCaptcha ? await getCaptcha(cookieStore) : null;
 
-  return <AuthInitResult>{
+  return <AuthInitInfo>{
     success: true,
     needCaptcha,
     captcha,
@@ -122,57 +123,52 @@ export const authInit = async (
   };
 };
 
-export interface AuthLoginOptions extends LoginOptions {
+export interface AuthInitOptions extends LoginOptions {
   params: Record<string, string>;
   salt: string;
   captcha: string;
 }
 
-export interface AuthLoginSuccessResult {
+export interface AuthInitSuccessResult {
   success: true;
   cookieStore: CookieStore;
 }
 
-export interface AuthLoginFailedResponse extends CommonFailedResponse {
+export interface AuthInitFailedResponse extends CommonFailedResponse {
   type: LoginFailType;
 }
 
-export type AuthLoginResult = AuthLoginSuccessResult | AuthLoginFailedResponse;
+export type AuthInitResult = AuthInitSuccessResult | AuthInitFailedResponse;
 
-export const authLogin = async (
-  { password, salt, captcha, params }: AuthLoginOptions,
+export const authInit = async (
+  { password, salt, captcha, params }: AuthInitOptions,
   cookieHeader: string,
-): Promise<AuthLoginResult> => {
+): Promise<AuthInitResult> => {
   const cookieStore = new CookieStore();
-  const url = `${AUTH_SERVER}/authserver/login`;
 
-  const headers = {
-    "Content-Type": "application/x-www-form-urlencoded",
-    Cookie: cookieHeader,
-    "Sec-Fetch-Site": "same-origin",
-    "Sec-Fetch-Mode": "navigate",
-    "Sec-Fetch-User": "?1",
-    "Sec-Fetch-Dest": "document",
-    ...COMMON_HEADERS,
-  };
-
-  const body = new URLSearchParams({
-    ...params,
-    password: authEncrypt(password, salt),
-    captchaResponse: captcha,
-  }).toString();
-
-  const response = await fetch(url, {
+  const response = await fetch(LOGIN_URL, {
     method: "POST",
-    headers: new Headers(headers),
-    body,
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Cookie: cookieHeader,
+      "Sec-Fetch-Site": "same-origin",
+      "Sec-Fetch-Mode": "navigate",
+      "Sec-Fetch-User": "?1",
+      "Sec-Fetch-Dest": "document",
+      ...COMMON_HEADERS,
+    },
+    body: new URLSearchParams({
+      ...params,
+      password: authEncrypt(password, salt),
+      captchaResponse: captcha,
+    }),
     redirect: "manual",
   });
 
   const resultContent = await response.text();
   const location = response.headers.get("Location");
 
-  cookieStore.applyResponse(response, url);
+  cookieStore.applyResponse(response, LOGIN_URL);
 
   console.log(`Request location:`, location);
 
@@ -269,12 +265,12 @@ export interface AuthInitResponse {
 export const authInitHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  AuthLoginOptions,
+  AuthInitOptions,
   { id: string }
 > = async (req, res) => {
   try {
     if (req.method === "GET") {
-      const result = await authInit(req.query.id);
+      const result = await getAuthInit(req.query.id);
 
       if (result.success) {
         const cookies = result.cookieStore
@@ -297,7 +293,7 @@ export const authInitHandler: RequestHandler<
       return res.json(result);
     }
 
-    const result = await authLogin(req.body, req.headers.cookie!);
+    const result = await authInit(req.body, req.headers.cookie!);
 
     if (result.success) {
       const { cookieStore } = result;

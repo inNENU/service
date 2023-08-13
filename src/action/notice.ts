@@ -2,21 +2,18 @@ import type { RequestHandler } from "express";
 
 import { actionLogin } from "./login.js";
 import { SERVER } from "./utils.js";
-import type { AuthLoginFailedResult } from "../auth/index.js";
-import type { AuthLoginFailedResponse } from "../auth/login.js";
+import type {
+  AuthLoginFailedResponse,
+  AuthLoginFailedResult,
+} from "../auth/index.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
   CommonFailedResponse,
-  CookieOptions,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
 import type { RichTextNode } from "../utils/getRichText.js";
-import {
-  CookieStore,
-  getCookieItems,
-  getRichTextNodes,
-} from "../utils/index.js";
+import { getRichTextNodes } from "../utils/index.js";
 
 const titleRegExp = /var title = '(.*?)';/;
 const fromRegExp = /var ly = '(.*?)'/;
@@ -28,9 +25,9 @@ const pageViewRegExp =
 const contentRegExp =
   /<div class="read" id="WBNR">\s+([\s\S]*?)\s+<\/div>\s+<p id="zrbj"/;
 
-export type NoticeOptions = (LoginOptions | CookieOptions) & {
+export interface NoticeOptions extends Partial<LoginOptions> {
   noticeID: string;
-};
+}
 
 export interface NoticeSuccessResponse {
   success: true;
@@ -58,22 +55,25 @@ export const noticeHandler: RequestHandler<
         msg: "ID is required",
       });
 
-    const cookieStore = new CookieStore();
+    const noticeUrl = `${SERVER}/page/viewNews?ID=${noticeID}`;
 
-    if (!req.headers.cookie)
-      if ("cookies" in req.body) {
-        cookieStore.apply(getCookieItems(req.body.cookies));
-      } else {
-        const result = await actionLogin(req.body, cookieStore);
+    if (!req.headers.cookie) {
+      if (!req.body.id || !req.body.password)
+        return res.json(<CommonFailedResponse>{
+          success: false,
+          msg: "请提供账号密码",
+        });
 
-        if (!result.success) return res.json(result);
-      }
+      const result = await actionLogin(<LoginOptions>req.body);
 
-    const url = `${SERVER}/page/viewNews?ID=${noticeID}`;
+      if (!result.success) return res.json(result);
 
-    const response = await fetch(url, {
+      req.headers.cookie = result.cookieStore.getHeader(noticeUrl);
+    }
+
+    const response = await fetch(noticeUrl, {
       headers: {
-        Cookie: req.headers.cookie || cookieStore.getHeader(url),
+        Cookie: req.headers.cookie,
       },
       redirect: "manual",
     });

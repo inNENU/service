@@ -49,27 +49,23 @@ export const selectLoginHandler: RequestHandler<
 
       while ((match = serverReg.exec(content))) servers.push(match[1]);
 
-      console.log("Available servers:", servers);
       const server = servers[id % servers.length];
-
-      console.log("Using server:", server);
       const url = `${server}xk/LoginToXkLdap`;
 
-      const headers = new Headers({
-        "Cache-Control": "max-age=0",
-        "Content-Type": "application/x-www-form-urlencoded",
-        Cookie: cookieHeader,
-        DNT: "1",
-        Origin: "http://xk.nenu.edu.cn",
-      });
-
-      console.log(`Login at ${url}`);
+      console.log("Available servers:", servers);
+      console.log("Using server:", server);
 
       const loginResponse = await fetch(`${url}?url=${url}`, {
         method: "POST",
-        headers,
-        redirect: "manual",
+        headers: {
+          "Cache-Control": "max-age=0",
+          "Content-Type": "application/x-www-form-urlencoded",
+          Cookie: cookieHeader,
+          DNT: "1",
+          Origin: "http://xk.nenu.edu.cn",
+        },
         body: `IDToken1=${id}&IDToken2=${password}&RANDOMCODE=1234&ymyzm=1234`,
+        redirect: "manual",
       });
 
       if (loginResponse.status === 302) {

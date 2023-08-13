@@ -49,16 +49,14 @@ export const underSystemLogin = async (
     };
   }
 
-  const ticketHeaders = {
-    Cookie: cookieStore.getHeader(result.location),
-    Referer: WEB_VPN_AUTH_SERVER,
-    ...COMMON_HEADERS,
-  };
-
   console.log("Login location", result.location);
 
   const ticketResponse = await fetch(result.location, {
-    headers: new Headers(ticketHeaders),
+    headers: {
+      Cookie: cookieStore.getHeader(result.location),
+      Referer: WEB_VPN_AUTH_SERVER,
+      ...COMMON_HEADERS,
+    },
     redirect: "manual",
   });
 

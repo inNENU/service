@@ -4,11 +4,9 @@ import { authLogin } from "./login.js";
 import { AUTH_SERVER } from "./utils.js";
 import type {
   CommonFailedResponse,
-  CookieType,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import { cookies2Header } from "../utils/index.js";
 
 export interface InfoSuccessResponse {
   success: true;
@@ -89,23 +87,27 @@ export const getBasicInfo = async (
 export const infoHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  LoginOptions | { cookies: CookieType[] }
+  Partial<LoginOptions>
 > = async (req, res) => {
   try {
     if (req.headers.cookie)
       return res.json(await getBasicInfo(req.headers.cookie));
 
-    if ("cookies" in req.body)
-      return res.json(await getBasicInfo(cookies2Header(req.body.cookies)));
+    if (!req.body.id || !req.body.password)
+      return res.json(<CommonFailedResponse>{
+        success: false,
+        msg: "请提供账号密码",
+      });
 
-    const result = await authLogin(req.body);
+    const result = await authLogin(<LoginOptions>req.body);
 
-    if (result.success)
-      return res.json(
-        await getBasicInfo(
-          result.cookieStore.getHeader(`${AUTH_SERVER}/authserver/`),
-        ),
+    if (result.success) {
+      const cookieHeader = result.cookieStore.getHeader(
+        `${AUTH_SERVER}/authserver/`,
       );
+
+      return res.json(await getBasicInfo(cookieHeader));
+    }
 
     return res.json(<CommonFailedResponse>{
       success: false,

@@ -88,10 +88,10 @@ export const searchHandler: RequestHandler<
 
     const response = await fetch(url, {
       method: "POST",
-      headers: new Headers({
+      headers: {
         "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
         Cookie: cookies.join(", "),
-      }),
+      },
       body: params,
     });
 

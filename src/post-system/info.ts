@@ -6,11 +6,9 @@ import { MAIN_URL, SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import type {
   CommonFailedResponse,
-  CookieOptions,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import { CookieStore, getCookieItems } from "../utils/index.js";
 
 const TITLE_REG_EXP = /aField\s?="(.*?)"\.split\("\t"\);/;
 const VALUE_REG_EXP = /aDataLS\s?="(.*?)"\.split\("\t"\);/;
@@ -90,8 +88,6 @@ const getInfo = (content: string): PostStudentInfo => {
   };
 };
 
-export type InfoOptions = LoginOptions | CookieOptions;
-
 export interface InfoSuccessResponse {
   success: true;
   info: PostStudentInfo;
@@ -142,21 +138,24 @@ export const getPostInfo = async (
 export const postInfoHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  InfoOptions
+  Partial<LoginOptions>
 > = async (req, res) => {
   try {
-    const cookieStore = new CookieStore();
+    let cookieHeader = req.headers.cookie;
 
-    if (!req.headers.cookie)
-      if ("cookies" in req.body) {
-        cookieStore.apply(getCookieItems(req.body.cookies));
-      } else {
-        const result = await postSystemLogin(req.body, cookieStore);
+    if (!cookieHeader) {
+      if (!req.body.id || !req.body.password)
+        return res.json(<CommonFailedResponse>{
+          success: false,
+          msg: "请提供账号密码",
+        });
 
-        if (!result.success) return res.json(result);
-      }
+      const result = await postSystemLogin(<LoginOptions>req.body);
 
-    const cookieHeader = req.headers.cookie || cookieStore.getHeader(SERVER);
+      if (!result.success) return res.json(result);
+
+      cookieHeader = result.cookieStore.getHeader(SERVER);
+    }
 
     return res.json(await getPostInfo(cookieHeader));
   } catch (err) {
