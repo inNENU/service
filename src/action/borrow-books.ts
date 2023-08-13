@@ -6,11 +6,9 @@ import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
   CommonFailedResponse,
-  CookieOptions,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import { CookieStore, getCookieItems } from "../utils/index.js";
 
 const BORROW_BOOKS_URL = `${SERVER}/basicInfo/getBookBorrow`;
 
@@ -109,8 +107,6 @@ const getBookData = ({
   status: item_policy.description,
 });
 
-export type BorrowBooksOptions = LoginOptions | CookieOptions;
-
 export interface BorrowBooksSuccessResponse {
   success: true;
   data: BorrowBookData[];
@@ -124,24 +120,27 @@ export type BorrowBooksResponse =
 export const borrowBooksHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  BorrowBooksOptions
+  Partial<LoginOptions>
 > = async (req, res) => {
   try {
-    const cookieStore = new CookieStore();
+    if (!req.headers.cookie) {
+      if (!req.body.id || req.body.password)
+        return res.json(<CommonFailedResponse>{
+          success: false,
+          msg: "请提供账号密码",
+        });
 
-    if (!req.headers.cookie)
-      if ("cookies" in req.body) {
-        cookieStore.apply(getCookieItems(req.body.cookies));
-      } else {
-        const result = await actionLogin(req.body, cookieStore);
+      const result = await actionLogin(<LoginOptions>req.body);
 
-        if (!result.success) return res.json(<AuthLoginFailedResponse>result);
-      }
+      if (!result.success) return res.json(<AuthLoginFailedResponse>result);
+
+      req.headers.cookie = result.cookieStore.getHeader(BORROW_BOOKS_URL);
+    }
 
     const response = await fetch(BORROW_BOOKS_URL, {
       headers: {
         Accept: "application/json, text/javascript, */*; q=0.01",
-        Cookie: req.headers.cookie || cookieStore.getHeader(BORROW_BOOKS_URL),
+        Cookie: req.headers.cookie,
         Referer: `${SERVER}/basicInfo/studentPageTurn?type=lifestudying&tg=bookborrow`,
       },
       redirect: "manual",

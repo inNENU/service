@@ -5,15 +5,10 @@ import { SERVER, getTimeStamp } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import type {
   CommonFailedResponse,
-  CookieOptions,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import {
-  CookieStore,
-  IE_8_USER_AGENT,
-  getCookieItems,
-} from "../utils/index.js";
+import { IE_8_USER_AGENT } from "../utils/index.js";
 
 type CourseType =
   | "通识教育必修课"
@@ -27,7 +22,7 @@ type CourseType =
   | "教师教育必修课"
   | "教师教育选修课";
 
-interface UserGradeListExtraOptions {
+export interface UserGradeListOptions extends Partial<LoginOptions> {
   /** 查询时间 */
   time?: string;
   /** 课程名称 */
@@ -36,10 +31,6 @@ interface UserGradeListExtraOptions {
   courseType?: CourseType | "";
   gradeType?: "all" | "best";
 }
-
-export type UserGradeListOptions = (LoginOptions | CookieOptions) &
-  UserGradeListExtraOptions;
-
 export interface ScoreDetail {
   score: number;
   percent: number;
@@ -348,35 +339,27 @@ export const underGradeListHandler: RequestHandler<
   UserGradeListOptions
 > = async (req, res) => {
   try {
-    const cookieStore = new CookieStore();
-
     const {
       time = "",
       name = "",
       courseType = "",
       gradeType = "all",
     } = req.body;
+    let cookieHeader = req.headers.cookie;
 
-    if (!req.headers.cookie)
-      if ("cookies" in req.body) {
-        cookieStore.apply(getCookieItems(req.body.cookies));
-      } else {
-        const result = await underSystemLogin(req.body, cookieStore);
+    if (!cookieHeader) {
+      if (!req.body.id || !req.body.password)
+        return res.json(<CommonFailedResponse>{
+          success: false,
+          msg: "请提供账号密码",
+        });
 
-        if (!result.success) return res.json(result);
-      }
+      const result = await underSystemLogin(<LoginOptions>req.body);
 
-    const params = new URLSearchParams({
-      kksj: time,
-      kcxz: courseType ? COURSE_TYPES[courseType] || "" : "",
-      kcmc: name,
-      xsfs: gradeType === "best" ? "zhcj" : gradeType === "all" ? "qbcj" : "",
-      ok: "",
-    });
+      if (!result.success) return res.json(result);
+      cookieHeader = result.cookieStore.getHeader(QUERY_URL);
+    }
 
-    console.log("Requesting with params:", params);
-
-    const cookieHeader = req.headers.cookie || cookieStore.getHeader(QUERY_URL);
     const response = await fetch(QUERY_URL, {
       method: "POST",
       headers: {
@@ -385,7 +368,13 @@ export const underGradeListHandler: RequestHandler<
         Referer: `${SERVER}/jiaowu/cjgl/xszq/query_xscj.jsp?tktime=${getTimeStamp()}`,
         "User-Agent": IE_8_USER_AGENT,
       },
-      body: params.toString(),
+      body: new URLSearchParams({
+        kksj: time,
+        kcxz: courseType ? COURSE_TYPES[courseType] || "" : "",
+        kcmc: name,
+        xsfs: gradeType === "best" ? "zhcj" : gradeType === "all" ? "qbcj" : "",
+        ok: "",
+      }),
     });
 
     const content = await response.text();

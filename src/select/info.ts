@@ -172,9 +172,9 @@ const setParams = async ({
 }: SelectBaseOptions): Promise<void> => {
   const infoResponse = await fetch(`${server}xk/AccessToXk`, {
     method: "GET",
-    headers: new Headers({
+    headers: {
       Cookie: cookies.join(", "),
-    }),
+    },
   });
 
   const infoResponseText = await readResponseContent(infoResponse);
@@ -241,9 +241,9 @@ export const selectInfoHandler: RequestHandler<
 
     const response = await fetch(`${server}xk/getXkInfo?${urlParams}`, {
       method: "GET",
-      headers: new Headers({
+      headers: {
         Cookie: cookies.join(", "),
-      }),
+      },
     });
 
     const documentContent = await readResponseContent(response);

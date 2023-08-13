@@ -2,16 +2,18 @@ import type { RequestHandler } from "express";
 
 import { actionLogin } from "./login.js";
 import { SERVER } from "./utils.js";
-import type { AuthLoginFailedResult } from "../auth/index.js";
-import type { AuthLoginFailedResponse } from "../auth/login.js";
+import type {
+  AuthLoginFailedResponse,
+  AuthLoginFailedResult,
+} from "../auth/index.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
   CommonFailedResponse,
-  CookieOptions,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import { CookieStore, getCookieItems } from "../utils/index.js";
+
+const NOTICE_LIST_QUERY_URL = `${SERVER}/page/queryList`;
 
 interface RawNoticeItem {
   LLCS: number;
@@ -33,14 +35,14 @@ interface RawNoticeListData {
   totalCount: number;
 }
 
-export type NoticeListOptions = (LoginOptions | CookieOptions) & {
+export interface NoticeListOptions extends Partial<LoginOptions> {
   /** @default 20 */
   limit?: number;
   /** @default 1 */
   page?: number;
   /** @default "notice" */
   type?: "notice" | "news";
-};
+}
 
 export interface NoticeItem {
   title: string;
@@ -81,39 +83,39 @@ export const noticeListHandler: RequestHandler<
   NoticeListOptions
 > = async (req, res) => {
   try {
+    let cookieHeader = req.headers.cookie;
+
+    if (!cookieHeader) {
+      if (!req.body.id || !req.body.password)
+        return res.json(<CommonFailedResponse>{
+          success: false,
+          msg: "请提供账号密码",
+        });
+
+      const result = await actionLogin(<LoginOptions>req.body);
+
+      if (!result.success) return res.json(result);
+
+      cookieHeader = result.cookieStore.getHeader(NOTICE_LIST_QUERY_URL);
+    }
+
     const { limit = 20, page = 1, type = "notice" } = req.body;
-    const cookieStore = new CookieStore();
 
-    if (!req.headers.cookie)
-      if ("cookies" in req.body) {
-        cookieStore.apply(getCookieItems(req.body.cookies));
-      } else {
-        const result = await actionLogin(req.body, cookieStore);
-
-        if (!result.success) return res.json(result);
-      }
-
-    const queryUrl = `${SERVER}/page/queryList`;
-
-    const headers = {
-      Accept: "application/json, text/javascript, */*; q=0.01",
-      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-      Cookie: req.headers.cookie || cookieStore.getHeader(queryUrl),
-      Referer: `${SERVER}/basicInfo/studentPageTurn?type=lifeschool`,
-    };
-
-    const params = new URLSearchParams({
-      type,
-      _search: "false",
-      nd: new Date().getTime().toString(),
-      limit: limit.toString(),
-      page: page.toString(),
-    });
-
-    const response = await fetch(queryUrl, {
+    const response = await fetch(NOTICE_LIST_QUERY_URL, {
       method: "POST",
-      headers,
-      body: params.toString(),
+      headers: {
+        Accept: "application/json, text/javascript, */*; q=0.01",
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        Cookie: cookieHeader,
+        Referer: `${SERVER}/basicInfo/studentPageTurn?type=lifeschool`,
+      },
+      body: new URLSearchParams({
+        type,
+        _search: "false",
+        nd: new Date().getTime().toString(),
+        limit: limit.toString(),
+        page: page.toString(),
+      }),
       redirect: "manual",
     });
 

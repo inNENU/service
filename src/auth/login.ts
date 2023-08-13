@@ -92,42 +92,34 @@ export const authLogin = async (
 
   const needCaptcha = await (<Promise<boolean>>captchaCheckResponse.json());
 
-  console.log("Need captcha:", needCaptcha);
-
   if (needCaptcha)
     return {
       success: false,
       type: LoginFailType.NeedCaptcha,
-      // TODO: update
-      msg: "无法自动登录。请访问学校统一身份认证官网手动登录，成功登录后后即可继续自动登录。",
+      msg: "需要验证码，请重新登录",
     };
-
-  const headers = {
-    "Content-Type": "application/x-www-form-urlencoded",
-    Cookie: cookieStore.getHeader(server),
-    "Sec-Fetch-Site": "same-origin",
-    "Sec-Fetch-Mode": "navigate",
-    "Sec-Fetch-User": "?1",
-    "Sec-Fetch-Dest": "document",
-    ...COMMON_HEADERS,
-  };
-  const params = {
-    username: id.toString(),
-    password: authEncrypt(password, salt),
-    lt,
-    dllt,
-    execution,
-    _eventId,
-    rmShown,
-    rememberMe: "on",
-  };
-
-  const body = new URLSearchParams(params).toString();
 
   const response = await fetch(url, {
     method: "POST",
-    headers: new Headers(headers),
-    body,
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Cookie: cookieStore.getHeader(server),
+      "Sec-Fetch-Site": "same-origin",
+      "Sec-Fetch-Mode": "navigate",
+      "Sec-Fetch-User": "?1",
+      "Sec-Fetch-Dest": "document",
+      ...COMMON_HEADERS,
+    },
+    body: new URLSearchParams({
+      username: id.toString(),
+      password: authEncrypt(password, salt),
+      lt,
+      dllt,
+      execution,
+      _eventId,
+      rmShown,
+      rememberMe: "on",
+    }),
     redirect: "manual",
   });
 
@@ -209,7 +201,11 @@ export const authLogin = async (
 
 export interface AuthLoginSuccessResponse {
   success: true;
-  /** @deprecated */
+  /**
+   * @deprecated
+   *
+   * For future web app only
+   */
   cookies: CookieType[];
   location: string;
 }

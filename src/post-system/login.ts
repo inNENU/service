@@ -35,12 +35,10 @@ export const postSystemLogin = async (
     };
   }
 
-  const ticketHeaders = {
-    Cookie: cookieStore.getHeader(result.location),
-  };
-
   const ticketResponse = await fetch(result.location, {
-    headers: new Headers(ticketHeaders),
+    headers: {
+      Cookie: cookieStore.getHeader(result.location),
+    },
     redirect: "manual",
   });
 
@@ -73,9 +71,9 @@ export const postSystemLogin = async (
 
   if (finalLocation === "https://math127.nenu.edu.cn/HProg/yjsy/index_pc.php") {
     const indexResponse = await fetch(finalLocation, {
-      headers: new Headers({
+      headers: {
         Cookie: cookieStore.getHeader(finalLocation),
-      }),
+      },
     });
 
     cookieStore.applyResponse(indexResponse, finalLocation);

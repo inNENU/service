@@ -4,12 +4,12 @@ import { underSystemLogin } from "./login.js";
 import { SERVER, getTimeStamp } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import { semesterStartTime } from "../config/semester-start-time.js";
-import type { CookieOptions, EmptyObject, LoginOptions } from "../typings.js";
-import {
-  CookieStore,
-  IE_8_USER_AGENT,
-  getCookieItems,
-} from "../utils/index.js";
+import type {
+  CommonFailedResponse,
+  EmptyObject,
+  LoginOptions,
+} from "../typings.js";
+import { IE_8_USER_AGENT } from "../utils/index.js";
 
 export interface ClassItem {
   name: string;
@@ -44,17 +44,10 @@ const getCourses = (content: string): TableItem =>
     ),
   );
 
-interface UserCourseTableExtraOptions {
-  /** 学号 */
-  // Comment as not required
-  // id: number;
+export interface UserCourseTableOptions extends Partial<LoginOptions> {
   /** 查询时间 */
   time: string;
 }
-
-export type UserCourseTableOptions =
-  | ((LoginOptions | CookieOptions) & UserCourseTableExtraOptions)
-  | UserCourseTableExtraOptions;
 
 export interface UserCourseTableSuccessResponse {
   success: true;
@@ -74,36 +67,34 @@ export const underCourseTableHandler: RequestHandler<
   UserCourseTableOptions
 > = async (req, res) => {
   try {
-    const cookieStore = new CookieStore();
-
     const { time } = req.body;
 
-    if (!req.headers.cookie)
-      if ("cookies" in req.body) {
-        cookieStore.apply(getCookieItems(req.body.cookies));
-      } else {
-        const result = await underSystemLogin(
-          <LoginOptions>req.body,
-          cookieStore,
-        );
-
-        if (!result.success) return res.json(result);
-      }
-
-    const params = new URLSearchParams({
+    const QUERY_URL = `${SERVER}/tkglAction.do?${new URLSearchParams({
       method: "goListKbByXs",
       istsxx: "no",
       xnxqh: time,
       zc: "",
-    });
+    }).toString()}`;
 
-    console.log("Requesting with params:", params);
+    let cookieHeader = req.headers.cookie;
 
-    const QUERY_URL = `${SERVER}/tkglAction.do?${params.toString()}`;
+    if (!cookieHeader) {
+      if (!req.body.id || !req.body.password)
+        return res.json(<CommonFailedResponse>{
+          success: false,
+          msg: "请提供账号密码",
+        });
+
+      const result = await underSystemLogin(<LoginOptions>req.body);
+
+      if (!result.success) return res.json(result);
+
+      cookieHeader = result.cookieStore.getHeader(QUERY_URL);
+    }
 
     const response = await fetch(QUERY_URL, {
       headers: {
-        Cookie: req.headers.cookie || cookieStore.getHeader(QUERY_URL),
+        Cookie: cookieHeader,
         Referer: `${SERVER}/tkglAction.do?method=kbxxXs&tktime=${getTimeStamp()}`,
         "User-Agent": IE_8_USER_AGENT,
       },
