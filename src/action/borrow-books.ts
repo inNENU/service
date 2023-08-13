@@ -109,8 +109,6 @@ const getBookData = ({
   status: item_policy.description,
 });
 
-export type BorrowBooksOptions = LoginOptions | CookieOptions;
-
 export interface BorrowBooksSuccessResponse {
   success: true;
   data: BorrowBookData[];
@@ -124,19 +122,16 @@ export type BorrowBooksResponse =
 export const borrowBooksHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  BorrowBooksOptions
+  LoginOptions | Record<never, never>
 > = async (req, res) => {
   try {
     const cookieStore = new CookieStore();
 
-    if (!req.headers.cookie)
-      if ("cookies" in req.body) {
-        cookieStore.apply(getCookieItems(req.body.cookies));
-      } else {
-        const result = await actionLogin(req.body, cookieStore);
+    if (!req.headers.cookie) {
+      const result = await actionLogin(<LoginOptions>req.body, cookieStore);
 
-        if (!result.success) return res.json(<AuthLoginFailedResponse>result);
-      }
+      if (!result.success) return res.json(<AuthLoginFailedResponse>result);
+    }
 
     const response = await fetch(BORROW_BOOKS_URL, {
       headers: {
