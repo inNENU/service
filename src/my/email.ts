@@ -147,7 +147,7 @@ const activateEmail = async (
   }: ActivateEmailOptions,
   info: MyInfo,
 ): Promise<ActivateEmailResponse> => {
-  const password = emailPassword || "use inNENU in NENU 4ever!";
+  const password = emailPassword || "inNENU4ever";
 
   const checkMailAccountResponse = await fetch(
     "https://my.webvpn.nenu.edu.cn/Gryxsq/checkMailBoxAccount",
