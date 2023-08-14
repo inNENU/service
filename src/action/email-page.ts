@@ -8,126 +8,6 @@ import type {
   LoginOptions,
 } from "../typings.js";
 
-interface RawEmailItem {
-  /** 发件人 */
-  from: string;
-  /** 邮件ID */
-  id: string;
-  /** 接收日期 */
-  receivedDate: number;
-  /** 发送日期 */
-  sentDate: number;
-  /** 偶见大小 */
-  size: number;
-
-  /** 邮件主题 */
-  subject: string;
-  to: string;
-
-  fid: 1;
-  flags: {
-    read: boolean;
-    popRead: boolean;
-    attached: boolean;
-  };
-}
-
-interface RawEmailInfoSuccessResponse {
-  success: true;
-  count: string;
-  emailList: {
-    suc: true;
-    ver: 0;
-    /** 账户名称 */
-    account_name: string;
-    con: {
-      /** 总数 */
-      total: number;
-      var: RawEmailItem[];
-    };
-  };
-}
-
-interface RawEmailInfoFailedResponse {
-  emailList: {
-    suc: false;
-    ver: 0;
-    error_code: string;
-  };
-}
-
-type RawEmailInfoResponse =
-  | RawEmailInfoSuccessResponse
-  | RawEmailInfoFailedResponse;
-
-export interface EmailItem {
-  /** 邮件主题 */
-  subject: string;
-  /** 接收日期 */
-  receivedDate: number;
-  /** 发件人 */
-  from: string;
-  /** 邮件 ID */
-  mid: string;
-}
-
-export interface ActionEmailInfoResponse {
-  success: true;
-  /** 未读数 */
-  unread: number;
-  /** 近期邮件 */
-  recent: EmailItem[];
-}
-
-const EMAIL_INFO_URL = `${ACTION_SERVER}/extract/getEmailInfo`;
-
-export const emailInfo = async (
-  cookieHeader: string
-): Promise<ActionEmailInfoResponse | CommonFailedResponse> => {
-  try {
-    const checkResponse = await fetch(EMAIL_INFO_URL, {
-      method: "POST",
-      headers: {
-        Accept: "application/json, text/javascript, */*; q=0.01",
-        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-        Cookie: cookieHeader,
-        Referer: ACTION_MAIN_PAGE,
-      },
-      body: `domain=nenu.edu.cn&type=1&format=json`,
-    });
-
-    const checkResult = <RawEmailInfoResponse>await checkResponse.json();
-
-    if ("success" in checkResult && checkResult.success)
-      return {
-        success: true,
-        unread: Number(checkResult.count),
-        recent: checkResult.emailList.con.var.map(
-          ({ subject, receivedDate, from, id }) => ({
-            subject,
-            receivedDate,
-            from,
-            mid: id,
-          })
-        ),
-      };
-
-    return {
-      success: false,
-      msg: "用户无邮箱",
-    };
-  } catch (err) {
-    const { message } = <Error>err;
-
-    console.error(err);
-
-    return {
-      success: false,
-      msg: message,
-    };
-  }
-};
-
 interface RawEmailPageResponse {
   success: boolean;
   url: string;
@@ -138,7 +18,7 @@ export interface ActionEmailPageSuccessResult {
   url: string;
 }
 
-type ActionEmailPageResult =
+export type ActionEmailPageResult =
   | ActionEmailPageSuccessResult
   | CommonFailedResponse;
 
@@ -147,7 +27,7 @@ const EMAIL_URL = `${ACTION_SERVER}/extract/sendRedirect2EmailPage`;
 
 export const emailPage = async (
   cookieHeader: string,
-  mid = ""
+  mid = "",
 ): Promise<ActionEmailPageResult> => {
   try {
     const emailPageResponse = await fetch(mid ? EMAIL_PAGE_URL : EMAIL_URL, {
@@ -190,10 +70,10 @@ export const emailPage = async (
   }
 };
 
-export const actionEmailHandler: RequestHandler<
+export const actionEmailPageHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  Partial<LoginOptions>,
+  Partial<LoginOptions> & { mid?: string },
   Partial<LoginOptions> & { mid?: string }
 > = async (req, res) => {
   try {
@@ -242,7 +122,7 @@ export const actionEmailHandler: RequestHandler<
         req.headers.cookie = result.cookieStore.getHeader(ACTION_SERVER);
       }
 
-      return res.json(await emailInfo(req.headers.cookie));
+      return res.json(await emailPage(req.headers.cookie, req.body.mid || ""));
     }
   } catch (err) {
     const { message } = <Error>err;
