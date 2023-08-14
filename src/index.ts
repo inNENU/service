@@ -33,7 +33,7 @@ import {
   mainStatusHandler,
 } from "./main/index.js";
 import { mpLoginHandler } from "./mp/index.js";
-import { emailHandler, myLoginHandler } from "./my/index.js";
+import { emailHandler, myInfoHandler, myLoginHandler } from "./my/index.js";
 import {
   postInfoHandler,
   postSystemLoginHandler,
@@ -95,6 +95,7 @@ app.post("/auth/init", authInitHandler);
 app.post("/auth/login", authLoginHandler);
 app.post("/auth/info", infoHandler);
 
+app.post("/my/info", myInfoHandler);
 app.post("/my/login", myLoginHandler);
 app.post("/my/email", emailHandler);
 

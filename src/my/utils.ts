@@ -1,2 +1,2 @@
-export const SERVER = "https://my.webvpn.nenu.edu.cn";
-export const MAIN_PAGE = `${SERVER}/portal_main/toPortalPage`;
+export const MY_SERVER = "https://my.webvpn.nenu.edu.cn";
+export const MY_MAIN_PAGE = `${MY_SERVER}/portal_main/toPortalPage`;

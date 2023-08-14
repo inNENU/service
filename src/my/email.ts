@@ -1,10 +1,10 @@
 import type { RequestHandler } from "express";
 
-import { getInfo } from "./info.js";
+import { getMyInfo } from "./info.js";
+import type { MyLoginFailedResult } from "./login.js";
 import { myLogin } from "./login.js";
 import { getProcess } from "./process.js";
-import { SERVER } from "./utils.js";
-import type { AuthLoginFailedResult } from "../auth/index.js";
+import { MY_SERVER } from "./utils.js";
 import type {
   CommonFailedResponse,
   EmptyObject,
@@ -58,7 +58,7 @@ export type ActivateEmailResponse =
   | ActivateEmailSuccessResponse
   | InitEmailSuccessResponse
   | InitEmailFailedResponse
-  | CommonFailedResponse;
+  | MyLoginFailedResult;
 
 export const emailHandler: RequestHandler<
   EmptyObject,
@@ -72,10 +72,10 @@ export const emailHandler: RequestHandler<
       const result = await myLogin(req.body);
 
       if (!result.success) return res.json(result);
-      cookieHeader = result.cookieStore.getHeader(SERVER);
+      cookieHeader = result.cookieStore.getHeader(MY_SERVER);
     }
 
-    const info = await getInfo(cookieHeader);
+    const info = await getMyInfo(cookieHeader);
 
     if (!info.success) return res.json(info);
 
@@ -109,7 +109,7 @@ export const emailHandler: RequestHandler<
         });
 
       const setMailResponse = await fetch(
-        `${SERVER}/dynamicDrawForm/submitAndSend`,
+        `${MY_SERVER}/dynamicDrawForm/submitAndSend`,
         {
           method: "POST",
           headers: {
@@ -131,7 +131,7 @@ export const emailHandler: RequestHandler<
             KEYWORDS_: "邮箱",
             SQRXM: info.data.name,
             SQRXH: info.data.id.toString(),
-            SQRDW: info.data.orgName,
+            SQRDW: info.data.org,
             SFZH: info.data.idCard,
             DHHM: phone.toString(),
             YXMC: name ?? "",
@@ -157,7 +157,7 @@ export const emailHandler: RequestHandler<
       });
     }
 
-    const checkMailResponse = await fetch(`${SERVER}/Gryxsq/checkMailBox`, {
+    const checkMailResponse = await fetch(`${MY_SERVER}/Gryxsq/checkMailBox`, {
       method: "POST",
       headers: {
         Accept: "application/json, text/javascript, */*; q=0.01",
@@ -189,7 +189,7 @@ export const emailHandler: RequestHandler<
     const { taskId, instanceId } = processResult;
 
     const accountListResponse = await fetch(
-      `${SERVER}/sysform/getSelectOption?random=${Math.random()}`,
+      `${MY_SERVER}/sysform/getSelectOption?random=${Math.random()}`,
       {
         method: "POST",
         headers: {
@@ -225,7 +225,7 @@ export const emailHandler: RequestHandler<
     const { message } = <Error>err;
 
     console.error(err);
-    res.json(<AuthLoginFailedResult>{
+    res.json(<MyLoginFailedResult>{
       success: false,
       msg: message,
     });

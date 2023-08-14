@@ -1,4 +1,4 @@
-import { MAIN_PAGE, SERVER } from "./utils.js";
+import { MY_MAIN_PAGE, MY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type { CommonFailedResponse } from "../typings.js";
@@ -41,7 +41,7 @@ export const getProcess = async ({
   processId,
   cookieHeader,
 }: ProcessOptions): Promise<ProcessResult> => {
-  const processURL = `${SERVER}/wf/process/startProcessByKey/${processId}?random=${Math.random()}`;
+  const processURL = `${MY_SERVER}/wf/process/startProcessByKey/${processId}?random=${Math.random()}`;
 
   const response = await fetch(processURL, {
     method: "POST",
@@ -49,7 +49,7 @@ export const getProcess = async ({
       Accept: "application/json, text/javascript, */*; q=0.01",
       "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
       Cookie: cookieHeader,
-      Referer: MAIN_PAGE,
+      Referer: MY_MAIN_PAGE,
     },
     body: "isFormPathDetail=false",
   });

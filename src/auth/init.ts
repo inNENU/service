@@ -1,24 +1,16 @@
 import type { RequestHandler } from "express";
 
 import { authEncrypt, saltRegExp } from "./authEncrypt.js";
-import { getBasicInfo } from "./info.js";
 import { AUTH_SERVER } from "./utils.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
-import type { PostStudentInfo } from "../post-system/info.js";
-import { getPostInfo } from "../post-system/info.js";
-import { postSystemLogin } from "../post-system/login.js";
-import { MAIN_URL } from "../post-system/utils.js";
+import type { MyInfo } from "../my/index.js";
+import { getMyInfo, myLogin } from "../my/index.js";
+import { MY_SERVER } from "../my/utils.js";
 import type {
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import {
-  STUDENT_ARCHIVE_QUERY_URL,
-  getUnderInfo,
-  underSystemLogin,
-} from "../under-system/index.js";
-import type { UnderStudentInfo } from "../under-system/info.js";
 import { CookieStore, getDomain } from "../utils/index.js";
 import { vpnLogin } from "../vpn/login.js";
 
@@ -246,20 +238,10 @@ export interface AuthInitInfoResponse {
   salt: string;
 }
 
-export interface AuthInfo
-  extends Partial<UnderStudentInfo>,
-    Partial<PostStudentInfo> {
-  /** 用户姓名 */
-  name: string;
-
-  /** 登陆别名 */
-  alias: string;
-}
-
 export interface AuthInitResponse {
   success: true;
 
-  info: AuthInfo | null;
+  info: MyInfo | null;
 }
 
 export const authInitHandler: RequestHandler<
@@ -304,29 +286,11 @@ export const authInitHandler: RequestHandler<
         res.cookie(name, value, rest);
       });
 
-      const { id } = req.body;
-      const grade = Number(id.toString().substring(0, 4));
-      let info: Partial<AuthInfo> = {
-        // FIXME: Compact code
-        name: "未知",
-        id,
-        grade,
-        school: "未知",
-        major: "未知",
-      };
-
-      const basicInfo = await getBasicInfo(
-        cookieStore.getHeader(`${AUTH_SERVER}/authserver/`),
-      );
-
-      if (basicInfo.success) {
-        info.name = basicInfo.name;
-        info.alias = basicInfo.alias;
-      }
+      let info: MyInfo | null = null;
 
       // 本科生
       if (req.body.id.toString().charAt(4) === "0") {
-        let loginResult = await underSystemLogin({
+        let loginResult = await myLogin({
           id: req.body.id,
           password: req.body.password,
         });
@@ -339,7 +303,7 @@ export const authInitHandler: RequestHandler<
           const vpnLoginResult = await vpnLogin(req.body);
 
           if (vpnLoginResult.success)
-            loginResult = await underSystemLogin({
+            loginResult = await myLogin({
               id: req.body.id,
               password: req.body.password,
             });
@@ -348,40 +312,11 @@ export const authInitHandler: RequestHandler<
 
         // 获得信息
         if (loginResult.success) {
-          const studentInfo = await getUnderInfo(
-            loginResult.cookieStore.getHeader(STUDENT_ARCHIVE_QUERY_URL),
+          const studentInfo = await getMyInfo(
+            loginResult.cookieStore.getHeader(MY_SERVER),
           );
 
-          if (studentInfo.success) info = { ...info, ...studentInfo.info };
-        }
-      } else {
-        let loginResult = await postSystemLogin({
-          id: req.body.id,
-          password: req.body.password,
-        });
-
-        if (
-          "type" in loginResult &&
-          loginResult.type === LoginFailType.Forbidden
-        ) {
-          // Activate VPN by login
-          const vpnLoginResult = await vpnLogin(req.body);
-
-          if (vpnLoginResult.success)
-            loginResult = await postSystemLogin({
-              id: req.body.id,
-              password: req.body.password,
-            });
-          else console.error("VPN login failed", vpnLoginResult);
-        }
-
-        // 获得信息
-        if (loginResult.success) {
-          const studentInfo = await getPostInfo(
-            loginResult.cookieStore.getHeader(MAIN_URL),
-          );
-
-          if (studentInfo.success) info = { ...info, ...studentInfo.info };
+          if (studentInfo.success) info = studentInfo.data;
         }
       }
 

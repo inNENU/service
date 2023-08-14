@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { MAIN_PAGE } from "./utils.js";
+import { MY_MAIN_PAGE } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
@@ -9,28 +9,27 @@ import { CookieStore } from "../utils/index.js";
 import type { VPNLoginFailedResult } from "../vpn/login.js";
 import { vpnCASLogin } from "../vpn/login.js";
 
-export interface ActionLoginSuccessResult {
+export interface MyLoginSuccessResult {
   success: true;
   cookieStore: CookieStore;
   identify: string;
   orgCode: number;
 }
 
-export type ActionLoginResult =
-  | ActionLoginSuccessResult
-  | AuthLoginFailedResult
-  | VPNLoginFailedResult;
+export type MyLoginFailedResult = AuthLoginFailedResult | VPNLoginFailedResult;
+
+export type MyLoginResult = MyLoginSuccessResult | MyLoginFailedResult;
 
 export const myLogin = async (
   options: LoginOptions,
   cookieStore = new CookieStore(),
-): Promise<ActionLoginResult> => {
+): Promise<MyLoginResult> => {
   const vpnLoginResult = await vpnCASLogin(options, cookieStore);
 
   if (!vpnLoginResult.success) return vpnLoginResult;
 
   const result = await authLogin(options, {
-    service: MAIN_PAGE,
+    service: MY_MAIN_PAGE,
     webVPN: true,
     cookieStore,
   });
@@ -85,7 +84,7 @@ export const myLogin = async (
     const content = await mainResponse.text();
 
     if (content.includes("<title>网上服务大厅</title>"))
-      return <ActionLoginResult>{
+      return <MyLoginResult>{
         success: true,
         identify: /"ID":"(.*?)","ISFIELDROLE"/.exec(content)![1],
         orgCode: Number(/"ORGCODE":"(\d+)",/.exec(content)![1]),
@@ -100,7 +99,7 @@ export const myLogin = async (
   };
 };
 
-export interface ActionLoginSuccessResponse {
+export interface MyLoginSuccessResponse {
   success: true;
   /** @deprecated */
   cookies: CookieType[];
@@ -108,10 +107,7 @@ export interface ActionLoginSuccessResponse {
   orgCode: number;
 }
 
-export type ActionLoginResponse =
-  | ActionLoginSuccessResponse
-  | AuthLoginFailedResult
-  | VPNLoginFailedResult;
+export type MyLoginResponse = MyLoginSuccessResponse | MyLoginFailedResult;
 
 export const myLoginHandler: RequestHandler<
   EmptyObject,
@@ -130,7 +126,7 @@ export const myLoginHandler: RequestHandler<
         res.cookie(name, value, rest);
       });
 
-      return res.json(<ActionLoginSuccessResponse>{
+      return res.json(<MyLoginSuccessResponse>{
         success: true,
         cookies,
         orgCode: result.orgCode,
@@ -143,7 +139,7 @@ export const myLoginHandler: RequestHandler<
     const { message } = <Error>err;
 
     console.error(err);
-    res.json(<AuthLoginFailedResult>{
+    res.json(<MyLoginFailedResult>{
       success: false,
       msg: message,
     });

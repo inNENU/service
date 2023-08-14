@@ -1,7 +1,15 @@
-import { SERVER } from "./utils.js";
-import type { CommonFailedResponse } from "../typings.js";
+import type { RequestHandler } from "express";
 
-export interface RawInfo {
+import type { MyLoginFailedResult } from "./login.js";
+import { myLogin } from "./login.js";
+import { MY_SERVER } from "./utils.js";
+import type {
+  CommonFailedResponse,
+  EmptyObject,
+  LoginOptions,
+} from "../typings.js";
+
+interface RawInfo {
   success: true;
   data: {
     execResponse: {
@@ -48,52 +56,59 @@ export interface RawInfo {
   };
 }
 
+export interface MyInfo {
+  /** 用户学号 */
+  id: number;
+  /** 用户姓名 */
+  name: string;
+  /** 用户身份证号 */
+  idCard: string;
+  /** 用户所在组织名称 */
+  org: string;
+  // FIXME: Remove
+  /** @deprecated */
+  school: string;
+  /** 用户所在组织 ID */
+  orgId: number;
+  /** 用户所在专业名称 */
+  major: string;
+  /** 用户所在专业 ID */
+  majorId: string;
+  /** 用户入学年份 */
+  inYear: number;
+  /** 用户入学年级 */
+  grade: number;
+  /** 用户层次 */
+  type: string;
+  /** 用户层次代码 */
+  typeId: string;
+  /** 用户类别码 */
+  code: string;
+  /** 用户政治面貌 */
+  politicalStatus: string;
+  /** 用户民族 */
+  people: string;
+  /** 用户民族代码 */
+  peopleId: number;
+  /** 用户性别 */
+  gender: string;
+  /** 用户性别代码 */
+  genderId: number;
+  /** 用户出生日期 */
+  birth: string;
+}
+
 export interface MyInfoSuccessResult {
   success: true;
-  data: {
-    /** 用户学号 */
-    id: number;
-    /** 用户姓名 */
-    name: string;
-    /** 用户身份证号 */
-    idCard: string;
-    /** 用户所在组织 ID */
-    orgId: number;
-    /** 用户所在组织名称 */
-    orgName: string;
-    /** 用户所在专业 ID */
-    majorId: string;
-    /** 用户所在专业名称 */
-    majorName: string;
-    /** 用户入学年份 */
-    inYear: number;
-    /** 用户入学年级 */
-    grade: number;
-    /** 用户层次 */
-    type: string;
-    /** 用户层次代码 */
-    typeId: string;
-    /** 用户类别码 */
-    code: string;
-    /** 用户政治面貌 */
-    politicalStatus: string;
-    /** 用户民族 */
-    people: string;
-    /** 用户民族代码 */
-    peopleId: number;
-    /** 用户性别 */
-    gender: string;
-    /** 用户性别代码 */
-    genderId: number;
-    /** 用户出生日期 */
-    birth: string;
-  };
+  data: MyInfo;
 }
 
 export type MyInfoResult = MyInfoSuccessResult | CommonFailedResponse;
 
-export const getInfo = async (cookieHeader: string): Promise<MyInfoResult> => {
-  const infoResponse = await fetch(`${SERVER}/sysform/loadIntelligent`, {
+export const getMyInfo = async (
+  cookieHeader: string,
+): Promise<MyInfoResult> => {
+  const infoResponse = await fetch(`${MY_SERVER}/sysform/loadIntelligent`, {
     method: "POST",
     headers: {
       Accept: "application/json, text/javascript, */*; q=0.01",
@@ -117,9 +132,10 @@ export const getInfo = async (cookieHeader: string): Promise<MyInfoResult> => {
         id: Number(info.uid),
         name: info.name,
         idCard: info.idcard,
-        orgName: info.orgname,
+        org: info.orgname,
+        school: info.orgname,
         orgId: Number(info.orgdn),
-        majorName: info.zymc,
+        major: info.zymc,
         majorId: info.zydm,
         inYear: Number(info.rxnf),
         grade: Number(info.xznj),
@@ -140,4 +156,35 @@ export const getInfo = async (cookieHeader: string): Promise<MyInfoResult> => {
     success: false,
     msg: "获取人员信息失败",
   };
+};
+
+export type MyInfoResponse = MyInfoSuccessResult | MyLoginFailedResult;
+
+export const myInfoHandler: RequestHandler<
+  EmptyObject,
+  EmptyObject,
+  LoginOptions
+> = async (req, res) => {
+  try {
+    let cookieHeader = req.headers.cookie;
+
+    if (!cookieHeader) {
+      const result = await myLogin(req.body);
+
+      if (!result.success) return res.json(result);
+      cookieHeader = result.cookieStore.getHeader(MY_SERVER);
+    }
+
+    const info = await getMyInfo(cookieHeader);
+
+    return res.json(info);
+  } catch (err) {
+    const { message } = <Error>err;
+
+    console.error(err);
+    res.json(<MyLoginFailedResult>{
+      success: false,
+      msg: message,
+    });
+  }
 };
