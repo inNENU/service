@@ -106,56 +106,65 @@ export interface MyInfoSuccessResult {
 export type MyInfoResult = MyInfoSuccessResult | CommonFailedResponse;
 
 export const getMyInfo = async (
-  cookieHeader: string,
+  cookieHeader: string
 ): Promise<MyInfoResult> => {
-  const infoResponse = await fetch(`${MY_SERVER}/sysform/loadIntelligent`, {
-    method: "POST",
-    headers: {
-      Accept: "application/json, text/javascript, */*; q=0.01",
-      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-      Cookie: cookieHeader,
-    },
-    body: "serviceAddress=dataCenter2.0%2Fsoap%2F00001_00036_01_02_20170918192121",
-  });
+  try {
+    const infoResponse = await fetch(`${MY_SERVER}/sysform/loadIntelligent`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json, text/javascript, */*; q=0.01",
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        Cookie: cookieHeader,
+      },
+      body: "serviceAddress=dataCenter2.0%2Fsoap%2F00001_00036_01_02_20170918192121",
+    });
 
-  const infoResult = <RawInfo>await infoResponse.json();
+    const infoResult = <RawInfo>await infoResponse.json();
 
-  if (
-    infoResult.success &&
-    infoResult.data.execResponse.return.Body.code === "200"
-  ) {
-    const info = infoResult.data.execResponse.return.Body.items.item[0];
+    if (
+      infoResult.success &&
+      infoResult.data.execResponse.return.Body.code === "200"
+    ) {
+      const info = infoResult.data.execResponse.return.Body.items.item[0];
+
+      return {
+        success: true,
+        data: {
+          id: Number(info.uid),
+          name: info.name,
+          idCard: info.idcard,
+          org: info.orgname,
+          school: info.orgname,
+          orgId: Number(info.orgdn),
+          major: info.zymc,
+          majorId: info.zydm,
+          inYear: Number(info.rxnf),
+          grade: Number(info.xznj),
+          type: info.pycc,
+          typeId: info.lb,
+          code: info.ryfldm,
+          politicalStatus: info.zzmm,
+          people: info.mzmc,
+          peopleId: Number(info.mzdm),
+          gender: info.xbmc,
+          genderId: Number(info.xbdm),
+          birth: info.csrq,
+        },
+      };
+    }
 
     return {
-      success: true,
-      data: {
-        id: Number(info.uid),
-        name: info.name,
-        idCard: info.idcard,
-        org: info.orgname,
-        school: info.orgname,
-        orgId: Number(info.orgdn),
-        major: info.zymc,
-        majorId: info.zydm,
-        inYear: Number(info.rxnf),
-        grade: Number(info.xznj),
-        type: info.pycc,
-        typeId: info.lb,
-        code: info.ryfldm,
-        politicalStatus: info.zzmm,
-        people: info.mzmc,
-        peopleId: Number(info.mzdm),
-        gender: info.xbmc,
-        genderId: Number(info.xbdm),
-        birth: info.csrq,
-      },
+      success: false,
+      msg: "获取人员信息失败",
+    };
+  } catch (err) {
+    console.error(err);
+
+    return {
+      success: false,
+      msg: "获取人员信息失败",
     };
   }
-
-  return {
-    success: false,
-    msg: "获取人员信息失败",
-  };
 };
 
 export type MyInfoResponse = MyInfoSuccessResult | MyLoginFailedResult;

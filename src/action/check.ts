@@ -28,11 +28,10 @@ export const actionCheckHandler: RequestHandler<
       try {
         const result = <{ success: boolean }>await response.json();
 
-        if (result.success)
-          return res.json(<CookieVerifySuccessResponse>{
-            success: true,
-            valid: true,
-          });
+        return res.json(<CookieVerifySuccessResponse>{
+          success: true,
+          valid: result.success,
+        });
       } catch (err) {
         return res.json(<CookieVerifySuccessResponse>{
           success: true,
