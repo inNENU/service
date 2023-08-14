@@ -48,7 +48,7 @@ export type GetEmailResponse =
 
 export const getEmailInfo = async (
   cookieHeader: string,
-  info: MyInfo
+  info: MyInfo,
 ): Promise<GetEmailResponse> => {
   const checkMailResponse = await fetch(`${MY_SERVER}/Gryxsq/checkMailBox`, {
     method: "POST",
@@ -89,7 +89,7 @@ export const getEmailInfo = async (
         method: "getAccountList",
         paramStr: "{}",
       }),
-    }
+    },
   );
 
   const accountListResult = <RawAccountList>await accountListResponse.json();
@@ -114,9 +114,9 @@ export const getEmailInfo = async (
 export interface ActivateEmailOptions extends Partial<LoginOptions> {
   type: "set";
   name: string;
-  password: string;
-  phone: number;
-  suffix: number;
+  emailPassword?: string;
+  phone: number | string;
+  suffix?: number | string;
   taskId: string;
   instanceId: string;
 }
@@ -137,9 +137,18 @@ export type ActivateEmailResponse =
 
 const activateEmail = async (
   cookieHeader: string,
-  { name, password, phone, suffix, taskId, instanceId }: ActivateEmailOptions,
-  info: MyInfo
+  {
+    name,
+    emailPassword,
+    phone,
+    suffix,
+    taskId,
+    instanceId,
+  }: ActivateEmailOptions,
+  info: MyInfo,
 ): Promise<ActivateEmailResponse> => {
+  const password = emailPassword || "use inNENU in NENU 4ever!";
+
   const checkMailAccountResponse = await fetch(
     "https://my.webvpn.nenu.edu.cn/Gryxsq/checkMailBoxAccount",
     {
@@ -150,7 +159,7 @@ const activateEmail = async (
         Cookie: cookieHeader,
       },
       body: `mailBoxName=${name}`,
-    }
+    },
   );
 
   const checkResult = <{ suc: boolean }>await checkMailAccountResponse.json();
@@ -193,7 +202,7 @@ const activateEmail = async (
         YXHZ: suffix?.toString() ?? "",
         MM: password,
       }),
-    }
+    },
   );
 
   const setMailResult = <{ success: boolean }>await setMailResponse.json();
