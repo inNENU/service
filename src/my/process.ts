@@ -3,14 +3,6 @@ import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type { CommonFailedResponse } from "../typings.js";
 
-export interface ProcessOptions {
-  id: number;
-  identify: string;
-  processId: string;
-  processKey: string;
-  cookieHeader: string;
-}
-
 interface RawProcessResult {
   success: boolean;
   needShow: boolean;
@@ -22,8 +14,8 @@ interface RawProcessResult {
   formPath: string;
 }
 
-export interface ProcessSuccessResult {
-  success: boolean;
+export interface MyProcessSuccessResult {
+  success: true;
   taskId: string;
   processId: string;
   processKey: string;
@@ -32,15 +24,15 @@ export interface ProcessSuccessResult {
   realFormPath: string;
 }
 
-export type ProcessResult =
-  | ProcessSuccessResult
+export type MyProcessResult =
+  | MyProcessSuccessResult
   | AuthLoginFailedResponse
   | CommonFailedResponse;
 
-export const getProcess = async ({
-  processId,
-  cookieHeader,
-}: ProcessOptions): Promise<ProcessResult> => {
+export const getProcess = async (
+  processId: string,
+  cookieHeader: string,
+): Promise<MyProcessResult> => {
   const processURL = `${MY_SERVER}/wf/process/startProcessByKey/${processId}?random=${Math.random()}`;
 
   const response = await fetch(processURL, {

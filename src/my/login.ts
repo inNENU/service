@@ -22,7 +22,7 @@ export type MyLoginResult = MyLoginSuccessResult | MyLoginFailedResult;
 
 export const myLogin = async (
   options: LoginOptions,
-  cookieStore = new CookieStore()
+  cookieStore = new CookieStore(),
 ): Promise<MyLoginResult> => {
   const vpnLoginResult = await vpnCASLogin(options, cookieStore);
 
@@ -58,7 +58,7 @@ export const myLogin = async (
   console.log(
     "ticket",
     ticketResponse.headers.get("Location"),
-    await ticketResponse.text()
+    await ticketResponse.text(),
   );
 
   if (ticketResponse.status !== 302)

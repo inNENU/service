@@ -106,7 +106,7 @@ export interface MyInfoSuccessResult {
 export type MyInfoResult = MyInfoSuccessResult | CommonFailedResponse;
 
 export const getMyInfo = async (
-  cookieHeader: string
+  cookieHeader: string,
 ): Promise<MyInfoResult> => {
   try {
     const infoResponse = await fetch(`${MY_SERVER}/sysform/loadIntelligent`, {
