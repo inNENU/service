@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { SERVER } from "./utils.js";
+import { ACTION_SERVER } from "./utils.js";
 import type {
   CommonFailedResponse,
   CookieOptions,
@@ -15,7 +15,7 @@ export const actionCheckHandler: RequestHandler<
   CookieOptions
 > = async (req, res) => {
   try {
-    const response = await fetch(`${SERVER}/page/getidentity`, {
+    const response = await fetch(`${ACTION_SERVER}/page/getidentity`, {
       method: "POST",
       headers: {
         Accept: "application/json, text/javascript, */*; q=0.01",

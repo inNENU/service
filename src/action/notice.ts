@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
 import { actionLogin } from "./login.js";
-import { SERVER } from "./utils.js";
+import { ACTION_SERVER } from "./utils.js";
 import type {
   AuthLoginFailedResponse,
   AuthLoginFailedResult,
@@ -55,7 +55,7 @@ export const noticeHandler: RequestHandler<
         msg: "ID is required",
       });
 
-    const noticeUrl = `${SERVER}/page/viewNews?ID=${noticeID}`;
+    const noticeUrl = `${ACTION_SERVER}/page/viewNews?ID=${noticeID}`;
 
     if (!req.headers.cookie) {
       if (!req.body.id || !req.body.password)
@@ -103,7 +103,7 @@ export const noticeHandler: RequestHandler<
       pageView: Number(pageView),
       content: await getRichTextNodes(content, {
         getLinkText: (link) =>
-          link.startsWith(SERVER) ||
+          link.startsWith(ACTION_SERVER) ||
           link.startsWith("https://my.webvpn.nenu.edu.cn")
             ? null
             : link,

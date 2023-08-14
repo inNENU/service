@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
 import { actionLogin } from "./login.js";
-import { SERVER } from "./utils.js";
+import { ACTION_SERVER } from "./utils.js";
 import type {
   AuthLoginFailedResponse,
   AuthLoginFailedResult,
@@ -12,8 +12,9 @@ import type {
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
+import type { VPNLoginFailedResult } from "../vpn/login.js";
 
-const CARD_BALANCE_URL = `${SERVER}/soapBasic/postSoap`;
+const CARD_BALANCE_URL = `${ACTION_SERVER}/soapBasic/postSoap`;
 const CARD_BALANCE_PARAMS =
   '"serviceAddress=wis-apis%2Fsoap%2F00001_00083_01_02_20181210185800&serviceSource=ds2&params=%7B%22xgh%22%3Anull%7D"';
 
@@ -35,6 +36,8 @@ export interface CardBalanceSuccessResponse {
 
 export type CardBalanceResponse =
   | CardBalanceSuccessResponse
+  | AuthLoginFailedResponse
+  | VPNLoginFailedResult
   | CommonFailedResponse;
 
 export const cardBalanceHandler: RequestHandler<
@@ -63,7 +66,7 @@ export const cardBalanceHandler: RequestHandler<
         Accept: "application/json, text/javascript, */*; q=0.01",
         "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
         Cookie: req.headers.cookie,
-        Referer: `${SERVER}/basicInfo/studentPageTurn?type=lifeschool`,
+        Referer: `${ACTION_SERVER}/basicInfo/studentPageTurn?type=lifeschool`,
       },
       body: CARD_BALANCE_PARAMS,
       redirect: "manual",

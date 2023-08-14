@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
 import { actionLogin } from "./login.js";
-import { SERVER } from "./utils.js";
+import { ACTION_SERVER } from "./utils.js";
 import type {
   AuthLoginFailedResponse,
   AuthLoginFailedResult,
@@ -13,7 +13,7 @@ import type {
   LoginOptions,
 } from "../typings.js";
 
-const NOTICE_LIST_QUERY_URL = `${SERVER}/page/queryList`;
+const NOTICE_LIST_QUERY_URL = `${ACTION_SERVER}/page/queryList`;
 
 interface RawNoticeItem {
   LLCS: number;
@@ -107,7 +107,7 @@ export const noticeListHandler: RequestHandler<
         Accept: "application/json, text/javascript, */*; q=0.01",
         "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
         Cookie: cookieHeader,
-        Referer: `${SERVER}/basicInfo/studentPageTurn?type=lifeschool`,
+        Referer: `${ACTION_SERVER}/basicInfo/studentPageTurn?type=lifeschool`,
       },
       body: new URLSearchParams({
         type,

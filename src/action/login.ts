@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { SERVER } from "./utils.js";
+import { ACTION_SERVER } from "./utils.js";
 import { WEB_VPN_AUTH_SERVER, authLogin } from "../auth/index.js";
 import type { AuthLoginFailedResult } from "../auth/login.js";
 import type { CookieType, EmptyObject, LoginOptions } from "../typings.js";
@@ -27,7 +27,7 @@ export const actionLogin = async (
   if (!vpnLoginResult.success) return vpnLoginResult;
 
   const result = await authLogin(options, {
-    service: `${SERVER}/portal_main/toPortalPage`,
+    service: `${ACTION_SERVER}/portal_main/toPortalPage`,
     webVPN: true,
     cookieStore,
   });
@@ -67,7 +67,7 @@ export const actionLogin = async (
 
   const finalLocation = ticketResponse.headers.get("Location");
 
-  if (finalLocation?.startsWith(`${SERVER}/portal_main/toPortalPage`))
+  if (finalLocation?.startsWith(`${ACTION_SERVER}/portal_main/toPortalPage`))
     return <ActionLoginResult>{
       success: true,
       cookieStore,

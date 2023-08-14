@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
 import { actionLogin } from "./login.js";
-import { SERVER } from "./utils.js";
+import { ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
@@ -9,8 +9,9 @@ import type {
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
+import type { VPNLoginFailedResult } from "../vpn/login.js";
 
-const BORROW_BOOKS_URL = `${SERVER}/basicInfo/getBookBorrow`;
+const BORROW_BOOKS_URL = `${ACTION_SERVER}/basicInfo/getBookBorrow`;
 
 interface RawBorrowBookData extends Record<string, unknown> {
   due_date: string;
@@ -115,6 +116,7 @@ export interface BorrowBooksSuccessResponse {
 export type BorrowBooksResponse =
   | BorrowBooksSuccessResponse
   | AuthLoginFailedResponse
+  | VPNLoginFailedResult
   | CommonFailedResponse;
 
 export const borrowBooksHandler: RequestHandler<
@@ -124,7 +126,7 @@ export const borrowBooksHandler: RequestHandler<
 > = async (req, res) => {
   try {
     if (!req.headers.cookie) {
-      if (!req.body.id || req.body.password)
+      if (!req.body.id || !req.body.password)
         return res.json(<CommonFailedResponse>{
           success: false,
           msg: "请提供账号密码",
@@ -132,7 +134,7 @@ export const borrowBooksHandler: RequestHandler<
 
       const result = await actionLogin(<LoginOptions>req.body);
 
-      if (!result.success) return res.json(<AuthLoginFailedResponse>result);
+      if (!result.success) return res.json(result);
 
       req.headers.cookie = result.cookieStore.getHeader(BORROW_BOOKS_URL);
     }
@@ -141,7 +143,7 @@ export const borrowBooksHandler: RequestHandler<
       headers: {
         Accept: "application/json, text/javascript, */*; q=0.01",
         Cookie: req.headers.cookie,
-        Referer: `${SERVER}/basicInfo/studentPageTurn?type=lifestudying&tg=bookborrow`,
+        Referer: `${ACTION_SERVER}/basicInfo/studentPageTurn?type=lifestudying&tg=bookborrow`,
       },
       redirect: "manual",
     });
