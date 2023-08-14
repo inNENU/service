@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 
 import type { MyInfo } from "./info.js";
 import { getMyInfo } from "./info.js";
-import type { MyLoginFailedResult, MyLoginResponse } from "./login.js";
+import type { MyLoginFailedResult } from "./login.js";
 import { myLogin } from "./login.js";
 import { getProcess } from "./process.js";
 import { MY_SERVER } from "./utils.js";
@@ -19,16 +19,6 @@ export interface GetEmailInfoOptions extends Partial<LoginOptions> {
   type?: "get";
 }
 
-export interface ActivateEmailOptions extends Partial<LoginOptions> {
-  type: "set";
-  name: string;
-  password: string;
-  phone: number;
-  suffix: number;
-  taskId: string;
-  instanceId: string;
-}
-
 type RawCheckMailData = { flag: false; yxmc: string } | { flag: true };
 
 interface RawAccountList {
@@ -36,28 +26,29 @@ interface RawAccountList {
   data: { text: string; value: string }[];
 }
 
-export interface GetEmailSuccessResponse {
+export interface GetEmailNameResponse {
   success: true;
-  data: string[];
+  hasEmail: true;
+  email: string;
+}
+
+export interface GetEmailInfoResponse {
+  success: true;
+  hasEmail: false;
+  accounts: string[];
   taskId: string;
   instanceId: string;
 }
 
-export interface GetEmailFailedResponse {
-  success: false;
-  msg: string;
-  email: string;
-}
-
-type GetEmailResponse =
-  | GetEmailSuccessResponse
-  | GetEmailFailedResponse
-  | MyLoginResponse
+export type GetEmailResponse =
+  | GetEmailNameResponse
+  | GetEmailInfoResponse
+  | MyLoginFailedResult
   | CommonFailedResponse;
 
-const getEmailInfo = async (
+export const getEmailInfo = async (
   cookieHeader: string,
-  info: MyInfo,
+  info: MyInfo
 ): Promise<GetEmailResponse> => {
   const checkMailResponse = await fetch(`${MY_SERVER}/Gryxsq/checkMailBox`, {
     method: "POST",
@@ -72,9 +63,9 @@ const getEmailInfo = async (
   const checkResult = <RawCheckMailData>await checkMailResponse.json();
 
   if (!checkResult.flag)
-    return <GetEmailFailedResponse>{
-      success: false,
-      msg: "用户已有邮箱",
+    return {
+      success: true,
+      hasEmail: true,
       email: checkResult.yxmc,
     };
 
@@ -98,26 +89,37 @@ const getEmailInfo = async (
         method: "getAccountList",
         paramStr: "{}",
       }),
-    },
+    }
   );
 
   const accountListResult = <RawAccountList>await accountListResponse.json();
 
   if (accountListResult.success)
-    return <GetEmailSuccessResponse>{
+    return {
       success: true,
-      data: accountListResult.data
+      hasEmail: false,
+      accounts: accountListResult.data
         .map(({ value }) => value)
         .filter((item) => Boolean(item)),
       taskId,
       instanceId,
     };
 
-  return <CommonFailedResponse>{
+  return {
     success: false,
     msg: "获取可用邮箱失败",
   };
 };
+
+export interface ActivateEmailOptions extends Partial<LoginOptions> {
+  type: "set";
+  name: string;
+  password: string;
+  phone: number;
+  suffix: number;
+  taskId: string;
+  instanceId: string;
+}
 
 export interface ActivateEmailSuccessResponse {
   success: true;
@@ -125,19 +127,19 @@ export interface ActivateEmailSuccessResponse {
   password: string;
 }
 
-export type ActivateEmailResponse =
-  | ActivateEmailSuccessResponse
+export type ActivateMailFailedResponse =
   | MyLoginFailedResult
   | CommonFailedResponse;
 
+export type ActivateEmailResponse =
+  | ActivateEmailSuccessResponse
+  | ActivateMailFailedResponse;
+
 const activateEmail = async (
   cookieHeader: string,
-  options: ActivateEmailOptions,
-  info: MyInfo,
+  { name, password, phone, suffix, taskId, instanceId }: ActivateEmailOptions,
+  info: MyInfo
 ): Promise<ActivateEmailResponse> => {
-  const { name, password, phone, suffix, taskId, instanceId } = options;
-
-  // TODO: add something
   const checkMailAccountResponse = await fetch(
     "https://my.webvpn.nenu.edu.cn/Gryxsq/checkMailBoxAccount",
     {
@@ -148,7 +150,7 @@ const activateEmail = async (
         Cookie: cookieHeader,
       },
       body: `mailBoxName=${name}`,
-    },
+    }
   );
 
   const checkResult = <{ suc: boolean }>await checkMailAccountResponse.json();
@@ -191,7 +193,7 @@ const activateEmail = async (
         YXHZ: suffix?.toString() ?? "",
         MM: password,
       }),
-    },
+    }
   );
 
   const setMailResult = <{ success: boolean }>await setMailResponse.json();
