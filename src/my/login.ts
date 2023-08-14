@@ -22,7 +22,7 @@ export type MyLoginResult = MyLoginSuccessResult | MyLoginFailedResult;
 
 export const myLogin = async (
   options: LoginOptions,
-  cookieStore = new CookieStore(),
+  cookieStore = new CookieStore()
 ): Promise<MyLoginResult> => {
   const vpnLoginResult = await vpnCASLogin(options, cookieStore);
 
@@ -58,7 +58,7 @@ export const myLogin = async (
   console.log(
     "ticket",
     ticketResponse.headers.get("Location"),
-    await ticketResponse.text(),
+    await ticketResponse.text()
   );
 
   if (ticketResponse.status !== 302)
@@ -86,8 +86,6 @@ export const myLogin = async (
     if (content.includes("<title>网上服务大厅</title>"))
       return <MyLoginResult>{
         success: true,
-        identify: /"ID":"(.*?)","ISFIELDROLE"/.exec(content)![1],
-        orgCode: Number(/"ORGCODE":"(\d+)",/.exec(content)![1]),
         cookieStore,
       };
   }
@@ -103,8 +101,6 @@ export interface MyLoginSuccessResponse {
   success: true;
   /** @deprecated */
   cookies: CookieType[];
-  identify: string;
-  orgCode: number;
 }
 
 export type MyLoginResponse = MyLoginSuccessResponse | MyLoginFailedResult;
@@ -129,8 +125,6 @@ export const myLoginHandler: RequestHandler<
       return res.json(<MyLoginSuccessResponse>{
         success: true,
         cookies,
-        orgCode: result.orgCode,
-        identify: result.identify,
       });
     }
 
