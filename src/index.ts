@@ -7,8 +7,9 @@ import morgan from "morgan";
 
 import {
   actionCheckHandler,
-  actionEmailHandler,
+  actionEmailPageHandler,
   actionLoginHandler,
+  actionRecentEmailHandler,
   borrowBooksHandler,
   cardBalanceHandler,
   noticeHandler,
@@ -89,8 +90,9 @@ app.post("/action/login", actionLoginHandler);
 app.post("/action/check", actionCheckHandler);
 app.post("/action/borrow-books", borrowBooksHandler);
 app.post("/action/card-balance", cardBalanceHandler);
-app.get("/action/email", actionEmailHandler);
-app.post("/action/email", actionEmailHandler);
+app.get("/action/email-page", actionEmailPageHandler);
+app.post("/action/email-page", actionEmailPageHandler);
+app.post("/action/recent-email", actionRecentEmailHandler);
 app.post("/action/notice", noticeHandler);
 app.post("/action/notice-list", noticeListHandler);
 
