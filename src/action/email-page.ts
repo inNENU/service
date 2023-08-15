@@ -27,7 +27,7 @@ const EMAIL_URL = `${ACTION_SERVER}/extract/sendRedirect2EmailPage`;
 
 export const emailPage = async (
   cookieHeader: string,
-  mid = ""
+  mid = "",
 ): Promise<ActionEmailPageResult> => {
   try {
     const emailPageResponse = await fetch(mid ? EMAIL_PAGE_URL : EMAIL_URL, {

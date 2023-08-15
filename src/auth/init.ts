@@ -123,7 +123,6 @@ export interface AuthInitOptions extends LoginOptions {
 
 export interface AuthInitSuccessResult {
   success: true;
-  cookieStore: CookieStore;
 }
 
 export interface AuthInitFailedResponse extends CommonFailedResponse {
@@ -136,9 +135,7 @@ export const authInit = async (
   { password, salt, captcha, params }: AuthInitOptions,
   cookieHeader: string,
 ): Promise<AuthInitResult> => {
-  const cookieStore = new CookieStore();
-
-  const response = await fetch(LOGIN_URL, {
+  const loginResponse = await fetch(LOGIN_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -157,14 +154,12 @@ export const authInit = async (
     redirect: "manual",
   });
 
-  const resultContent = await response.text();
-  const location = response.headers.get("Location");
-
-  cookieStore.applyResponse(response, LOGIN_URL);
+  const location = loginResponse.headers.get("Location");
+  const resultContent = await loginResponse.text();
 
   console.log(`Request location:`, location);
 
-  if (response.status === 200) {
+  if (loginResponse.status === 200) {
     if (resultContent.includes("无效的验证码"))
       return {
         success: false,
@@ -207,7 +202,7 @@ export const authInit = async (
       };
   }
 
-  if (response.status === 302) {
+  if (loginResponse.status === 302) {
     if (location === `${AUTH_SERVER}/authserver/login`)
       return {
         success: false,
@@ -217,7 +212,6 @@ export const authInit = async (
 
     return {
       success: true,
-      cookieStore,
     };
   }
 
@@ -278,46 +272,35 @@ export const authInitHandler: RequestHandler<
     const result = await authInit(req.body, req.headers.cookie!);
 
     if (result.success) {
-      const { cookieStore } = result;
-
-      const cookies = cookieStore.getAllCookies().map((item) => item.toJSON());
-
-      cookies.forEach(({ name, value, ...rest }) => {
-        res.cookie(name, value, rest);
-      });
-
       let info: MyInfo | null = null;
 
-      // 本科生
-      if (req.body.id.toString().charAt(4) === "0") {
-        let loginResult = await myLogin({
-          id: req.body.id,
-          password: req.body.password,
-        });
+      let loginResult = await myLogin({
+        id: req.body.id,
+        password: req.body.password,
+      });
 
-        if (
-          "type" in loginResult &&
-          loginResult.type === LoginFailType.Forbidden
-        ) {
-          // Activate VPN by login
-          const vpnLoginResult = await vpnLogin(req.body);
+      if (
+        "type" in loginResult &&
+        loginResult.type === LoginFailType.Forbidden
+      ) {
+        // Activate VPN by login
+        const vpnLoginResult = await vpnLogin(req.body);
 
-          if (vpnLoginResult.success)
-            loginResult = await myLogin({
-              id: req.body.id,
-              password: req.body.password,
-            });
-          else console.error("VPN login failed", vpnLoginResult);
-        }
+        if (vpnLoginResult.success)
+          loginResult = await myLogin({
+            id: req.body.id,
+            password: req.body.password,
+          });
+        else console.error("VPN login failed", vpnLoginResult);
+      }
 
-        // 获得信息
-        if (loginResult.success) {
-          const studentInfo = await getMyInfo(
-            loginResult.cookieStore.getHeader(MY_SERVER),
-          );
+      // 获得信息
+      if (loginResult.success) {
+        const studentInfo = await getMyInfo(
+          loginResult.cookieStore.getHeader(MY_SERVER),
+        );
 
-          if (studentInfo.success) info = studentInfo.data;
-        }
+        if (studentInfo.success) info = studentInfo.data;
       }
 
       return res.json(<AuthInitResponse>{
