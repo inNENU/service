@@ -29,11 +29,14 @@ export const BACKLIST_HINT = [
   "呼，大风把你的请求吹跑了",
   "你的请求被雷劈了",
   "你的请求正在洗澡，请稍等",
+  "山东蓝翔拦截了您的请求，并向您发出了录取邀请",
+  "你的请求飞走了",
+  "恶龙劫掠了你的请求",
 ];
 
 const testCondition = (
   info: MyInfo,
-  condition: IdConditionalBlackList,
+  condition: IdConditionalBlackList
 ): boolean =>
   Object.entries(condition).some(([key, value]) => {
     if (value instanceof RegExp)
@@ -57,7 +60,7 @@ export const isInBlackList = (id: number, info?: MyInfo | null): boolean => {
   if (!info) return false;
 
   const result = ID_CONDITIONAL_BLACK_LIST.some((condition) =>
-    testCondition(info, condition),
+    testCondition(info, condition)
   );
 
   if (result)
