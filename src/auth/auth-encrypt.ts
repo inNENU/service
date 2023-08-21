@@ -1,4 +1,7 @@
 import CryptoJS from "crypto-js";
+import type { RequestHandler } from "express";
+
+import type { EmptyObject } from "../typings.js";
 
 const DICT = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678";
 const DICT_LENGTH = DICT.length;
@@ -21,4 +24,20 @@ export const authEncrypt = (password: string, key: string): string => {
     mode: CryptoJS.mode.CBC,
     padding: CryptoJS.pad.Pkcs7,
   }).toString();
+};
+
+export interface AuthEncryptOptions {
+  password: string;
+  salt: string;
+}
+
+export const authEncryptHandler: RequestHandler<
+  EmptyObject,
+  EmptyObject,
+  AuthEncryptOptions
+> = (req, res) => {
+  res.json({
+    success: true,
+    data: authEncrypt(req.body.password, req.body.salt),
+  });
 };

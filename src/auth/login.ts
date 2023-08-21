@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { authEncrypt, saltRegExp } from "./authEncrypt.js";
+import { authEncrypt, saltRegExp } from "./auth-encrypt.js";
 import { AUTH_SERVER, WEB_VPN_AUTH_SERVER } from "./utils.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
@@ -46,7 +46,7 @@ export const authLogin = async (
     service = "",
     webVPN = false,
     cookieStore = new CookieStore(),
-  }: AuthLoginOptions = {},
+  }: AuthLoginOptions = {}
 ): Promise<AuthLoginResult> => {
   if (isInBlackList(id))
     return {
@@ -107,7 +107,7 @@ export const authLogin = async (
           ...COMMON_HEADERS,
           Referer: `${server}/authserver/login`,
         },
-      },
+      }
     );
 
     cookieStore.applyResponse(captchaCheckResponse, server);
@@ -172,7 +172,7 @@ export const authLogin = async (
 
       if (
         resultContent.includes(
-          "当前存在其他用户使用同一帐号登录，是否注销其他使用同一帐号的用户。",
+          "当前存在其他用户使用同一帐号登录，是否注销其他使用同一帐号的用户。"
         )
       )
         return {

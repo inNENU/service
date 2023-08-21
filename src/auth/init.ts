@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { authEncrypt, saltRegExp } from "./authEncrypt.js";
+import { authEncrypt, saltRegExp } from "./auth-encrypt.js";
 import { AUTH_SERVER } from "./utils.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type { MyInfo } from "../my/index.js";
@@ -44,7 +44,7 @@ const getCaptcha = async (cookieStore: CookieStore): Promise<string> => {
         ...COMMON_HEADERS,
         Referer: `${AUTH_SERVER}/authserver/login`,
       },
-    },
+    }
   );
 
   const captcha = await captchaResponse.arrayBuffer();
@@ -56,7 +56,7 @@ const getCaptcha = async (cookieStore: CookieStore): Promise<string> => {
 
 export const getAuthInit = async (
   id: string,
-  cookieStore = new CookieStore(),
+  cookieStore = new CookieStore()
 ): Promise<AuthInitInfo> => {
   const url = `${AUTH_SERVER}/authserver/login`;
 
@@ -89,7 +89,7 @@ export const getAuthInit = async (
         ...COMMON_HEADERS,
         Referer: `${AUTH_SERVER}/authserver/login`,
       },
-    },
+    }
   );
 
   cookieStore.applyResponse(captchaCheckResponse, AUTH_SERVER);
@@ -138,7 +138,7 @@ export type AuthInitResult = AuthInitSuccessResult | AuthInitFailedResponse;
 
 export const authInit = async (
   { password, salt, captcha, params }: AuthInitOptions,
-  cookieHeader: string,
+  cookieHeader: string
 ): Promise<AuthInitResult> => {
   const loginResponse = await fetch(LOGIN_URL, {
     method: "POST",
@@ -190,7 +190,7 @@ export const authInit = async (
 
     if (
       resultContent.includes(
-        "当前存在其他用户使用同一帐号登录，是否注销其他使用同一帐号的用户。",
+        "当前存在其他用户使用同一帐号登录，是否注销其他使用同一帐号的用户。"
       )
     )
       return {
@@ -302,7 +302,7 @@ export const authInitHandler: RequestHandler<
       // 获得信息
       if (loginResult.success) {
         const studentInfo = await getMyInfo(
-          loginResult.cookieStore.getHeader(MY_SERVER),
+          loginResult.cookieStore.getHeader(MY_SERVER)
         );
 
         if (studentInfo.success) info = studentInfo.data;
