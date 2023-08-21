@@ -309,11 +309,11 @@ export const authInitHandler: RequestHandler<
       }
 
       if (isInBlackList(req.body.id, info))
-        return {
+        return res.json({
           success: false,
           type: LoginFailType.BlackList,
           msg: BACKLIST_HINT[Math.floor(Math.random() * BACKLIST_HINT.length)],
-        };
+        });
 
       return res.json(<AuthInitResponse>{
         success: true,

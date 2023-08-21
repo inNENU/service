@@ -38,7 +38,7 @@ const testCondition = (
   info: MyInfo,
   condition: IdConditionalBlackList
 ): boolean =>
-  Object.entries(condition).some(([key, value]) => {
+  Object.entries(condition).every(([key, value]) => {
     if (value instanceof RegExp)
       return value.test(<string>info[<keyof MyInfo>key]);
 
