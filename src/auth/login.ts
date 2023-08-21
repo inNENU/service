@@ -9,7 +9,12 @@ import type {
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import { CookieStore, getDomain } from "../utils/index.js";
+import {
+  BACKLIST_HINT,
+  CookieStore,
+  getDomain,
+  isInBlackList,
+} from "../utils/index.js";
 
 const COMMON_HEADERS = {
   DNT: "1",
@@ -43,6 +48,13 @@ export const authLogin = async (
     cookieStore = new CookieStore(),
   }: AuthLoginOptions = {},
 ): Promise<AuthLoginResult> => {
+  if (isInBlackList(id))
+    return {
+      success: false,
+      type: LoginFailType.BlackList,
+      msg: BACKLIST_HINT[Math.floor(Math.random() * BACKLIST_HINT.length)],
+    };
+
   const server = webVPN ? WEB_VPN_AUTH_SERVER : AUTH_SERVER;
 
   const url = `${server}/authserver/login${
@@ -183,6 +195,14 @@ export const authLogin = async (
           type: LoginFailType.Forbidden,
           msg: "用户账号没有此服务权限。",
         };
+
+      console.error("Unknown login response: ", resultContent);
+
+      return {
+        success: false,
+        type: LoginFailType.Unknown,
+        msg: "未知错误",
+      };
     }
 
     if (response.status === 302) {
@@ -201,7 +221,7 @@ export const authLogin = async (
     }
   }
 
-  console.error("Unknown login response: ", resultContent);
+  console.error("Unknown login response: ", loginPageResponse.status);
 
   return {
     success: false,

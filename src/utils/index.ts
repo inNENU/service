@@ -1,3 +1,4 @@
+export * from "./blackList.js";
 export * from "./content.js";
 export * from "./cookie/index.js";
 export * from "./getRichText.js";

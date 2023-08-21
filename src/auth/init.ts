@@ -11,7 +11,12 @@ import type {
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import { CookieStore, getDomain } from "../utils/index.js";
+import {
+  BACKLIST_HINT,
+  CookieStore,
+  getDomain,
+  isInBlackList,
+} from "../utils/index.js";
 import { vpnLogin } from "../vpn/login.js";
 
 const COMMON_HEADERS = {
@@ -302,6 +307,13 @@ export const authInitHandler: RequestHandler<
 
         if (studentInfo.success) info = studentInfo.data;
       }
+
+      if (isInBlackList(req.body.id, info))
+        return {
+          success: false,
+          type: LoginFailType.BlackList,
+          msg: BACKLIST_HINT[Math.floor(Math.random() * BACKLIST_HINT.length)],
+        };
 
       return res.json(<AuthInitResponse>{
         success: true,
