@@ -274,15 +274,14 @@ export const authInitHandler: RequestHandler<
       return res.json(result);
     }
 
+    const { id, password } = req.body;
+
     const result = await authInit(req.body, req.headers.cookie!);
 
     if (result.success) {
       let info: MyInfo | null = null;
 
-      let loginResult = await myLogin({
-        id: req.body.id,
-        password: req.body.password,
-      });
+      let loginResult = await myLogin({ id, password });
 
       if (
         "type" in loginResult &&
@@ -292,10 +291,7 @@ export const authInitHandler: RequestHandler<
         const vpnLoginResult = await vpnLogin(req.body);
 
         if (vpnLoginResult.success)
-          loginResult = await myLogin({
-            id: req.body.id,
-            password: req.body.password,
-          });
+          loginResult = await myLogin({ id, password });
         else console.error("VPN login failed", vpnLoginResult);
       }
 
@@ -306,6 +302,8 @@ export const authInitHandler: RequestHandler<
         );
 
         if (studentInfo.success) info = studentInfo.data;
+
+        console.log(`${id} 登录信息:\n`, JSON.stringify(info, null, 2));
       }
 
       if (isInBlackList(req.body.id, info))
