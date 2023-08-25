@@ -112,7 +112,7 @@ export interface MyInfoSuccessResult {
 export type MyInfoResult = MyInfoSuccessResult | CommonFailedResponse;
 
 export const getMyInfo = async (
-  cookieHeader: string,
+  cookieHeader: string
 ): Promise<MyInfoResult> => {
   try {
     const infoResponse = await fetch(`${MY_SERVER}/sysform/loadIntelligent`, {
@@ -155,6 +155,30 @@ export const getMyInfo = async (
         birth: personInfo.csrq,
       };
 
+      // fix post birth
+      if (/[A-Z]/.test(personInfo.csrq)) {
+        const [day, month, year] = personInfo.csrq.split("-");
+
+        const monthMap: Record<string, string> = {
+          JAN: "01",
+          FEB: "02",
+          MAR: "03",
+          APR: "04",
+          MAY: "05",
+          JUN: "06",
+          JUL: "07",
+          AUG: "08",
+          SEP: "09",
+          OCT: "10",
+          NOV: "11",
+          DEC: "12",
+        };
+
+        info.birth = `${
+          year.startsWith("0") || year.startsWith("1") ? "20" : "19"
+        }-${monthMap[month]}-${day}`;
+      }
+
       const location = [
         // 本部外国语专业
         "167111",
@@ -180,7 +204,7 @@ export const getMyInfo = async (
           ].includes(info.orgId)
         ? "benbu"
         : [161000, 169000, 252000, 168000, 261000, 178000, 235000].includes(
-            info.orgId,
+            info.orgId
           )
         ? "jingyue"
         : "unknown";
