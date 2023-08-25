@@ -8,6 +8,9 @@ import type {
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
+import { major2code } from "../config/major.js";
+import { writeFileSync } from "fs";
+import { org2code } from "../config/org.js";
 
 interface RawInfo {
   success: true;
@@ -96,6 +99,8 @@ export interface MyInfo {
   genderId: number;
   /** 用户出生日期 */
   birth: string;
+  /** 用户所在校区 */
+  location: "benbu" | "jingyue" | "unknown";
 }
 
 export interface MyInfoSuccessResult {
@@ -106,7 +111,7 @@ export interface MyInfoSuccessResult {
 export type MyInfoResult = MyInfoSuccessResult | CommonFailedResponse;
 
 export const getMyInfo = async (
-  cookieHeader: string,
+  cookieHeader: string
 ): Promise<MyInfoResult> => {
   try {
     const infoResponse = await fetch(`${MY_SERVER}/sysform/loadIntelligent`, {
@@ -125,30 +130,75 @@ export const getMyInfo = async (
       infoResult.success &&
       infoResult.data.execResponse.return.Body.code === "200"
     ) {
-      const info = infoResult.data.execResponse.return.Body.items.item[0];
+      const personInfo = infoResult.data.execResponse.return.Body.items.item[0];
+
+      const info = {
+        id: Number(personInfo.uid),
+        name: personInfo.name,
+        idCard: personInfo.idcard,
+        org: personInfo.orgname,
+        school: personInfo.orgname,
+        orgId: Number(personInfo.orgdn),
+        major: personInfo.zymc,
+        majorId: personInfo.zydm,
+        inYear: Number(personInfo.rxnf),
+        grade: Number(personInfo.xznj),
+        type: personInfo.pycc,
+        typeId: personInfo.lb,
+        code: personInfo.ryfldm,
+        politicalStatus: personInfo.zzmm,
+        people: personInfo.mzmc,
+        peopleId: Number(personInfo.mzdm),
+        gender: personInfo.xbmc,
+        genderId: Number(personInfo.xbdm),
+        birth: personInfo.csrq,
+      };
+
+      const location = [
+        // 本部外国语专业
+        "167111",
+        "167110",
+        "1066",
+        "050201",
+        "055102",
+      ].includes(info.majorId)
+        ? "benbu"
+        : [
+            // 净月外国语专业
+            "167120",
+            "167180",
+            "167130",
+            "167140",
+          ].includes(info.majorId)
+        ? "jingyue"
+        : ["070201"].includes(info.majorId)
+        ? "unknown"
+        : [
+            253000, 170000, 166000, 234000, 173000, 236000, 232000, 174000,
+            175000, 177000,
+          ].includes(info.orgId)
+        ? "benbu"
+        : [161000, 169000, 252000, 168000, 261000, 178000, 235000].includes(
+            info.orgId
+          )
+        ? "jingyue"
+        : "unknown";
+
+      if (!org2code.has(info.org))
+        writeFileSync("data", `["${info.org}", ${info.orgId}],\n`, {
+          flag: "a",
+        });
+
+      if (!major2code.has(info.major))
+        writeFileSync("data", `["${info.major}", "${info.majorId}"],\n`, {
+          flag: "a",
+        });
 
       return {
         success: true,
         data: {
-          id: Number(info.uid),
-          name: info.name,
-          idCard: info.idcard,
-          org: info.orgname,
-          school: info.orgname,
-          orgId: Number(info.orgdn),
-          major: info.zymc,
-          majorId: info.zydm,
-          inYear: Number(info.rxnf),
-          grade: Number(info.xznj),
-          type: info.pycc,
-          typeId: info.lb,
-          code: info.ryfldm,
-          politicalStatus: info.zzmm,
-          people: info.mzmc,
-          peopleId: Number(info.mzdm),
-          gender: info.xbmc,
-          genderId: Number(info.xbdm),
-          birth: info.csrq,
+          ...info,
+          location,
         },
       };
     }
