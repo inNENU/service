@@ -36,7 +36,7 @@ export const BACKLIST_HINT = [
 
 const testCondition = (
   info: MyInfo,
-  condition: IdConditionalBlackList
+  condition: IdConditionalBlackList,
 ): boolean =>
   Object.entries(condition).every(([key, value]) => {
     if (value instanceof RegExp)
@@ -60,7 +60,7 @@ export const isInBlackList = (id: number, info?: MyInfo | null): boolean => {
   if (!info) return false;
 
   const result = ID_CONDITIONAL_BLACK_LIST.some((condition) =>
-    testCondition(info, condition)
+    testCondition(info, condition),
   );
 
   if (result)

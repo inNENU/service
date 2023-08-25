@@ -57,7 +57,7 @@ export const changePasswordHandler: RequestHandler<
             "map['passwordAgain']": authEncrypt(newPassword, salt),
             "map['captchaResponse']": captcha,
           }),
-        }
+        },
       );
 
       const changePasswordResponseText = await changePasswordResponse.text();
@@ -91,7 +91,7 @@ export const changePasswordHandler: RequestHandler<
           headers: {
             Cookie: result.cookieStore.getHeader(changePassWordUrl),
           },
-        }
+        },
       );
 
       const passwordPageContent = await passwordChangePageResponse.text();
@@ -105,7 +105,7 @@ export const changePasswordHandler: RequestHandler<
             Cookie: result.cookieStore.getHeader(changePassWordUrl),
             Referer: `${AUTH_SERVER}/authserver/userAttributesEdit.do`,
           },
-        }
+        },
       );
 
       const recaptchaImage = await recaptchaResponse.arrayBuffer();

@@ -1,16 +1,17 @@
+import { writeFileSync } from "fs";
+
 import type { RequestHandler } from "express";
 
 import type { MyLoginFailedResult } from "./login.js";
 import { myLogin } from "./login.js";
 import { MY_SERVER } from "./utils.js";
+import { major2code } from "../config/major.js";
+import { org2code } from "../config/org.js";
 import type {
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import { major2code } from "../config/major.js";
-import { writeFileSync } from "fs";
-import { org2code } from "../config/org.js";
 
 interface RawInfo {
   success: true;
@@ -111,7 +112,7 @@ export interface MyInfoSuccessResult {
 export type MyInfoResult = MyInfoSuccessResult | CommonFailedResponse;
 
 export const getMyInfo = async (
-  cookieHeader: string
+  cookieHeader: string,
 ): Promise<MyInfoResult> => {
   try {
     const infoResponse = await fetch(`${MY_SERVER}/sysform/loadIntelligent`, {
@@ -171,7 +172,7 @@ export const getMyInfo = async (
             "167140",
           ].includes(info.majorId)
         ? "jingyue"
-        : ["070201"].includes(info.majorId)
+        : ["070201"].includes(info.majorId) || info.major === "细胞生物学"
         ? "unknown"
         : [
             253000, 170000, 166000, 234000, 173000, 236000, 232000, 174000,
@@ -179,7 +180,7 @@ export const getMyInfo = async (
           ].includes(info.orgId)
         ? "benbu"
         : [161000, 169000, 252000, 168000, 261000, 178000, 235000].includes(
-            info.orgId
+            info.orgId,
           )
         ? "jingyue"
         : "unknown";

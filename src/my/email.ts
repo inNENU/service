@@ -48,7 +48,7 @@ export type GetEmailResponse =
 
 export const getEmailInfo = async (
   cookieHeader: string,
-  info: MyInfo
+  info: MyInfo,
 ): Promise<GetEmailResponse> => {
   const checkMailResponse = await fetch(`${MY_SERVER}/Gryxsq/checkMailBox`, {
     method: "POST",
@@ -89,7 +89,7 @@ export const getEmailInfo = async (
         method: "getAccountList",
         paramStr: "{}",
       }),
-    }
+    },
   );
 
   const accountListResult = <RawAccountList>await accountListResponse.json();
@@ -145,7 +145,7 @@ const activateEmail = async (
     taskId,
     instanceId,
   }: ActivateEmailOptions,
-  info: MyInfo
+  info: MyInfo,
 ): Promise<ActivateEmailResponse> => {
   // TODO: Update password detect
   // const password = emailPassword || "inNENU4ever";
@@ -161,7 +161,7 @@ const activateEmail = async (
         Cookie: cookieHeader,
       },
       body: `mailBoxName=${name}`,
-    }
+    },
   );
 
   const checkResult = <{ suc: boolean }>await checkMailAccountResponse.json();
@@ -204,7 +204,7 @@ const activateEmail = async (
         YXHZ: suffix?.toString() ?? "",
         MM: password,
       }),
-    }
+    },
   );
 
   const setMailResult = <{ success: boolean }>await setMailResponse.json();

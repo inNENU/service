@@ -82,7 +82,7 @@ export interface ActionRecentMailResponse {
 const EMAIL_INFO_URL = `${ACTION_SERVER}/extract/getEmailInfo`;
 
 export const emailInfo = async (
-  cookieHeader: string
+  cookieHeader: string,
 ): Promise<ActionRecentMailResponse | CommonFailedResponse> => {
   try {
     const checkResponse = await fetch(EMAIL_INFO_URL, {
@@ -112,7 +112,7 @@ export const emailInfo = async (
             receivedDate,
             from,
             mid: id,
-          })
+          }),
         ),
       };
 
