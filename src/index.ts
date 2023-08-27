@@ -49,6 +49,7 @@ import {
 import {
   postCourseTableHandler,
   postGradeListHandler,
+  postSystemCheckHandler,
   postSystemLoginHandler,
 } from "./post-system/index.js";
 import { qrCodeHandler } from "./qrcode.js";
@@ -126,9 +127,10 @@ app.post("/under-system/info", underInfoHandler);
 app.post("/post-new-system/login", postNewSystemLoginHandler);
 app.post("/post-new-system/info", postNewInfoHandler);
 
+app.post("/post-system/login", postSystemLoginHandler);
+app.post("/post-system/check", postSystemCheckHandler);
 app.post("/post-system/course-table", postCourseTableHandler);
 app.post("/post-system/grade-list", postGradeListHandler);
-app.post("/post-system/login", postSystemLoginHandler);
 
 app.get("/main/info", mainInfoHandler);
 app.post("/main/info-list", mainInfoListHandler);
