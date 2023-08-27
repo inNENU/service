@@ -215,5 +215,5 @@ const majorConfig: [string, string][] = [
 ];
 
 export const code2major = new Map<string, string>(
-  majorConfig.map(([major, code]) => [code, major])
+  majorConfig.map(([major, code]) => [code, major]),
 );
