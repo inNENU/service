@@ -12,6 +12,7 @@ import {
   actionRecentEmailHandler,
   borrowBooksHandler,
   cardBalanceHandler,
+  noticeAttachmentHandler,
   noticeHandler,
   noticeListHandler,
 } from "./action/index.js";
@@ -95,6 +96,7 @@ app.get("/action/email-page", actionEmailPageHandler);
 app.post("/action/email-page", actionEmailPageHandler);
 app.post("/action/recent-email", actionRecentEmailHandler);
 app.post("/action/notice", noticeHandler);
+app.post("/action/notice-attachment", noticeAttachmentHandler);
 app.post("/action/notice-list", noticeListHandler);
 
 app.get("/auth/activate", activateHandler);

@@ -4,6 +4,7 @@ export * from "./check.js";
 export * from "./email-page.js";
 export * from "./login.js";
 export * from "./notice.js";
+export * from "./notice-attachment.js";
 export * from "./recent-mail.js";
 export * from "./notice-list.js";
 export * from "./utils.js";

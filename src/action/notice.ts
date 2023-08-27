@@ -24,9 +24,20 @@ const pageViewRegExp =
   /<span style="margin: 0 10px;font-size: 13px;color: #787878;font-family: 'Microsoft YaHei';">\s+阅览：(\d+)\s+<\/span>/;
 const contentRegExp =
   /<div class="read" id="WBNR">\s+([\s\S]*?)\s+<\/div>\s+<p id="zrbj"/;
+const attachmentsRegExp =
+  /<a\s+href="(https:\/\/my\.webvpn\.nenu\.edu\.cn:443\/download\.action.*?)"\s+title="(.*?)">([\s\S]+?)<\/a>/g;
 
 export interface NoticeOptions extends Partial<LoginOptions> {
   noticeID: string;
+}
+
+export interface NoticeAttachment {
+  /** 附件类型 */
+  type: string;
+  /** 附件名称 */
+  name: string;
+  /** 附件地址 */
+  url: string;
 }
 
 export interface NoticeSuccessResponse {
@@ -37,6 +48,7 @@ export interface NoticeSuccessResponse {
   from: string;
   pageView: number;
   content: RichTextNode[];
+  attachments: NoticeAttachment[];
 }
 
 export type NoticeResponse = NoticeSuccessResponse | CommonFailedResponse;
@@ -94,6 +106,34 @@ export const noticeHandler: RequestHandler<
     const pageView = pageViewRegExp.exec(responseText)![1];
     const content = contentRegExp.exec(responseText)![1];
 
+    const attachments = Array.from(content.matchAll(attachmentsRegExp)).map(
+      ([, url, , text]) => {
+        const nameParts = text
+          .replace(/<br>/g, "")
+          .replace(/\s+/, " ")
+          .trim()
+          .split(".");
+
+        if (nameParts.length > 1) nameParts.pop();
+
+        return {
+          type: title.split(".").pop()!,
+          name: nameParts.join("."),
+          url: url
+            .replace(
+              "https://my.webvpn.nenu.edu.cn:443",
+              "https://m-443.webvpn.nenu.edu.cn"
+            )
+            .replace(
+              "https://m-443.webvpn.nenu.edu.cn:443",
+              "https://m-443.webvpn.nenu.edu.cn"
+            ),
+        };
+      }
+    );
+
+    console.log(attachments);
+
     return res.json(<NoticeSuccessResponse>{
       success: true,
       title,
@@ -110,6 +150,7 @@ export const noticeHandler: RequestHandler<
         // TODO: Support image
         getImageSrc: () => null,
       }),
+      attachments,
     });
   } catch (err) {
     const { message } = <Error>err;
