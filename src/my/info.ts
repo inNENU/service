@@ -5,8 +5,8 @@ import type { RequestHandler } from "express";
 import type { MyLoginFailedResult } from "./login.js";
 import { myLogin } from "./login.js";
 import { MY_SERVER } from "./utils.js";
-import { major2code } from "../config/major.js";
-import { org2code } from "../config/org.js";
+import { code2major } from "../config/major.js";
+import { code2org } from "../config/org.js";
 import type {
   CommonFailedResponse,
   EmptyObject,
@@ -112,7 +112,7 @@ export interface MyInfoSuccessResult {
 export type MyInfoResult = MyInfoSuccessResult | CommonFailedResponse;
 
 export const getMyInfo = async (
-  cookieHeader: string,
+  cookieHeader: string
 ): Promise<MyInfoResult> => {
   try {
     const infoResponse = await fetch(`${MY_SERVER}/sysform/loadIntelligent`, {
@@ -204,20 +204,24 @@ export const getMyInfo = async (
           ].includes(info.orgId)
         ? "benbu"
         : [161000, 169000, 252000, 168000, 261000, 178000, 235000].includes(
-            info.orgId,
+            info.orgId
           )
         ? "jingyue"
         : "unknown";
 
-      if (!org2code.has(info.org))
+      if (!code2org.has(info.orgId)) {
         writeFileSync("data", `["${info.org}", ${info.orgId}],\n`, {
           flag: "a",
         });
+        code2org.set(info.orgId, info.org);
+      }
 
-      if (!major2code.has(info.major))
+      if (!code2major.has(info.majorId)) {
         writeFileSync("data", `["${info.major}", "${info.majorId}"],\n`, {
           flag: "a",
         });
+        code2major.set(info.majorId, info.major);
+      }
 
       return {
         success: true,

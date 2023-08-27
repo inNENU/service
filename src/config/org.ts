@@ -11,6 +11,7 @@ const orgConfig: [string, number][] = [
   ["生命科学学院", 175000],
   ["体育学院", 177000],
   ["外国语学院", 167000],
+  ["教师教育研究院", 159000],
 
   ["政法学院", 161000],
   ["美术学院", 169000],
@@ -19,9 +20,10 @@ const orgConfig: [string, number][] = [
   ["经济与管理学院", 261000],
   ["传媒科学学院（新闻学院）", 178000],
   ["环境学院", 235000],
+  ["国际汉学院（海外教育学院）", 246000],
 ];
 
 export const org2code = new Map<string, number>(orgConfig);
 export const code2org = new Map<number, string>(
-  orgConfig.map(([org, code]) => [code, org]),
+  orgConfig.map(([org, code]) => [code, org])
 );
