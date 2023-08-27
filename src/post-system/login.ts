@@ -3,7 +3,7 @@ import type { RequestHandler } from "express";
 import { SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
-import { AUTH_SERVER, WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
+import { AUTH_SERVER } from "../auth/utils.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type { CookieType, EmptyObject, LoginOptions } from "../typings.js";
 import { CookieStore, IE_8_USER_AGENT } from "../utils/index.js";
@@ -26,7 +26,7 @@ const COMMON_HEADERS = {
 
 export const postSystemLogin = async (
   options: LoginOptions,
-  cookieStore = new CookieStore()
+  cookieStore = new CookieStore(),
 ): Promise<PostSystemLoginResult> => {
   const result = await authLogin(options, {
     service: "http://dsyjs.nenu.edu.cn:80/framework/main.jsp",

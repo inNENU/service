@@ -18,7 +18,7 @@ export type PostSystemLoginResult =
 
 export const postNewSystemLogin = async (
   options: LoginOptions,
-  cookieStore = new CookieStore()
+  cookieStore = new CookieStore(),
 ): Promise<PostSystemLoginResult> => {
   const result = await authLogin(options, {
     service: `${SERVER}/HProg/yjsy/index_pc.php`,
@@ -47,7 +47,7 @@ export const postNewSystemLogin = async (
   console.log(
     "ticket",
     ticketResponse.headers.get("Location"),
-    await ticketResponse.text()
+    await ticketResponse.text(),
   );
 
   if (ticketResponse.status !== 302) {

@@ -99,14 +99,14 @@ export type InfoResponse =
   | CommonFailedResponse;
 
 export const getPostInfo = async (
-  cookieHeader: string
+  cookieHeader: string,
 ): Promise<InfoResponse> => {
   const result = await getAction(cookieHeader);
 
   if (result.success) {
     const { id } = result.actions.find(
       ({ name }) =>
-        name === "显示硕士生信息采集" || name === "显示博士生信息采集"
+        name === "显示硕士生信息采集" || name === "显示博士生信息采集",
     )!;
 
     const response = await fetch(
@@ -116,7 +116,7 @@ export const getPostInfo = async (
           Cookie: cookieHeader,
           Referer: MAIN_URL,
         },
-      }
+      },
     );
 
     const content = await response.text();

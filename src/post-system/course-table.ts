@@ -39,9 +39,9 @@ const getCourses = (content: string): TableItem =>
           teacher,
           time,
           location,
-        })
+        }),
       );
-    })
+    }),
   );
 
 export interface UserCourseTableOptions extends Partial<LoginOptions> {

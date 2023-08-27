@@ -144,7 +144,7 @@ export const getGrades = (content: string, isJS = false): GradeResult[] =>
         examType,
         reLearn,
       ] = Array.from(gradeCellRegExp.exec(item)!).map((item) =>
-        item.replace(/&nbsp;/g, " ").trim()
+        item.replace(/&nbsp;/g, " ").trim(),
       );
 
       const actualGrade =
@@ -168,12 +168,12 @@ export const getGrades = (content: string, isJS = false): GradeResult[] =>
         examType,
         reLearn: reLearn ? getDisplayTime(reLearn) : "",
       };
-    }
+    },
   );
 
 export const getGradeLists = async (
   cookieHeader: string,
-  content: string
+  content: string,
 ): Promise<GradeResult[]> => {
   // We force writing these 2 field to ensure we care getting the default table structure
   const tableFields = tableFieldsRegExp.exec(content)![1];
@@ -237,7 +237,7 @@ export const getGradeLists = async (
       const newGrades = getGrades(responseText, true);
 
       grades.push(...newGrades);
-    })
+    }),
   );
 
   return grades;
