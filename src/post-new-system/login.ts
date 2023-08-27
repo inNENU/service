@@ -3,11 +3,9 @@ import type { RequestHandler } from "express";
 import { SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
-import { AUTH_SERVER, WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type { CookieType, EmptyObject, LoginOptions } from "../typings.js";
-import { CookieStore, IE_8_USER_AGENT } from "../utils/index.js";
-import type { VPNLoginFailedResult } from "../vpn/login.js";
+import { CookieStore } from "../utils/index.js";
 
 export interface PostSystemLoginSuccessResult {
   success: true;
@@ -16,20 +14,14 @@ export interface PostSystemLoginSuccessResult {
 
 export type PostSystemLoginResult =
   | PostSystemLoginSuccessResult
-  | AuthLoginFailedResult
-  | VPNLoginFailedResult;
+  | AuthLoginFailedResult;
 
-const COMMON_HEADERS = {
-  "User-Agent":
-    "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 10.0; WOW64; Trident/7.0; .NET4.0C; .NET4.0E; .NET CLR 2.0.50727; .NET CLR 3.0.30729; .NET CLR 3.5.30729; Tablet PC 2.0)",
-};
-
-export const postSystemLogin = async (
+export const postNewSystemLogin = async (
   options: LoginOptions,
   cookieStore = new CookieStore()
 ): Promise<PostSystemLoginResult> => {
   const result = await authLogin(options, {
-    service: "http://dsyjs.nenu.edu.cn:80/framework/main.jsp",
+    service: `${SERVER}/HProg/yjsy/index_pc.php`,
     cookieStore,
   });
 
@@ -43,18 +35,20 @@ export const postSystemLogin = async (
     };
   }
 
-  console.log("Login location", result.location);
-
   const ticketResponse = await fetch(result.location, {
     headers: {
       Cookie: cookieStore.getHeader(result.location),
-      Referer: AUTH_SERVER,
-      ...COMMON_HEADERS,
     },
     redirect: "manual",
   });
 
   cookieStore.applyResponse(ticketResponse, result.location);
+
+  console.log(
+    "ticket",
+    ticketResponse.headers.get("Location"),
+    await ticketResponse.text()
+  );
 
   if (ticketResponse.status !== 302) {
     console.log("ticket response", await ticketResponse.text());
@@ -68,8 +62,6 @@ export const postSystemLogin = async (
 
   const finalLocation = ticketResponse.headers.get("Location");
 
-  console.log("location: ", finalLocation);
-
   if (finalLocation?.includes("http://wafnenu.nenu.edu.cn/offCampus.html"))
     return {
       success: false,
@@ -77,18 +69,14 @@ export const postSystemLogin = async (
       msg: "此账户无法登录研究生教学服务系统",
     };
 
-  if (finalLocation?.includes(";jsessionid=")) {
-    const ssoUrl = `${SERVER}/Logon.do?method=logonBySSO`;
-
-    await fetch(ssoUrl, {
-      method: "POST",
+  if (finalLocation === "https://math127.nenu.edu.cn/HProg/yjsy/index_pc.php") {
+    const indexResponse = await fetch(finalLocation, {
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Cookie: cookieStore.getHeader(ssoUrl),
-        Referer: `${SERVER}/framework/main.jsp`,
-        "User-Agent": IE_8_USER_AGENT,
+        Cookie: cookieStore.getHeader(finalLocation),
       },
     });
+
+    cookieStore.applyResponse(indexResponse, finalLocation);
 
     return <PostSystemLoginSuccessResult>{
       success: true,
@@ -111,16 +99,15 @@ export interface PostSystemLoginSuccessResponse {
 
 export type PostSystemLoginResponse =
   | PostSystemLoginSuccessResponse
-  | AuthLoginFailedResult
-  | VPNLoginFailedResult;
+  | AuthLoginFailedResult;
 
-export const postSystemLoginHandler: RequestHandler<
+export const postNewSystemLoginHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
   LoginOptions
 > = async (req, res) => {
   try {
-    const result = await postSystemLogin(req.body);
+    const result = await postNewSystemLogin(req.body);
 
     if (result.success) {
       const cookies = result.cookieStore
