@@ -39,7 +39,7 @@ export type RichTextNode = ElementNode | TextNode;
 
 const handleNode = async (
   node: AnyNode,
-  options: GetNodeOptions,
+  options: GetNodeOptions
 ): Promise<RichTextNode | null> => {
   if (node.type === "text") return { type: "text", text: node.data };
 
@@ -51,15 +51,20 @@ const handleNode = async (
         node.attributes
           .filter(
             ({ name }) =>
-              ["class", "style"].includes(name) || config[1]?.includes(name),
+              ["class", "style"].includes(name) || config[1]?.includes(name)
           )
-          .map<[string, string]>(({ name, value }) => [name, value]),
+          .map<[string, string]>(({ name, value }) => [name, value])
       );
       const children = (
         await Promise.all(
-          node.children.map((node) => handleNode(node, options)),
+          node.children.map((node) => handleNode(node, options))
         )
       ).filter((item): item is RichTextNode => item !== null);
+
+      // add node name to class
+      attrs["class"] = attrs["class"]
+        ? `${attrs["class"]} ${node.name}`
+        : node.name;
 
       // append link for anchor tag
       if (node.name === "a" && node.attribs.href) {
@@ -102,7 +107,7 @@ const handleNode = async (
 
 export const getRichTextNodes = async (
   content: string | AnyNode[],
-  options: GetNodeOptions = {},
+  options: GetNodeOptions = {}
 ): Promise<RichTextNode[]> => {
   const rootNodes = Array.isArray(content) ? content : parseHTML(content) || [];
 
