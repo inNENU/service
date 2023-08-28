@@ -10,6 +10,7 @@ import type {
   LoginOptions,
 } from "../typings.js";
 import { IE_8_USER_AGENT } from "../utils/index.js";
+import type { VPNLoginFailedResult } from "../vpn/login.js";
 
 export interface ClassItem {
   name: string;
@@ -39,32 +40,34 @@ const getCourses = (content: string): TableItem =>
           teacher,
           time,
           location,
-        }),
-      ),
-    ),
+        })
+      )
+    )
   );
 
-export interface UserCourseTableOptions extends Partial<LoginOptions> {
+export interface UnderCourseTableOptions extends Partial<LoginOptions> {
   /** 查询时间 */
   time: string;
 }
 
-export interface UserCourseTableSuccessResponse {
+export interface UnderCourseTableSuccessResponse {
   success: true;
   data: TableItem;
   startTime: string;
 }
 
-export type UserCourseTableFailedResponse = AuthLoginFailedResult;
+export type UnderCourseTableFailedResponse =
+  | AuthLoginFailedResult
+  | VPNLoginFailedResult;
 
-export type UserCourseTableResponse =
-  | UserCourseTableSuccessResponse
-  | UserCourseTableFailedResponse;
+export type UnderCourseTableResponse =
+  | UnderCourseTableSuccessResponse
+  | UnderCourseTableFailedResponse;
 
 export const underCourseTableHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  UserCourseTableOptions
+  UnderCourseTableOptions
 > = async (req, res) => {
   try {
     const { time } = req.body;
@@ -104,7 +107,7 @@ export const underCourseTableHandler: RequestHandler<
 
     const tableData = getCourses(content);
 
-    return res.json(<UserCourseTableSuccessResponse>{
+    return res.json(<UnderCourseTableSuccessResponse>{
       success: true,
       data: tableData,
       startTime: semesterStartTime[time],

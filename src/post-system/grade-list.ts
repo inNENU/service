@@ -10,38 +10,7 @@ import type {
 } from "../typings.js";
 import { IE_8_USER_AGENT } from "../utils/index.js";
 
-type CourseType =
-  | "通识教育必修课"
-  | "通识教育选修课"
-  | "专业教育必修课"
-  | "专业教育选修课"
-  | "教师职业教育必修课"
-  | "教师职业教育选修课"
-  | "任意选修课"
-  | "发展方向课"
-  | "教师教育必修课"
-  | "教师教育选修课";
-
-export interface UserGradeListOptions extends Partial<LoginOptions> {
-  /** 查询时间 */
-  time?: string;
-  /** 课程名称 */
-  name?: string;
-  /** 课程性质 */
-  courseType?: CourseType | "";
-  gradeType?: "all" | "best";
-}
-export interface ScoreDetail {
-  score: number;
-  percent: number;
-}
-
-export interface GradeDetail {
-  usual: ScoreDetail[];
-  exam: ScoreDetail | null;
-}
-
-export interface GradeResult {
+export interface PostGradeResult {
   /** 修读时间 */
   time: string;
   /** 课程名称 */
@@ -50,6 +19,8 @@ export interface GradeResult {
   grade: number;
   /** 分数文本 */
   gradeText: string | null;
+  /** 绩点成绩 */
+  gradePoint: number;
   /** 成绩标志 */
   mark: string;
   /** 课程性质 */
@@ -66,13 +37,13 @@ export interface GradeResult {
   reLearn: string;
 }
 
-export interface UserGradeListSuccessResponse {
+export interface PostGradeListSuccessResponse {
   success: true;
-  data: GradeResult[];
+  data: PostGradeResult[];
 }
 
-export type UserGradeListResponse =
-  | UserGradeListSuccessResponse
+export type PostGradeListResponse =
+  | PostGradeListSuccessResponse
   | AuthLoginFailedResult
   | CommonFailedResponse;
 
@@ -105,18 +76,6 @@ const totalPagesRegExp =
 const otherFieldsRegExp =
   /<input\s+type="hidden"\s+name\s*=\s*"otherFields"\s+id\s*=\s*"otherFields"\s+value="([^"]*?)">/;
 
-const COURSE_TYPES: Record<CourseType, string> = {
-  通识教育必修课: "01",
-  通识教育选修课: "02",
-  专业教育必修课: "03",
-  专业教育选修课: "04",
-  教师职业教育必修课: "05",
-  教师职业教育选修课: "06",
-  任意选修课: "09",
-  发展方向课: "10",
-  教师教育必修课: "11",
-  教师教育选修课: "12",
-};
 const DEFAULT_TABLE_FIELD =
   "学号:1:1:90:a.xh,姓名:2:1:110:a.xm,开课学期:3:1:120:a.xqmc,课程名称:4:1:130:a.kcmc,总成绩:5:1:70:a.zcj,成绩标志:6:1:90:,课程性质:7:1:110:,课程类别:8:1:90:,学时:9:1:70:a.zxs,学分:10:1:70:a.xf,考试性质:11:1:100:ksxz.dmmc,补重学期:15:1:100:";
 const DEFAULT_OTHER_FIELD = "null";
@@ -128,7 +87,7 @@ const getDisplayTime = (time: string): string => {
   return semester === "1" ? `${startYear}年秋季学期` : `${endYear}年春季学期`;
 };
 
-export const getGrades = (content: string, isJS = false): GradeResult[] =>
+export const getGrades = (content: string, isJS = false): PostGradeResult[] =>
   Array.from(content.matchAll(isJS ? jsGradeItemRegExp : gradeItemRegExp)).map(
     ([, item]) => {
       const [
@@ -144,7 +103,7 @@ export const getGrades = (content: string, isJS = false): GradeResult[] =>
         examType,
         reLearn,
       ] = Array.from(gradeCellRegExp.exec(item)!).map((item) =>
-        item.replace(/&nbsp;/g, " ").trim(),
+        item.replace(/&nbsp;/g, " ").trim()
       );
 
       const actualGrade =
@@ -168,13 +127,13 @@ export const getGrades = (content: string, isJS = false): GradeResult[] =>
         examType,
         reLearn: reLearn ? getDisplayTime(reLearn) : "",
       };
-    },
+    }
   );
 
 export const getGradeLists = async (
   cookieHeader: string,
-  content: string,
-): Promise<GradeResult[]> => {
+  content: string
+): Promise<PostGradeResult[]> => {
   // We force writing these 2 field to ensure we care getting the default table structure
   const tableFields = tableFieldsRegExp.exec(content)![1];
   const otherFields = String(otherFieldsRegExp.exec(content)?.[1]);
@@ -237,7 +196,7 @@ export const getGradeLists = async (
       const newGrades = getGrades(responseText, true);
 
       grades.push(...newGrades);
-    }),
+    })
   );
 
   return grades;
@@ -246,15 +205,9 @@ export const getGradeLists = async (
 export const postGradeListHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  UserGradeListOptions
+  Partial<LoginOptions>
 > = async (req, res) => {
   try {
-    const {
-      time = "",
-      name = "",
-      courseType = "",
-      gradeType = "all",
-    } = req.body;
     let cookieHeader = req.headers.cookie;
 
     if (!cookieHeader) {
@@ -278,28 +231,13 @@ export const postGradeListHandler: RequestHandler<
         Referer: `${SERVER}/jiaowu/cjgl/xszq/query_xscj.jsp?tktime=${getTimeStamp()}`,
         "User-Agent": IE_8_USER_AGENT,
       },
-      body: new URLSearchParams({
-        kksj: time,
-        kcxz: courseType ? COURSE_TYPES[courseType] || "" : "",
-        kcmc: name,
-        xsfs: gradeType === "best" ? "zhcj" : gradeType === "all" ? "qbcj" : "",
-        ok: "",
-      }),
     });
 
     const content = await response.text();
 
-    if (content.includes("评教未完成，不能查询成绩！"))
-      return res.json(<CommonFailedResponse>{
-        success: false,
-        msg: time
-          ? "此学期评教未完成，不能查询成绩！"
-          : "部分学期评教未完成，不能查阅全部成绩! 请分学期查询。",
-      });
-
     const gradeList = await getGradeLists(cookieHeader, content);
 
-    return res.json(<UserGradeListSuccessResponse>{
+    return res.json(<PostGradeListSuccessResponse>{
       success: true,
       data: gradeList,
     });

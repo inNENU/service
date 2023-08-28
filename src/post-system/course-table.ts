@@ -39,32 +39,32 @@ const getCourses = (content: string): TableItem =>
           teacher,
           time,
           location,
-        }),
+        })
       );
-    }),
+    })
   );
 
-export interface UserCourseTableOptions extends Partial<LoginOptions> {
+export interface PostCourseTableOptions extends Partial<LoginOptions> {
   /** 查询时间 */
   time: string;
 }
 
-export interface UserCourseTableSuccessResponse {
+export interface PostCourseTableSuccessResponse {
   success: true;
   data: TableItem;
   startTime: string;
 }
 
-export type UserCourseTableFailedResponse = AuthLoginFailedResult;
+export type PostCourseTableFailedResponse = AuthLoginFailedResult;
 
-export type UserCourseTableResponse =
-  | UserCourseTableSuccessResponse
-  | UserCourseTableFailedResponse;
+export type PostCourseTableResponse =
+  | PostCourseTableSuccessResponse
+  | PostCourseTableFailedResponse;
 
 export const postCourseTableHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  UserCourseTableOptions
+  PostCourseTableOptions
 > = async (req, res) => {
   try {
     const { time } = req.body;
@@ -102,7 +102,7 @@ export const postCourseTableHandler: RequestHandler<
 
     const tableData = getCourses(content);
 
-    return res.json(<UserCourseTableSuccessResponse>{
+    return res.json(<PostCourseTableSuccessResponse>{
       success: true,
       data: tableData,
       startTime: semesterStartTime[time],

@@ -10,7 +10,7 @@ import type {
 } from "../typings.js";
 import { IE_8_USER_AGENT } from "../utils/index.js";
 
-type CourseType =
+type UnderCourseType =
   | "通识教育必修课"
   | "通识教育选修课"
   | "专业教育必修课"
@@ -22,13 +22,13 @@ type CourseType =
   | "教师教育必修课"
   | "教师教育选修课";
 
-export interface UserGradeListOptions extends Partial<LoginOptions> {
+export interface UnderGradeListOptions extends Partial<LoginOptions> {
   /** 查询时间 */
   time?: string;
   /** 课程名称 */
   name?: string;
   /** 课程性质 */
-  courseType?: CourseType | "";
+  courseType?: UnderCourseType | "";
   gradeType?: "all" | "best";
 }
 export interface ScoreDetail {
@@ -41,7 +41,7 @@ export interface GradeDetail {
   exam: ScoreDetail | null;
 }
 
-export interface GradeResult {
+export interface UnderGradeResult {
   /** 修读时间 */
   time: string;
   /** 课程 id */
@@ -78,13 +78,13 @@ export interface GradeResult {
   status: string;
 }
 
-export interface UserGradeListSuccessResponse {
+export interface UnderGradeListSuccessResponse {
   success: true;
-  data: GradeResult[];
+  data: UnderGradeResult[];
 }
 
-export type UserGradeListResponse =
-  | UserGradeListSuccessResponse
+export type UnderGradeListResponse =
+  | UnderGradeListSuccessResponse
   | AuthLoginFailedResult
   | CommonFailedResponse;
 
@@ -122,7 +122,7 @@ const otherFieldsRegExp =
 const xsIdRegExp =
   /<input\s+type="hidden"\s+name\s*=\s*"xsId"\s+id\s*=\s*"xsId"\s+value="([^"]*?)" \/>/;
 
-const COURSE_TYPES: Record<CourseType, string> = {
+const COURSE_TYPES: Record<UnderCourseType, string> = {
   通识教育必修课: "01",
   通识教育选修课: "02",
   专业教育必修课: "03",
@@ -159,11 +159,11 @@ const getScoreDetail = (content: string): ScoreDetail | null => {
 export const getGrades = (
   cookieHeader: string,
   content: string,
-  isJS = false,
-): Promise<GradeResult[]> =>
+  isJS = false
+): Promise<UnderGradeResult[]> =>
   Promise.all(
     Array.from(
-      content.matchAll(isJS ? jsGradeItemRegExp : gradeItemRegExp),
+      content.matchAll(isJS ? jsGradeItemRegExp : gradeItemRegExp)
     ).map(async ([, item]) => {
       const [
         ,
@@ -183,7 +183,7 @@ export const getGrades = (
         reLearn,
         status,
       ] = Array.from(gradeCellRegExp.exec(item)!).map((item) =>
-        item.replace(/&nbsp;/g, " ").trim(),
+        item.replace(/&nbsp;/g, " ").trim()
       );
       const [, gradeLink, gradeText] = gradeRegExp.exec(grade) || [];
       const actualDifficulty = Number(difficulty) || 1;
@@ -192,7 +192,7 @@ export const getGrades = (
         gradeText && !Number.isNaN(Number(gradeText))
           ? Number(gradeText)
           : Math.round(
-              (Number(gradePoint) / Number(point) / actualDifficulty) * 10 + 50,
+              (Number(gradePoint) / Number(point) / actualDifficulty) * 10 + 50
             );
 
       let gradeDetail: GradeDetail | null = null;
@@ -256,13 +256,13 @@ export const getGrades = (
         reLearn: reLearn ? getDisplayTime(reLearn) : "",
         status,
       };
-    }),
+    })
   );
 
 export const getGradeLists = async (
   cookieHeader: string,
-  content: string,
-): Promise<GradeResult[]> => {
+  content: string
+): Promise<UnderGradeResult[]> => {
   // We force writing these 2 field to ensure we care getting the default table structure
   const tableFields = tableFieldsRegExp.exec(content)![1];
   const otherFields = String(otherFieldsRegExp.exec(content)?.[1]);
@@ -327,7 +327,7 @@ export const getGradeLists = async (
       const newGrades = await getGrades(cookieHeader, responseText, true);
 
       grades.push(...newGrades);
-    }),
+    })
   );
 
   return grades;
@@ -336,7 +336,7 @@ export const getGradeLists = async (
 export const underGradeListHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  UserGradeListOptions
+  UnderGradeListOptions
 > = async (req, res) => {
   try {
     const {
@@ -389,7 +389,7 @@ export const underGradeListHandler: RequestHandler<
 
     const gradeList = await getGradeLists(cookieHeader, content);
 
-    return res.json(<UserGradeListSuccessResponse>{
+    return res.json(<UnderGradeListSuccessResponse>{
       success: true,
       data: gradeList,
     });
