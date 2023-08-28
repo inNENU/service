@@ -46,9 +46,47 @@ export type GetEmailResponse =
   | MyLoginFailedResult
   | CommonFailedResponse;
 
+const PASSWORD_CHARS = [
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+  "abcdefghijklmnopqrstuvwxyz",
+  "1234567890",
+];
+
+const initRandomPassWord = (length: number): string => {
+  const password: string[] = [];
+  let n = 0;
+
+  for (let i = 0; i < length; i++)
+    if (password.length < length - 3) {
+      // Get random passwordArray index
+      const arrayRandom = Math.floor(Math.random() * 3);
+      // Get password array value
+      const passwordItem = PASSWORD_CHARS[arrayRandom];
+      // Get password array value random index
+      // Get random real value
+      const char =
+        passwordItem[Math.floor(Math.random() * passwordItem.length)];
+
+      password.push(char);
+    } else {
+      const passwordItem = PASSWORD_CHARS[n];
+
+      const char =
+        passwordItem[Math.floor(Math.random() * passwordItem.length)];
+      // Get array splice index
+      const spliceIndex = Math.floor(Math.random() * password.length);
+
+      // insert every type randomly
+      password.splice(spliceIndex, 0, char);
+      n++;
+    }
+
+  return password.join("");
+};
+
 export const getEmailInfo = async (
   cookieHeader: string,
-  info: MyInfo,
+  info: MyInfo
 ): Promise<GetEmailResponse> => {
   const checkMailResponse = await fetch(`${MY_SERVER}/Gryxsq/checkMailBox`, {
     method: "POST",
@@ -89,7 +127,7 @@ export const getEmailInfo = async (
         method: "getAccountList",
         paramStr: "{}",
       }),
-    },
+    }
   );
 
   const accountListResult = <RawAccountList>await accountListResponse.json();
@@ -145,7 +183,7 @@ const activateEmail = async (
     taskId,
     instanceId,
   }: ActivateEmailOptions,
-  info: MyInfo,
+  info: MyInfo
 ): Promise<ActivateEmailResponse> => {
   // TODO: Update password detect
   // const password = emailPassword || "inNENU4ever";
@@ -161,7 +199,7 @@ const activateEmail = async (
         Cookie: cookieHeader,
       },
       body: `mailBoxName=${name}`,
-    },
+    }
   );
 
   const checkResult = <{ suc: boolean }>await checkMailAccountResponse.json();
@@ -202,9 +240,9 @@ const activateEmail = async (
         YXMC: name ?? "",
         SFSYSZ: suffix ? "2" : "1",
         YXHZ: suffix?.toString() ?? "",
-        MM: password,
+        MM: initRandomPassWord(10),
       }),
-    },
+    }
   );
 
   const setMailResult = <{ success: boolean }>await setMailResponse.json();
