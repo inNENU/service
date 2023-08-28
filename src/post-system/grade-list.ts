@@ -9,6 +9,7 @@ import type {
   LoginOptions,
 } from "../typings.js";
 import { IE_8_USER_AGENT } from "../utils/index.js";
+import { LoginFailType } from "../config/loginFailTypes.js";
 
 export interface PostGradeResult {
   /** 修读时间 */
@@ -237,6 +238,13 @@ export const postGradeListHandler: RequestHandler<
     });
 
     const content = await response.text();
+
+    if (content.startsWith("<script languge='javascript'>"))
+      return res.json(<AuthLoginFailedResult>{
+        success: false,
+        msg: "登录已过期，请重新登录",
+        type: LoginFailType.Expired,
+      });
 
     const gradeList = await getGradeLists(cookieHeader, content);
 
