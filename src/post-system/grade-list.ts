@@ -118,7 +118,8 @@ export const getGrades = (content: string, isJS = false): PostGradeResult[] =>
         name,
         grade: actualGrade,
         gradeText: grade && Number.isNaN(Number(grade)) ? grade : null,
-        gradePoint: actualGrade < 60 ? 0 : actualGrade * Number(point),
+        gradePoint:
+          actualGrade < 60 ? 0 : (actualGrade / 10 - 5) * Number(point),
         mark,
         courseCategory,
         courseType,
