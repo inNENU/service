@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 
+import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
   CommonFailedResponse,
   EmptyObject,
@@ -27,7 +28,13 @@ export interface SelectLoginSuccessResult {
   server: string;
 }
 
-export type SelectLoginResult = SelectLoginSuccessResult | CommonFailedResponse;
+export interface SelectLoginFailResult extends CommonFailedResponse {
+  type?: LoginFailType.Closed | LoginFailType.WrongPassword;
+}
+
+export type SelectLoginResult =
+  | SelectLoginSuccessResult
+  | SelectLoginFailResult;
 
 export const selectLogin = async (
   { id: id, password }: LoginOptions,
@@ -45,6 +52,7 @@ export const selectLogin = async (
   if (homePageResponse.status !== 200)
     return <CommonFailedResponse>{
       success: false,
+      type: LoginFailType.Closed,
       msg: "无法连接到选课系统",
     };
 
@@ -106,6 +114,7 @@ export const selectLogin = async (
 
   return <CommonFailedResponse>{
     success: false,
+    type: LoginFailType.WrongPassword,
     msg: "用户名或密码错误",
   };
 };

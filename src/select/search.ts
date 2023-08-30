@@ -1,6 +1,7 @@
 import type { RequestHandler } from "express";
 
 import { selectLogin } from "./login.js";
+import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
   CommonFailedResponse,
   EmptyObject,
@@ -45,7 +46,7 @@ export interface SelectSearchSuccessResponse {
 }
 
 export interface SelectSearchFailedResponse extends CommonFailedResponse {
-  type?: "relogin";
+  type?: LoginFailType.Expired;
 }
 
 export type SelectSearchResponse =
@@ -120,7 +121,7 @@ export const searchHandler: RequestHandler<
       return res.json(<SelectSearchFailedResponse>{
         success: false,
         msg: "请重新登录",
-        type: "relogin",
+        type: LoginFailType.Expired,
       });
 
     const courses = (<Record<string, string>[]>JSON.parse(rawData)).map(

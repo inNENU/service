@@ -1,6 +1,7 @@
 import type { RequestHandler } from "express";
 
 import { selectLogin } from "./login.js";
+import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
   CommonFailedResponse,
   EmptyObject,
@@ -32,7 +33,7 @@ export interface StudentAmountSuccessResponse {
 }
 
 export interface StudentAmountFailedResponse extends CommonFailedResponse {
-  type?: "relogin";
+  type?: LoginFailType.Expired;
 }
 
 export type StudentAmountResponse =
@@ -87,7 +88,7 @@ export const studentAmountHandler: RequestHandler<
       return res.json(<StudentAmountFailedResponse>{
         success: false,
         msg: "请重新登录",
-        type: "relogin",
+        type: LoginFailType.Expired,
       });
 
     const data: StudentAmountData[] = (<StudentAmountRaw[]>(

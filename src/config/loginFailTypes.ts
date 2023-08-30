@@ -17,4 +17,6 @@ export const enum LoginFailType {
   Unknown = "unknown",
   /** 黑名单 */
   BlackList = "blacklist",
+  /** 系统关闭 */
+  Closed = "closed",
 }

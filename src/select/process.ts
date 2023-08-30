@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 
 import { selectLogin } from "./login.js";
 import { underCoursesStore } from "./store.js";
+import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
   CommonFailedResponse,
   EmptyObject,
@@ -22,7 +23,7 @@ export interface ProcessSuccessResponse {
 }
 
 export interface ProcessFailedResponse extends CommonFailedResponse {
-  type?: "conflict" | "relogin" | "forbid";
+  type?: LoginFailType.Expired | "conflict" | "forbidden";
 }
 
 export type ProcessResponse = ProcessSuccessResponse | ProcessFailedResponse;
@@ -83,7 +84,7 @@ export const processHandler: RequestHandler<
         return res.json(<ProcessFailedResponse>{
           success: false,
           msg,
-          type: "relogin",
+          type: LoginFailType.Expired,
         });
       }
 
@@ -91,7 +92,7 @@ export const processHandler: RequestHandler<
         return res.json(<ProcessFailedResponse>{
           success: false,
           msg,
-          type: "relogin",
+          type: LoginFailType.Expired,
         });
 
       if (method === "DELETE") {
@@ -112,7 +113,7 @@ export const processHandler: RequestHandler<
           return res.json(<ProcessFailedResponse>{
             success: false,
             msg,
-            type: "forbid",
+            type: "forbidden",
           });
 
         if (msg.endsWith("上课时间冲突"))
