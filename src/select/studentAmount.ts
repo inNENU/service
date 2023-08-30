@@ -1,15 +1,22 @@
 import type { RequestHandler } from "express";
 
+import { selectLogin } from "./login.js";
 import type {
   SelectBaseFailedResponse,
   SelectBaseOptions,
   SelectBaseSuccessResponse,
-} from "./typings";
-import type { EmptyObject } from "../typings";
+} from "./typings.js";
+import type {
+  CommonFailedResponse,
+  EmptyObject,
+  LoginOptions,
+} from "../typings.js";
 
-export interface StudentAmountOptions extends SelectBaseOptions {
+export interface StudentAmountOptions
+  extends SelectBaseOptions,
+    Partial<LoginOptions> {
   /** 课程号 */
-  id: string;
+  courseId: string;
   jx0502id: string;
 }
 
@@ -44,11 +51,27 @@ export const studentAmountHandler: RequestHandler<
   StudentAmountOptions
 > = async (req, res) => {
   try {
-    const { cookies, server, id, jx0502id } = req.body;
+    if (!req.headers.cookie) {
+      if (!req.body.id || !req.body.password)
+        return res.json(<CommonFailedResponse>{
+          success: false,
+          msg: "请提供账号密码",
+        });
+
+      const result = await selectLogin(<LoginOptions>req.body);
+
+      if (!result.success) return res.json(result);
+
+      req.body.server = result.server;
+      req.body.type = req.body.id.toString()[4] === "0" ? "under" : "post";
+      req.headers.cookie = result.cookieStore.getHeader(result.server);
+    }
+
+    const { server, courseId, jx0502id } = req.body;
     const url = `${server}xk/GetXkRs`;
     const params = new URLSearchParams({
       jx0502id,
-      kch: id,
+      kch: courseId,
     }).toString();
 
     console.log("Requesting with params:", params);
@@ -58,7 +81,7 @@ export const studentAmountHandler: RequestHandler<
       headers: {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         "Content-Type": "application/x-www-form-urlencoded",
-        Cookie: cookies.join(", "),
+        Cookie: req.headers.cookie,
       },
       body: params,
     });

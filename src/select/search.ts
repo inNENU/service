@@ -1,13 +1,20 @@
 import type { RequestHandler } from "express";
 
+import { selectLogin } from "./login.js";
 import type {
   SelectBaseFailedResponse,
   SelectBaseOptions,
   SelectBaseSuccessResponse,
 } from "./typings.js";
-import type { EmptyObject } from "../typings.js";
+import type {
+  CommonFailedResponse,
+  EmptyObject,
+  LoginOptions,
+} from "../typings.js";
 
-export interface SearchOptions extends SelectBaseOptions {
+export interface SearchOptions
+  extends SelectBaseOptions,
+    Partial<LoginOptions> {
   /** 年级 */
   grade?: string;
   /** 专业 */
@@ -55,8 +62,23 @@ export const searchHandler: RequestHandler<
   SearchOptions
 > = async (req, res) => {
   try {
+    if (!req.headers.cookie) {
+      if (!req.body.id || !req.body.password)
+        return res.json(<CommonFailedResponse>{
+          success: false,
+          msg: "请提供账号密码",
+        });
+
+      const result = await selectLogin(<LoginOptions>req.body);
+
+      if (!result.success) return res.json(result);
+
+      req.body.server = result.server;
+      req.body.type = req.body.id.toString()[4] === "0" ? "under" : "post";
+      req.headers.cookie = result.cookieStore.getHeader(result.server);
+    }
+
     const {
-      cookies,
       server,
       jx0502id,
       grade = "",
@@ -90,7 +112,7 @@ export const searchHandler: RequestHandler<
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-        Cookie: cookies.join(", "),
+        Cookie: req.headers.cookie,
       },
       body: params,
     });

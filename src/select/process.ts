@@ -1,16 +1,23 @@
 import type { RequestHandler } from "express";
 
-import { coursesStore } from "./store";
+import { selectLogin } from "./login.js";
+import { underCoursesStore } from "./store.js";
 import type {
   SelectBaseFailedResponse,
   SelectBaseOptions,
   SelectBaseSuccessResponse,
-} from "./typings";
-import type { EmptyObject } from "../typings";
+} from "./typings.js";
+import type {
+  CommonFailedResponse,
+  EmptyObject,
+  LoginOptions,
+} from "../typings.js";
 
-export interface ProcessOptions extends SelectBaseOptions {
+export interface ProcessOptions
+  extends SelectBaseOptions,
+    Partial<LoginOptions> {
   /** 课程号 */
-  id: string;
+  courseId: string;
   jx0502id: string;
   jx0502zbid: string;
 }
@@ -32,14 +39,30 @@ export const processHandler: RequestHandler<
 > = async (req, res) => {
   const { method } = req;
 
+  if (!req.headers.cookie) {
+    if (!req.body.id || !req.body.password)
+      return res.json(<CommonFailedResponse>{
+        success: false,
+        msg: "请提供账号密码",
+      });
+
+    const result = await selectLogin(<LoginOptions>req.body);
+
+    if (!result.success) return res.json(result);
+
+    req.body.server = result.server;
+    req.body.type = req.body.id.toString()[4] === "0" ? "under" : "post";
+    req.headers.cookie = result.cookieStore.getHeader(result.server);
+  }
+
   try {
-    const { cookies, server, id, jx0502id, jx0502zbid } = req.body;
+    const { server, courseId, jx0502id, jx0502zbid } = req.body;
 
     const url = `${server}xk/process${method === "DELETE" ? "Tx" : "Xk"}`;
     const params = new URLSearchParams({
       jx0502id,
       jx0502zbid,
-      jx0404id: id,
+      jx0404id: courseId,
     }).toString();
 
     console.log("Requesting with params:", params);
@@ -48,7 +71,7 @@ export const processHandler: RequestHandler<
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
-        Cookie: cookies.join(", "),
+        Cookie: req.headers.cookie,
       },
       body: params,
     });
@@ -61,7 +84,7 @@ export const processHandler: RequestHandler<
       const { msgContent: msg } = <{ msgContent: string }>JSON.parse(rawData);
 
       if (msg === "系统更新了选课数据,请重新登录系统") {
-        coursesStore.setState([]);
+        underCoursesStore.setState([]);
 
         return res.json(<ProcessFailedResponse>{
           success: false,

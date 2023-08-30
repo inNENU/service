@@ -23,7 +23,7 @@ export const postSystemCheckHandler: RequestHandler<
           "User-Agent": IE_8_USER_AGENT,
         },
         redirect: "manual",
-      }
+      },
     );
 
     if (response.status === 200) {

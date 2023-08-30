@@ -40,9 +40,9 @@ const getCourses = (content: string): TableItem =>
           teacher,
           time,
           location,
-        })
-      )
-    )
+        }),
+      ),
+    ),
   );
 
 export interface UnderCourseTableOptions extends Partial<LoginOptions> {

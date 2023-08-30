@@ -46,9 +46,11 @@ export interface CourseInfo {
   className: string;
 }
 
-export const coursesStore = createStore<CourseInfo[]>([]);
+export const underCoursesStore = createStore<CourseInfo[]>([]);
+export const postCoursesStore = createStore<CourseInfo[]>([]);
 
-export const coursesOfficeStore = createStore<string[]>([]);
+export const underCoursesOfficeStore = createStore<string[]>([]);
+export const postCoursesOfficeStore = createStore<string[]>([]);
 
 export const gradesStore = createStore<string[]>([]);
 
@@ -59,11 +61,14 @@ export interface MajorInfo {
   id: string;
 }
 
-export const majorsStore = createStore<MajorInfo[]>([]);
+export const underMajorsStore = createStore<MajorInfo[]>([]);
+export const postMajorsStore = createStore<MajorInfo[]>([]);
 
 export interface ParamsStore {
   jx0502id: string;
   jx0502zbid: string;
 }
 
-export const paramsStore = createStore<ParamsStore | null>(null);
+export const underParamsStore = createStore<ParamsStore | null>(null);
+
+export const postParamsStore = createStore<ParamsStore | null>(null);

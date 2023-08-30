@@ -3,13 +3,13 @@ import type { RequestHandler } from "express";
 import { postSystemLogin } from "./login.js";
 import { SERVER, getTimeStamp } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
+import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
 import { IE_8_USER_AGENT } from "../utils/index.js";
-import { LoginFailType } from "../config/loginFailTypes.js";
 
 export interface PostGradeResult {
   /** 修读时间 */
@@ -104,7 +104,7 @@ export const getGrades = (content: string, isJS = false): PostGradeResult[] =>
         examType,
         reLearn,
       ] = Array.from(gradeCellRegExp.exec(item)!).map((item) =>
-        item.replace(/&nbsp;/g, " ").trim()
+        item.replace(/&nbsp;/g, " ").trim(),
       );
 
       const actualGrade =
@@ -131,12 +131,12 @@ export const getGrades = (content: string, isJS = false): PostGradeResult[] =>
         examType,
         reLearn: reLearn ? getDisplayTime(reLearn) : "",
       };
-    }
+    },
   );
 
 export const getGradeLists = async (
   cookieHeader: string,
-  content: string
+  content: string,
 ): Promise<PostGradeResult[]> => {
   // We force writing these 2 field to ensure we care getting the default table structure
   const tableFields = tableFieldsRegExp.exec(content)![1];
@@ -200,7 +200,7 @@ export const getGradeLists = async (
       const newGrades = getGrades(responseText, true);
 
       grades.push(...newGrades);
-    })
+    }),
   );
 
   return grades;
