@@ -3,30 +3,25 @@ import type { RequestHandler } from "express";
 import { selectLogin } from "./login.js";
 import { underCoursesStore } from "./store.js";
 import type {
-  SelectBaseFailedResponse,
-  SelectBaseOptions,
-  SelectBaseSuccessResponse,
-} from "./typings.js";
-import type {
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
 
-export interface ProcessOptions
-  extends SelectBaseOptions,
-    Partial<LoginOptions> {
+export interface ProcessOptions extends Partial<LoginOptions> {
+  server: string;
   /** 课程号 */
   courseId: string;
   jx0502id: string;
   jx0502zbid: string;
 }
 
-export interface ProcessSuccessResponse extends SelectBaseSuccessResponse {
+export interface ProcessSuccessResponse {
+  success: true;
   msg: string;
 }
 
-export interface ProcessFailedResponse extends SelectBaseFailedResponse {
+export interface ProcessFailedResponse extends CommonFailedResponse {
   type?: "conflict" | "relogin" | "forbid";
 }
 
@@ -51,7 +46,6 @@ export const processHandler: RequestHandler<
     if (!result.success) return res.json(result);
 
     req.body.server = result.server;
-    req.body.type = req.body.id.toString()[4] === "0" ? "under" : "post";
     req.headers.cookie = result.cookieStore.getHeader(result.server);
   }
 

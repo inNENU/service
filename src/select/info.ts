@@ -15,11 +15,6 @@ import {
   underMajorsStore,
   underParamsStore,
 } from "./store.js";
-import type {
-  CourseData,
-  SelectBaseSuccessResponse,
-  StudentInfo,
-} from "./typings.js";
 import { POST_COURSE_TYPES, UNDER_COURSE_TYPES } from "./utils.js";
 import type {
   CommonFailedResponse,
@@ -28,7 +23,31 @@ import type {
 } from "../typings.js";
 import { getResponseContent, readResponseContent } from "../utils/index.js";
 
-export interface SelectInfoSuccessResponse extends SelectBaseSuccessResponse {
+export interface CourseData {
+  /** 课程名称 */
+  name: string;
+  /** 课程 ID */
+  cid: string;
+}
+
+export interface StudentInfo {
+  /** 当前学期 */
+  period: string;
+  /** 阶段 */
+  stage: string;
+  /** 姓名 */
+  name: string;
+  /** 学号 */
+  id: string;
+  /** 年级 */
+  grade: string;
+  /** 专业名 */
+  majorName: string;
+  max: number;
+}
+
+export interface SelectInfoSuccessResponse {
+  success: true;
   jx0502id: string;
   jx0502zbid: string;
 

@@ -2,19 +2,14 @@ import type { RequestHandler } from "express";
 
 import { selectLogin } from "./login.js";
 import type {
-  SelectBaseFailedResponse,
-  SelectBaseOptions,
-  SelectBaseSuccessResponse,
-} from "./typings.js";
-import type {
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
 
-export interface SearchOptions
-  extends SelectBaseOptions,
-    Partial<LoginOptions> {
+export interface SearchOptions extends Partial<LoginOptions> {
+  server: string;
+
   /** 年级 */
   grade?: string;
   /** 专业 */
@@ -43,12 +38,13 @@ export interface CourseBasicInfo {
   type: string;
 }
 
-export interface SelectSearchSuccessResponse extends SelectBaseSuccessResponse {
+export interface SelectSearchSuccessResponse {
+  success: true;
   /** 课程信息 */
   courses: CourseBasicInfo[];
 }
 
-export interface SelectSearchFailedResponse extends SelectBaseFailedResponse {
+export interface SelectSearchFailedResponse extends CommonFailedResponse {
   type?: "relogin";
 }
 
@@ -74,7 +70,6 @@ export const searchHandler: RequestHandler<
       if (!result.success) return res.json(result);
 
       req.body.server = result.server;
-      req.body.type = req.body.id.toString()[4] === "0" ? "under" : "post";
       req.headers.cookie = result.cookieStore.getHeader(result.server);
     }
 
