@@ -86,7 +86,7 @@ const initRandomPassWord = (length: number): string => {
 
 export const getEmailInfo = async (
   cookieHeader: string,
-  info: MyInfo,
+  info: MyInfo
 ): Promise<GetEmailResponse> => {
   const checkMailResponse = await fetch(`${MY_SERVER}/Gryxsq/checkMailBox`, {
     method: "POST",
@@ -127,7 +127,7 @@ export const getEmailInfo = async (
         method: "getAccountList",
         paramStr: "{}",
       }),
-    },
+    }
   );
 
   const accountListResult = <RawAccountList>await accountListResponse.json();
@@ -152,7 +152,6 @@ export const getEmailInfo = async (
 export interface ActivateEmailOptions extends Partial<LoginOptions> {
   type: "set";
   name: string;
-  emailPassword?: string;
   phone: number | string;
   suffix?: number | string;
   taskId: string;
@@ -175,22 +174,12 @@ export type ActivateEmailResponse =
 
 const activateEmail = async (
   cookieHeader: string,
-  {
-    name,
-    // emailPassword,
-    phone,
-    suffix,
-    taskId,
-    instanceId,
-  }: ActivateEmailOptions,
-  info: MyInfo,
+  { name, phone, suffix, taskId, instanceId }: ActivateEmailOptions,
+  info: MyInfo
 ): Promise<ActivateEmailResponse> => {
-  // TODO: Update password detect
-  // const password = emailPassword || "inNENU4ever";
-  const password = "inNENU4ever";
-
+  const password = initRandomPassWord(10);
   const checkMailAccountResponse = await fetch(
-    "https://my.webvpn.nenu.edu.cn/Gryxsq/checkMailBoxAccount",
+    `${MY_SERVER}/Gryxsq/checkMailBoxAccount`,
     {
       method: "POST",
       headers: {
@@ -199,7 +188,7 @@ const activateEmail = async (
         Cookie: cookieHeader,
       },
       body: `mailBoxName=${name}`,
-    },
+    }
   );
 
   const checkResult = <{ suc: boolean }>await checkMailAccountResponse.json();
@@ -240,9 +229,9 @@ const activateEmail = async (
         YXMC: name ?? "",
         SFSYSZ: suffix ? "2" : "1",
         YXHZ: suffix?.toString() ?? "",
-        MM: initRandomPassWord(10),
+        MM: password,
       }),
-    },
+    }
   );
 
   const setMailResult = <{ success: boolean }>await setMailResponse.json();
