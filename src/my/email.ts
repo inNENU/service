@@ -191,9 +191,11 @@ const activateEmail = async (
     }
   );
 
-  const checkResult = <{ suc: boolean }>await checkMailAccountResponse.json();
+  const checkResult = <{ suc: boolean; error_code: string }>(
+    await checkMailAccountResponse.json()
+  );
 
-  if (checkResult.suc)
+  if (checkResult.suc || !checkResult.error_code.startsWith("ACCOUNT.NOTEXIST"))
     return {
       success: false,
       msg: "邮箱账户已存在",
