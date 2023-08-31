@@ -1,5 +1,3 @@
-import { writeFileSync } from "fs";
-
 import type { RequestHandler } from "express";
 
 import { selectLogin } from "./login.js";
@@ -323,8 +321,6 @@ export const selectInfo = async (
   });
 
   const documentContent = await getResponseContent(response);
-
-  writeFileSync("response", documentContent);
 
   if (documentContent.includes("不在选课时间范围内，无法选课!"))
     return <CommonFailedResponse>{

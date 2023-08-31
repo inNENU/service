@@ -26,5 +26,5 @@ const orgConfig: [string, number][] = [
 
 export const org2code = new Map<string, number>(orgConfig);
 export const code2org = new Map<number, string>(
-  orgConfig.map(([org, code]) => [code, org])
+  orgConfig.map(([org, code]) => [code, org]),
 );
