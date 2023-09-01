@@ -40,9 +40,9 @@ const getCourses = (content: string): TableItem =>
           teacher,
           time,
           location,
-        }),
-      ),
-    ),
+        })
+      )
+    )
   );
 
 export interface UnderCourseTableOptions extends Partial<LoginOptions> {
@@ -104,6 +104,12 @@ export const underCourseTableHandler: RequestHandler<
     });
 
     const content = await response.text();
+
+    if (content.includes("评教未完成，不能查看课表！"))
+      return res.json(<CommonFailedResponse>{
+        success: false,
+        msg: "评教未完成，不能查看课表！",
+      });
 
     const tableData = getCourses(content);
 
