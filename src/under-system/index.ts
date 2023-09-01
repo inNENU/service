@@ -1,3 +1,4 @@
+export * from "./change-major-plan.js";
 export * from "./check.js";
 export * from "./course-table.js";
 export * from "./grade-list.js";
