@@ -32,19 +32,19 @@ export interface AppliedTest {
   status: string;
 }
 
-export interface UnderTestApplySuccessResponse {
+export interface UnderTestQueySuccessResponse {
   success: true;
   apply: ApplyTest[];
   result: AppliedTest[];
 }
 
-export type UnderTestApplyFailedResponse =
+export type UnderTestQueyFailedResponse =
   | AuthLoginFailedResult
   | VPNLoginFailedResult;
 
-export type UnderTestApplyResponse =
-  | UnderTestApplySuccessResponse
-  | UnderTestApplyFailedResponse;
+export type UnderTestQueyResponse =
+  | UnderTestQueySuccessResponse
+  | UnderTestQueyFailedResponse;
 
 export const underTestQueryHandler: RequestHandler<
   EmptyObject,
@@ -95,7 +95,7 @@ export const underTestQueryHandler: RequestHandler<
           Referer: QUERY_URL,
           "User-Agent": IE_8_USER_AGENT,
         },
-      },
+      }
     );
 
     const applyContent = await applyListResponse.text();
@@ -103,7 +103,7 @@ export const underTestQueryHandler: RequestHandler<
     const applyTable = tableRegExp.exec(applyContent)![0];
 
     const applyList = Array.from(applyTable.matchAll(applyRowRexExp)).map(
-      ([, url, name, time, type]) => ({ name, time, type, url }),
+      ([, url, name, time, type]) => ({ name, time, type, url })
     );
 
     const resultListResponse = await fetch(
@@ -114,7 +114,7 @@ export const underTestQueryHandler: RequestHandler<
           Referer: QUERY_URL,
           "User-Agent": IE_8_USER_AGENT,
         },
-      },
+      }
     );
 
     const resultContent = await resultListResponse.text();
@@ -122,10 +122,10 @@ export const underTestQueryHandler: RequestHandler<
     const resultTable = tableRegExp.exec(resultContent)![0];
 
     const resultList = Array.from(resultTable.matchAll(resultRowRexExp)).map(
-      ([, name, time, type, status]) => ({ name, time, type, status }),
+      ([, name, time, type, status]) => ({ name, time, type, status })
     );
 
-    return res.json(<UnderTestApplySuccessResponse>{
+    return res.json(<UnderTestQueySuccessResponse>{
       success: true,
       apply: applyList,
       result: resultList,
