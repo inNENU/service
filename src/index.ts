@@ -62,11 +62,13 @@ import {
 } from "./select/index.js";
 import type { CommonFailedResponse } from "./typings.js";
 import {
+  underChangeMajorPlanHandler,
   underCourseTableHandler,
   underGradeListHandler,
   underInfoHandler,
   underSystemCheckHandler,
   underSystemLoginHandler,
+  underTestQueryHandler,
 } from "./under-system/index.js";
 import { vpnCASLoginHandler, vpnLoginHandler } from "./vpn/index.js";
 import { weatherHandler } from "./weather/handler.js";
@@ -120,9 +122,11 @@ app.post("/my/email", emailHandler);
 
 app.post("/under-system/login", underSystemLoginHandler);
 app.post("/under-system/check", underSystemCheckHandler);
+app.post("/under-system/change-major-plan", underChangeMajorPlanHandler);
 app.post("/under-system/course-table", underCourseTableHandler);
 app.post("/under-system/grade-list", underGradeListHandler);
 app.post("/under-system/info", underInfoHandler);
+app.post("/under-system/test-query", underTestQueryHandler);
 
 app.post("/post-new-system/login", postNewSystemLoginHandler);
 app.post("/post-new-system/info", postNewInfoHandler);

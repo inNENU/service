@@ -11,6 +11,7 @@ import type {
 } from "../typings.js";
 import { IE_8_USER_AGENT } from "../utils/index.js";
 import type { VPNLoginFailedResult } from "../vpn/login.js";
+import { LoginFailType } from "../config/loginFailTypes.js";
 
 export interface ClassItem {
   name: string;
@@ -40,9 +41,9 @@ const getCourses = (content: string): TableItem =>
           teacher,
           time,
           location,
-        }),
-      ),
-    ),
+        })
+      )
+    )
   );
 
 export interface UnderCourseTableOptions extends Partial<LoginOptions> {
@@ -58,7 +59,8 @@ export interface UnderCourseTableSuccessResponse {
 
 export type UnderCourseTableFailedResponse =
   | AuthLoginFailedResult
-  | VPNLoginFailedResult;
+  | VPNLoginFailedResult
+  | CommonFailedResponse;
 
 export type UnderCourseTableResponse =
   | UnderCourseTableSuccessResponse
@@ -101,9 +103,23 @@ export const underCourseTableHandler: RequestHandler<
         Referer: `${SERVER}/tkglAction.do?method=kbxxXs&tktime=${getTimeStamp()}`,
         "User-Agent": IE_8_USER_AGENT,
       },
+      redirect: "manual",
     });
 
+    if (response.status === 302)
+      return res.json(<CommonFailedResponse>{
+        success: false,
+        type: LoginFailType.Expired,
+        msg: "登录已过期，请重试",
+      });
+
     const content = await response.text();
+
+    if (content.includes("评教未完成，不能查看课表！"))
+      return res.json(<CommonFailedResponse>{
+        success: false,
+        msg: "上学期评教未完成，不能查看本学期课表",
+      });
 
     const tableData = getCourses(content);
 

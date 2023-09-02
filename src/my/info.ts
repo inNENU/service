@@ -112,7 +112,7 @@ export interface MyInfoSuccessResult {
 export type MyInfoResult = MyInfoSuccessResult | CommonFailedResponse;
 
 export const getMyInfo = async (
-  cookieHeader: string,
+  cookieHeader: string
 ): Promise<MyInfoResult> => {
   try {
     const infoResponse = await fetch(`${MY_SERVER}/sysform/loadIntelligent`, {
@@ -204,15 +204,19 @@ export const getMyInfo = async (
           ].includes(info.orgId)
         ? "benbu"
         : [161000, 169000, 252000, 168000, 261000, 178000, 235000].includes(
-            info.orgId,
+            info.orgId
           )
         ? "jingyue"
         : "unknown";
 
       if (!code2org.has(info.orgId)) {
-        writeFileSync("data", `["${info.org}", ${info.orgId}],\n`, {
-          flag: "a",
-        });
+        writeFileSync(
+          "data",
+          `["${info.org}", ${info.orgId}], // ${info.major}\n`,
+          {
+            flag: "a",
+          }
+        );
         code2org.set(info.orgId, info.org);
       }
 

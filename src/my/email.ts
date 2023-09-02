@@ -152,7 +152,6 @@ export const getEmailInfo = async (
 export interface ActivateEmailOptions extends Partial<LoginOptions> {
   type: "set";
   name: string;
-  emailPassword?: string;
   phone: number | string;
   suffix?: number | string;
   taskId: string;
@@ -175,22 +174,12 @@ export type ActivateEmailResponse =
 
 const activateEmail = async (
   cookieHeader: string,
-  {
-    name,
-    // emailPassword,
-    phone,
-    suffix,
-    taskId,
-    instanceId,
-  }: ActivateEmailOptions,
+  { name, phone, suffix, taskId, instanceId }: ActivateEmailOptions,
   info: MyInfo,
 ): Promise<ActivateEmailResponse> => {
-  // TODO: Update password detect
-  // const password = emailPassword || "inNENU4ever";
-  const password = "inNENU4ever";
-
+  const password = initRandomPassWord(10);
   const checkMailAccountResponse = await fetch(
-    "https://my.webvpn.nenu.edu.cn/Gryxsq/checkMailBoxAccount",
+    `${MY_SERVER}/Gryxsq/checkMailBoxAccount`,
     {
       method: "POST",
       headers: {
@@ -202,9 +191,11 @@ const activateEmail = async (
     },
   );
 
-  const checkResult = <{ suc: boolean }>await checkMailAccountResponse.json();
+  const checkResult = <{ suc: boolean; error_code: string }>(
+    await checkMailAccountResponse.json()
+  );
 
-  if (checkResult.suc)
+  if (checkResult.suc || !checkResult.error_code.startsWith("ACCOUNT.NOTEXIST"))
     return {
       success: false,
       msg: "邮箱账户已存在",
@@ -240,7 +231,7 @@ const activateEmail = async (
         YXMC: name ?? "",
         SFSYSZ: suffix ? "2" : "1",
         YXHZ: suffix?.toString() ?? "",
-        MM: initRandomPassWord(10),
+        MM: password,
       }),
     },
   );
