@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
 import { underSystemLogin } from "./login.js";
-import { SERVER, getTimeStamp } from "./utils.js";
+import { SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import type {
   CommonFailedResponse,
@@ -11,7 +11,10 @@ import type {
 import { IE_8_USER_AGENT } from "../utils/index.js";
 import type { VPNLoginFailedResult } from "../vpn/login.js";
 
-const headerRegExp = /<title>(.*)<\/title>/;
+const selectRegExp =
+  /<select\s+name="kskzid"\s+id="kskzid"[^>]*><option value="">---请选择---<\/option>([\s\S]*?)<\/select>/;
+const optionRegExp = /<option value="([^"]+)">([^<]+)<\/option>/g;
+
 const keyCodeRegExp =
   /<input\s+type="hidden"\s+name\s*=\s*"keyCode"\s+id\s*=\s*"keyCode"\s+value="([^"]*?)">/;
 const printHQLInputRegExp =
@@ -30,79 +33,64 @@ const tableFieldsRegExp =
   /<input type="hidden"\s+name\s*=\s*"tableFields"\s+id\s*=\s*"tableFields"\s+value="([^"]+?)">/;
 const otherFieldsRegExp =
   /<input\s+type="hidden"\s+name\s*=\s*"otherFields"\s+id\s*=\s*"otherFields"\s+value="([^"]*?)">/;
-const planRegExp =
-  /<tr[^>]*><td[^>]*>.*?<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<\/tr>/g;
+const examRegExp =
+  /<tr[^>]*><td[^>]*>.*?<\/td>\s*<td[^>]*>.*?<\/td>\s*<td[^>]*>.*?<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<\/tr>/g;
 
 const DEFAULT_TABLE_FIELD =
-  "控制名称:12:1:100:e.kzmc,学院:11:1:150:c.dwmc,专业名称:10:1:150:zymc,接收科类:16:1:80:zykl,考核方式:3:1:70:zzykhfs.dmmc,考核时间:4:1:110:khsj,考核地点:5:1:80:khdd,拟转入人数:6:1:90:zrrs,报名人数:17:1:90:jyzrrs,转入条件:15:1:60:zrtj,联系人:18:1:90:lxr,咨询电话:19:1:100:lxdh";
+  "学号:0:1:90:xh,姓名:1:1:90:xm,课程名称:2:1:130:course_name,考试时间:3:1:260:kw0403.ksqssj,校区名称:4:1:200:xqmc,教学楼:5:1:300:jxl,考场:6:1:420:kw0404.kcmc";
 const DEFAULT_OTHER_FIELD = "null";
 
-const QUERY_URL = `${SERVER}/jiaowu/xjgl/zzygl/zzyxxgl_xsd_list.jsp`;
+const INFO_URL = `${SERVER}/jiaowu/kwgl/kwgl_xsJgfb_soso.jsp`;
+const QUERY_URL = `${SERVER}/kwsjglAction.do?method=sosoXsFb`;
 
-export interface ChangeMajorPlan {
-  /** 学院 */
-  school: string;
-  /** 专业 */
-  major: string;
-  /** 科类 */
-  subject: string;
-  /** 考试类型 */
-  examType: string;
-  /** 考试时间 */
+export interface ExamPlace {
+  /** 课程 */
+  course: string;
+  /** 时间 */
   time: string;
-  /** 考试地点 */
-  location: string;
-  /** 计划数 */
-  plan: number;
-  /** 当前报名人数 */
-  current: number;
-  /** 准入要求 */
-  requirement: string;
-  /** 联系人 */
-  contact: string;
-  /** 电话 */
-  phone: string;
+  /** 校区 */
+  campus: string;
+  /** 教学楼 */
+  building: string;
+  /** 考场 */
+  classroom: string;
 }
 
-const getPlans = (content: string): ChangeMajorPlan[] =>
-  Array.from(content.matchAll(planRegExp)).map(
-    ([
-      ,
-      ,
-      school,
-      major,
-      subject,
-      examType,
-      time,
-      location,
-      plan,
-      current,
-      requirement,
-      contact,
-      phone,
-    ]) => ({
-      school,
-      major,
-      subject,
-      examType,
-      time,
-      location,
-      plan: Number(plan),
-      current: Number(current),
-      requirement: requirement
-        .replace(/准入考核内容/g, "\n准入考核内容")
-        .replace(/(\d+)\./g, "\n$1.")
-        .replace(/([一二三四五六七八九十]+)、/g, "\n$1、")
-        .trim(),
-      contact,
-      phone,
-    }),
-  );
+const getExamPlaces = (content: string): ExamPlace[] =>
+  Array.from(content.matchAll(examRegExp)).map((item) => {
+    const [, course, time, campus, building, classroom] = item.map((text) =>
+      text.replace(/&nbsp;/g, "").trim(),
+    );
 
-export const getPlanList = async (
+    return {
+      course,
+      time,
+      campus,
+      building,
+      classroom,
+    };
+  });
+
+export const getExamList = async (
   cookieHeader: string,
-  content: string,
-): Promise<ChangeMajorPlan[]> => {
+  value: string,
+): Promise<ExamPlace[]> => {
+  const response = await fetch(QUERY_URL, {
+    method: "POST",
+    headers: {
+      Cookie: cookieHeader,
+      "Content-Type": "application/x-www-form-urlencoded",
+      Referer: INFO_URL,
+      "User-Agent": IE_8_USER_AGENT,
+    },
+    body: new URLSearchParams({
+      xnxq: "",
+      kskzid: value,
+    }),
+  });
+
+  const content = await response.text();
+
   // We force writing these 2 field to ensure we care getting the default table structure
   const tableFields = tableFieldsRegExp.exec(content)![1];
   const otherFields = String(otherFieldsRegExp.exec(content)?.[1]);
@@ -112,11 +100,11 @@ export const getPlanList = async (
   const shouldRefetch =
     tableFields !== DEFAULT_TABLE_FIELD || otherFields !== DEFAULT_OTHER_FIELD;
 
-  const plans = shouldRefetch ? [] : getPlans(content);
+  const exams = shouldRefetch ? [] : getExamPlaces(content);
 
   console.log("Total pages:", totalPages);
 
-  if (totalPages === 1 && !shouldRefetch) return plans;
+  if (totalPages === 1 && !shouldRefetch) return exams;
 
   const field = String(fieldRegExp.exec(content)?.[1]);
   const printPageSize = String(printPageSizeRegExp.exec(content)?.[1]);
@@ -145,12 +133,12 @@ export const getPlanList = async (
         otherFields: DEFAULT_OTHER_FIELD,
       });
 
-      const response = await fetch(QUERY_URL, {
+      const response = await fetch(INFO_URL, {
         method: "POST",
         headers: {
           Cookie: cookieHeader,
           "Content-Type": "application/x-www-form-urlencoded",
-          Referer: QUERY_URL,
+          Referer: INFO_URL,
           "User-Agent": IE_8_USER_AGENT,
         },
         body: params.toString(),
@@ -158,32 +146,34 @@ export const getPlanList = async (
 
       const responseText = await response.text();
 
-      const newPlans = getPlans(responseText);
+      const newExamPlaces = getExamPlaces(responseText);
 
-      plans.push(...newPlans);
+      exams.push(...newExamPlaces);
     }),
   );
 
-  return plans;
+  return exams;
 };
 
-export interface UnderChangeMajorPlanSuccessResponse {
+export interface UnderExamPlaceSuccessResponse {
   success: true;
-  /** 计划标题 */
-  header: string;
+
   /** 计划 */
-  plans: ChangeMajorPlan[];
+  data: {
+    name: string;
+    exams: ExamPlace[];
+  }[];
 }
 
-export type UnderChangeMajorPlanFailedResponse =
+export type UnderExamPlaceFailedResponse =
   | AuthLoginFailedResult
   | VPNLoginFailedResult;
 
-export type UnderChangeMajorPlanResponse =
-  | UnderChangeMajorPlanSuccessResponse
-  | UnderChangeMajorPlanFailedResponse;
+export type UnderExamPlaceResponse =
+  | UnderExamPlaceSuccessResponse
+  | UnderExamPlaceFailedResponse;
 
-export const underChangeMajorPlanHandler: RequestHandler<
+export const underExamPlaceHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
   Partial<LoginOptions>
@@ -205,7 +195,7 @@ export const underChangeMajorPlanHandler: RequestHandler<
       cookieHeader = result.cookieStore.getHeader(SERVER);
     }
 
-    const response = await fetch(`${QUERY_URL}?tktime=${getTimeStamp()}`, {
+    const response = await fetch(INFO_URL, {
       headers: {
         Cookie: cookieHeader,
         "User-Agent": IE_8_USER_AGENT,
@@ -213,14 +203,22 @@ export const underChangeMajorPlanHandler: RequestHandler<
     });
 
     const content = await response.text();
-    const header = headerRegExp.exec(content)![1].trim();
+    const select = selectRegExp.exec(content)![1].trim();
 
-    const plans = await getPlanList(cookieHeader, content);
+    const options = Array.from(select.matchAll(optionRegExp)).map(
+      ([, value, name]) => ({ value, name }),
+    );
 
-    return res.json(<UnderChangeMajorPlanSuccessResponse>{
+    const data = await Promise.all(
+      options.map(async ({ name, value }) => ({
+        name,
+        exams: await getExamList(cookieHeader!, value),
+      })),
+    );
+
+    return res.json(<UnderExamPlaceSuccessResponse>{
       success: true,
-      header,
-      plans,
+      data,
     });
   } catch (err) {
     const { message } = <Error>err;
