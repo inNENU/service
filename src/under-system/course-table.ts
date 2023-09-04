@@ -3,6 +3,7 @@ import type { RequestHandler } from "express";
 import { underSystemLogin } from "./login.js";
 import { SERVER, getTimeStamp } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
+import { LoginFailType } from "../config/loginFailTypes.js";
 import { semesterStartTime } from "../config/semester-start-time.js";
 import type {
   CommonFailedResponse,
@@ -11,7 +12,6 @@ import type {
 } from "../typings.js";
 import { IE_8_USER_AGENT } from "../utils/index.js";
 import type { VPNLoginFailedResult } from "../vpn/login.js";
-import { LoginFailType } from "../config/loginFailTypes.js";
 
 export interface ClassItem {
   name: string;
@@ -41,9 +41,9 @@ const getCourses = (content: string): TableItem =>
           teacher,
           time,
           location,
-        })
-      )
-    )
+        }),
+      ),
+    ),
   );
 
 export interface UnderCourseTableOptions extends Partial<LoginOptions> {

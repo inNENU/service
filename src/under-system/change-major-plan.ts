@@ -11,7 +11,7 @@ import type {
 import { IE_8_USER_AGENT } from "../utils/index.js";
 import type { VPNLoginFailedResult } from "../vpn/login.js";
 
-const titleRegExp = /<title>(.*)<\/title>/;
+const headerRegExp = /<title>(.*)<\/title>/;
 const keyCodeRegExp =
   /<input\s+type="hidden"\s+name\s*=\s*"keyCode"\s+id\s*=\s*"keyCode"\s+value="([^"]*?)">/;
 const printHQLInputRegExp =
@@ -39,13 +39,36 @@ const DEFAULT_OTHER_FIELD = "null";
 
 const QUERY_URL = `${SERVER}/jiaowu/xjgl/zzygl/zzyxxgl_xsd_list.jsp`;
 
-export interface ChangeMajorPlan {}
+export interface ChangeMajorPlan {
+  /** 学院 */
+  school: string;
+  /** 专业 */
+  major: string;
+  /** 科类 */
+  subject: string;
+  /** 考试类型 */
+  examType: string;
+  /** 考试时间 */
+  time: string;
+  /** 考试地点 */
+  location: string;
+  /** 计划数 */
+  plan: number;
+  /** 当前报名人数 */
+  current: number;
+  /** 准入要求 */
+  requirement: string;
+  /** 联系人 */
+  contact: string;
+  /** 电话 */
+  phone: string;
+}
 
 const getPlans = (content: string): ChangeMajorPlan[] =>
   Array.from(content.matchAll(planRegExp)).map(
     ([
       ,
-      category,
+      ,
       school,
       major,
       subject,
@@ -58,16 +81,19 @@ const getPlans = (content: string): ChangeMajorPlan[] =>
       contact,
       phone,
     ]) => ({
-      category,
       school,
       major,
       subject,
       examType,
       time,
       location,
-      plan,
-      current,
-      requirement,
+      plan: Number(plan),
+      current: Number(current),
+      requirement: requirement
+        .replace(/准入考核内容/g, "\n准入考核内容")
+        .replace(/(\d+)\./g, "\n$1.")
+        .replace(/([一二三四五六七八九十]+)、/g, "\n$1、")
+        .trim(),
       contact,
       phone,
     })
@@ -144,7 +170,7 @@ export const getPlanList = async (
 export interface UnderChangeMajorPlanSuccessResponse {
   success: true;
   /** 计划标题 */
-  title: string;
+  header: string;
   /** 计划 */
   plans: ChangeMajorPlan[];
 }
@@ -187,13 +213,13 @@ export const underChangeMajorPlanHandler: RequestHandler<
     });
 
     const content = await response.text();
-    const title = titleRegExp.exec(content)![1];
+    const header = headerRegExp.exec(content)![1].trim();
 
     const plans = await getPlanList(cookieHeader, content);
 
     return res.json(<UnderChangeMajorPlanSuccessResponse>{
       success: true,
-      title,
+      header,
       plans,
     });
   } catch (err) {

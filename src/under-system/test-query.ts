@@ -95,7 +95,7 @@ export const underTestQueryHandler: RequestHandler<
           Referer: QUERY_URL,
           "User-Agent": IE_8_USER_AGENT,
         },
-      }
+      },
     );
 
     const applyContent = await applyListResponse.text();
@@ -103,7 +103,7 @@ export const underTestQueryHandler: RequestHandler<
     const applyTable = tableRegExp.exec(applyContent)![0];
 
     const applyList = Array.from(applyTable.matchAll(applyRowRexExp)).map(
-      ([, url, name, time, type]) => ({ name, time, type, url })
+      ([, url, name, time, type]) => ({ name, time, type, url }),
     );
 
     const resultListResponse = await fetch(
@@ -114,7 +114,7 @@ export const underTestQueryHandler: RequestHandler<
           Referer: QUERY_URL,
           "User-Agent": IE_8_USER_AGENT,
         },
-      }
+      },
     );
 
     const resultContent = await resultListResponse.text();
@@ -122,7 +122,7 @@ export const underTestQueryHandler: RequestHandler<
     const resultTable = tableRegExp.exec(resultContent)![0];
 
     const resultList = Array.from(resultTable.matchAll(resultRowRexExp)).map(
-      ([, name, time, type, status]) => ({ name, time, type, status })
+      ([, name, time, type, status]) => ({ name, time, type, status }),
     );
 
     return res.json(<UnderTestQueySuccessResponse>{
