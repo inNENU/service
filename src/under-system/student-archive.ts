@@ -17,6 +17,9 @@ const studyRegExp =
 const familyRegExp =
   /<td {2}>(\S+)<\/td>\s*<td {2}>(\S+)<\/td>\s*<td\scolspan="2">(\S+)<\/td>\s*<td\scolspan="2">(\S+)<\/td>\s*<td\scolspan="3">(\S+)<\/td>\s*<td {2}>(\S+)<\/td/g;
 const pathRegExp = /var newwin = window.showModalDialog\("(.+?)"\);/;
+const registerButtonRegExp =
+  /<input\s+type="button"\s+id="zc"\s+class="button"\s+value="确定注册"\s+onclick="bc()"\/>/;
+const isRegisteredRegExp = /您已经提交注册信息/;
 
 const UNDER_STUDENT_ARCHIVE_QUERY_URL = `${SERVER}/xszhxxAction.do?method=addStudentPic_xszc`;
 
@@ -66,8 +69,10 @@ export interface UnderStudentArchiveInfo {
   study: UnderStudyInfo[];
   /** 家庭信息 */
   family: UnderFamilyInfo[];
+  /** 是否能注册 */
+  canRegister: boolean;
   /** 是否已注册 */
-  registered: boolean;
+  isRegistered: boolean;
   /** 注册路径 */
   path: string;
 }
@@ -137,7 +142,8 @@ const getStudentArchive = async (
     examImage,
     study,
     family,
-    registered: content.includes("您已经提交注册信息"),
+    canRegister: registerButtonRegExp.test(content),
+    isRegistered: isRegisteredRegExp.test(content),
     path,
   };
 };
