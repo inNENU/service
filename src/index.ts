@@ -67,6 +67,7 @@ import {
   underExamPlaceHandler,
   underGradeListHandler,
   underInfoHandler,
+  underStudentArchiveHandler,
   underSystemCheckHandler,
   underSystemLoginHandler,
   underTestQueryHandler,
@@ -128,6 +129,7 @@ app.post("/under-system/course-table", underCourseTableHandler);
 app.post("/under-system/exam-place", underExamPlaceHandler);
 app.post("/under-system/grade-list", underGradeListHandler);
 app.post("/under-system/info", underInfoHandler);
+app.post("/under-system/student-archive", underStudentArchiveHandler);
 app.post("/under-system/test-query", underTestQueryHandler);
 
 app.post("/post-new-system/login", postNewSystemLoginHandler);

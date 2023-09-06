@@ -143,7 +143,7 @@ export type UnderInfoResponse =
   | CommonFailedResponse;
 
 export const getUnderInfo = async (
-  cookieHeader: string
+  cookieHeader: string,
 ): Promise<UnderInfoResponse> => {
   const response = await fetch(
     `${STUDENT_ARCHIVE_QUERY_URL}&tktime=${getTimeStamp()}`,
@@ -153,7 +153,7 @@ export const getUnderInfo = async (
         Referer: `${SERVER}/framework/new_window.jsp?lianjie=&winid=win3`,
         "User-Agent": IE_8_USER_AGENT,
       },
-    }
+    },
   );
 
   const content = await response.text();
