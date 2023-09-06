@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
 import { underSystemLogin } from "./login.js";
-import { getTimeStamp } from "./utils.js";
+import { SERVER, getTimeStamp } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import type {
   CommonFailedResponse,
@@ -43,8 +43,7 @@ const PROVINCE_REGEXP =
 const CANDIDATE_TYPE_REGEXP =
   /<td>考生类别<\/td>\s+<td colspan="2">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/;
 
-export const STUDENT_ARCHIVE_QUERY_URL =
-  "https://dsjx.webvpn.nenu.edu.cn/xszhxxAction.do?method=addStudentPic_xszc";
+export const STUDENT_ARCHIVE_QUERY_URL = `${SERVER}/xszhxxAction.do?method=addStudentPic_xszc`;
 
 export interface UnderStudentInfo {
   /** 姓名 */
@@ -144,18 +143,17 @@ export type UnderInfoResponse =
   | CommonFailedResponse;
 
 export const getUnderInfo = async (
-  cookieHeader: string,
+  cookieHeader: string
 ): Promise<UnderInfoResponse> => {
   const response = await fetch(
     `${STUDENT_ARCHIVE_QUERY_URL}&tktime=${getTimeStamp()}`,
     {
       headers: {
         Cookie: cookieHeader,
-        Referer:
-          "https://dsjx.webvpn.nenu.edu.cn/framework/new_window.jsp?lianjie=&winid=win3",
+        Referer: `${SERVER}/framework/new_window.jsp?lianjie=&winid=win3`,
         "User-Agent": IE_8_USER_AGENT,
       },
-    },
+    }
   );
 
   const content = await response.text();
