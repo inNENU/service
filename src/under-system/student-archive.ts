@@ -16,6 +16,7 @@ const studyRegExp =
   /<td {2}>(\S+)<\/td>\s*<td {2}>(\S+)<\/td>\s*<td\scolspan="4">(\S+)<\/td>\s*<td {2}>(\S+)<\/td>\s*<td\scolspan="2">(\S+)<\/td>\s*<td {2}>(\S+)<\/td>/g;
 const familyRegExp =
   /<td {2}>(\S+)<\/td>\s*<td {2}>(\S+)<\/td>\s*<td\scolspan="2">(\S+)<\/td>\s*<td\scolspan="2">(\S+)<\/td>\s*<td\scolspan="3">(\S+)<\/td>\s*<td {2}>(\S+)<\/td/g;
+const pathRegExp = /var newwin = window.showModalDialog\("(.+?)"\);/;
 
 const UNDER_STUDENT_ARCHIVE_QUERY_URL = `${SERVER}/xszhxxAction.do?method=addStudentPic_xszc`;
 
@@ -61,13 +62,18 @@ export interface UnderStudentArchiveInfo {
   examImage: string;
   /** 基础信息 */
   basic: UnderBasicInfo[];
+  /** 学习经历信息 */
   study: UnderStudyInfo[];
+  /** 家庭信息 */
   family: UnderFamilyInfo[];
+  /** 是否已注册 */
   registered: boolean;
+  /** 注册路径 */
+  path: string;
 }
 
 const getStudentArchive = async (
-  content: string,
+  content: string
 ): Promise<UnderStudentArchiveInfo> => {
   const [baseInfo, tableInfo] = content.split("本人学历及社会经历");
   const [studyInfo, familyInfo] = tableInfo.split("家庭成员及主要社会关系");
@@ -76,7 +82,7 @@ const getStudentArchive = async (
     ([, text, value]) => ({
       text: text.replace(/&nbsp;/g, ""),
       value,
-    }),
+    })
   );
   const study = Array.from(studyInfo.matchAll(studyRegExp))
     .map(([, startTime, endTime, school, title, witness, remark]) => ({
@@ -89,7 +95,7 @@ const getStudentArchive = async (
     }))
     .filter(
       ({ startTime, endTime, school, title, witness, remark }) =>
-        startTime || endTime || school || title || witness || remark,
+        startTime || endTime || school || title || witness || remark
     );
   const family = Array.from(familyInfo.matchAll(familyRegExp))
     .map(([, name, relation, office, title, phone, remark]) => ({
@@ -102,7 +108,7 @@ const getStudentArchive = async (
     }))
     .filter(
       ({ name, relation, office, title, phone, remark }) =>
-        name || relation || office || title || phone || remark,
+        name || relation || office || title || phone || remark
     );
 
   const id = basic.find(({ text }) => text === "学籍号")!.value;
@@ -112,16 +118,18 @@ const getStudentArchive = async (
     fetch(`${SERVER}/gkuploadfile/studentphoto/pic/${idCard}.JPG`).then(
       async (examImageResponse) =>
         `data:image/jpeg;base64,${Buffer.from(
-          await examImageResponse.arrayBuffer(),
-        ).toString("base64")}`,
+          await examImageResponse.arrayBuffer()
+        ).toString("base64")}`
     ),
     fetch(`${SERVER}/rxuploadfile/studentphoto/pic/${id}.JPG`).then(
       async (archiveImageResponse) =>
         `data:image/jpeg;base64,${Buffer.from(
-          await archiveImageResponse.arrayBuffer(),
-        ).toString("base64")}`,
+          await archiveImageResponse.arrayBuffer()
+        ).toString("base64")}`
     ),
   ]);
+
+  const path = pathRegExp.exec(content)?.[1] || "";
 
   return {
     basic,
@@ -130,6 +138,7 @@ const getStudentArchive = async (
     study,
     family,
     registered: content.includes("您已经提交注册信息"),
+    path,
   };
 };
 
@@ -148,7 +157,7 @@ export type UnderGetStudentArchiveResponse =
   | CommonFailedResponse;
 
 export const getUnderStudentArchive = async (
-  cookieHeader: string,
+  cookieHeader: string
 ): Promise<UnderGetStudentArchiveResponse> => {
   const response = await fetch(
     `${UNDER_STUDENT_ARCHIVE_QUERY_URL}&tktime=${getTimeStamp()}`,
@@ -158,7 +167,7 @@ export const getUnderStudentArchive = async (
         Referer: `${SERVER}/framework/new_window.jsp?lianjie=&winid=win3`,
         "User-Agent": IE_8_USER_AGENT,
       },
-    },
+    }
   );
 
   const content = await response.text();
@@ -183,7 +192,7 @@ const alertRegExp = /window.alert\('(.+?)'\)/;
 export interface RegisterUnderStudentArchiveOptions
   extends Partial<LoginOptions> {
   type?: "register";
-  id: number;
+  path: string;
 }
 
 export interface UnderRegisterStudentArchiveSuccessResponse {
@@ -197,9 +206,9 @@ export type UnderRegisterStudentArchiveResponse =
 
 export const registerStudentArchive = async (
   cookieHeader: string,
-  id: number,
+  path: string
 ): Promise<UnderRegisterStudentArchiveResponse> => {
-  const url = `${SERVER}/xszhxxAction.do?method=addStudentPic_ZC&xs0101id=${id}`;
+  const url = `${SERVER}${path}`;
 
   const registerResponse = await fetch(url, {
     headers: {
@@ -241,12 +250,14 @@ export const underStudentArchiveHandler: RequestHandler<
       if (!result.success) return res.json(result);
 
       cookieHeader = result.cookieStore.getHeader(
-        UNDER_STUDENT_ARCHIVE_QUERY_URL,
+        UNDER_STUDENT_ARCHIVE_QUERY_URL
       );
     }
 
     if (req.body.type === "register")
-      return res.json(await registerStudentArchive(cookieHeader, req.body.id));
+      return res.json(
+        await registerStudentArchive(cookieHeader, req.body.path)
+      );
 
     return res.json(await getUnderStudentArchive(cookieHeader));
   } catch (err) {
