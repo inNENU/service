@@ -16,6 +16,9 @@ const studyRegExp =
   /<td {2}>(\S+)<\/td>\s*<td {2}>(\S+)<\/td>\s*<td\scolspan="4">(\S+)<\/td>\s*<td {2}>(\S+)<\/td>\s*<td\scolspan="2">(\S+)<\/td>\s*<td {2}>(\S+)<\/td>/g;
 const familyRegExp =
   /<td {2}>(\S+)<\/td>\s*<td {2}>(\S+)<\/td>\s*<td\scolspan="2">(\S+)<\/td>\s*<td\scolspan="2">(\S+)<\/td>\s*<td\scolspan="3">(\S+)<\/td>\s*<td {2}>(\S+)<\/td/g;
+const archiveImageRegExp =
+  /"(\/rxuploadfile\/studentphoto\/pic\/(?:.+?)\.JPG)"/;
+const examImageRegExp = /"(\/gkuploadfile\/studentphoto\/pic\/(?:.+?)\.JPG)"/;
 const pathRegExp = /var newwin = window.showModalDialog\("(.+?)"\);/;
 const registerButtonRegExp =
   /<input\s+type="button"\s+id="zc"\s+class="button"\s+value="确定注册"\s+onclick="bc()"\/>/;
@@ -116,22 +119,26 @@ const getStudentArchive = async (
         name || relation || office || title || phone || remark
     );
 
-  const id = basic.find(({ text }) => text === "学籍号")!.value;
-  const idCard = basic.find(({ text }) => text === "身份证号")!.value;
+  const archiveImageLink = archiveImageRegExp.exec(content)?.[1] || "";
+  const examImageLink = examImageRegExp.exec(content)?.[1] || "";
 
-  const [examImage, archiveImage] = await Promise.all([
-    fetch(`${SERVER}/gkuploadfile/studentphoto/pic/${idCard}.JPG`).then(
-      async (examImageResponse) =>
-        `data:image/jpeg;base64,${Buffer.from(
-          await examImageResponse.arrayBuffer()
-        ).toString("base64")}`
-    ),
-    fetch(`${SERVER}/rxuploadfile/studentphoto/pic/${id}.JPG`).then(
-      async (archiveImageResponse) =>
-        `data:image/jpeg;base64,${Buffer.from(
-          await archiveImageResponse.arrayBuffer()
-        ).toString("base64")}`
-    ),
+  const [archiveImage, examImage] = await Promise.all([
+    archiveImageLink
+      ? fetch(`${SERVER}${archiveImageLink}`).then(
+          async (archiveImageResponse) =>
+            `data:image/jpeg;base64,${Buffer.from(
+              await archiveImageResponse.arrayBuffer()
+            ).toString("base64")}`
+        )
+      : "",
+    examImageLink
+      ? fetch(`${SERVER}${examImageLink}`).then(
+          async (examImageResponse) =>
+            `data:image/jpeg;base64,${Buffer.from(
+              await examImageResponse.arrayBuffer()
+            ).toString("base64")}`
+        )
+      : "",
   ]);
 
   const path = pathRegExp.exec(content)?.[1] || "";
