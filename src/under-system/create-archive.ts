@@ -17,29 +17,29 @@ export interface ReadonlyUnderArchiveInfo {
 }
 
 export interface SelectUnderArchiveInfo {
-  text: string;
-  value: string;
   name: string;
+  text: string;
+  defaultValue: string;
   checkboxName: string;
   checkboxValue: string;
   options: { text: string; value: string }[];
   remark: string;
 }
 
-export interface UnderCreateStudentArchiveOptions
+export interface UnderCreateStudentArchiveGetInfoOptions
   extends Partial<LoginOptions> {
   type: "get-info";
 }
 
-export interface UnderCreateStudentArchiveSuccessResponse {
+export interface GetUnderCreateStudentArchiveInfoSuccessResponse {
   success: true;
   readonly: ReadonlyUnderArchiveInfo[];
   editable: SelectUnderArchiveInfo[];
-  hidden: { name: string; value: string }[];
+  fields: { name: string; value: string }[];
 }
 
-export type UnderCreateStudentArchiveResponse =
-  | UnderCreateStudentArchiveSuccessResponse
+export type GetUnderCreateStudentArchiveInfoResponse =
+  | GetUnderCreateStudentArchiveInfoSuccessResponse
   | AuthLoginFailedResult
   | CommonFailedResponse;
 
@@ -57,7 +57,7 @@ const hiddenFieldsRegExp =
 
 export const getUnderStudentArchiveInfo = async (
   cookieHeader: string
-): Promise<UnderCreateStudentArchiveResponse> => {
+): Promise<GetUnderCreateStudentArchiveInfoResponse> => {
   const welcomePageResponse = await fetch(
     `${SERVER}/ggxx/xj/bdzcsm.jsp?tktime=${getTimeStamp()}`,
     {
@@ -94,23 +94,13 @@ export const getUnderStudentArchiveInfo = async (
       matches.map((item) => item.replace(/&nbsp;/g, " ").trim())
   );
 
-  const readonlyFields = info
-    .filter(([, , editable]) => readonlyRegExp.test(editable))
-    .map(([text, value, , input, remark]) => {
-      const realValue = /<font[^>]*>(.*)<\/font>/.exec(value)?.[1] || value;
-      const result = inputRegExp.exec(input);
-
-      return {
-        text,
-        value: realValue,
-        ...(result ? { inputName: result[1], inputValue: result[2] } : {}),
-        remark,
-      };
-    });
+  const readonlyFields = info.filter(([, , editable]) =>
+    readonlyRegExp.test(editable)
+  );
 
   const editableFields = info
     .filter(([, , editable]) => !readonlyRegExp.test(editable))
-    .map(([text, value, checkBox, inputOrSelect, remark]) => {
+    .map(([text, defaultValue, checkBox, inputOrSelect, remark]) => {
       const [, checkboxValue, checkboxName] = checkBoxRegExp.exec(checkBox)!;
 
       const selectName = /<select[^>]+name="(.*?)"/.exec(inputOrSelect)![1];
@@ -121,7 +111,7 @@ export const getUnderStudentArchiveInfo = async (
 
       return {
         text,
-        value,
+        defaultValue,
         name: selectName,
         checkboxName,
         checkboxValue,
@@ -136,9 +126,30 @@ export const getUnderStudentArchiveInfo = async (
 
   return {
     success: true,
-    readonly: readonlyFields,
+    readonly: readonlyFields.map(([text, value, , , remark]) => {
+      const realValue = /<font[^>]*>(.*)<\/font>/.exec(value)?.[1] || value;
+
+      return {
+        text,
+        value: realValue,
+        remark,
+      };
+    }),
     editable: editableFields,
-    hidden: hiddenFields,
+    fields: [
+      ...readonlyFields
+        .map(([, , , input]) => {
+          const result = inputRegExp.exec(input);
+
+          if (result) return { name: result[1], value: result[2] };
+
+          return null;
+        })
+        .filter(
+          (item): item is { name: string; value: string } => item !== null
+        ),
+      ...hiddenFields,
+    ],
   };
 };
 
@@ -168,6 +179,53 @@ export const getUnderStudentArchiveInfo = async (
 // xs.kslbm.oldvalue	农村应届
 // xs.hcdz.oldvalue
 // xs0105.jtlxr.oldvalue
+
+export interface UnderStudentArchiveInfoFieldOptions {
+  name: string;
+  value: string;
+}
+
+export interface UnderCreateStudentArchiveSubmitInfoOptions
+  extends Partial<LoginOptions> {
+  type: "submit-info";
+  fields: UnderStudentArchiveInfoFieldOptions[];
+  path: string;
+}
+
+export interface UnderCreateStudentArchiveSubmitInfoSuccessResponse {
+  success: true;
+  content: string;
+}
+
+export type UnderCreateStudentArchiveSubmitInfoResponse =
+  | UnderCreateStudentArchiveSubmitInfoSuccessResponse
+  | AuthLoginFailedResult
+  | CommonFailedResponse;
+
+export const submitUnderStudentArchiveInfo = async (
+  cookieHeader: string,
+  { path, fields }: UnderCreateStudentArchiveSubmitInfoOptions
+): Promise<UnderCreateStudentArchiveSubmitInfoResponse> => {
+  const submitResponse = await fetch(`${SERVER}${path}`, {
+    method: "POST",
+    headers: {
+      Cookie: cookieHeader,
+      "User-Agent": IE_8_USER_AGENT,
+    },
+    body: new URLSearchParams({
+      ...Object.fromEntries(fields.map(({ name, value }) => [name, value])),
+    }),
+  });
+
+  const content = await submitResponse.text();
+
+  console.log(content);
+
+  return {
+    success: true,
+    content,
+  };
+};
 
 export interface UnderStudyOptions {
   /** 开始时间 */
