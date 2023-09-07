@@ -1,5 +1,5 @@
-import type { AnyNode } from "cheerio";
-import { load } from "cheerio";
+import type { AnyNode } from "cheerio/lib/slim";
+import { load } from "cheerio/lib/slim";
 
 const $ = load("");
 

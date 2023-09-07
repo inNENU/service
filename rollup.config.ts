@@ -3,7 +3,7 @@ import esbuild from "rollup-plugin-esbuild";
 const external = [
   /^node:/,
   "body-parser",
-  "cheerio",
+  "cheerio/lib/slim",
   "compression",
   "cookie-parser",
   "crypto-js",
