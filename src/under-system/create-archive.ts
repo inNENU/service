@@ -10,39 +10,19 @@ import type {
 } from "../typings.js";
 import { IE_8_USER_AGENT } from "../utils/index.js";
 
-export interface UnderArchiveInfo {
+export interface ReadonlyUnderArchiveInfo {
   text: string;
   value: string;
-  editable: boolean;
-}
-
-export interface UnderStudyOptions {
-  /** 开始时间 */
-  startTime: string;
-  /** 结束时间 */
-  endTime: string;
-  /** 地点 */
-  school: string;
-  /** 职务 */
-  title: string;
-  /** 证明人 */
-  witness: string;
-  /** 备注 */
   remark: string;
 }
 
-export interface UnderFamilyOptions {
-  /** 姓名 */
+export interface SelectUnderArchiveInfo {
+  text: string;
+  value: string;
   name: string;
-  /** 与本人关系 */
-  relation: string;
-  /** 工作单位 */
-  office: string;
-  /** 职务 */
-  title: string;
-  /** 联系电话 */
-  phone: string;
-  /** 备注 */
+  checkboxName: string;
+  checkboxValue: string;
+  options: { text: string; value: string }[];
   remark: string;
 }
 
@@ -53,7 +33,9 @@ export interface UnderCreateStudentArchiveOptions
 
 export interface UnderCreateStudentArchiveSuccessResponse {
   success: true;
-  info: unknown;
+  readonly: ReadonlyUnderArchiveInfo[];
+  editable: SelectUnderArchiveInfo[];
+  hidden: { name: string; value: string }[];
 }
 
 export type UnderCreateStudentArchiveResponse =
@@ -65,6 +47,13 @@ const nextLinkRegExp =
   /<input\s+type="button"\s+class="button"\s+onclick="window.location.href='([^']+)';"\s+value=" 下一步 "\/>/;
 const infoRowRegExp =
   /<tr height="25px"\s*><td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<\/tr>/g;
+const readonlyRegExp = /<font[^>]+>ø<\/font>/;
+const inputRegExp = /<input[^>]*name="(.*?)"[^>]*value="(.*?)"[^>]*\/>/;
+const checkBoxRegExp =
+  /<input type="checkbox" value="(.*?)" id="gx" name="(.*?)"[^>]+\/>/;
+const optionRegExp = /<option value="([^"]+)">([^<]*?)<\/option>/g;
+const hiddenFieldsRegExp =
+  /<input\s+type="hidden"\s+id=".*?"\s+name="(.*?)"\s*value="(.*?)"\s*\/>/g;
 
 export const getUnderStudentArchiveInfo = async (
   cookieHeader: string
@@ -105,11 +94,51 @@ export const getUnderStudentArchiveInfo = async (
       matches.map((item) => item.replace(/&nbsp;/g, " ").trim())
   );
 
-  console.log(info);
+  const readonlyFields = info
+    .filter(([, , editable]) => readonlyRegExp.test(editable))
+    .map(([text, value, , input, remark]) => {
+      const realValue = /<font[^>]*>(.*)<\/font>/.exec(value)?.[1] || value;
+      const result = inputRegExp.exec(input);
+
+      return {
+        text,
+        value: realValue,
+        ...(result ? { inputName: result[1], inputValue: result[2] } : {}),
+        remark,
+      };
+    });
+
+  const editableFields = info
+    .filter(([, , editable]) => !readonlyRegExp.test(editable))
+    .map(([text, value, checkBox, inputOrSelect, remark]) => {
+      const [, checkboxValue, checkboxName] = checkBoxRegExp.exec(checkBox)!;
+
+      const selectName = /<select[^>]+name="(.*?)"/.exec(inputOrSelect)![1];
+
+      const options = Array.from(inputOrSelect.matchAll(optionRegExp))
+        .map(([, value, text]) => ({ value, text }))
+        .filter(({ value }) => value);
+
+      return {
+        text,
+        value,
+        name: selectName,
+        checkboxName,
+        checkboxValue,
+        options,
+        remark,
+      };
+    });
+
+  const hiddenFields = Array.from(infoContent.matchAll(hiddenFieldsRegExp)).map(
+    ([, name, value]) => ({ name, value })
+  );
 
   return {
     success: true,
-    info,
+    readonly: readonlyFields,
+    editable: editableFields,
+    hidden: hiddenFields,
   };
 };
 
@@ -139,6 +168,36 @@ export const getUnderStudentArchiveInfo = async (
 // xs.kslbm.oldvalue	农村应届
 // xs.hcdz.oldvalue
 // xs0105.jtlxr.oldvalue
+
+export interface UnderStudyOptions {
+  /** 开始时间 */
+  startTime: string;
+  /** 结束时间 */
+  endTime: string;
+  /** 地点 */
+  school: string;
+  /** 职务 */
+  title: string;
+  /** 证明人 */
+  witness: string;
+  /** 备注 */
+  remark: string;
+}
+
+export interface UnderFamilyOptions {
+  /** 姓名 */
+  name: string;
+  /** 与本人关系 */
+  relation: string;
+  /** 工作单位 */
+  office: string;
+  /** 职务 */
+  title: string;
+  /** 联系电话 */
+  phone: string;
+  /** 备注 */
+  remark: string;
+}
 
 export const underCreateStudentArchiveHandler: RequestHandler<
   EmptyObject,
