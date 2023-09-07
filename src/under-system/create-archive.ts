@@ -31,33 +31,36 @@ export interface UnderCreateStudentArchiveGetInfoOptions
   type: "get-info";
 }
 
-export interface GetUnderCreateStudentArchiveInfoSuccessResponse {
+export interface UnderCreateStudentArchiveGetInfoSuccessResponse {
   success: true;
   readonly: ReadonlyUnderArchiveInfo[];
   editable: SelectUnderArchiveInfo[];
   fields: { name: string; value: string }[];
+  path: string;
 }
 
-export type GetUnderCreateStudentArchiveInfoResponse =
-  | GetUnderCreateStudentArchiveInfoSuccessResponse
+export type UnderCreateStudentGetArchiveInfoResponse =
+  | UnderCreateStudentArchiveGetInfoSuccessResponse
   | AuthLoginFailedResult
-  | CommonFailedResponse;
+  | (CommonFailedResponse & { type?: "created" });
 
 const nextLinkRegExp =
   /<input\s+type="button"\s+class="button"\s+onclick="window.location.href='([^']+)';"\s+value=" 下一步 "\/>/;
+const pathRegExp = /<form action="([^"]+)"/;
 const infoRowRegExp =
   /<tr height="25px"\s*><td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<\/tr>/g;
 const readonlyRegExp = /<font[^>]+>ø<\/font>/;
 const inputRegExp = /<input[^>]*name="(.*?)"[^>]*value="(.*?)"[^>]*\/>/;
 const checkBoxRegExp =
   /<input type="checkbox" value="(.*?)" id="gx" name="(.*?)"[^>]+\/>/;
-const optionRegExp = /<option value="([^"]+)">([^<]*?)<\/option>/g;
+const selectRegExp = /<select[^>]+name="(.*?)"/;
+const optionRegExp = /<option value="([^"]*)">([^<]*?)<\/option>/g;
 const hiddenFieldsRegExp =
   /<input\s+type="hidden"\s+id=".*?"\s+name="(.*?)"\s*value="(.*?)"\s*\/>/g;
 
 export const getUnderStudentArchiveInfo = async (
-  cookieHeader: string,
-): Promise<GetUnderCreateStudentArchiveInfoResponse> => {
+  cookieHeader: string
+): Promise<UnderCreateStudentGetArchiveInfoResponse> => {
   const welcomePageResponse = await fetch(
     `${SERVER}/ggxx/xj/bdzcsm.jsp?tktime=${getTimeStamp()}`,
     {
@@ -66,7 +69,7 @@ export const getUnderStudentArchiveInfo = async (
         Referer: `${SERVER}/framework/new_window.jsp?lianjie=&winid=win1`,
         "User-Agent": IE_8_USER_AGENT,
       },
-    },
+    }
   );
 
   const welcomePageContent = await welcomePageResponse.text();
@@ -89,13 +92,20 @@ export const getUnderStudentArchiveInfo = async (
 
   const infoContent = await infoResponse.text();
 
+  if (infoContent.includes("不在控制范围内！"))
+    return {
+      success: false,
+      type: "created",
+      msg: "学籍已建立",
+    };
+
   const info = Array.from(infoContent.matchAll(infoRowRegExp)).map(
     ([, ...matches]) =>
-      matches.map((item) => item.replace(/&nbsp;/g, " ").trim()),
+      matches.map((item) => item.replace(/&nbsp;/g, " ").trim())
   );
 
   const readonlyFields = info.filter(([, , editable]) =>
-    readonlyRegExp.test(editable),
+    readonlyRegExp.test(editable)
   );
 
   const editableFields = info
@@ -103,16 +113,16 @@ export const getUnderStudentArchiveInfo = async (
     .map(([text, defaultValue, checkBox, inputOrSelect, remark]) => {
       const [, checkboxValue, checkboxName] = checkBoxRegExp.exec(checkBox)!;
 
-      const selectName = /<select[^>]+name="(.*?)"/.exec(inputOrSelect)![1];
+      const name = selectRegExp.exec(inputOrSelect)![1];
 
-      const options = Array.from(inputOrSelect.matchAll(optionRegExp))
-        .map(([, value, text]) => ({ value, text }))
-        .filter(({ value }) => value);
+      const options = Array.from(inputOrSelect.matchAll(optionRegExp)).map(
+        ([, value, text]) => ({ value, text })
+      );
 
       return {
         text,
         defaultValue,
-        name: selectName,
+        name,
         checkboxName,
         checkboxValue,
         options,
@@ -121,7 +131,7 @@ export const getUnderStudentArchiveInfo = async (
     });
 
   const hiddenFields = Array.from(infoContent.matchAll(hiddenFieldsRegExp)).map(
-    ([, name, value]) => ({ name, value }),
+    ([, name, value]) => ({ name, value })
   );
 
   return {
@@ -146,10 +156,11 @@ export const getUnderStudentArchiveInfo = async (
           return null;
         })
         .filter(
-          (item): item is { name: string; value: string } => item !== null,
+          (item): item is { name: string; value: string } => item !== null
         ),
       ...hiddenFields,
     ],
+    path: pathRegExp.exec(infoContent)![1],
   };
 };
 
@@ -204,7 +215,7 @@ export type UnderCreateStudentArchiveSubmitInfoResponse =
 
 export const submitUnderStudentArchiveInfo = async (
   cookieHeader: string,
-  { path, fields }: UnderCreateStudentArchiveSubmitInfoOptions,
+  { path, fields }: UnderCreateStudentArchiveSubmitInfoOptions
 ): Promise<UnderCreateStudentArchiveSubmitInfoResponse> => {
   const submitResponse = await fetch(`${SERVER}${path}`, {
     method: "POST",
@@ -260,7 +271,7 @@ export interface UnderFamilyOptions {
 export const underCreateStudentArchiveHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  UnderCreateStudentArchiveOptions
+  UnderCreateStudentArchiveGetInfoOptions
 > = async (req, res) => {
   try {
     let cookieHeader = req.headers.cookie;
