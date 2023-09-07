@@ -217,24 +217,27 @@ export const submitUnderStudentArchiveInfo = async (
   cookieHeader: string,
   { path, fields }: UnderCreateStudentArchiveSubmitInfoOptions
 ): Promise<UnderCreateStudentArchiveSubmitInfoResponse> => {
-  const submitResponse = await fetch(`${SERVER}${path}`, {
-    method: "POST",
-    headers: {
-      Cookie: cookieHeader,
-      "User-Agent": IE_8_USER_AGENT,
-    },
-    body: new URLSearchParams({
-      ...Object.fromEntries(fields.map(({ name, value }) => [name, value])),
-    }),
-  });
+  cookieHeader;
+  console.log(fields, path);
 
-  const content = await submitResponse.text();
+  // const submitResponse = await fetch(`${SERVER}${path}`, {
+  //   method: "POST",
+  //   headers: {
+  //     Cookie: cookieHeader,
+  //     "User-Agent": IE_8_USER_AGENT,
+  //   },
+  //   body: new URLSearchParams({
+  //     ...Object.fromEntries(fields.map(({ name, value }) => [name, value])),
+  //   }),
+  // });
 
-  console.log(content);
+  // const content = await submitResponse.text();
+
+  // console.log(content);
 
   return {
     success: true,
-    content,
+    // content,
   };
 };
 
@@ -271,7 +274,8 @@ export interface UnderFamilyOptions {
 export const underCreateStudentArchiveHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  UnderCreateStudentArchiveGetInfoOptions
+  | UnderCreateStudentArchiveGetInfoOptions
+  | UnderCreateStudentArchiveSubmitInfoOptions
 > = async (req, res) => {
   try {
     let cookieHeader = req.headers.cookie;
@@ -292,6 +296,10 @@ export const underCreateStudentArchiveHandler: RequestHandler<
 
     if (req.body.type === "get-info")
       return res.json(await getUnderStudentArchiveInfo(cookieHeader));
+    if (req.body.type === "submit-info")
+      return res.json(
+        await submitUnderStudentArchiveInfo(cookieHeader, req.body)
+      );
 
     return res.json({
       success: false,
