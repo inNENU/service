@@ -21,7 +21,7 @@ const archiveImageRegExp =
 const examImageRegExp = /"(\/gkuploadfile\/studentphoto\/pic\/(?:.+?)\.JPG)"/;
 const pathRegExp = /var newwin = window.showModalDialog\("(.+?)"\);/;
 const registerButtonRegExp =
-  /<input\s+type="button"\s+id="zc"\s+class="button"\s+value="确定注册"\s+onclick="bc()"\/>/;
+  /<input\s+type="button"\s+id="zc"\s+class="button"\s+value="确定注册"\s+onclick="bc\(\)"\/>/;
 const isRegisteredRegExp = /您已经提交注册信息/;
 
 const UNDER_STUDENT_ARCHIVE_QUERY_URL = `${SERVER}/xszhxxAction.do?method=addStudentPic_xszc`;
@@ -81,7 +81,7 @@ export interface UnderStudentArchiveInfo {
 }
 
 const getStudentArchive = async (
-  content: string
+  content: string,
 ): Promise<UnderStudentArchiveInfo> => {
   const [baseInfo, tableInfo] = content.split("本人学历及社会经历");
   const [studyInfo, familyInfo] = tableInfo.split("家庭成员及主要社会关系");
@@ -90,7 +90,7 @@ const getStudentArchive = async (
     ([, text, value]) => ({
       text: text.replace(/&nbsp;/g, ""),
       value,
-    })
+    }),
   );
   const study = Array.from(studyInfo.matchAll(studyRegExp))
     .map(([, startTime, endTime, school, title, witness, remark]) => ({
@@ -103,7 +103,7 @@ const getStudentArchive = async (
     }))
     .filter(
       ({ startTime, endTime, school, title, witness, remark }) =>
-        startTime || endTime || school || title || witness || remark
+        startTime || endTime || school || title || witness || remark,
     );
   const family = Array.from(familyInfo.matchAll(familyRegExp))
     .map(([, name, relation, office, title, phone, remark]) => ({
@@ -116,7 +116,7 @@ const getStudentArchive = async (
     }))
     .filter(
       ({ name, relation, office, title, phone, remark }) =>
-        name || relation || office || title || phone || remark
+        name || relation || office || title || phone || remark,
     );
 
   const archiveImageLink = archiveImageRegExp.exec(content)?.[1] || "";
@@ -127,16 +127,16 @@ const getStudentArchive = async (
       ? fetch(`${SERVER}${archiveImageLink}`).then(
           async (archiveImageResponse) =>
             `data:image/jpeg;base64,${Buffer.from(
-              await archiveImageResponse.arrayBuffer()
-            ).toString("base64")}`
+              await archiveImageResponse.arrayBuffer(),
+            ).toString("base64")}`,
         )
       : "",
     examImageLink
       ? fetch(`${SERVER}${examImageLink}`).then(
           async (examImageResponse) =>
             `data:image/jpeg;base64,${Buffer.from(
-              await examImageResponse.arrayBuffer()
-            ).toString("base64")}`
+              await examImageResponse.arrayBuffer(),
+            ).toString("base64")}`,
         )
       : "",
   ]);
@@ -170,7 +170,7 @@ export type UnderGetStudentArchiveResponse =
   | CommonFailedResponse;
 
 export const getUnderStudentArchive = async (
-  cookieHeader: string
+  cookieHeader: string,
 ): Promise<UnderGetStudentArchiveResponse> => {
   const response = await fetch(
     `${UNDER_STUDENT_ARCHIVE_QUERY_URL}&tktime=${getTimeStamp()}`,
@@ -180,7 +180,7 @@ export const getUnderStudentArchive = async (
         Referer: `${SERVER}/framework/new_window.jsp?lianjie=&winid=win3`,
         "User-Agent": IE_8_USER_AGENT,
       },
-    }
+    },
   );
 
   const content = await response.text();
@@ -219,7 +219,7 @@ export type UnderRegisterStudentArchiveResponse =
 
 export const registerStudentArchive = async (
   cookieHeader: string,
-  path: string
+  path: string,
 ): Promise<UnderRegisterStudentArchiveResponse> => {
   const url = `${SERVER}${path}`;
 
@@ -263,13 +263,13 @@ export const underStudentArchiveHandler: RequestHandler<
       if (!result.success) return res.json(result);
 
       cookieHeader = result.cookieStore.getHeader(
-        UNDER_STUDENT_ARCHIVE_QUERY_URL
+        UNDER_STUDENT_ARCHIVE_QUERY_URL,
       );
     }
 
     if (req.body.type === "register")
       return res.json(
-        await registerStudentArchive(cookieHeader, req.body.path)
+        await registerStudentArchive(cookieHeader, req.body.path),
       );
 
     return res.json(await getUnderStudentArchive(cookieHeader));

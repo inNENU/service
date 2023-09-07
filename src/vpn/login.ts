@@ -272,6 +272,8 @@ export const vpnLoginHandler: RequestHandler<
 
     return res.json(result);
   } catch (err) {
+    console.error(err);
+
     return res.json(<VPNLoginFailedResult>{
       success: false,
       msg: "参数错误",
