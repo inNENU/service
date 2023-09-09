@@ -37,9 +37,15 @@ export type SelectLoginResult =
   | SelectLoginFailResult;
 
 export const selectLogin = async (
-  { id: id, password }: LoginOptions,
-  cookieStore = new CookieStore(),
+  { id, password }: LoginOptions,
+  cookieStore = new CookieStore()
 ): Promise<SelectLoginResult> => {
+  if (id.toString() === "2022010054")
+    return {
+      success: false,
+      msg: "此功能会影响测试账号的选课，故暂时禁用。因选课系统交互过于复杂，暂不提供模拟功能，敬请谅解。",
+    };
+
   const isUnder = id.toString()[4] === "0";
   const homePage = isUnder
     ? "http://xk.nenu.edu.cn"
@@ -59,7 +65,7 @@ export const selectLogin = async (
   const content = await getResponseContent(homePageResponse);
 
   const servers = Array.from(content.matchAll(SERVER_REG)).map(
-    (item) => item[1],
+    (item) => item[1]
   );
 
   const server = servers[id % servers.length];
