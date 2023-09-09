@@ -68,8 +68,6 @@ export const studentAmountHandler: RequestHandler<
       kch: courseId,
     }).toString();
 
-    console.log("Requesting with params:", params);
-
     const response = await fetch(url, {
       method: "POST",
       headers: {
@@ -81,8 +79,6 @@ export const studentAmountHandler: RequestHandler<
     });
 
     const rawData = await response.text();
-
-    console.log("Raw data:", rawData);
 
     if (rawData.match(/\s+<!DOCTYPE html/))
       return res.json(<StudentAmountFailedResponse>{

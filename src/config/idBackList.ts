@@ -1,6 +1,6 @@
 import type { MyInfo } from "../my/index.js";
 
-export const ID_BLACK_LIST = [2021012638, 2023014072, 2023010767];
+export const ID_BLACK_LIST = [2021012638, 2023010767];
 
 export type IdConditionalBlackList = {
   [I in keyof MyInfo]?: MyInfo[I] | RegExp;

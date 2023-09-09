@@ -39,7 +39,7 @@ export type RichTextNode = ElementNode | TextNode;
 
 const handleNodes = (node: (RichTextNode | null)[]): RichTextNode[] => {
   const result = [...node].filter(
-    (item): item is RichTextNode => item !== null
+    (item): item is RichTextNode => item !== null,
   );
 
   if (result.length && result[0].type === "text" && result[0].text === "\n")
@@ -58,7 +58,7 @@ const handleNodes = (node: (RichTextNode | null)[]): RichTextNode[] => {
 
 const handleNode = async (
   node: AnyNode,
-  options: GetNodeOptions
+  options: GetNodeOptions,
 ): Promise<RichTextNode | null> => {
   if (node.type === "text")
     return { type: "text", text: node.data.replace(/\r/g, "") };
@@ -71,14 +71,14 @@ const handleNode = async (
         node.attributes
           .filter(
             ({ name }) =>
-              ["class", "style"].includes(name) || config[1]?.includes(name)
+              ["class", "style"].includes(name) || config[1]?.includes(name),
           )
-          .map<[string, string]>(({ name, value }) => [name, value])
+          .map<[string, string]>(({ name, value }) => [name, value]),
       );
       const children = handleNodes(
         await Promise.all(
-          node.children.map((node) => handleNode(node, options))
-        )
+          node.children.map((node) => handleNode(node, options)),
+        ),
       );
 
       if (
@@ -145,11 +145,11 @@ const handleNode = async (
 
 export const getRichTextNodes = async (
   content: string | AnyNode[],
-  options: GetNodeOptions = {}
+  options: GetNodeOptions = {},
 ): Promise<RichTextNode[]> => {
   const rootNodes = Array.isArray(content) ? content : parseHTML(content) || [];
 
   return handleNodes(
-    await Promise.all(rootNodes.map((node) => handleNode(node, options)))
+    await Promise.all(rootNodes.map((node) => handleNode(node, options))),
   );
 };

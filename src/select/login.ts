@@ -71,6 +71,7 @@ export const selectLogin = async (
       "Content-Type": "application/x-www-form-urlencoded",
       Cookie: cookieStore.getHeader(url),
       Origin: homePage,
+      Referer: `${url}?url=${url}`,
     },
     body: new URLSearchParams({
       IDToken1: id.toString(),
@@ -86,9 +87,13 @@ export const selectLogin = async (
   if (loginResponse.status === 302) {
     const location = loginResponse.headers.get("Location")!;
 
-    const finalResponse = await fetch(location, {
+    const url = location.startsWith("/")
+      ? `${server.replace(/\/$/, "")}${location}`
+      : location;
+
+    const finalResponse = await fetch(url, {
       headers: {
-        Cookie: cookieStore.getHeader(location),
+        Cookie: cookieStore.getHeader(url),
       },
     });
 

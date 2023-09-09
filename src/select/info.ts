@@ -337,7 +337,6 @@ export const selectInfo = async (
   const currentMajor = currentMajorReg.exec(majorsText)![1];
   const currentLocation = /'SO'=="SO"/.test(documentContent) ? "净月" : "本部";
 
-  console.log(infoReg.exec(documentContent));
   const [, period, stage, name, id, grade, majorName] =
     infoReg.exec(documentContent)!;
   const max = Number(maxCreditReg.exec(documentContent)![1]);
