@@ -38,7 +38,7 @@ export type SelectLoginResult =
 
 export const selectLogin = async (
   { id, password }: LoginOptions,
-  cookieStore = new CookieStore()
+  cookieStore = new CookieStore(),
 ): Promise<SelectLoginResult> => {
   if (id.toString() === "2022010054")
     return {
@@ -65,7 +65,7 @@ export const selectLogin = async (
   const content = await getResponseContent(homePageResponse);
 
   const servers = Array.from(content.matchAll(SERVER_REG)).map(
-    (item) => item[1]
+    (item) => item[1],
   );
 
   const server = servers[id % servers.length];
