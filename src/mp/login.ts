@@ -7,7 +7,7 @@ export type AppID = "wx33acb831ee1831a5" | "wx9ce37d9662499df3" | 1109559721;
 export type Env = "qq" | "wx" | "web";
 
 export interface MPLoginOptions {
-  appID: Exclude<AppID, "wx69e79c3d87753512">;
+  appID: AppID;
   env: string;
   code: string;
 }
