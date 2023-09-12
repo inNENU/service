@@ -68,6 +68,7 @@ import {
   underExamPlaceHandler,
   underGradeListHandler,
   underInfoHandler,
+  underSpecialExamHandler,
   underStudentArchiveHandler,
   underSystemCheckHandler,
   underSystemLoginHandler,
@@ -131,6 +132,7 @@ app.post("/under-system/create-archive", underCreateStudentArchiveHandler);
 app.post("/under-system/exam-place", underExamPlaceHandler);
 app.post("/under-system/grade-list", underGradeListHandler);
 app.post("/under-system/info", underInfoHandler);
+app.post("/under-system/special-exam", underSpecialExamHandler);
 app.post("/under-system/student-archive", underStudentArchiveHandler);
 app.post("/under-system/test-query", underTestQueryHandler);
 
