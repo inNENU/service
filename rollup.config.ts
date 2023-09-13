@@ -11,6 +11,7 @@ const external = [
   "express",
   "iconv-lite",
   "morgan",
+  "nodejs-jieba",
   "qrcode",
   "set-cookie-parser",
 ];

@@ -35,7 +35,7 @@ import {
   mainInfoListHandler,
   mainStatusHandler,
 } from "./main/index.js";
-import { mpLoginHandler } from "./mp/index.js";
+import { mpLoginHandler, mpSearchHandler } from "./mp/index.js";
 import {
   emailHandler,
   myCheckHandler,
@@ -165,6 +165,7 @@ app.post("/vpn/cas-login", vpnCASLoginHandler);
 app.post("/vpn/login", vpnLoginHandler);
 
 app.post("/mp/login", mpLoginHandler);
+app.post("/mp/search", mpSearchHandler);
 
 app.get("/library/people", libraryPeopleHandler);
 app.get("/qrcode", qrCodeHandler);

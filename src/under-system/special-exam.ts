@@ -61,12 +61,12 @@ const getGrades = (content: string): UnderSpecialExamItem[] =>
       time,
       name,
       score: Number(score),
-    })
+    }),
   );
 
 export const getSpecialExams = async (
   cookieHeader: string,
-  content: string
+  content: string,
 ): Promise<UnderSpecialExamItem[]> => {
   // We force writing these 2 field to ensure we care getting the default table structure
   const tableFields = tableFieldsRegExp.exec(content)![1];
@@ -129,10 +129,10 @@ export const getSpecialExams = async (
 
       const responseText = await response.text();
 
-      const newGrades = getGrades(responseText, true);
+      const newGrades = getGrades(responseText);
 
       grades.push(...newGrades);
-    })
+    }),
   );
 
   return grades;
