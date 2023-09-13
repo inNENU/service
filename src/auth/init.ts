@@ -124,6 +124,7 @@ export interface AuthInitOptions extends LoginOptions {
   params: Record<string, string>;
   salt: string;
   captcha: string;
+  openid: string;
 }
 
 export interface AuthInitSuccessResult {
@@ -306,7 +307,7 @@ export const authInitHandler: RequestHandler<
         console.log(`${id} 登录信息:\n`, JSON.stringify(info, null, 2));
       }
 
-      if (isInBlackList(req.body.id, info))
+      if (isInBlackList(req.body.id, req.body.openid, info))
         return res.json({
           success: false,
           type: LoginFailType.BlackList,

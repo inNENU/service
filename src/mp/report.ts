@@ -12,7 +12,7 @@ export const mpReportHandler: RequestHandler<
   writeFileSync(
     "./log",
     `${new Date().toLocaleString()} ${JSON.stringify(req.body)}\n`,
-    { flag: "a" }
+    { flag: "a" },
   );
 
   res.end();

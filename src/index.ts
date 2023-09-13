@@ -37,9 +37,9 @@ import {
 } from "./main/index.js";
 import {
   mpLoginHandler,
+  mpQrCodeHandler,
   mpReportHandler,
   mpSearchHandler,
-  mpQrCodeHandler,
 } from "./mp/index.js";
 import {
   emailHandler,
