@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
-import { appIDInfo } from "../config/appID";
-import type { EmptyObject } from "../typings";
+import { appIDInfo } from "../config/appID.js";
+import type { EmptyObject } from "../typings.js";
 
 export type AppID = "wx33acb831ee1831a5" | "wx9ce37d9662499df3" | 1109559721;
 export type Env = "qq" | "wx" | "web";

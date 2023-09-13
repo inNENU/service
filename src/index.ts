@@ -35,7 +35,12 @@ import {
   mainInfoListHandler,
   mainStatusHandler,
 } from "./main/index.js";
-import { mpLoginHandler, mpSearchHandler } from "./mp/index.js";
+import {
+  mpLoginHandler,
+  mpReportHandler,
+  mpSearchHandler,
+  mpQrCodeHandler,
+} from "./mp/index.js";
 import {
   emailHandler,
   myCheckHandler,
@@ -52,7 +57,6 @@ import {
   postSystemCheckHandler,
   postSystemLoginHandler,
 } from "./post-system/index.js";
-import { qrCodeHandler } from "./qrcode.js";
 import {
   processHandler,
   searchHandler,
@@ -165,10 +169,12 @@ app.post("/vpn/cas-login", vpnCASLoginHandler);
 app.post("/vpn/login", vpnLoginHandler);
 
 app.post("/mp/login", mpLoginHandler);
+app.post("/mp/report", mpReportHandler);
 app.post("/mp/search", mpSearchHandler);
+app.get("/mp/qrcode", mpQrCodeHandler);
 
 app.get("/library/people", libraryPeopleHandler);
-app.get("/qrcode", qrCodeHandler);
+app.get("/qrcode", mpQrCodeHandler);
 app.get("/weather", weatherHandler);
 
 // @ts-ignore

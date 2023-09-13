@@ -1,9 +1,9 @@
 import type { RequestHandler } from "express";
 import { toBuffer } from "qrcode";
 
-import { appIDInfo } from "./config/appID.js";
-import type { CommonFailedResponse } from "./typings.js";
-import { getWechatAccessToken } from "./utils/wechatAccessToken.js";
+import { appIDInfo } from "../config/appID.js";
+import type { CommonFailedResponse } from "../typings.js";
+import { getWechatAccessToken } from "../utils/wechatAccessToken.js";
 
 export interface WechatQRCodeOptions {
   appID: "wx33acb831ee1831a5" | "wx9ce37d9662499df3";
@@ -33,7 +33,7 @@ export type QRCodeResponse = QRCodeSuccessResponse | CommonFailedResponse;
 const getWechatQRCode = async (
   accessToken: string,
   page: string,
-  scene: string,
+  scene: string
 ): Promise<Buffer | WechatQRCodeError> => {
   const response = await fetch(
     `https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=${accessToken}`,
@@ -45,7 +45,7 @@ const getWechatQRCode = async (
         // eslint-disable-next-line @typescript-eslint/naming-convention
         auto_color: true,
       }),
-    },
+    }
   );
 
   const image = Buffer.from(await response.arrayBuffer());
@@ -59,7 +59,7 @@ const getWechatQRCode = async (
 const getQQQRCode = async (appID: number, page: string): Promise<Buffer> =>
   toBuffer(`https://m.q.qq.com/a/p/${appID}?s=${encodeURI(page)}`);
 
-export const qrCodeHandler: RequestHandler<
+export const mpQrCodeHandler: RequestHandler<
   Record<never, never>,
   Record<never, never>,
   Record<never, never>,
@@ -82,7 +82,7 @@ export const qrCodeHandler: RequestHandler<
       const image = await getWechatQRCode(
         wechatAccessToken,
         page,
-        (<WechatQRCodeOptions>req.query).scene,
+        (<WechatQRCodeOptions>req.query).scene
       );
 
       if (image instanceof Buffer) {
