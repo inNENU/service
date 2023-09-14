@@ -156,7 +156,7 @@ const getScoreDetail = (content: string): ScoreDetail | null => {
   };
 };
 
-export const getGrades = (
+const getGrades = (
   cookieHeader: string,
   content: string,
   isJS = false,

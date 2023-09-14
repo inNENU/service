@@ -102,8 +102,6 @@ export const searchHandler: RequestHandler<
 
     const url = `${server}xk/SeachKC`;
 
-    console.log("Searching with", url, params);
-
     const response = await fetch(url, {
       method: "POST",
       headers: {
@@ -114,8 +112,6 @@ export const searchHandler: RequestHandler<
     });
 
     const rawData = await response.text();
-
-    console.log("Raw data:", rawData);
 
     if (rawData.match(/\s+<!DOCTYPE html/))
       return res.json(<SelectSearchFailedResponse>{

@@ -118,7 +118,7 @@ export const emailInfo = async (
 
     return {
       success: false,
-      msg: "用户无邮箱",
+      msg: "用户无邮箱或未初始化邮箱",
     };
   } catch (err) {
     const { message } = <Error>err;

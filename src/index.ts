@@ -35,7 +35,12 @@ import {
   mainInfoListHandler,
   mainStatusHandler,
 } from "./main/index.js";
-import { mpLoginHandler } from "./mp/index.js";
+import {
+  mpLoginHandler,
+  mpQrCodeHandler,
+  mpReportHandler,
+  mpSearchHandler,
+} from "./mp/index.js";
 import {
   emailHandler,
   myCheckHandler,
@@ -52,7 +57,6 @@ import {
   postSystemCheckHandler,
   postSystemLoginHandler,
 } from "./post-system/index.js";
-import { qrCodeHandler } from "./qrcode.js";
 import {
   processHandler,
   searchHandler,
@@ -64,9 +68,11 @@ import type { CommonFailedResponse } from "./typings.js";
 import {
   underChangeMajorPlanHandler,
   underCourseTableHandler,
+  underCreateStudentArchiveHandler,
   underExamPlaceHandler,
   underGradeListHandler,
   underInfoHandler,
+  underSpecialExamHandler,
   underStudentArchiveHandler,
   underSystemCheckHandler,
   underSystemLoginHandler,
@@ -126,9 +132,11 @@ app.post("/under-system/login", underSystemLoginHandler);
 app.post("/under-system/check", underSystemCheckHandler);
 app.post("/under-system/change-major-plan", underChangeMajorPlanHandler);
 app.post("/under-system/course-table", underCourseTableHandler);
+app.post("/under-system/create-archive", underCreateStudentArchiveHandler);
 app.post("/under-system/exam-place", underExamPlaceHandler);
 app.post("/under-system/grade-list", underGradeListHandler);
 app.post("/under-system/info", underInfoHandler);
+app.post("/under-system/special-exam", underSpecialExamHandler);
 app.post("/under-system/student-archive", underStudentArchiveHandler);
 app.post("/under-system/test-query", underTestQueryHandler);
 
@@ -161,9 +169,12 @@ app.post("/vpn/cas-login", vpnCASLoginHandler);
 app.post("/vpn/login", vpnLoginHandler);
 
 app.post("/mp/login", mpLoginHandler);
+app.post("/mp/report", mpReportHandler);
+app.post("/mp/search", mpSearchHandler);
+app.get("/mp/qrcode", mpQrCodeHandler);
 
 app.get("/library/people", libraryPeopleHandler);
-app.get("/qrcode", qrCodeHandler);
+app.get("/qrcode", mpQrCodeHandler);
 app.get("/weather", weatherHandler);
 
 // @ts-ignore

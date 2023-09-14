@@ -37,9 +37,15 @@ export type SelectLoginResult =
   | SelectLoginFailResult;
 
 export const selectLogin = async (
-  { id: id, password }: LoginOptions,
+  { id, password }: LoginOptions,
   cookieStore = new CookieStore(),
 ): Promise<SelectLoginResult> => {
+  if (id.toString() === "2022010054")
+    return {
+      success: false,
+      msg: "此功能会影响测试账号的选课，故暂时禁用。因选课系统交互过于复杂，暂不提供模拟功能，敬请谅解。",
+    };
+
   const isUnder = id.toString()[4] === "0";
   const homePage = isUnder
     ? "http://xk.nenu.edu.cn"
@@ -71,6 +77,7 @@ export const selectLogin = async (
       "Content-Type": "application/x-www-form-urlencoded",
       Cookie: cookieStore.getHeader(url),
       Origin: homePage,
+      Referer: `${url}?url=${url}`,
     },
     body: new URLSearchParams({
       IDToken1: id.toString(),
@@ -86,9 +93,13 @@ export const selectLogin = async (
   if (loginResponse.status === 302) {
     const location = loginResponse.headers.get("Location")!;
 
-    const finalResponse = await fetch(location, {
+    const url = location.startsWith("/")
+      ? `${server.replace(/\/$/, "")}${location}`
+      : location;
+
+    const finalResponse = await fetch(url, {
       headers: {
-        Cookie: cookieStore.getHeader(location),
+        Cookie: cookieStore.getHeader(url),
       },
     });
 

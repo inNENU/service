@@ -1,9 +1,9 @@
 import type { RequestHandler } from "express";
 import { toBuffer } from "qrcode";
 
-import { appIDInfo } from "./config/appID.js";
-import type { CommonFailedResponse } from "./typings.js";
-import { getWechatAccessToken } from "./utils/wechatAccessToken.js";
+import { appIDInfo } from "../config/appID.js";
+import type { CommonFailedResponse } from "../typings.js";
+import { getWechatAccessToken } from "../utils/wechatAccessToken.js";
 
 export interface WechatQRCodeOptions {
   appID: "wx33acb831ee1831a5" | "wx9ce37d9662499df3";
@@ -59,7 +59,7 @@ const getWechatQRCode = async (
 const getQQQRCode = async (appID: number, page: string): Promise<Buffer> =>
   toBuffer(`https://m.q.qq.com/a/p/${appID}?s=${encodeURI(page)}`);
 
-export const qrCodeHandler: RequestHandler<
+export const mpQrCodeHandler: RequestHandler<
   Record<never, never>,
   Record<never, never>,
   Record<never, never>,

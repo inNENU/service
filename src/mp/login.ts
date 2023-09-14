@@ -1,15 +1,17 @@
 import type { RequestHandler } from "express";
 
-import { appIDInfo } from "../config/appID";
-import type { EmptyObject } from "../typings";
+import { appIDInfo } from "../config/appID.js";
+import { OPENID_BLACK_LIST } from "../config/blacklist.js";
+import type { EmptyObject } from "../typings.js";
 
 export type AppID = "wx33acb831ee1831a5" | "wx9ce37d9662499df3" | 1109559721;
 export type Env = "qq" | "wx" | "web";
 
 export interface MPLoginOptions {
-  appID: Exclude<AppID, "wx69e79c3d87753512">;
+  appID: AppID;
   env: string;
   code: string;
+  openid?: string;
 }
 
 export const mpLoginHandler: RequestHandler<
@@ -19,19 +21,24 @@ export const mpLoginHandler: RequestHandler<
 > = async (req, res) => {
   try {
     const { env, appID, code } = req.body;
+    let { openid } = req.body;
 
-    const url = `https://api.${
-      env === "qq" ? "q" : "weixin"
-    }.qq.com/sns/jscode2session?appid=${appID}&secret=${
-      appIDInfo[appID]
-    }&js_code=${code}&grant_type=authorization_code`;
-    const response = await fetch(url);
+    if (!openid) {
+      const url = `https://api.${
+        env === "qq" ? "q" : "weixin"
+      }.qq.com/sns/jscode2session?appid=${appID}&secret=${
+        appIDInfo[appID]
+      }&js_code=${code}&grant_type=authorization_code`;
+      const response = await fetch(url);
 
-    const result = <Record<string, unknown>>await response.json();
+      ({ openid } = <{ openid: string }>await response.json());
+    }
 
-    delete result.session_key;
-
-    res.json(result);
+    res.json({
+      openid,
+      inBacklist: OPENID_BLACK_LIST.includes(openid),
+      isAdmin: false,
+    });
   } catch (err) {
     console.error(err);
 

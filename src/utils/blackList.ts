@@ -1,10 +1,10 @@
 import fs from "node:fs";
 
-import type { IdConditionalBlackList } from "../config/idBackList.js";
+import type { IdConditionalBlackList } from "../config/blacklist.js";
 import {
   ID_BLACK_LIST,
   ID_CONDITIONAL_BLACK_LIST,
-} from "../config/idBackList.js";
+} from "../config/blacklist.js";
 import type { MyInfo } from "../my/index.js";
 
 export const BACKLIST_HINT = [
@@ -47,7 +47,11 @@ const testCondition = (
     return info[<keyof MyInfo>key] === Buffer.from(value, "base64").toString();
   });
 
-export const isInBlackList = (id: number, info?: MyInfo | null): boolean => {
+export const isInBlackList = (
+  id: number,
+  openid?: string,
+  info?: MyInfo | null,
+): boolean => {
   if (ID_BLACK_LIST.includes(id)) {
     fs.writeFileSync("backlist", `${id}\n`, {
       encoding: "utf8",
@@ -64,10 +68,14 @@ export const isInBlackList = (id: number, info?: MyInfo | null): boolean => {
   );
 
   if (result)
-    fs.writeFileSync("backlist", `${id} new ${JSON.stringify(info || "")}\n`, {
-      encoding: "utf8",
-      flag: "a",
-    });
+    fs.writeFileSync(
+      "backlist",
+      `${id} new ${openid || ""} ${JSON.stringify(info || "")}\n`,
+      {
+        encoding: "utf8",
+        flag: "a",
+      },
+    );
 
   return result;
 };
