@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rollup -c rollup.config.ts --configPlugin esbuild",
     "bundle:parser": "rollup -c scripts/parser.ts --configPlugin esbuild",
-    "debug": "cross-env NODE_ENV=debug pnpm build && node dist/index.js",
+    "debug": "cross-env NODE_ENV=debug pnpm build && node dist/index.js --expose-gc",
     "dev": "cross-env tsx src/index.ts",
     "lint": "prettier --check --write . && eslint . --ext .ts --fix",
     "lint:check": "prettier --check . && eslint . --ext .ts",
@@ -30,6 +30,7 @@
     "crypto-js": "4.1.1",
     "dotenv": "16.3.1",
     "express": "4.18.2",
+    "heapdump": "^0.3.15",
     "iconv-lite": "0.6.3",
     "morgan": "1.10.0",
     "mysql": "2.18.1",

@@ -227,27 +227,27 @@ export const getSearchWord = (
     .map(([word]) => word);
 };
 
+type Result =
+  | {
+      title: string;
+      weight: number;
+      icon: string;
+      url: string;
+    }
+  | {
+      weight: number;
+      title: string;
+      path: string;
+      indexes: [type: string, config: unknown][];
+    };
+
 export const getSearchResult = (word: string, scope: SearchType): unknown[] => {
   const words = cut(word, true).sort((a, b) => a.length - b.length);
   const searchIndex = getIndex(scope);
-  const results = <
-    (
-      | {
-          title: string;
-          weight: number;
-          icon: string;
-          url: string;
-        }
-      | {
-          weight: number;
-          title: string;
-          path: string;
-          indexes: [type: string, config: unknown][];
-        }
-    )[]
-  >[];
+  const results = <Result[]>[];
 
-  Object.entries(searchIndex).forEach(([idOrUrl, indexContent]) => {
+  for (const idOrUrl in searchIndex) {
+    const indexContent = searchIndex[idOrUrl];
     let matchedWords = 0;
 
     if (indexContent[0] === SearchItemType.Page) {
@@ -385,7 +385,7 @@ export const getSearchResult = (word: string, scope: SearchType): unknown[] => {
         results.push(record);
       }
     }
-  });
+  }
 
   return results.sort((a, b) => b.weight - a.weight);
 };

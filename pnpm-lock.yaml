@@ -56,6 +56,9 @@ dependencies:
   express:
     specifier: 4.18.2
     version: 4.18.2
+  heapdump:
+    specifier: ^0.3.15
+    version: 0.3.15
   iconv-lite:
     specifier: 0.6.3
     version: 0.6.3
@@ -2532,6 +2535,14 @@ packages:
     dependencies:
       function-bind: 1.1.1
 
+  /heapdump@0.3.15:
+    resolution: {integrity: sha512-n8aSFscI9r3gfhOcAECAtXFaQ1uy4QSke6bnaL+iymYZ/dWs9cqDqHM+rALfsHUwukUbxsdlECZ0pKmJdQ/4OA==}
+    engines: {node: '>=0.10.0'}
+    requiresBuild: true
+    dependencies:
+      nan: 2.18.0
+    dev: false
+
   /htmlparser2@8.0.2:
     resolution: {integrity: sha512-GYdjWKDkbRLkZ5geuHs5NY1puJ+PXwP7+fHPRz06Eirsb9ugf6d8kkXav6ADhcODhFFPMIXyxkxSuMf3D6NCFA==}
     dependencies:
@@ -3160,6 +3171,10 @@ packages:
       readable-stream: 2.3.7
       safe-buffer: 5.1.2
       sqlstring: 2.3.1
+    dev: false
+
+  /nan@2.18.0:
+    resolution: {integrity: sha512-W7tfG7vMOGtD30sHoZSSc/JVYiyDPEyQVso/Zz+/uQd0B0L46gtC+pHha5FFMRpil6fm/AoEcRWyOVi4+E/f8w==}
     dev: false
 
   /natural-compare@1.4.0:
