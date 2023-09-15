@@ -2,6 +2,8 @@ import esbuild from "rollup-plugin-esbuild";
 
 const external = [
   /^node:/,
+  "@alicloud/alinlp20200629",
+  "@alicloud/openapi-client",
   "body-parser",
   "cheerio/lib/slim",
   "compression",

@@ -437,12 +437,17 @@ export const mpSearchHandler: RequestHandler<
   try {
     const { scope = "all", type = "result", word } = req.body;
 
+    if (!word) return res.json({ success: true, data: [] });
+
     const result =
       type === "word"
         ? await getSearchWord(word, scope)
         : await getSearchResult(word, scope);
 
-    res.json(result);
+    return res.json({
+      success: true,
+      data: result,
+    });
   } catch (err) {
     console.error(err);
 
