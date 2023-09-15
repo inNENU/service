@@ -1,23 +1,46 @@
 import type { RequestHandler } from "express";
 
+interface LibraryPeopleRawData {
+  code: number;
+  data: {
+    AbleMainNum: number;
+    JingYueNum: number;
+    AbleJingYueNum: number;
+    MainNum: number;
+  };
+
+  status: number;
+}
+
 export interface LibraryPeopleResponse {
   benbu: number;
+  benbuMax: number;
   jingyue: number;
+  jingyueMax: number;
 }
 
 export const libraryPeopleHandler: RequestHandler = async (_, res) => {
   try {
-    const response = await fetch("http://www.library.nenu.edu.cn");
+    const response = await fetch(
+      "http://www.library.nenu.edu.cn/engine2/custom/nenu/onlineUserNum",
+    );
 
-    const responseText = await response.text();
+    const data = <LibraryPeopleRawData>await response.json();
 
-    const [, benbu, jingyue] = responseText.match(
-      /<p><span>本部<\/span><span>(\d+)<\/span><\/p>\s+<p><span>净月<\/span><span>(\d+)<\/span><\/p>/,
-    )!;
+    if (data.code === 1 && data.status === 200) {
+      const { MainNum, JingYueNum, AbleJingYueNum, AbleMainNum } = data.data;
 
-    res.json({
-      benbu,
-      jingyue,
+      return res.json({
+        success: true,
+        benbu: MainNum,
+        benbuMax: AbleMainNum,
+        jingyue: JingYueNum,
+        jingyueMax: AbleJingYueNum,
+      });
+    }
+
+    return res.json({
+      success: false,
     });
   } catch (err) {
     console.error(err);
