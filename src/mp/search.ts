@@ -1,7 +1,39 @@
+import Client, { GetWeChGeneralRequest } from "@alicloud/alinlp20200629";
+import { Config } from "@alicloud/openapi-client";
 import type { RequestHandler } from "express";
-// import { cutForSearch } from "nodejs-jieba";
 
 import type { EmptyObject } from "../typings";
+
+// @ts-ignore
+const client = new (Client as unknown as { default: typeof Client }).default(
+  new Config({
+    accessKeyId: process.env.NLP_ACCESS_KEY,
+    accessKeySecret: process.env.NLP_ACCESS_SECRET,
+    regionId: "cn-hangzhou",
+  }),
+);
+
+interface NLPWeChGeneralResponse {
+  success: boolean;
+  result: {
+    word: string;
+    id: string;
+    tags: string[];
+  }[];
+}
+
+const splitWords = async (text: string): Promise<string[]> => {
+  const response = await client.getWsChGeneral(
+    new GetWeChGeneralRequest({
+      serviceCode: "alinlp",
+      text,
+    }),
+  );
+
+  return (<NLPWeChGeneralResponse>JSON.parse(response.body.data!)).result.map(
+    ({ word }) => word,
+  );
+};
 
 export type SearchType = "all" | "guide" | "intro" | "function";
 
@@ -102,7 +134,7 @@ const getIndex = (type: SearchType): SearchMap => {
 
 const updateIndex = async (): Promise<void> => {
   const versionResponse = await fetch(
-    "https://mp.innenu.com/service/version.php"
+    "https://mp.innenu.com/service/version.php",
   );
 
   let changed = false;
@@ -120,7 +152,7 @@ const updateIndex = async (): Promise<void> => {
         body: JSON.stringify({
           type: "guide",
         }),
-      }
+      },
     );
 
     guideIndex = <SearchMap>await guideResponse.json();
@@ -139,7 +171,7 @@ const updateIndex = async (): Promise<void> => {
         body: JSON.stringify({
           type: "intro",
         }),
-      }
+      },
     );
 
     introIndex = <SearchMap>await introResponse.json();
@@ -155,7 +187,7 @@ const updateIndex = async (): Promise<void> => {
         body: JSON.stringify({
           type: "function",
         }),
-      }
+      },
     );
 
     functionIndex = <SearchMap>await functionResponse.json();
@@ -179,15 +211,16 @@ setInterval(
   () => {
     void updateIndex();
   },
-  1000 * 60 * 5
+  1000 * 60 * 5,
 );
 
-export const getSearchWord = (
+export const getSearchWord = async (
   searchWord: string,
-  scope: SearchType
-): string[] => {
-  // const words = cutForSearch(searchWord).sort((a, b) => a.length - b.length);
-  const words = searchWord.split(" ");
+  scope: SearchType,
+): Promise<string[]> => {
+  const words = (await splitWords(searchWord)).sort(
+    (a, b) => a.length - b.length,
+  );
   const searchIndex = getIndex(scope);
   const suggestions = new Map<string, number>();
 
@@ -242,9 +275,13 @@ type Result =
       indexes: [type: string, config: unknown][];
     };
 
-export const getSearchResult = (word: string, scope: SearchType): unknown[] => {
-  const words = word.split(" ");
-  // const words = cutForSearch(word).sort((a, b) => a.length - b.length);
+export const getSearchResult = async (
+  searchWord: string,
+  scope: SearchType,
+): Promise<unknown[]> => {
+  const words = (await splitWords(searchWord)).sort(
+    (a, b) => a.length - b.length,
+  );
   const searchIndex = getIndex(scope);
   const results = <Result[]>[];
 
@@ -262,7 +299,7 @@ export const getSearchResult = (word: string, scope: SearchType): unknown[] => {
       if (matchedWords)
         results.push({
           title,
-          weight: 1024 * word.length * matchedWords,
+          weight: 1024 * searchWord.length * matchedWords,
           icon,
           url: idOrUrl,
         });
@@ -382,7 +419,7 @@ export const getSearchResult = (word: string, scope: SearchType): unknown[] => {
         record.weight =
           Array.from(indexedContent.values()).reduce(
             (prev, current) => prev + current,
-            0
+            0,
           ) * Math.pow(4, matchedWords - 1);
         results.push(record);
       }
@@ -396,14 +433,14 @@ export const mpSearchHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
   SearchOptions
-> = (req, res) => {
+> = async (req, res) => {
   try {
     const { scope = "all", type = "result", word } = req.body;
 
     const result =
       type === "word"
-        ? getSearchWord(word, scope)
-        : getSearchResult(word, scope);
+        ? await getSearchWord(word, scope)
+        : await getSearchResult(word, scope);
 
     res.json(result);
   } catch (err) {
