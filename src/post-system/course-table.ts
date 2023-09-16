@@ -33,14 +33,25 @@ const classRegExp =
 const getCourses = (content: string): TableItem =>
   [...content.matchAll(courseRowRegExp)].map(([, rowContent]) =>
     [...rowContent.matchAll(courseCellRegExp)].map(([, cell]) => {
-      return [...cell.matchAll(classRegExp)].map(
-        ([, name, teacher, time, location]) => ({
+      const classMap: Record<string, ClassItem[]> = {};
+
+      [...cell.matchAll(classRegExp)]
+        .map(([, name, teacher, time, location]) => ({
           name,
           teacher,
           time,
           location,
-        }),
-      );
+        }))
+        .forEach((item) => {
+          (classMap[item.name] ??= []).push(item);
+        });
+
+      return Object.values(classMap).map((classes) => ({
+        name: classes[0].name,
+        location: classes[0].location,
+        teacher: classes.map((item) => item.teacher).join("、"),
+        time: classes.map((item) => item.time).join("、"),
+      }));
     }),
   );
 
