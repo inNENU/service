@@ -1,39 +1,7 @@
-import Client, { GetWeChGeneralRequest } from "@alicloud/alinlp20200629";
-import { Config } from "@alicloud/openapi-client";
 import type { RequestHandler } from "express";
 
-import type { EmptyObject } from "../typings";
-
-// @ts-ignore
-const client = new (Client as unknown as { default: typeof Client }).default(
-  new Config({
-    accessKeyId: process.env.NLP_ACCESS_KEY,
-    accessKeySecret: process.env.NLP_ACCESS_SECRET,
-    regionId: "cn-hangzhou",
-  }),
-);
-
-interface NLPWeChGeneralResponse {
-  success: boolean;
-  result: {
-    word: string;
-    id: string;
-    tags: string[];
-  }[];
-}
-
-const splitWords = async (text: string): Promise<string[]> => {
-  const response = await client.getWsChGeneral(
-    new GetWeChGeneralRequest({
-      serviceCode: "alinlp",
-      text,
-    }),
-  );
-
-  return (<NLPWeChGeneralResponse>JSON.parse(response.body.data!)).result.map(
-    ({ word }) => word,
-  );
-};
+import type { EmptyObject } from "../typings.js";
+import { splitWords } from "../utils/index.js";
 
 export type SearchType = "all" | "guide" | "intro" | "function";
 
@@ -134,7 +102,7 @@ const getIndex = (type: SearchType): SearchMap => {
 
 const updateIndex = async (): Promise<void> => {
   const versionResponse = await fetch(
-    "https://mp.innenu.com/service/version.php",
+    "https://mp.innenu.com/service/version.php"
   );
 
   let changed = false;
@@ -152,7 +120,7 @@ const updateIndex = async (): Promise<void> => {
         body: JSON.stringify({
           type: "guide",
         }),
-      },
+      }
     );
 
     guideIndex = <SearchMap>await guideResponse.json();
@@ -171,7 +139,7 @@ const updateIndex = async (): Promise<void> => {
         body: JSON.stringify({
           type: "intro",
         }),
-      },
+      }
     );
 
     introIndex = <SearchMap>await introResponse.json();
@@ -187,7 +155,7 @@ const updateIndex = async (): Promise<void> => {
         body: JSON.stringify({
           type: "function",
         }),
-      },
+      }
     );
 
     functionIndex = <SearchMap>await functionResponse.json();
@@ -211,20 +179,22 @@ setInterval(
   () => {
     void updateIndex();
   },
-  1000 * 60 * 5,
+  1000 * 60 * 5
 );
 
 export const getSearchWord = async (
   searchWord: string,
-  scope: SearchType,
+  scope: SearchType
 ): Promise<string[]> => {
   const words = (await splitWords(searchWord)).sort(
-    (a, b) => a.length - b.length,
+    (a, b) => a.length - b.length
   );
   const searchIndex = getIndex(scope);
   const suggestions = new Map<string, number>();
 
-  Object.entries(searchIndex).forEach(([, indexContent]) => {
+  for (const idOrUrl in searchIndex) {
+    const indexContent = searchIndex[idOrUrl];
+
     words: for (const word of words)
       if (indexContent[0] === SearchItemType.Page) {
         const [, title, , tags] = <PageIndex>indexContent;
@@ -254,7 +224,7 @@ export const getSearchWord = async (
             suggestions.set(text, word.length);
         });
       }
-  });
+  }
 
   return Array.from(suggestions.entries())
     .sort((a, b) => b[1] - a[1])
@@ -277,10 +247,10 @@ type Result =
 
 export const getSearchResult = async (
   searchWord: string,
-  scope: SearchType,
+  scope: SearchType
 ): Promise<unknown[]> => {
   const words = (await splitWords(searchWord)).sort(
-    (a, b) => a.length - b.length,
+    (a, b) => a.length - b.length
   );
   const searchIndex = getIndex(scope);
   const results = <Result[]>[];
@@ -419,7 +389,7 @@ export const getSearchResult = async (
         record.weight =
           Array.from(indexedContent.values()).reduce(
             (prev, current) => prev + current,
-            0,
+            0
           ) * Math.pow(4, matchedWords - 1);
         results.push(record);
       }
