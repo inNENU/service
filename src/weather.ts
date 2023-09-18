@@ -1,16 +1,16 @@
 /* eslint-disable */
 import type { RequestHandler } from "express";
-import type { EmptyObject } from "../typings";
+import type { EmptyObject } from "./typings";
 
 type Time = `${number}${number}:${number}${number}`;
 type Date =
   `${number}${number}${number}${number}${number}${number}${number}${number}`;
 
-interface WeatherData {
+interface WeatherRawData {
   data: {
     air: {
       aqi: number;
-      aqi_level: string;
+      aqi_level: number;
       aqi_name: string;
       co: string;
       no2: string;
@@ -49,7 +49,7 @@ interface WeatherData {
     };
 
     forecast_1h: Record<
-      number,
+      `${number}`,
       {
         degree: string;
         update_time: string;
@@ -62,7 +62,7 @@ interface WeatherData {
     >;
 
     forecast_24h: Record<
-      number,
+      `${number}`,
       {
         day_weather: string;
         day_weather_code: string;
@@ -128,13 +128,14 @@ interface WeatherData {
       };
     };
   };
+  status: 200;
 }
 
 /**
  * 获得天气代码
  *
  * @param icon 天气代码
- * @param $isDay 当前是否是白天
+ * @param isDay 当前是否是白天
  */
 const getWeatherCode = (icon: string, isDay: boolean) =>
   (icon === "00" || icon === "01" || icon === "03" || icon === "13"
@@ -168,53 +169,145 @@ export interface WeatherOptions {
   county?: string;
 }
 
-export const weatherHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  WeatherOptions
-> = async (req, res) => {
-  const { province = "吉林", city = "长春", county = "南关" } = req.body;
+export interface WeatherAirInfo {
+  /** 空气质量 */
+  aqi: number;
+  /** 空气质量等级 */
+  aqiLevel: number;
+  /** 空气质量描述 */
+  aqiName: string;
+  co: number;
+  no2: number;
+  o3: number;
+  pm10: number;
+  pm25: number;
+  so2: number;
+}
 
-  const { data } = <WeatherData>(
-    await (
-      await fetch(
-        `https://wis.qq.com/weather/common?source=pc&weather_type=observe|rise|air|forecast_1h|forecast_24h|index|alarm|limit|tips&province=${province}&city=${city}&county=${county}`
-      )
-    ).json()
-  );
+interface WeatherAlarm {
+  level: string;
+  type: string;
+  text: string;
+}
 
-  const air = {
-    aqi: data.air.aqi,
-    aqiLevel: data.air.aqi_level,
-    aqiName: data.air.aqi_name,
-    co: data.air.co,
-    no2: data.air.no2,
-    o3: data.air.o3,
-    pm10: data.air["pm10"],
-    pm25: data.air["pm2.5"],
-    so2: data.air.so2,
-  };
+/** 一小时天气预报详情 */
+export interface WeatherForecast1H {
+  /** 摄氏度 */
+  degree: string;
+  /** 更新时间 */
+  time: string;
+  /** 天气代码 */
+  weatherCode: string;
+}
 
-  const alarm = Object.entries(data.alarm).map(([, value]) => {
-    const { detail, level_name, type_name } = value;
+/** 24小时天气预报详情 */
+export interface WeatherForecast24H {
+  /** 日间天气 */
+  dayWeather: string;
+  /** 日间天气代码 */
+  dayWeatherCode: string;
+  /** 日间天气缩写 */
+  dayWeatherShort: string;
+  /** 最高温 */
+  maxDegree: string;
+  /** 最低温 */
+  minDegree: string;
+  /** 夜间温度 */
+  nightWeather: string;
+  /** 夜间温度代码 */
+  nightWeatherCode: string;
+  /** 夜间温度缩写 */
+  nightWeatherShort: string;
+  /** 夜间风向 */
+  nightWindDirection: string;
+  /** 夜间风力 */
+  nightWindPower: string;
+  /** 星期 */
+  weekday: string;
+}
 
-    return { level: level_name, type: type_name, text: detail };
-  });
+export interface WeatherHint {
+  id: string;
+  name: string;
+  info: string;
+  detail: string;
+}
 
-  const { wind_direction: windDirection } = data.observe;
+export interface WeatherObserveInfo {
+  /** 温度 */
+  degree: string;
+  /** 湿度 */
+  humidity: string;
+  /** 降水量 */
+  precipitation: string;
+  /** 压力 */
+  pressure: string;
+  /** 更新时间 */
+  updateTime: string;
+  /** 天气 */
+  weather: string;
+  /** 天气代码 */
+  weatherCode: string;
+  /** 天气缩写 */
+  weatherShort: string;
+  /** 风向 */
+  windDirection: string;
+  /** 风力 */
+  windPower: string;
+}
 
-  const observe = {
-    weatherCode: data.observe.weather_code,
-    weatherShort: data.observe.weather_short,
-    weather: data.observe.weather,
-    degree: data.observe.degree,
-    windDirection: getWindDirection(windDirection),
-    windPower: data.observe.wind_power,
-    humidity: data.observe.humidity,
-    precipitation: data.observe.precipitation,
-    pressure: data.observe.pressure,
-    updateTime: data.observe.update_time,
-  };
+export interface WeatherRiseInfo {
+  /** 日出时间 */
+  sunrise: string;
+  /** 日落时间 */
+  sunset: string;
+  /** 日期 */
+  time: string;
+}
+
+/** 天气详情 */
+export interface WeatherData {
+  air: WeatherAirInfo;
+  /** 天气预警 */
+  alarm: WeatherAlarm[];
+  /** 天预报 */
+  dayForecast: WeatherForecast24H[];
+  /** 小时预报 */
+  hourForecast: WeatherForecast1H[];
+  /** 实时数据 */
+  observe: WeatherObserveInfo;
+  /** 日出日落时间 */
+  rise: WeatherRiseInfo[];
+  tips: string[];
+  hints: WeatherHint[];
+}
+
+const getWeather = ({
+  data: { air, alarm, ...data },
+}: WeatherRawData): WeatherData => {
+  const {
+    aqi,
+    aqi_level: aqiLevel,
+    aqi_name: aqiName,
+    co,
+    no2,
+    o3,
+    pm10,
+    "pm2.5": pm25,
+    so2,
+  } = air;
+  const {
+    wind_direction: windDirection,
+    weather_code: weatherCode,
+    weather_short: weatherShort,
+    weather,
+    degree,
+    wind_power: windPower,
+    humidity,
+    precipitation,
+    pressure,
+    update_time: updateTime,
+  } = data.observe;
 
   const rise = Object.entries(data.rise)
     .sort(([keyA], [keyB]) => Number(keyA) - Number(keyB))
@@ -330,14 +423,57 @@ export const weatherHandler: RequestHandler<
 
   const tips = Object.values(data.tips.observe);
 
-  return res.json({
-    air,
-    alarm,
+  return {
+    air: {
+      aqi,
+      aqiLevel,
+      aqiName,
+      co: Number(co),
+      no2: Number(no2),
+      o3: Number(o3),
+      pm10: Number(pm10),
+      pm25: Number(pm25),
+      so2: Number(so2),
+    },
+    alarm: Object.entries(alarm).map(
+      ([, { detail, level_name: level, type_name: type }]) => ({
+        level,
+        type,
+        text: detail,
+      })
+    ),
     dayForecast,
     hourForecast,
     hints,
-    observe,
+    observe: {
+      weatherCode,
+      weatherShort,
+      weather,
+      degree,
+      windDirection: getWindDirection(windDirection),
+      windPower,
+      humidity,
+      precipitation,
+      pressure,
+      updateTime,
+    },
     rise,
     tips,
-  });
+  };
+};
+
+export const weatherHandler: RequestHandler<
+  EmptyObject,
+  EmptyObject,
+  WeatherOptions
+> = async (req, res) => {
+  const { province = "吉林", city = "长春", county = "南关" } = req.body;
+
+  const weatherResponse = await fetch(
+    `https://wis.qq.com/weather/common?source=pc&weather_type=observe|rise|air|forecast_1h|forecast_24h|index|alarm|limit|tips&province=${province}&city=${city}&county=${county}`
+  );
+
+  const rawData = <WeatherRawData>await weatherResponse.json();
+
+  return res.json(getWeather(rawData));
 };
