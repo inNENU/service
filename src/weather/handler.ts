@@ -236,7 +236,7 @@ export const weatherHandler: RequestHandler<
       const isDay = sunriseHour < hour && hour <= sunsetHour;
 
       const weather = {
-        degree,
+        degree: `${degree}°`,
         weatherCode: getWeatherCode(weatherCode, isDay),
         time: `${updateTime.substring(8, 10)}:${updateTime.substring(10, 12)}`,
       };
