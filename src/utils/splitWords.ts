@@ -17,7 +17,7 @@ const client = new (Client as unknown as { default: typeof Client }).default(
     accessKeyId: process.env.NLP_ACCESS_KEY,
     accessKeySecret: process.env.NLP_ACCESS_SECRET,
     regionId: "cn-hangzhou",
-  })
+  }),
 );
 
 export const splitWords = async (text: string): Promise<string[]> => {
@@ -25,10 +25,10 @@ export const splitWords = async (text: string): Promise<string[]> => {
     new GetWeChGeneralRequest({
       serviceCode: "alinlp",
       text,
-    })
+    }),
   );
 
   return (<NLPWeChGeneralResponse>JSON.parse(response.body.data!)).result.map(
-    ({ word }) => word
+    ({ word }) => word,
   );
 };
