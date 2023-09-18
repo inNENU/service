@@ -12,6 +12,12 @@ interface WeatherData {
       aqi: number;
       aqi_level: string;
       aqi_name: string;
+      co: string;
+      no2: string;
+      o3: string;
+      pm10: string;
+      "pm2.5": string;
+      so2: string;
     };
 
     /** 天气预警 */
@@ -172,7 +178,7 @@ export const weatherHandler: RequestHandler<
   const { data } = <WeatherData>(
     await (
       await fetch(
-        `https://wis.qq.com/weather/common?source=xw&weather_type=observe|rise|air|forecast_1h|forecast_24h|index|alarm|limit|tips&province=${province}&city=${city}&county=${county}`
+        `https://wis.qq.com/weather/common?source=pc&weather_type=observe|rise|air|forecast_1h|forecast_24h|index|alarm|limit|tips&province=${province}&city=${city}&county=${county}`
       )
     ).json()
   );
@@ -181,6 +187,12 @@ export const weatherHandler: RequestHandler<
     aqi: data.air.aqi,
     aqiLevel: data.air.aqi_level,
     aqiName: data.air.aqi_name,
+    co: data.air.co,
+    no2: data.air.no2,
+    o3: data.air.o3,
+    pm10: data.air["pm10"],
+    pm25: data.air["pm2.5"],
+    so2: data.air.so2,
   };
 
   const alarm = Object.entries(data.alarm).map(([, value]) => {
