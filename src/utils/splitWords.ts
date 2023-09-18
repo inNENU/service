@@ -1,5 +1,6 @@
 import Client, { GetWeChGeneralRequest } from "@alicloud/alinlp20200629";
 import { Config } from "@alicloud/openapi-client";
+import "../config/loadEnv.js";
 
 interface NLPWeChGeneralResponse {
   success: boolean;

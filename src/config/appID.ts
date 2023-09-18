@@ -1,6 +1,4 @@
-import { config } from "dotenv";
-
-config();
+import "./loadEnv.js";
 
 export const appIDInfo = {
   // eslint-disable-next-line @typescript-eslint/naming-convention
