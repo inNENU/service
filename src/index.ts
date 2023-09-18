@@ -102,7 +102,21 @@ app.use(bodyParser.json());
 app.use(morgan("common"));
 
 app.get("/", (_req, res) => {
-  res.json({ success: true, version: pkg.version });
+  res.header("Content-Type", "text/html");
+
+  return res.send(`\
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>in东师服务</title>
+</head>
+<body>
+  当前版本: ${pkg.version}
+</body>
+</html>\
+`);
 });
 
 app.post("/action/login", actionLoginHandler);
