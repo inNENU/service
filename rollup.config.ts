@@ -1,3 +1,4 @@
+import json from "@rollup/plugin-json";
 import esbuild from "rollup-plugin-esbuild";
 
 const external = [
@@ -29,6 +30,7 @@ export default [
       },
     ],
     plugins: [
+      json(),
       esbuild({
         charset: "utf8",
         minify: process.env.NODE_ENV !== "debug",

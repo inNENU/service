@@ -81,6 +81,7 @@ import {
 import { getMemoryUsage } from "./utils/index.js";
 import { vpnCASLoginHandler, vpnLoginHandler } from "./vpn/index.js";
 import { weatherHandler } from "./weather/handler.js";
+import pkg from "../package.json" assert { type: "json" };
 
 const app = express();
 const port = process.env.PORT ? Number(process.env.PORT) : 8080;
@@ -101,7 +102,7 @@ app.use(bodyParser.json());
 app.use(morgan("common"));
 
 app.get("/", (_req, res) => {
-  res.json({ success: true });
+  res.json({ success: true, version: pkg.version });
 });
 
 app.post("/action/login", actionLoginHandler);
