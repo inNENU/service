@@ -7,127 +7,129 @@ type Date =
   `${number}${number}${number}${number}${number}${number}${number}${number}`;
 
 interface WeatherRawData {
-  data: {
-    air: {
-      aqi: number;
-      aqi_level: number;
-      aqi_name: string;
-      co: string;
-      no2: string;
-      o3: string;
-      pm10: string;
-      "pm2.5": string;
-      so2: string;
+  air: {
+    aqi: number;
+    aqi_level: number;
+    aqi_name: string;
+    co: string;
+    no2: string;
+    o3: string;
+    pm10: string;
+    "pm2.5": string;
+    so2: string;
+  };
+
+  /** 天气预警 */
+  alarm: {
+    [props: number]: {
+      /** 城市 */
+      city: string;
+      /** 区域 */
+      country: string;
+      /** 报警详情 */
+      detail: string;
+      /** 信息 */
+      info: string;
+      /** 级别代码 */
+      level_code: string;
+      /** 级别名称 */
+      level_name: string;
+      /** 省份 */
+      province: string;
+      /** 类型代码 */
+      type_code: string;
+      /** 类型名称 */
+      type_name: string;
+      /** 更新时间 */
+      update_time: string;
+      /** 对应地址 */
+      url: string;
     };
+  };
 
-    /** 天气预警 */
-    alarm: {
-      [props: number]: {
-        /** 城市 */
-        city: string;
-        /** 区域 */
-        country: string;
-        /** 报警详情 */
-        detail: string;
-        /** 信息 */
-        info: string;
-        /** 级别代码 */
-        level_code: string;
-        /** 级别名称 */
-        level_name: string;
-        /** 省份 */
-        province: string;
-        /** 类型代码 */
-        type_code: string;
-        /** 类型名称 */
-        type_name: string;
-        /** 更新时间 */
-        update_time: string;
-        /** 对应地址 */
-        url: string;
-      };
-    };
-
-    forecast_1h: Record<
-      `${number}`,
-      {
-        degree: string;
-        update_time: string;
-        weather: string;
-        weather_code: string;
-        weather_short: string;
-        wind_direction: string;
-        wind_power: string;
-      }
-    >;
-
-    forecast_24h: Record<
-      `${number}`,
-      {
-        day_weather: string;
-        day_weather_code: string;
-        day_weather_short: string;
-        day_wind_direction: string;
-        day_wind_direction_code: string;
-        day_wind_power: string;
-        day_wind_power_code: string;
-        max_degree: string;
-        min_degree: string;
-        night_weather: string;
-        night_weather_code: string;
-        night_weather_short: string;
-        night_wind_direction: string;
-        night_wind_direction_code: string;
-        night_wind_power: string;
-        night_wind_power_code: string;
-        time: string;
-      }
-    >;
-
-    index: {
-      time: string;
-      [type: string]:
-        | {
-            detail: string;
-            info: string;
-            name: string;
-          }
-        | string;
-    };
-
-    limit: {
-      tail_number: string;
-      time: string;
-    };
-
-    observe: {
+  forecast_1h: Record<
+    `${number}`,
+    {
       degree: string;
-      humidity: string;
-      precipitation: string;
-      pressure: string;
       update_time: string;
       weather: string;
       weather_code: string;
-      weather_short: "多云";
+      weather_short: string;
       wind_direction: string;
       wind_power: string;
-    };
+    }
+  >;
 
-    rise: Record<
-      number,
-      {
-        sunrise: Time;
-        sunset: Time;
-        time: Date;
-      }
-    >;
+  forecast_24h: Record<
+    `${number}`,
+    {
+      day_weather: string;
+      day_weather_code: string;
+      day_weather_short: string;
+      day_wind_direction: string;
+      day_wind_direction_code: string;
+      day_wind_power: string;
+      day_wind_power_code: string;
+      max_degree: string;
+      min_degree: string;
+      night_weather: string;
+      night_weather_code: string;
+      night_weather_short: string;
+      night_wind_direction: string;
+      night_wind_direction_code: string;
+      night_wind_power: string;
+      night_wind_power_code: string;
+      time: string;
+    }
+  >;
 
-    tips: {
-      observe: {
-        [props: string]: string;
-      };
+  index: {
+    time: string;
+    [type: string]:
+      | {
+          detail: string;
+          info: string;
+          name: string;
+        }
+      | string;
+  };
+
+  limit: {
+    tail_number: string;
+    time: string;
+  };
+
+  observe: {
+    degree: string;
+    humidity: string;
+    precipitation: string;
+    pressure: string;
+    update_time: string;
+    weather: string;
+    weather_code: string;
+    weather_short: "多云";
+    wind_direction: string;
+    wind_power: string;
+  };
+
+  rise: Record<
+    number,
+    {
+      sunrise: Time;
+      sunset: Time;
+      time: Date;
+    }
+  >;
+
+  tips: {
+    observe: {
+      [props: string]: string;
     };
   };
+}
+
+interface WeatherRawResponse {
+  data: WeatherRawData;
   status: 200;
 }
 
@@ -282,9 +284,7 @@ export interface WeatherData {
   hints: WeatherHint[];
 }
 
-const getWeather = ({
-  data: { air, alarm, ...data },
-}: WeatherRawData): WeatherData => {
+const getWeather = ({ air, alarm, ...data }: WeatherRawData): WeatherData => {
   const {
     aqi,
     aqi_level: aqiLevel,
@@ -333,7 +333,7 @@ const getWeather = ({
     .map(([, value]) => value)
     .map(({ degree, update_time: updateTime, weather_code: weatherCode }) => {
       const { sunrise, sunset } = rise.find(
-        (item) => item.time === updateTime.substring(0, 8),
+        (item) => item.time === updateTime.substring(0, 8)
       )!;
       const hour = Number(updateTime.substring(8, 10));
       const sunriseHour = Number(sunrise.substring(0, 2));
@@ -418,7 +418,7 @@ const getWeather = ({
         nightWindDirection: getWindDirection(nightWindDirection),
         maxDegree,
         minDegree,
-      }),
+      })
     );
 
   const tips = Object.values(data.tips.observe);
@@ -440,7 +440,7 @@ const getWeather = ({
         level,
         type,
         text: detail,
-      }),
+      })
     ),
     dayForecast,
     hourForecast,
@@ -470,10 +470,16 @@ export const weatherHandler: RequestHandler<
   const { province = "吉林", city = "长春", county = "南关" } = req.body;
 
   const weatherResponse = await fetch(
-    `https://wis.qq.com/weather/common?source=pc&weather_type=observe|rise|air|forecast_1h|forecast_24h|index|alarm|limit|tips&province=${province}&city=${city}&county=${county}`,
+    `https://wis.qq.com/weather/common?source=pc&weather_type=observe|rise|forecast_1h|forecast_24h|index|alarm|limit|tips&province=${province}&city=${city}&county=${county}`
+  );
+  const airResponse = await fetch(
+    `https://wis.qq.com/weather/common?source=pc&weather_type=observe|rise|air|forecast_1h|forecast_24h|index|alarm|limit|tips&province=${province}&city=${city}`
   );
 
-  const rawData = <WeatherRawData>await weatherResponse.json();
+  const rawData = {
+    ...(<WeatherRawResponse>await weatherResponse.json()).data,
+    ...(<WeatherRawResponse>await airResponse.json()).data,
+  };
 
   return res.json(getWeather(rawData));
 };
