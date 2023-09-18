@@ -80,7 +80,7 @@ import {
 } from "./under-system/index.js";
 import { getMemoryUsage } from "./utils/index.js";
 import { vpnCASLoginHandler, vpnLoginHandler } from "./vpn/index.js";
-import { weatherHandler } from "./weather/handler.js";
+import { weatherHandler } from "./weather/index.js";
 import pkg from "../package.json" assert { type: "json" };
 
 const app = express();
