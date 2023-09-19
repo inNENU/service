@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 
+import { queryCompleteActions } from "./actions.js";
 import type { MyInfo } from "./info.js";
 import { getMyInfo } from "./info.js";
 import type { MyLoginFailedResult } from "./login.js";
@@ -14,6 +15,57 @@ import type {
 
 // Note: This can be inferred from app list
 const APPLY_MAIL_APP_ID = "GRYXSQ";
+
+interface MailInitSuccessInfo {
+  success: true;
+  email: string;
+  password: string;
+}
+
+interface MailInitFailedInfo {
+  success: false;
+  msg: string;
+}
+
+type MailInitInfo = MailInitSuccessInfo | MailInitFailedInfo;
+
+const getMailInitInfo = async (
+  cookieHeader: string,
+  instanceId: string,
+): Promise<MailInitInfo> => {
+  const mailInfoResponse = await fetch(`${MY_SERVER}/Gryxsq/getResult`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json, text/javascript, */*; q=0.01",
+      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+      Cookie: cookieHeader,
+    },
+    body: new URLSearchParams({
+      PROC: instanceId,
+    }),
+  });
+
+  const { MESSAGE, MAILNAME, PASSWORD } = <
+    {
+      result: "0";
+      MESSAGE: string;
+      MAILNAME: string;
+      PASSWORD: string;
+    }
+  >await mailInfoResponse.json();
+
+  if (MESSAGE === "邮箱创建成功")
+    return {
+      success: true,
+      email: `${MAILNAME}@nenu.edu.cn`,
+      password: PASSWORD,
+    };
+
+  return {
+    success: false,
+    msg: "邮箱创建失败，请联系信息化办",
+  };
+};
 
 export interface GetEmailInfoOptions extends Partial<LoginOptions> {
   type?: "get";
@@ -46,44 +98,6 @@ export type GetEmailResponse =
   | MyLoginFailedResult
   | CommonFailedResponse;
 
-const PASSWORD_CHARS = [
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-  "abcdefghijklmnopqrstuvwxyz",
-  "1234567890",
-];
-
-const initRandomPassWord = (length: number): string => {
-  const password: string[] = [];
-  let n = 0;
-
-  for (let i = 0; i < length; i++)
-    if (password.length < length - 3) {
-      // Get random passwordArray index
-      const arrayRandom = Math.floor(Math.random() * 3);
-      // Get password array value
-      const passwordItem = PASSWORD_CHARS[arrayRandom];
-      // Get password array value random index
-      // Get random real value
-      const char =
-        passwordItem[Math.floor(Math.random() * passwordItem.length)];
-
-      password.push(char);
-    } else {
-      const passwordItem = PASSWORD_CHARS[n];
-
-      const char =
-        passwordItem[Math.floor(Math.random() * passwordItem.length)];
-      // Get array splice index
-      const spliceIndex = Math.floor(Math.random() * password.length);
-
-      // insert every type randomly
-      password.splice(spliceIndex, 0, char);
-      n++;
-    }
-
-  return password.join("");
-};
-
 export const getEmailInfo = async (
   cookieHeader: string,
   info: MyInfo,
@@ -100,12 +114,20 @@ export const getEmailInfo = async (
 
   const checkResult = <RawCheckMailData>await checkMailResponse.json();
 
-  if (!checkResult.flag)
+  if (!checkResult.flag) {
+    const { serviceId } = (await queryCompleteActions(cookieHeader)).find(
+      (item) => item.flowName === "个人邮箱申请",
+    )!;
+
+    const mailInitInfo = await getMailInitInfo(cookieHeader, serviceId);
+
+    if (mailInitInfo.success === false) return mailInitInfo;
+
     return {
-      success: true,
       hasEmail: true,
-      email: checkResult.yxmc,
+      ...mailInitInfo,
     };
+  }
 
   const processResult = await getProcess(APPLY_MAIL_APP_ID, cookieHeader);
 
@@ -158,18 +180,12 @@ export interface ActivateEmailOptions extends Partial<LoginOptions> {
   instanceId: string;
 }
 
-export interface ActivateEmailSuccessResponse {
-  success: true;
-  email: string;
-  password: string;
-}
-
 export type ActivateMailFailedResponse =
   | MyLoginFailedResult
   | CommonFailedResponse;
 
 export type ActivateEmailResponse =
-  | ActivateEmailSuccessResponse
+  | MailInitSuccessInfo
   | ActivateMailFailedResponse;
 
 const activateEmail = async (
@@ -177,7 +193,6 @@ const activateEmail = async (
   { name, phone, suffix, taskId, instanceId }: ActivateEmailOptions,
   info: MyInfo,
 ): Promise<ActivateEmailResponse> => {
-  const password = initRandomPassWord(10);
   const checkMailAccountResponse = await fetch(
     `${MY_SERVER}/Gryxsq/checkMailBoxAccount`,
     {
@@ -231,7 +246,6 @@ const activateEmail = async (
         YXMC: name ?? "",
         SFSYSZ: suffix ? "2" : "1",
         YXHZ: suffix?.toString() ?? "",
-        MM: password,
       }),
     },
   );
@@ -244,11 +258,9 @@ const activateEmail = async (
       msg: "申请失败",
     };
 
-  return <ActivateEmailSuccessResponse>{
-    success: true,
-    email: `${name}${suffix ?? ""}@nenu.edu.cn`,
-    password,
-  };
+  const initInfo = await getMailInitInfo(cookieHeader, instanceId);
+
+  return initInfo;
 };
 
 export const emailHandler: RequestHandler<

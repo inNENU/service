@@ -26,7 +26,7 @@ const userNameRegexp =
 const inputRegExp = /id="alias".*?value="(.*?)"/;
 
 export const getBasicInfo = async (
-  cookieHeader: string
+  cookieHeader: string,
 ): Promise<InfoResponse> => {
   const userNameResponse = await fetch(`${AUTH_SERVER}/authserver/index.do`, {
     method: "GET",
@@ -54,7 +54,7 @@ export const getBasicInfo = async (
       headers: {
         Cookie: cookieHeader,
       },
-    }
+    },
   );
 
   const aliasResponseText = await aliasResponse.text();
@@ -95,7 +95,7 @@ export const infoHandler: RequestHandler<
 
     if (result.success) {
       const cookieHeader = result.cookieStore.getHeader(
-        `${AUTH_SERVER}/authserver/`
+        `${AUTH_SERVER}/authserver/`,
       );
 
       return res.json(await getBasicInfo(cookieHeader));
