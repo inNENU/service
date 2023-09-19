@@ -71,7 +71,7 @@ export interface EmailItem {
   mid: string;
 }
 
-export interface ActionRecentMailResponse {
+export interface ActionRecentMailSuccessResponse {
   success: true;
   /** 未读数 */
   unread: number;
@@ -79,11 +79,19 @@ export interface ActionRecentMailResponse {
   recent: EmailItem[];
 }
 
+export interface ActionRecentMailFailedResponse extends CommonFailedResponse {
+  type?: "not-initialized";
+}
+
+export type ActionRecentMailResponse =
+  | ActionRecentMailSuccessResponse
+  | ActionRecentMailFailedResponse;
+
 const EMAIL_INFO_URL = `${ACTION_SERVER}/extract/getEmailInfo`;
 
 export const emailInfo = async (
   cookieHeader: string,
-): Promise<ActionRecentMailResponse | CommonFailedResponse> => {
+): Promise<ActionRecentMailResponse> => {
   try {
     const checkResponse = await fetch(EMAIL_INFO_URL, {
       method: "POST",
@@ -118,6 +126,7 @@ export const emailInfo = async (
 
     return {
       success: false,
+      type: "not-initialized",
       msg: "用户无邮箱或未初始化邮箱",
     };
   } catch (err) {

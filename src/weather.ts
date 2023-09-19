@@ -333,7 +333,7 @@ const getWeather = ({ air, alarm, ...data }: WeatherRawData): WeatherData => {
     .map(([, value]) => value)
     .map(({ degree, update_time: updateTime, weather_code: weatherCode }) => {
       const { sunrise, sunset } = rise.find(
-        (item) => item.time === updateTime.substring(0, 8)
+        (item) => item.time === updateTime.substring(0, 8),
       )!;
       const hour = Number(updateTime.substring(8, 10));
       const sunriseHour = Number(sunrise.substring(0, 2));
@@ -418,7 +418,7 @@ const getWeather = ({ air, alarm, ...data }: WeatherRawData): WeatherData => {
         nightWindDirection,
         maxDegree,
         minDegree,
-      })
+      }),
     );
 
   const tips = Object.values(data.tips.observe);
@@ -440,7 +440,7 @@ const getWeather = ({ air, alarm, ...data }: WeatherRawData): WeatherData => {
         level,
         type,
         text: detail,
-      })
+      }),
     ),
     dayForecast,
     hourForecast,
@@ -470,10 +470,10 @@ export const weatherHandler: RequestHandler<
   const { province = "吉林", city = "长春", county = "南关" } = req.body;
 
   const weatherResponse = await fetch(
-    `https://wis.qq.com/weather/common?source=pc&weather_type=observe|rise|forecast_1h|forecast_24h|index|alarm|limit|tips&province=${province}&city=${city}&county=${county}`
+    `https://wis.qq.com/weather/common?source=pc&weather_type=observe|rise|forecast_1h|forecast_24h|index|alarm|limit|tips&province=${province}&city=${city}&county=${county}`,
   );
   const airResponse = await fetch(
-    `https://wis.qq.com/weather/common?source=pc&weather_type=observe|rise|air|forecast_1h|forecast_24h|index|alarm|limit|tips&province=${province}&city=${city}`
+    `https://wis.qq.com/weather/common?source=pc&weather_type=observe|rise|air|forecast_1h|forecast_24h|index|alarm|limit|tips&province=${province}&city=${city}`,
   );
 
   const rawData = {
