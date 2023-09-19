@@ -69,9 +69,6 @@ export interface MyInfo {
   idCard: string;
   /** 用户所在组织名称 */
   org: string;
-  // FIXME: Remove
-  /** @deprecated */
-  school: string;
   /** 用户所在组织 ID */
   orgId: number;
   /** 用户所在专业名称 */
@@ -85,7 +82,7 @@ export interface MyInfo {
   /** 用户层次 */
   type: string;
   /** 用户层次代码 */
-  typeId: string;
+  typeId: "bks" | "yjs" | "lxs" | "jzg";
   /** 用户类别码 */
   code: string;
   /** 用户政治面貌 */
@@ -112,7 +109,7 @@ export interface MyInfoSuccessResult {
 export type MyInfoResult = MyInfoSuccessResult | CommonFailedResponse;
 
 export const getMyInfo = async (
-  cookieHeader: string,
+  cookieHeader: string
 ): Promise<MyInfoResult> => {
   try {
     const infoResponse = await fetch(`${MY_SERVER}/sysform/loadIntelligent`, {
@@ -204,7 +201,7 @@ export const getMyInfo = async (
           ].includes(info.orgId)
         ? "benbu"
         : [161000, 169000, 252000, 168000, 261000, 178000, 235000].includes(
-            info.orgId,
+            info.orgId
           )
         ? "jingyue"
         : "unknown";
@@ -220,7 +217,7 @@ export const getMyInfo = async (
         writeFileSync(
           "data",
           `["${info.major}", "${info.majorId}"], // ${info.org}\n`,
-          { flag: "a" },
+          { flag: "a" }
         );
         code2major.set(info.majorId, info.major);
       }

@@ -16,12 +16,6 @@ export interface InfoSuccessResponse {
 
   /** 登陆别名 */
   alias: string;
-
-  /**
-   * 用户邮箱
-   * @deprecated
-   */
-  email: string;
 }
 
 export type InfoResponse = InfoSuccessResponse | CommonFailedResponse;
@@ -32,7 +26,7 @@ const userNameRegexp =
 const inputRegExp = /id="alias".*?value="(.*?)"/;
 
 export const getBasicInfo = async (
-  cookieHeader: string,
+  cookieHeader: string
 ): Promise<InfoResponse> => {
   const userNameResponse = await fetch(`${AUTH_SERVER}/authserver/index.do`, {
     method: "GET",
@@ -60,7 +54,7 @@ export const getBasicInfo = async (
       headers: {
         Cookie: cookieHeader,
       },
-    },
+    }
   );
 
   const aliasResponseText = await aliasResponse.text();
@@ -79,8 +73,6 @@ export const getBasicInfo = async (
     success: true,
     name: userName,
     alias: alias || "未设置别名",
-    // TODO: Get real email
-    email: alias ? `${alias}@nenu.edu.cn` : "未设置邮箱",
   };
 };
 
@@ -103,7 +95,7 @@ export const infoHandler: RequestHandler<
 
     if (result.success) {
       const cookieHeader = result.cookieStore.getHeader(
-        `${AUTH_SERVER}/authserver/`,
+        `${AUTH_SERVER}/authserver/`
       );
 
       return res.json(await getBasicInfo(cookieHeader));
