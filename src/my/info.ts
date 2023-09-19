@@ -41,7 +41,7 @@ interface RawInfo {
                 zymc: string;
                 rxnf: string;
                 xznj: string;
-                lb: string;
+                lb: "bks" | "yjs" | "lxs" | "jzg";
                 zzmm: string;
                 wf_dhhm: string;
                 dhhm: string;
@@ -126,7 +126,7 @@ export const getMyInfo = async (
 
     if (
       infoResult.success &&
-      infoResult.data.execResponse.return.Body.code === "200"
+      infoResult.data.execResponse.return.Body?.code === "200"
     ) {
       const personInfo = infoResult.data.execResponse.return.Body.items.item[0];
 
