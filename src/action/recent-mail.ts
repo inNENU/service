@@ -65,8 +65,10 @@ export interface EmailItem {
   subject: string;
   /** 接收日期 */
   receivedDate: number;
-  /** 发件人 */
-  from: string;
+  /** 发件人姓名 */
+  name: string;
+  /** 发件人邮件 */
+  email: string;
   /** 邮件 ID */
   mid: string;
 }
@@ -118,7 +120,8 @@ export const emailInfo = async (
           ({ subject, receivedDate, from, id }) => ({
             subject,
             receivedDate,
-            from,
+            name: /"(.*)"/.exec(from)?.[1] ?? from,
+            email: /<(.*)>/.exec(from)?.[1] ?? from,
             mid: id,
           }),
         ),

@@ -24,7 +24,7 @@ export const actionCheckHandler: RequestHandler<
       redirect: "manual",
     });
 
-    if (response.status === 200) {
+    if (response.status === 200)
       try {
         const result = <{ success: boolean }>await response.json();
 
@@ -38,9 +38,6 @@ export const actionCheckHandler: RequestHandler<
           valid: false,
         });
       }
-
-      return;
-    }
 
     return res.json(<CookieVerifySuccessResponse>{
       success: true,

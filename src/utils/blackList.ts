@@ -70,7 +70,7 @@ export const isInBlackList = (
   if (result)
     fs.writeFileSync(
       "backlist",
-      `${id} new ${openid || ""} ${JSON.stringify(info || "")}\n`,
+      `${id} new ${openid || ""} ${JSON.stringify(info)}\n`,
       {
         encoding: "utf8",
         flag: "a",
