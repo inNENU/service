@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 
 import type { CommonFailedResponse, EmptyObject } from "../typings";
 
-export interface EnrollPlanOptions {
+export interface UnderEnrollPlanOptions {
   year: string;
   province: string;
   planType: string;
@@ -10,7 +10,7 @@ export interface EnrollPlanOptions {
   reformType: string;
 }
 
-export interface EnrollPlanInfo {
+export interface UnderEnrollPlanInfo {
   /** 专业名称 */
   major: string;
   /** 专业属性 */
@@ -27,25 +27,25 @@ export interface EnrollPlanInfo {
   remark: string;
 }
 
-export interface EnrollPlanSuccessResponse {
+export interface UnderEnrollPlanSuccessResponse {
   success: true;
-  data: EnrollPlanInfo[];
+  data: UnderEnrollPlanInfo[];
 }
 
-export type EnrollPlanResponse =
-  | EnrollPlanSuccessResponse
+export type UnderEnrollPlanResponse =
+  | UnderEnrollPlanSuccessResponse
   | CommonFailedResponse;
 
-const enrollItemReg =
+const underEnrollItemReg =
   /<tr class='RowTr'>\s+<td align='center'>(.*?)<\/td>\s+<td align='center'>(.*?)<\/td>\s+<td align='center'>(.*?)<\/td>\s+<td align='center'>(.*?)<\/td>\s+<td align='center'>(.*?)<\/td>\s+<td align='center'>(.*?)<\/td>\s*<td align='center'>(.*?)<\/td>\s*<\/tr>/g;
 
-const ENROLL_PLAN_URL =
+const UNDER_ENROLL_PLAN_URL =
   "http://bkzsw.nenu.edu.cn/col_000018_000171_action_Enrollment.html";
 
-export const enrollPlanHandler: RequestHandler<
+export const underEnrollPlanHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  EnrollPlanOptions
+  UnderEnrollPlanOptions
 > = async (req, res) => {
   try {
     const { majorType, planType, province, reformType, year } = req.body;
@@ -62,7 +62,7 @@ export const enrollPlanHandler: RequestHandler<
 
     console.log("Requesting enroll plan with params:", params);
 
-    const searchResponse = await fetch(ENROLL_PLAN_URL, {
+    const searchResponse = await fetch(UNDER_ENROLL_PLAN_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -78,10 +78,10 @@ export const enrollPlanHandler: RequestHandler<
 
     const content = await searchResponse.text();
 
-    const planInfo: EnrollPlanInfo[] = [];
+    const planInfo: UnderEnrollPlanInfo[] = [];
     let planMatch;
 
-    while ((planMatch = enrollItemReg.exec(content))) {
+    while ((planMatch = underEnrollItemReg.exec(content))) {
       const [, major, majorType, planType, count, year, fee, remark] =
         planMatch;
 
@@ -98,7 +98,7 @@ export const enrollPlanHandler: RequestHandler<
 
     console.log(`Getting ${planInfo.length} items`);
 
-    return res.json(<EnrollPlanSuccessResponse>{
+    return res.json(<UnderEnrollPlanSuccessResponse>{
       success: true,
       data: planInfo,
     });

@@ -24,7 +24,7 @@ import {
   infoHandler,
 } from "./auth/index.js";
 import {
-  enrollPlanHandler,
+  underEnrollPlanHandler,
   historyGradeHandler,
   postAdmissionHandler,
   underAdmissionHandler,
@@ -169,7 +169,7 @@ app.post("/main/info-list", mainInfoListHandler);
 app.get("/main/status", mainStatusHandler);
 
 app.post("/enroll/grade", historyGradeHandler);
-app.post("/enroll/plan", enrollPlanHandler);
+app.post("/enroll/plan", underEnrollPlanHandler);
 app.get("/enroll/under-admission", underAdmissionHandler);
 app.post("/enroll/under-admission", underAdmissionHandler);
 app.post("/enroll/post-admission", postAdmissionHandler);

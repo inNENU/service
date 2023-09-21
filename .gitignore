@@ -2,6 +2,7 @@
 logs
 *.log
 
+cache/
 dist/
 node_modules/
 temp/
