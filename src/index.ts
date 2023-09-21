@@ -28,6 +28,7 @@ import {
   historyGradeHandler,
   postAdmissionHandler,
   underAdmissionHandler,
+  postEnrollPlanHandler,
 } from "./enroll/index.js";
 import { libraryPeopleHandler } from "./library/people.js";
 import {
@@ -169,10 +170,11 @@ app.post("/main/info-list", mainInfoListHandler);
 app.get("/main/status", mainStatusHandler);
 
 app.post("/enroll/grade", historyGradeHandler);
-app.post("/enroll/plan", underEnrollPlanHandler);
 app.get("/enroll/under-admission", underAdmissionHandler);
 app.post("/enroll/under-admission", underAdmissionHandler);
+app.post("/enroll/under-plan", underEnrollPlanHandler);
 app.post("/enroll/post-admission", postAdmissionHandler);
+app.post("/enroll/post-plan", postEnrollPlanHandler);
 
 app.post("/select/login", selectLoginHandler);
 app.post("/select/info", selectInfoHandler);
