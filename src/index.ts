@@ -24,11 +24,11 @@ import {
   infoHandler,
 } from "./auth/index.js";
 import {
-  underEnrollPlanHandler,
   historyGradeHandler,
   postAdmissionHandler,
-  underAdmissionHandler,
   postEnrollPlanHandler,
+  underAdmissionHandler,
+  underEnrollPlanHandler,
 } from "./enroll/index.js";
 import { libraryPeopleHandler } from "./library/people.js";
 import {
