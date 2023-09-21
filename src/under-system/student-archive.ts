@@ -16,9 +16,6 @@ const studyRegExp =
   /<td {2}>(\S+)<\/td>\s*<td {2}>(\S+)<\/td>\s*<td\scolspan="4">(\S+)<\/td>\s*<td {2}>(\S+)<\/td>\s*<td\scolspan="2">(\S+)<\/td>\s*<td {2}>(\S+)<\/td>/g;
 const familyRegExp =
   /<td {2}>(\S+)<\/td>\s*<td {2}>(\S+)<\/td>\s*<td\scolspan="2">(\S+)<\/td>\s*<td\scolspan="2">(\S+)<\/td>\s*<td\scolspan="3">(\S+)<\/td>\s*<td {2}>(\S+)<\/td/g;
-const archiveImageRegExp =
-  /"(\/rxuploadfile\/studentphoto\/pic\/(?:.+?)\.JPG)"/;
-const examImageRegExp = /"(\/gkuploadfile\/studentphoto\/pic\/(?:.+?)\.JPG)"/;
 const pathRegExp = /var newwin = window.showModalDialog\("(.+?)"\);/;
 const registerButtonRegExp =
   /<input\s+type="button"\s+id="zc"\s+class="button"\s+value="确定注册"\s+onclick="bc\(\)"\/>/;
@@ -81,6 +78,7 @@ export interface UnderStudentArchiveInfo {
 }
 
 const getStudentArchive = async (
+  cookieHeader: string,
   content: string,
 ): Promise<UnderStudentArchiveInfo> => {
   const [baseInfo, tableInfo] = content.split("本人学历及社会经历");
@@ -118,26 +116,26 @@ const getStudentArchive = async (
       ({ name, relation, office, title, phone, remark }) =>
         name || relation || office || title || phone || remark,
     );
-
-  const archiveImageLink = archiveImageRegExp.exec(content)?.[1] || "";
-  const examImageLink = examImageRegExp.exec(content)?.[1] || "";
+  const [examImageLink, archiveImageLink] = Array.from(
+    content.matchAll(/var url\s*=\s*"(.*)"/g),
+  ).map(([, url]) => url);
 
   const [archiveImage, examImage] = await Promise.all([
     archiveImageLink
-      ? fetch(`${SERVER}${archiveImageLink}`).then(
-          async (archiveImageResponse) =>
-            `data:image/jpeg;base64,${Buffer.from(
-              await archiveImageResponse.arrayBuffer(),
-            ).toString("base64")}`,
-        )
+      ? fetch(`${SERVER}${archiveImageLink}`, {
+          method: "POST",
+          headers: {
+            Cookie: cookieHeader,
+          },
+        }).catch(() => "")
       : "",
     examImageLink
-      ? fetch(`${SERVER}${examImageLink}`).then(
-          async (examImageResponse) =>
-            `data:image/jpeg;base64,${Buffer.from(
-              await examImageResponse.arrayBuffer(),
-            ).toString("base64")}`,
-        )
+      ? fetch(`${SERVER}${examImageLink}`, {
+          method: "POST",
+          headers: {
+            Cookie: cookieHeader,
+          },
+        }).catch(() => "")
       : "",
   ]);
 
@@ -186,7 +184,7 @@ export const getUnderStudentArchive = async (
   const content = await response.text();
 
   if (content.includes("学生学籍卡片")) {
-    const info = await getStudentArchive(content);
+    const info = await getStudentArchive(cookieHeader, content);
 
     return <UnderGetStudentArchiveSuccessResponse>{
       success: true,
