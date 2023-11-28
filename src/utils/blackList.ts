@@ -7,7 +7,7 @@ import {
 } from "../config/blacklist.js";
 import type { MyInfo } from "../my/index.js";
 
-export const BACKLIST_HINT = [
+export const BLACKLIST_HINT = [
   "外星人来了！",
   "发生什么事了？",
   "服务器正在高冷状态，决定无视你",
@@ -53,7 +53,7 @@ export const isInBlackList = (
   info?: MyInfo | null,
 ): boolean => {
   if (ID_BLACK_LIST.includes(id)) {
-    fs.writeFileSync("backlist", `${id}\n`, {
+    fs.writeFileSync("blacklist", `${id}\n`, {
       encoding: "utf8",
       flag: "a",
     });
@@ -69,7 +69,7 @@ export const isInBlackList = (
 
   if (result)
     fs.writeFileSync(
-      "backlist",
+      "blacklist",
       `${id} new ${openid || ""} ${JSON.stringify(info)}\n`,
       {
         encoding: "utf8",

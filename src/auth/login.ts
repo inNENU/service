@@ -10,7 +10,7 @@ import type {
   LoginOptions,
 } from "../typings.js";
 import {
-  BACKLIST_HINT,
+  BLACKLIST_HINT,
   CookieStore,
   getDomain,
   isInBlackList,
@@ -52,7 +52,7 @@ export const authLogin = async (
     return {
       success: false,
       type: LoginFailType.BlackList,
-      msg: BACKLIST_HINT[Math.floor(Math.random() * BACKLIST_HINT.length)],
+      msg: BLACKLIST_HINT[Math.floor(Math.random() * BLACKLIST_HINT.length)],
     };
 
   const server = webVPN ? WEB_VPN_AUTH_SERVER : AUTH_SERVER;

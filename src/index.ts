@@ -116,6 +116,7 @@ app.get("/", (_req, res) => {
 </head>
 <body>
   当前版本: ${pkg.version}
+  <h1><a href="https://innenu.com">访问网页版 in东师</a></h1>
 </body>
 </html>\
 `);

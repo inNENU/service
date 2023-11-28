@@ -1,0 +1,45 @@
+name: Build Artifacts
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy-server:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          run_install: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Build
+        run: |
+          pnpm run build
+
+      - name: Deploy
+        run: |
+          cd dist
+          git config user.name 'Mr.Hope'
+          git config user.email "mister-hope@outlook.com"
+          git init
+          git branch -m deploy
+          git add -A
+          git commit -m "Deploy"
+          git push -f origin deploy

@@ -36,7 +36,7 @@ export const mpLoginHandler: RequestHandler<
 
     res.json({
       openid,
-      inBacklist: OPENID_BLACK_LIST.includes(openid),
+      inBLACKLIST: OPENID_BLACK_LIST.includes(openid),
       isAdmin: false,
     });
   } catch (err) {
