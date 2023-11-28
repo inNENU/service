@@ -29,7 +29,7 @@ export const postSystemLogin = async (
   cookieStore = new CookieStore(),
 ): Promise<PostSystemLoginResult> => {
   const result = await authLogin(options, {
-    service: "http://dsyjs.nenu.edu.cn:80/framework/main.jsp",
+    service: `${SERVER}/`,
     cookieStore,
   });
 
@@ -77,23 +77,40 @@ export const postSystemLogin = async (
       msg: "此账户无法登录研究生教学服务系统",
     };
 
-  if (finalLocation?.includes(";jsessionid=")) {
-    const ssoUrl = `${SERVER}/Logon.do?method=logonBySSO`;
-
-    await fetch(ssoUrl, {
-      method: "POST",
+  if (finalLocation === "https://dsyjs.nenu.edu.cn/") {
+    const mainResponse = await fetch(finalLocation, {
+      method: "GET",
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Cookie: cookieStore.getHeader(ssoUrl),
-        Referer: `${SERVER}/framework/main.jsp`,
+        Cookie: cookieStore.getHeader(finalLocation),
+        Referer: `${SERVER}/`,
         "User-Agent": IE_8_USER_AGENT,
       },
+      redirect: "manual",
     });
 
-    return <PostSystemLoginSuccessResult>{
-      success: true,
-      cookieStore,
-    };
+    const location = mainResponse.headers.get("Location");
+
+    if (
+      location === "http://dsyjs.nenu.edu.cn/framework/main.jsp" ||
+      location === `${SERVER}/framework/main.jsp`
+    ) {
+      const ssoUrl = `${SERVER}/Logon.do?method=logonBySSO`;
+
+      await fetch(ssoUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Cookie: cookieStore.getHeader(ssoUrl),
+          Referer: `${SERVER}/framework/main.jsp`,
+          "User-Agent": IE_8_USER_AGENT,
+        },
+      });
+
+      return <PostSystemLoginSuccessResult>{
+        success: true,
+        cookieStore,
+      };
+    }
   }
 
   return {
