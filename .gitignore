@@ -7,7 +7,5 @@ dist/
 node_modules/
 temp/
 .env
-backlist
-log
-major
-org
+blacklist
+data

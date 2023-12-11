@@ -1,23 +1,9 @@
+import commonjs from "@rollup/plugin-commonjs";
 import json from "@rollup/plugin-json";
+import nodeResolve from "@rollup/plugin-node-resolve";
 import esbuild from "rollup-plugin-esbuild";
 
-const external = [
-  /^node:/,
-  "@alicloud/alinlp20200629",
-  "@alicloud/openapi-client",
-  "body-parser",
-  "cheerio/lib/slim",
-  "compression",
-  "cookie-parser",
-  "crypto-js",
-  "dotenv",
-  "express",
-  "iconv-lite",
-  "morgan",
-  "nodejs-jieba",
-  "qrcode",
-  "set-cookie-parser",
-];
+const external = [/^node:/];
 
 export default [
   {
@@ -30,11 +16,13 @@ export default [
       },
     ],
     plugins: [
+      commonjs(),
+      nodeResolve(),
       json(),
       esbuild({
         charset: "utf8",
         minify: process.env.NODE_ENV !== "debug",
-        target: "node18",
+        target: "node20",
       }),
     ],
     external,

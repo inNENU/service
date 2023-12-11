@@ -111,8 +111,8 @@ export const getGrades = (content: string, isJS = false): PostGradeResult[] =>
         grade && !Number.isNaN(Number(grade))
           ? Number(grade)
           : grade === "通过"
-          ? 60
-          : 0;
+            ? 60
+            : 0;
 
       return {
         time: getDisplayTime(time),

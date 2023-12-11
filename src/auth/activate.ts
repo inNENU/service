@@ -357,12 +357,12 @@ export const activateHandler: RequestHandler<
           options.type === "info"
             ? checkAccount(options, cookieHeader)
             : options.type === "sms"
-            ? sendSms(options, cookieHeader)
-            : options.type === "bind-phone"
-            ? bindPhone(options, cookieHeader)
-            : options.type === "replace-phone"
-            ? replacePhone(options, cookieHeader)
-            : setPassword(options, cookieHeader),
+              ? sendSms(options, cookieHeader)
+              : options.type === "bind-phone"
+                ? bindPhone(options, cookieHeader)
+                : options.type === "replace-phone"
+                  ? replacePhone(options, cookieHeader)
+                  : setPassword(options, cookieHeader),
         );
       }
 

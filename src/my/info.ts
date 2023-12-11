@@ -186,25 +186,25 @@ export const getMyInfo = async (
       ].includes(info.majorId)
         ? "benbu"
         : [
-            // 净月外国语专业
-            "167120",
-            "167180",
-            "167130",
-            "167140",
-          ].includes(info.majorId)
-        ? "jingyue"
-        : ["070201"].includes(info.majorId) || info.major === "细胞生物学"
-        ? "unknown"
-        : [
-            253000, 170000, 166000, 234000, 173000, 236000, 232000, 174000,
-            175000, 177000,
-          ].includes(info.orgId)
-        ? "benbu"
-        : [161000, 169000, 252000, 168000, 261000, 178000, 235000].includes(
-            info.orgId,
-          )
-        ? "jingyue"
-        : "unknown";
+              // 净月外国语专业
+              "167120",
+              "167180",
+              "167130",
+              "167140",
+            ].includes(info.majorId)
+          ? "jingyue"
+          : ["070201"].includes(info.majorId) || info.major === "细胞生物学"
+            ? "unknown"
+            : [
+                  253000, 170000, 166000, 234000, 173000, 236000, 232000,
+                  174000, 175000, 177000,
+                ].includes(info.orgId)
+              ? "benbu"
+              : [
+                    161000, 169000, 252000, 168000, 261000, 178000, 235000,
+                  ].includes(info.orgId)
+                ? "jingyue"
+                : "unknown";
 
       if (!code2org.has(info.orgId)) {
         writeFileSync("data", `["${info.org}", ${info.orgId}],\n`, {

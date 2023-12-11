@@ -12,7 +12,7 @@ interface NLPWeChGeneralResponse {
 }
 
 // @ts-ignore
-const client = new (Client as unknown as { default: typeof Client }).default(
+const client = new Client(
   new Config({
     accessKeyId: process.env.NLP_ACCESS_KEY,
     accessKeySecret: process.env.NLP_ACCESS_SECRET,
