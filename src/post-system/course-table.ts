@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
 import { postSystemLogin } from "./login.js";
-import { SERVER, getTimeStamp } from "./utils.js";
+import { HTTPS_SERVER, getTimeStamp } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import { semesterStartTime } from "../config/semester-start-time.js";
 import type {
@@ -80,7 +80,7 @@ export const postCourseTableHandler: RequestHandler<
   try {
     const { time } = req.body;
 
-    const QUERY_URL = `${SERVER}/tkglAction.do?${new URLSearchParams({
+    const QUERY_URL = `${HTTPS_SERVER}/tkglAction.do?${new URLSearchParams({
       method: "goListKbByXs",
       xnxqh: time,
     }).toString()}`;
@@ -104,7 +104,7 @@ export const postCourseTableHandler: RequestHandler<
     const response = await fetch(QUERY_URL, {
       headers: {
         Cookie: cookieHeader,
-        Referer: `${SERVER}/tkglAction.do?method=kbxxXs&tktime=${getTimeStamp()}`,
+        Referer: `${HTTPS_SERVER}/tkglAction.do?method=kbxxXs&tktime=${getTimeStamp()}`,
         "User-Agent": IE_8_USER_AGENT,
       },
     });

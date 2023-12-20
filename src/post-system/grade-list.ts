@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
 import { postSystemLogin } from "./login.js";
-import { SERVER, getTimeStamp } from "./utils.js";
+import { HTTPS_SERVER, getTimeStamp } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
@@ -80,7 +80,7 @@ const otherFieldsRegExp =
 const DEFAULT_TABLE_FIELD =
   "学号:1:1:90:a.xh,姓名:2:1:110:a.xm,开课学期:3:1:120:a.xqmc,课程名称:4:1:130:a.kcmc,总成绩:5:1:70:a.zcj,成绩标志:6:1:90:,课程性质:7:1:110:,课程类别:8:1:90:,学时:9:1:70:a.zxs,学分:10:1:70:a.xf,考试性质:11:1:100:ksxz.dmmc,补重学期:15:1:100:";
 const DEFAULT_OTHER_FIELD = "null";
-const QUERY_URL = `${SERVER}/xszqcjglAction.do?method=queryxscj`;
+const QUERY_URL = `${HTTPS_SERVER}/xszqcjglAction.do?method=queryxscj`;
 
 const getDisplayTime = (time: string): string => {
   const [startYear, endYear, semester] = time.split("-");
@@ -232,7 +232,7 @@ export const postGradeListHandler: RequestHandler<
       headers: {
         Cookie: cookieHeader,
         "Content-Type": "application/x-www-form-urlencoded",
-        Referer: `${SERVER}/jiaowu/cjgl/xszq/query_xscj.jsp?tktime=${getTimeStamp()}`,
+        Referer: `${HTTPS_SERVER}/jiaowu/cjgl/xszq/query_xscj.jsp?tktime=${getTimeStamp()}`,
         "User-Agent": IE_8_USER_AGENT,
       },
     });

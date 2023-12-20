@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { SERVER } from "./utils.js";
+import { HTTPS_SERVER, HTTP_SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { AUTH_SERVER } from "../auth/utils.js";
@@ -29,7 +29,7 @@ export const postSystemLogin = async (
   cookieStore = new CookieStore(),
 ): Promise<PostSystemLoginResult> => {
   const result = await authLogin(options, {
-    service: `${SERVER}/`,
+    service: `${HTTP_SERVER}/`,
     cookieStore,
   });
 
@@ -77,12 +77,15 @@ export const postSystemLogin = async (
       msg: "此账户无法登录研究生教学服务系统",
     };
 
-  if (finalLocation === "https://dsyjs.nenu.edu.cn/") {
+  if (
+    finalLocation?.startsWith(HTTP_SERVER) ||
+    finalLocation?.startsWith(HTTPS_SERVER)
+  ) {
     const mainResponse = await fetch(finalLocation, {
       method: "GET",
       headers: {
         Cookie: cookieStore.getHeader(finalLocation),
-        Referer: `${SERVER}/`,
+        Referer: `${HTTPS_SERVER}/`,
         "User-Agent": IE_8_USER_AGENT,
       },
       redirect: "manual",
@@ -91,17 +94,17 @@ export const postSystemLogin = async (
     const location = mainResponse.headers.get("Location");
 
     if (
-      location === "http://dsyjs.nenu.edu.cn/framework/main.jsp" ||
-      location === `${SERVER}/framework/main.jsp`
+      location === `${HTTP_SERVER}/framework/main.jsp` ||
+      location === `${HTTPS_SERVER}/framework/main.jsp`
     ) {
-      const ssoUrl = `${SERVER}/Logon.do?method=logonBySSO`;
+      const ssoUrl = `${HTTPS_SERVER}/Logon.do?method=logonBySSO`;
 
       await fetch(ssoUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
           Cookie: cookieStore.getHeader(ssoUrl),
-          Referer: `${SERVER}/framework/main.jsp`,
+          Referer: `${HTTPS_SERVER}/framework/main.jsp`,
           "User-Agent": IE_8_USER_AGENT,
         },
       });
