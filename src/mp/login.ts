@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 
 import { appIDInfo } from "../config/appID.js";
 import { OPENID_BLACK_LIST } from "../config/blacklist.js";
-import type { EmptyObject } from "../typings.js";
+import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 
 export type AppID = "wx33acb831ee1831a5" | "wx9ce37d9662499df3" | 1109559721;
 export type Env = "qq" | "wx" | "web";
@@ -13,6 +13,17 @@ export interface MPLoginOptions {
   code: string;
   openid?: string;
 }
+
+export interface MPloginSuccessResponse {
+  success: true;
+  openid: string;
+  inBLACKLIST: boolean;
+  isAdmin: boolean;
+}
+
+export type MPloginFailResponse = CommonFailedResponse;
+
+export type MPLoginResponse = MPloginSuccessResponse | MPloginFailResponse;
 
 export const mpLoginHandler: RequestHandler<
   EmptyObject,
@@ -34,7 +45,7 @@ export const mpLoginHandler: RequestHandler<
       ({ openid } = <{ openid: string }>await response.json());
     }
 
-    res.json({
+    res.json(<MPloginSuccessResponse>{
       openid,
       inBLACKLIST: OPENID_BLACK_LIST.includes(openid),
       isAdmin: false,
@@ -42,7 +53,7 @@ export const mpLoginHandler: RequestHandler<
   } catch (err) {
     console.error(err);
 
-    res.status(500).end({
+    res.status(500).end(<CommonFailedResponse>{
       success: false,
       msg: "获取失败",
     });

@@ -1,10 +1,7 @@
 import fs from "node:fs";
 
-import type { IdConditionalBlackList } from "../config/blacklist.js";
-import {
-  ID_BLACK_LIST,
-  ID_CONDITIONAL_BLACK_LIST,
-} from "../config/blacklist.js";
+import type { ConditionBlackList } from "../config/blacklist.js";
+import { CONDITION_BLACK_LIST, ID_BLACK_LIST } from "../config/blacklist.js";
 import type { MyInfo } from "../my/index.js";
 
 export const BLACKLIST_HINT = [
@@ -34,10 +31,7 @@ export const BLACKLIST_HINT = [
   "恶龙劫掠了你的请求",
 ];
 
-const testCondition = (
-  info: MyInfo,
-  condition: IdConditionalBlackList,
-): boolean =>
+const testCondition = (info: MyInfo, condition: ConditionBlackList): boolean =>
   Object.entries(condition).every(([key, value]) => {
     if (value instanceof RegExp)
       return value.test(<string>info[<keyof MyInfo>key]);
@@ -53,7 +47,7 @@ export const isInBlackList = (
   info?: MyInfo | null,
 ): boolean => {
   if (ID_BLACK_LIST.includes(id)) {
-    fs.writeFileSync("blacklist", `${id}\n`, {
+    fs.writeFileSync("blacklist", `${id} with openid ${openid}\n`, {
       encoding: "utf8",
       flag: "a",
     });
@@ -63,7 +57,7 @@ export const isInBlackList = (
 
   if (!info) return false;
 
-  const result = ID_CONDITIONAL_BLACK_LIST.some((condition) =>
+  const result = CONDITION_BLACK_LIST.some((condition) =>
     testCondition(info, condition),
   );
 

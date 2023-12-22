@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "rollup -c rollup.config.ts --configPlugin esbuild",
+    "bundle:encrypt": "rollup -c scripts/encrypt.ts --configPlugin esbuild",
     "bundle:parser": "rollup -c scripts/parser.ts --configPlugin esbuild",
     "debug": "cross-env NODE_ENV=debug pnpm build && node dist/index.js --expose-gc",
     "dev": "cross-env tsx src/index.ts",
