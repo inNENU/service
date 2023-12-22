@@ -8,7 +8,7 @@ import { getRichTextNodes, getText } from "../utils/index.js";
 const infoBodyRegExp =
   /<div class="article-info">([\s\S]*?)<div class="wrapper" id="footer">/;
 const infoTitleRegExp = /<h1 class="arti-title">([\s\S]*?)<\/h1>/;
-const infoTimeRegExp = /<span class="arti-update">时间：([^<]*)<\/span>/;
+const infoTimeRegExp = /<span id="ftime"[^>]*>([^<]*)<\/span>/;
 const infoFromRegExp = /<span class="arti-update">供稿单位：([^<]*)<\/span>/;
 const infoAuthorRegExp = /<span class="arti-update">撰稿：([^<]*)<\/span>/;
 const infoEditorRegExp = /<span>网络编辑：<em>([^<]+?)<\/em><\/span>/;
