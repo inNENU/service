@@ -11,14 +11,20 @@ interface NLPWeChGeneralResponse {
   }[];
 }
 
+const config = new Config({
+  accessKeyId: process.env.NLP_ACCESS_KEY,
+  accessKeySecret: process.env.NLP_ACCESS_SECRET,
+  regionId: "cn-hangzhou",
+});
+
 // @ts-ignore
-const client = new Client(
-  new Config({
-    accessKeyId: process.env.NLP_ACCESS_KEY,
-    accessKeySecret: process.env.NLP_ACCESS_SECRET,
-    regionId: "cn-hangzhou",
-  }),
-);
+// eslint-disable-next-line
+const client: Client = Client.default
+  ? // eslint-disable-next-line
+    // @ts-ignore
+    // eslint-disable-next-line
+    new Client.default(config)
+  : new Client(config);
 
 export const splitWords = async (text: string): Promise<string[]> => {
   const response = await client.getWsChGeneral(

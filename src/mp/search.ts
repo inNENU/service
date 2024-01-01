@@ -173,14 +173,19 @@ const updateIndex = async (): Promise<void> => {
   }
 };
 
-await updateIndex();
+if (
+  process.env.NODE_ENV !== "development" &&
+  process.env.NODE_ENV !== "debug"
+) {
+  await updateIndex();
 
-setInterval(
-  () => {
-    void updateIndex();
-  },
-  1000 * 60 * 5,
-);
+  setInterval(
+    () => {
+      void updateIndex();
+    },
+    1000 * 60 * 5,
+  );
+}
 
 export const getSearchWord = async (
   searchWord: string,
