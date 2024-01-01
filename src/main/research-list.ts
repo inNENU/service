@@ -8,7 +8,7 @@ const totalItemsRegExp = /<span class="p_t">共(\d+)条<\/span>/;
 const pageViewRegExp =
   /_showDynClickBatch\(\[[^\]]+\],\s*\[([^\]]+)\],\s*"wbnews",\s*(\d+)\)/;
 const researchItemRegExp =
-  /data-aos="fade-up">\s*<a href="(?:\.\.\/)+([^"]+)"[^>]+>\s+<div class="ll">\s+<div class="time">\s+<h3>(.*?)\.(.*?)<\/h3>\s*<h6>(.*?)<\/h6>\s*<\/div>\s*<\/div>\s*<div class="rr">\s*<h4 class="l1 h4s1">(.*)<\/h4>\s+<p class="l3 ps3">\s*([^<]*)\.\.\.<\/p>/g;
+  /data-aos="fade-up">\s*<a href="(?:\.\.\/)+([^"]+)"[^>]+>\s+<div class="ll">\s+<div class="time">\s+<h3>(.*?)\.(.*?)<\/h3>\s*<h6>(.*?)<\/h6>\s*<\/div>\s*<\/div>\s*<div class="rr">\s*<h4 class="l1 h4s1">(.*)<\/h4>\s+<p[^>]*>\s*([^<]*)\.\.\.<\/p>\s*<\/div>\s*(?:<div class="img slow imgBox">[\s\S]*?src="(.*?)"[\s\S]+?)?<\/a>/g;
 
 export type ResearchType = "social" | "science";
 
@@ -19,10 +19,17 @@ export interface ResearchListOptions {
 }
 
 export interface ResearchInfoItem {
+  /** 标题 */
   title: string;
+  /** 时间 */
   time: string;
+  /** 访问量 */
   pageView: number;
+  /** 描述 */
   description: string;
+  /** 封面 */
+  cover?: string;
+  /** 地址 */
   url: string;
 }
 
@@ -90,12 +97,15 @@ export const researchListHandler: RequestHandler<
 
     const data = Array.from(
       listBodyRegExp.exec(text)![1].matchAll(researchItemRegExp),
-    ).map(([, url, month, date, year, title, description], index) => ({
+    ).map(([, url, month, date, year, title, description, cover], index) => ({
       title,
       time: `${year}-${month}-${date}`,
       pageView: pageViews[index],
       description,
       url,
+      ...(cover
+        ? { cover: cover.startsWith("/") ? `${MAIN_URL}${cover}` : cover }
+        : {}),
     }));
 
     return res.json(<ResearchListSuccessResponse>{
