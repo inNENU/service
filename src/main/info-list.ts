@@ -3,35 +3,39 @@ import type { RequestHandler } from "express";
 import { MAIN_URL } from "./utils.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 
-const listBodyRegExp = /<tbody>([\s\S]*?)<\/tbody>/;
-const totalPageRegExp = /_simple_list_gotopage_fun\((\d+),/;
+const listBodyRegExp = /<ul class=".*? dsyw">([\s\S]+?)<\/ul>/;
+const totalItemsRegExp = /<span class="p_t">共(\d+)条<\/span>/;
 const pageViewRegExp =
-  /\[(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\],"wbnews", (\d+)\)/;
-const noticeItemRegExp =
-  /<a href="(?:\.\.\/)+([^"]+)"[^>]+>([^<]+)<\/a>\s*<\/h2>\s*<\/td>\s*<td class="news-table-department">\s*<span id="sou1">([^<]*)<\/span>\s*<\/td>\s*<td class="news-table-date">\s+<span>([^<]*)<\/span>/g;
-const newsItemRegExp =
-  /<a href="(?:\.\.\/)+([^"]+)"[^>]+>([^<]+)<\/a>\s*<\/h2>\s*<\/td>\s*<td class="news-table-department">\s*<span id="sou1">([^<]*)<\/span>\s*<\/td>\s*<td class="news-table-date">\s+<span>([^<]*)<\/span>/g;
+  /_showDynClickBatch\(\[[^\]]+\],\s*\[([^\]]+)\],\s*"wbnews",\s*(\d+)\)/;
+const researchItemRegExp =
+  /data-aos="fade-up">\s*<a href="(?:\.\.\/)+([^"]+)"[^>]+>\s+<div[^>]*>\s+<div class="time">\s+<h3>(.*?)\.(.*?)<\/h3>\s*<h6>(.*?)<\/h6>\s*<\/div>\s*<\/div>\s*<div class="rr">\s*<h4[^>]*>(.*)<\/h4>\s+<p[^>]*>\s*([^<]*?)\s*<\/p>\s*<\/div>\s*(?:<div class="img slow imgBox">[\s\S]*?src="(.*?)"[\s\S]+?)?<\/a>/g;
 
-export type MainInfoType = "notice" | "news" | "academic";
+export type MainInfoType = "social" | "science" | "news" | "media";
 
 export interface MainInfoListOptions {
-  /** @default 1 */
+  type: MainInfoType;
   page?: number;
   totalPage?: number;
-  type: MainInfoType;
 }
 
-export interface InfoItem {
+export interface MainInfoInfoItem {
+  /** 标题 */
   title: string;
-  from: string;
+  /** 时间 */
   time: string;
-  url: string;
+  /** 访问量 */
   pageView: number;
+  /** 描述 */
+  description: string;
+  /** 封面 */
+  cover?: string;
+  /** 地址 */
+  url: string;
 }
 
 export interface MainInfoListSuccessResponse {
   success: true;
-  data: InfoItem[];
+  data: MainInfoInfoItem[];
   page: number;
   totalPage: number;
 }
@@ -41,9 +45,10 @@ export type MainInfoListResponse =
   | CommonFailedResponse;
 
 const type2ID = {
-  notice: "tzgg",
-  news: "dsxw1",
-  academic: "xshd1",
+  social: "xsyj/rwsk",
+  science: "xsyj/zrkx",
+  news: "dsyw/ywsd",
+  media: "dsyw/mtsd",
 };
 
 const totalPageState: Record<string, number> = {};
@@ -56,26 +61,16 @@ export const mainInfoListHandler: RequestHandler<
   try {
     const { type, page = 1, totalPage = totalPageState[type] || 0 } = req.body;
 
-    if (!["news", "notice", "academic"].includes(type))
+    if (!["social", "science", "news", "media"].includes(type))
       return res.json(<CommonFailedResponse>{
         success: false,
         msg: "type 参数错误",
       });
 
-    if (
-      Math.round(page) !== page ||
-      page < 1 ||
-      (page !== 1 && page > totalPage)
-    )
-      return res.json(<CommonFailedResponse>{
-        success: false,
-        msg: "page 参数错误",
-      });
-
     const response = await fetch(
       totalPage && page !== 1
-        ? `${MAIN_URL}/index/${type2ID[type]}/${totalPage - page}.htm`
-        : `${MAIN_URL}/index/${type2ID[type]}.htm`,
+        ? `${MAIN_URL}/${type2ID[type]}/${totalPage - page + 1}.htm`
+        : `${MAIN_URL}/${type2ID[type]}.htm`,
     );
 
     if (response.status !== 200)
@@ -86,30 +81,33 @@ export const mainInfoListHandler: RequestHandler<
 
     const text = await response.text();
 
-    totalPageState[type] = Number(totalPageRegExp.exec(text)![1]);
-
-    const matched = pageViewRegExp.exec(text)!.slice(1).map(Number);
-
-    const owner = matched.pop();
-
-    const pageViewResponse = await fetch(
-      `${MAIN_URL}/system/resource/code/news/click/dynclicksbatch.jsp?clickids=${matched.join(
-        ",",
-      )}&owner=${owner}&clicktype=wbnews`,
+    totalPageState[type] = Math.ceil(
+      Number(totalItemsRegExp.exec(text)![1]) / 10,
     );
 
-    const pageViews = (await pageViewResponse.text()).split(",").map(Number);
+    const [, pageIds, owner] = pageViewRegExp.exec(text)!;
+
+    const pageViews = await Promise.all(
+      pageIds.split(/,\s*/).map((id) =>
+        fetch(
+          `${MAIN_URL}/system/resource/code/news/click/dynclicks.jsp?clickid=${id}&owner=${owner}&clicktype=wbnews`,
+        )
+          .then((res) => res.text())
+          .then((pageView) => Number(pageView)),
+      ),
+    );
 
     const data = Array.from(
-      listBodyRegExp
-        .exec(text)![1]
-        .matchAll(type === "notice" ? noticeItemRegExp : newsItemRegExp),
-    ).map(([, url, title, from, time], index) => ({
-      url,
+      listBodyRegExp.exec(text)![1].matchAll(researchItemRegExp),
+    ).map(([, url, month, date, year, title, description, cover], index) => ({
       title,
-      from,
-      time,
+      time: `${year}-${month}-${date}`,
       pageView: pageViews[index],
+      description,
+      url,
+      ...(cover
+        ? { cover: cover.startsWith("/") ? `${MAIN_URL}${cover}` : cover }
+        : {}),
     }));
 
     return res.json(<MainInfoListSuccessResponse>{

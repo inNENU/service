@@ -39,8 +39,6 @@ import {
   mainInfoListHandler,
   mainNoticeInfoHandler,
   mainNoticeListHandler,
-  researchInfoHandler,
-  researchListHandler,
 } from "./main/index.js";
 import {
   mpLoginHandler,
@@ -172,14 +170,12 @@ app.post("/post-system/check", postSystemCheckHandler);
 app.post("/post-system/course-table", postCourseTableHandler);
 app.post("/post-system/grade-list", postGradeListHandler);
 
+app.get("/main/academic", academicInfoHandler);
 app.post("/main/academic-list", academicListHandler);
-app.get("/main/academic-info", academicInfoHandler);
 app.get("/main/info", mainInfoHandler);
 app.post("/main/info-list", mainInfoListHandler);
+app.get("/main/notice", mainNoticeInfoHandler);
 app.post("/main/notice-list", mainNoticeListHandler);
-app.get("/main/notice-info", mainNoticeInfoHandler);
-app.post("/main/research-list", researchListHandler);
-app.get("/main/research-info", researchInfoHandler);
 
 app.post("/enroll/grade", historyGradeHandler);
 app.get("/enroll/under-admission", underAdmissionHandler);

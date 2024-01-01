@@ -4,5 +4,3 @@ export * from "./info.js";
 export * from "./info-list.js";
 export * from "./notice.js";
 export * from "./notice-list.js";
-export * from "./research.js";
-export * from "./research-list.js";

@@ -3,17 +3,17 @@ import type { RequestHandler } from "express";
 import { MAIN_URL } from "./utils.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 import type { RichTextNode } from "../utils/index.js";
-import { getRichTextNodes, getText } from "../utils/index.js";
+import { getRichTextNodes } from "../utils/index.js";
 
-const infoBodyRegExp =
-  /<div class="article-info">([\s\S]*?)<div class="wrapper" id="footer">/;
-const infoTitleRegExp = /<h1 class="arti-title">([\s\S]*?)<\/h1>/;
-const infoTimeRegExp = /<span id="ftime"[^>]*>([^<]*)<\/span>/;
-const infoFromRegExp = /<span class="arti-update">供稿单位：([^<]*)<\/span>/;
-const infoAuthorRegExp = /<span class="arti-update">撰稿：([^<]*)<\/span>/;
-const infoEditorRegExp = /<span>网络编辑：<em>([^<]+?)<\/em><\/span>/;
-const infoContentRegExp =
+const infoRegExp =
+  /<div class="ar_tit">\s*<h3>([^>]+)<\/h3>\s*<h6>([\s\S]+?)<\/h6>/;
+const contentRegExp =
   /<div class="v_news_content">([\s\S]+?)<\/div><\/div><div id="div_vote_id">/;
+
+const infoTimeRegExp = /<span>发布时间：([^<]*)<\/span>/;
+const infoFromRegExp = /<span>供稿单位：([^<]*)<\/span>/;
+const infoAuthorRegExp = /<span>撰稿：([^<]*)<\/span>/;
+const infoEditorRegExp = /<span>网络编辑：<em>([^<]+?)<\/em><\/span>/;
 const pageViewParamRegExp = /_showDynClicks\("wbnews",\s*(\d+),\s*(\d+)\)/;
 
 export interface MainInfoOptions {
@@ -52,15 +52,14 @@ export const mainInfoHandler: RequestHandler<
 
     const text = await response.text();
 
-    const body = infoBodyRegExp.exec(text)![1];
-    const title = infoTitleRegExp.exec(body)![1];
-    const time = infoTimeRegExp.exec(body)![1];
-    const content = infoContentRegExp.exec(body)![1];
-    const [, owner, clickID] = pageViewParamRegExp.exec(body)!;
+    const [, title, info] = infoRegExp.exec(text)!;
 
-    const from = infoFromRegExp.exec(body)?.[1];
-    const author = infoAuthorRegExp.exec(body)?.[1];
-    const editor = infoEditorRegExp.exec(body)?.[1];
+    const time = infoTimeRegExp.exec(info)![1];
+    const from = infoFromRegExp.exec(info)?.[1];
+    const author = infoAuthorRegExp.exec(info)?.[1];
+    const editor = infoEditorRegExp.exec(info)?.[1];
+    const [, owner, clickID] = pageViewParamRegExp.exec(info)!;
+    const content = contentRegExp.exec(text)![1];
 
     const pageViewResponse = await fetch(
       `${MAIN_URL}/system/resource/code/news/click/dynclicks.jsp?clickid=${clickID}&owner=${owner}&clicktype=wbnews`,
@@ -68,7 +67,7 @@ export const mainInfoHandler: RequestHandler<
 
     return res.json(<MainInfoSuccessResponse>{
       success: true,
-      title: getText(title),
+      title,
       time,
       from,
       author,
