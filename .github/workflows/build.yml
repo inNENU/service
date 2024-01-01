@@ -14,14 +14,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 0
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
-        with:
-          run_install: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -29,9 +24,11 @@ jobs:
           node-version: 20
           cache: pnpm
 
-      - name: Build
-        run: |
-          pnpm run build
+      - name: Install project
+        run: pnpm install --frozen-lockfile
+
+      - name: Build project
+        run: pnpm run build
 
       - name: Generate Files
         run: |
