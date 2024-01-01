@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { MAIN_URL } from "./utils.js";
+import { MAIN_URL, getPageView } from "./utils.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 import type { RichTextNode } from "../utils/index.js";
 import { getRichTextNodes } from "../utils/index.js";
@@ -50,18 +50,16 @@ export const academicInfoHandler: RequestHandler<
     const [, title, info] = infoRegExp.exec(text)!;
 
     const time = infoTimeRegExp.exec(info)![1];
-    const [, owner, clickID] = pageViewParamRegExp.exec(info)!;
+    const [, owner, id] = pageViewParamRegExp.exec(info)!;
     const content = contentRegExp.exec(text)![1];
 
-    const pageViewResponse = await fetch(
-      `${MAIN_URL}/system/resource/code/news/click/dynclicks.jsp?clickid=${clickID}&owner=${owner}&clicktype=wbnews`,
-    );
+    const pageView = await getPageView(id, owner);
 
     return res.json(<AcademicInfoSuccessResponse>{
       success: true,
       title,
       time,
-      pageView: Number(await pageViewResponse.text()),
+      pageView,
       content: await getRichTextNodes(content, {
         getClass: (tag, className) =>
           tag === "img"

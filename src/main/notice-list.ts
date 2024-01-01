@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { MAIN_URL } from "./utils.js";
+import { MAIN_URL, getPageView } from "./utils.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 
 const totalItemsRegExp = /<span class="p_t">共(\d+)条<\/span>/;
@@ -67,13 +67,7 @@ export const mainNoticeListHandler: RequestHandler<
     const [, pageIds, owner] = pageViewRegExp.exec(text)!;
 
     const pageViews = await Promise.all(
-      pageIds.split(/,\s*/).map((id) =>
-        fetch(
-          `${MAIN_URL}/system/resource/code/news/click/dynclicks.jsp?clickid=${id}&owner=${owner}&clicktype=wbnews`,
-        )
-          .then((res) => res.text())
-          .then((pageView) => Number(pageView)),
-      ),
+      pageIds.split(/,\s*/).map((id) => getPageView(id, owner)),
     );
 
     const data = Array.from(text.matchAll(noticeItemRegExp)).map(
