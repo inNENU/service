@@ -3,52 +3,55 @@ import type { RequestHandler } from "express";
 import { MAIN_URL } from "./utils.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 
-const listBodyRegExp = /<ul class=".*? xsyg">([\s\S]+?)<\/ul>/;
 const totalItemsRegExp = /<span class="p_t">共(\d+)条<\/span>/;
 const pageViewRegExp =
   /_showDynClickBatch\(\[[^\]]+\],\s*\[([^\]]+)\],\s*"wbnews",\s*(\d+)\)/;
-const academicItemRegExp =
-  /data-aos="fade-up">\s*<a href="(?:\.\.\/)+([^"]+)"[^>]+>\s+<div[^>]*>\s*<h4[^>]*>(.*)<\/h4>\s*<h6><span>报告人：<\/span>([^<]*?)<\/h6>\s*<h6><span>报告时间：<\/span>([^<]*?)<\/h6>\s*<h6><span>报告地点：<\/span>([^<]*?)<\/h6>/g;
+const noticeItemRegExp =
+  /data-aos="fade-up">\s*<a href="([^"]+)"[^>]+>\s+<div class="time">\s+<h3>(.*?)\.(.*?)<\/h3>\s*<h6>(.*?)<\/h6>\s*<\/div>\s*<div[^>]*>\s*<h4[^>]*>(.*)<\/h4>\s+<h6>(.*?)<span>/g;
 
-export interface AcademicListOptions {
+export interface MainNoticeListOptions {
   page?: number;
   totalPage?: number;
 }
 
-export interface AcademicInfoItem {
-  subject: string;
-  person: string;
+export interface NoticeInfoItem {
+  /** 标题 */
+  title: string;
+  /** 时间 */
   time: string;
-  location: string;
+  /** 访问量 */
   pageView: number;
+  /** 来源 */
+  from: string;
+  /** 地址 */
   url: string;
 }
 
-export interface AcademicListSuccessResponse {
+export interface MainNoticeListSuccessResponse {
   success: true;
-  data: AcademicInfoItem[];
+  data: NoticeInfoItem[];
   page: number;
   totalPage: number;
 }
 
-export type AcademicListResponse =
-  | AcademicListSuccessResponse
+export type MainNoticeListResponse =
+  | MainNoticeListSuccessResponse
   | CommonFailedResponse;
 
 let totalPageState = 0;
 
-export const academicListHandler: RequestHandler<
+export const mainNoticeListHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  AcademicListOptions
+  MainNoticeListOptions
 > = async (req, res) => {
   try {
-    const { page = 1, totalPage = totalPageState || 0 } = req.body;
+    const { page = 1, totalPage = totalPageState } = req.body;
 
     const response = await fetch(
       totalPage && page !== 1
-        ? `${MAIN_URL}/xsyj/xsyg/${totalPage - page + 1}.htm`
-        : `${MAIN_URL}/xsyj/xsyg.htm`,
+        ? `${MAIN_URL}/tzgg/${totalPage - page + 1}.htm`
+        : `${MAIN_URL}/tzgg.htm`,
     );
 
     if (response.status !== 200)
@@ -73,18 +76,17 @@ export const academicListHandler: RequestHandler<
       ),
     );
 
-    const data = Array.from(
-      listBodyRegExp.exec(text)![1].matchAll(academicItemRegExp),
-    ).map(([, url, subject, person, time, location], index) => ({
-      subject,
-      person,
-      time,
-      location,
-      pageView: pageViews[index],
-      url,
-    }));
+    const data = Array.from(text.matchAll(noticeItemRegExp)).map(
+      ([, url, month, date, year, title, from], index) => ({
+        title,
+        time: `${year}-${month}-${date}`,
+        pageView: pageViews[index],
+        from,
+        url,
+      }),
+    );
 
-    return res.json(<AcademicListSuccessResponse>{
+    return res.json(<MainNoticeListSuccessResponse>{
       success: true,
       data,
       page,

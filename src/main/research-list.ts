@@ -8,7 +8,7 @@ const totalItemsRegExp = /<span class="p_t">共(\d+)条<\/span>/;
 const pageViewRegExp =
   /_showDynClickBatch\(\[[^\]]+\],\s*\[([^\]]+)\],\s*"wbnews",\s*(\d+)\)/;
 const researchItemRegExp =
-  /data-aos="fade-up">\s*<a href="(?:\.\.\/)+([^"]+)"[^>]+>\s+<div class="ll">\s+<div class="time">\s+<h3>(.*?)\.(.*?)<\/h3>\s*<h6>(.*?)<\/h6>\s*<\/div>\s*<\/div>\s*<div class="rr">\s*<h4 class="l1 h4s1">(.*)<\/h4>\s+<p[^>]*>\s*([^<]*)\.\.\.<\/p>\s*<\/div>\s*(?:<div class="img slow imgBox">[\s\S]*?src="(.*?)"[\s\S]+?)?<\/a>/g;
+  /data-aos="fade-up">\s*<a href="(?:\.\.\/)+([^"]+)"[^>]+>\s+<div class="ll">\s+<div class="time">\s+<h3>(.*?)\.(.*?)<\/h3>\s*<h6>(.*?)<\/h6>\s*<\/div>\s*<\/div>\s*<div class="rr">\s*<h4[^>]*>(.*)<\/h4>\s+<p[^>]*>\s*([^<]*)\.\.\.<\/p>\s*<\/div>\s*(?:<div class="img slow imgBox">[\s\S]*?src="(.*?)"[\s\S]+?)?<\/a>/g;
 
 export type ResearchType = "social" | "science";
 
@@ -59,7 +59,7 @@ export const researchListHandler: RequestHandler<
   try {
     const { type, page = 1, totalPage = totalPageState[type] || 0 } = req.body;
 
-    if (!["social", "science", "academic"].includes(type))
+    if (!["social", "science"].includes(type))
       return res.json(<CommonFailedResponse>{
         success: false,
         msg: "type 参数错误",

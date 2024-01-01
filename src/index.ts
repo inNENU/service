@@ -37,6 +37,7 @@ import {
   academicListHandler,
   mainInfoHandler,
   mainInfoListHandler,
+  mainNoticeListHandler,
   mainStatusHandler,
   researchInfoHandler,
   researchListHandler,
@@ -175,6 +176,7 @@ app.post("/main/academic-list", academicListHandler);
 app.get("/main/academic-info", academicInfoHandler);
 app.get("/main/info", mainInfoHandler);
 app.post("/main/info-list", mainInfoListHandler);
+app.post("/main/notice-list", mainNoticeListHandler);
 app.post("/main/research-list", researchListHandler);
 app.get("/main/research-info", researchInfoHandler);
 app.get("/main/status", mainStatusHandler);
