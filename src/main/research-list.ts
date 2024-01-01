@@ -3,7 +3,7 @@ import type { RequestHandler } from "express";
 import { MAIN_URL } from "./utils.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 
-const listBodyRegExp = /<ul class="list22 dsyw">([\s\S]+?)<\/ul>/;
+const listBodyRegExp = /<ul class=".*? dsyw">([\s\S]+?)<\/ul>/;
 const totalItemsRegExp = /<span class="p_t">共(\d+)条<\/span>/;
 const pageViewRegExp =
   /_showDynClickBatch\(\[[^\]]+\],\s*\[([^\]]+)\],\s*"wbnews",\s*(\d+)\)/;
