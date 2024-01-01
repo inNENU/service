@@ -34,7 +34,9 @@ import {
 import { libraryPeopleHandler } from "./library/people.js";
 import {
   mainInfoHandler,
+  mainInfoListHandler,
   mainStatusHandler,
+  researchInfoHandler,
   researchListHandler,
 } from "./main/index.js";
 import {
@@ -168,7 +170,9 @@ app.post("/post-system/course-table", postCourseTableHandler);
 app.post("/post-system/grade-list", postGradeListHandler);
 
 app.get("/main/info", mainInfoHandler);
+app.post("/main/info-list", mainInfoListHandler);
 app.post("/main/research-list", researchListHandler);
+app.get("/main/research-info", researchInfoHandler);
 app.get("/main/status", mainStatusHandler);
 
 app.post("/enroll/grade", historyGradeHandler);
