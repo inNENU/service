@@ -33,6 +33,7 @@ import {
 } from "./enroll/index.js";
 import { libraryPeopleHandler } from "./library/people.js";
 import {
+  academicInfoHandler,
   academicListHandler,
   mainInfoHandler,
   mainInfoListHandler,
@@ -171,6 +172,7 @@ app.post("/post-system/course-table", postCourseTableHandler);
 app.post("/post-system/grade-list", postGradeListHandler);
 
 app.post("/main/academic-list", academicListHandler);
+app.get("/main/academic-info", academicInfoHandler);
 app.get("/main/info", mainInfoHandler);
 app.post("/main/info-list", mainInfoListHandler);
 app.post("/main/research-list", researchListHandler);
