@@ -9,12 +9,12 @@ const pageViewRegExp =
 const noticeItemRegExp =
   /data-aos="fade-up">\s*<a href="([^"]+)"[^>]+>\s+<div class="time">\s+<h3>(.*?)\.(.*?)<\/h3>\s*<h6>(.*?)<\/h6>\s*<\/div>\s*<div[^>]*>\s*<h4[^>]*>(.*)<\/h4>\s+<h6>(.*?)<span>/g;
 
-export interface MainNoticeListOptions {
+export interface AnnouncementListOptions {
   page?: number;
   totalPage?: number;
 }
 
-export interface NoticeInfoItem {
+export interface AnnouncementItem {
   /** 标题 */
   title: string;
   /** 时间 */
@@ -27,23 +27,23 @@ export interface NoticeInfoItem {
   url: string;
 }
 
-export interface MainNoticeListSuccessResponse {
+export interface AnnouncementListSuccessResponse {
   success: true;
-  data: NoticeInfoItem[];
+  data: AnnouncementItem[];
   page: number;
   totalPage: number;
 }
 
-export type MainNoticeListResponse =
-  | MainNoticeListSuccessResponse
+export type AnnouncementListResponse =
+  | AnnouncementListSuccessResponse
   | CommonFailedResponse;
 
 let totalPageState = 0;
 
-export const mainNoticeListHandler: RequestHandler<
+export const announcementListHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  MainNoticeListOptions
+  AnnouncementListOptions
 > = async (req, res) => {
   try {
     const { page = 1, totalPage = totalPageState } = req.body;
@@ -80,7 +80,7 @@ export const mainNoticeListHandler: RequestHandler<
       }),
     );
 
-    return res.json(<MainNoticeListSuccessResponse>{
+    return res.json(<AnnouncementListSuccessResponse>{
       success: true,
       data,
       page,

@@ -35,10 +35,10 @@ import { libraryPeopleHandler } from "./library/people.js";
 import {
   academicInfoHandler,
   academicListHandler,
+  announcementInfoHandler,
+  announcementListHandler,
   mainInfoHandler,
   mainInfoListHandler,
-  mainNoticeInfoHandler,
-  mainNoticeListHandler,
 } from "./main/index.js";
 import {
   mpLoginHandler,
@@ -172,10 +172,10 @@ app.post("/post-system/grade-list", postGradeListHandler);
 
 app.get("/main/academic", academicInfoHandler);
 app.post("/main/academic-list", academicListHandler);
+app.get("/main/announcement", announcementInfoHandler);
+app.post("/main/announcement-list", announcementListHandler);
 app.get("/main/info", mainInfoHandler);
 app.post("/main/info-list", mainInfoListHandler);
-app.get("/main/notice", mainNoticeInfoHandler);
-app.post("/main/notice-list", mainNoticeListHandler);
 
 app.post("/enroll/grade", historyGradeHandler);
 app.get("/enroll/under-admission", underAdmissionHandler);

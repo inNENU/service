@@ -14,11 +14,11 @@ const infoTimeRegExp = /<span>发布时间：([^<]*)<\/span>/;
 const infoFromRegExp = /<span>发布单位：([^<]*)<\/span>/;
 const pageViewParamRegExp = /_showDynClicks\("wbnews",\s*(\d+),\s*(\d+)\)/;
 
-export interface MainNoticeInfoOptions {
+export interface AnnouncementInfoOptions {
   url: string;
 }
 
-export interface MainNoticeInfoSuccessResponse {
+export interface AnnouncementInfoSuccessResponse {
   success: true;
   title: string;
   time: string;
@@ -27,15 +27,15 @@ export interface MainNoticeInfoSuccessResponse {
   content: RichTextNode[];
 }
 
-export type MainNoticeInfoResponse =
-  | MainNoticeInfoSuccessResponse
+export type AnnouncementInfoResponse =
+  | AnnouncementInfoSuccessResponse
   | CommonFailedResponse;
 
-export const mainNoticeInfoHandler: RequestHandler<
+export const announcementInfoHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
   EmptyObject,
-  MainNoticeInfoOptions
+  AnnouncementInfoOptions
 > = async (req, res) => {
   try {
     const { url } = req.query;
@@ -60,7 +60,7 @@ export const mainNoticeInfoHandler: RequestHandler<
 
     const pageView = await getPageView(id, owner);
 
-    return res.json(<MainNoticeInfoSuccessResponse>{
+    return res.json(<AnnouncementInfoSuccessResponse>{
       success: true,
       title,
       time,
