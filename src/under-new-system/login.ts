@@ -6,7 +6,7 @@ import { authLogin } from "../auth/login.js";
 import { AUTH_SERVER } from "../auth/utils.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type { CookieType, EmptyObject, LoginOptions } from "../typings.js";
-import { CookieStore, IE_8_USER_AGENT } from "../utils/index.js";
+import { CookieStore, EDGE_USER_AGENT_HEADERS } from "../utils/index.js";
 
 export interface UnderNewSystemLoginSuccessResult {
   success: true;
@@ -69,7 +69,7 @@ export const underNewSystemLogin = async (
       headers: {
         Cookie: cookieStore.getHeader(ssoUrl),
         Referer: `${SERVER}/framework/main.jsp`,
-        "User-Agent": IE_8_USER_AGENT,
+        ...EDGE_USER_AGENT_HEADERS,
       },
       redirect: "manual",
     });
