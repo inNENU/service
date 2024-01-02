@@ -172,7 +172,7 @@ const getGradeLists = (
     }),
   );
 
-export const underGradeListHandler: RequestHandler<
+export const underNewGradeListHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
   UnderGradeListOptions

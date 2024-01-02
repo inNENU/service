@@ -70,7 +70,10 @@ import {
   studentAmountHandler,
 } from "./select/index.js";
 import type { CommonFailedResponse } from "./typings.js";
-import { underNewSystemLoginHandler } from "./under-new-system/index.js";
+import {
+  underNewGradeListHandler,
+  underNewSystemLoginHandler,
+} from "./under-new-system/index.js";
 import {
   underChangeMajorPlanHandler,
   underCourseTableHandler,
@@ -151,6 +154,7 @@ app.post("/my/info", myInfoHandler);
 app.post("/my/login", myLoginHandler);
 app.post("/my/email", emailHandler);
 
+app.post("/under-new-system/grade-list", underNewGradeListHandler);
 app.post("/under-new-system/login", underNewSystemLoginHandler);
 
 app.post("/under-system/login", underSystemLoginHandler);
