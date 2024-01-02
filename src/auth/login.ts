@@ -79,7 +79,10 @@ export const authLogin = async (
   if (loginPageResponse.status === 200) {
     const content = await loginPageResponse.text();
 
-    if (content.includes("不允许使用认证服务来认证您访问的目标应用。"))
+    if (
+      content.includes("不允许使用认证服务来认证您访问的目标应用。") ||
+      content.includes("不允许访问")
+    )
       return {
         success: false,
         type: LoginFailType.Forbidden,
