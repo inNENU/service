@@ -211,6 +211,30 @@ app.get("/library/people", libraryPeopleHandler);
 app.get("/qrcode", mpQrCodeHandler);
 app.get("/weather", weatherHandler);
 
+app.get("/test", (req, res) => {
+  console.log(req.headers);
+  console.log(req.body);
+
+  res.cookie("a", "1");
+  res.cookie("b", "2");
+  res.end({
+    success: true,
+    msg: "test",
+  });
+});
+
+app.post("/test", (req, res) => {
+  console.log(req.headers);
+  console.log(req.body);
+
+  res.cookie("a", "1");
+  res.cookie("b", "2");
+  res.end({
+    success: true,
+    msg: "test",
+  });
+});
+
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((err: Error, req, res: Response, _next: () => void) => {
