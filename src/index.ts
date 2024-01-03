@@ -22,6 +22,7 @@ import {
   authLoginHandler,
   changePasswordHandler,
   infoHandler,
+  resetPasswordHandler,
 } from "./auth/index.js";
 import {
   historyGradeHandler,
@@ -148,6 +149,8 @@ app.get("/auth/init", authInitHandler);
 app.post("/auth/init", authInitHandler);
 app.post("/auth/login", authLoginHandler);
 app.post("/auth/info", infoHandler);
+app.get("/auth/reset", resetPasswordHandler);
+app.post("/auth/reset", resetPasswordHandler);
 
 app.post("/my/check", myCheckHandler);
 app.post("/my/info", myInfoHandler);
