@@ -45,7 +45,7 @@ const getInfo = async ({
 
   console.log("Getting params", params);
 
-  const response = await fetch("http://bkzsw.nenu.edu.cn/query", {
+  const response = await fetch("https://bkzsw.nenu.edu.cn/query", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
