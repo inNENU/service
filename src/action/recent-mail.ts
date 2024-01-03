@@ -8,6 +8,8 @@ import type {
   LoginOptions,
 } from "../typings.js";
 
+const EMAIL_INFO_URL = `${ACTION_SERVER}/extract/getEmailInfo`;
+
 interface RawEmailItem {
   /** 发件人 */
   from: string;
@@ -71,6 +73,8 @@ export interface EmailItem {
   email: string;
   /** 邮件 ID */
   mid: string;
+  /** 是否已读 */
+  unread: boolean;
 }
 
 export interface ActionRecentMailSuccessResponse {
@@ -88,61 +92,6 @@ export interface ActionRecentMailFailedResponse extends CommonFailedResponse {
 export type ActionRecentMailResponse =
   | ActionRecentMailSuccessResponse
   | ActionRecentMailFailedResponse;
-
-const EMAIL_INFO_URL = `${ACTION_SERVER}/extract/getEmailInfo`;
-
-export const emailInfo = async (
-  cookieHeader: string,
-): Promise<ActionRecentMailResponse> => {
-  try {
-    const checkResponse = await fetch(EMAIL_INFO_URL, {
-      method: "POST",
-      headers: {
-        Accept: "application/json, text/javascript, */*; q=0.01",
-        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-        Cookie: cookieHeader,
-        Referer: ACTION_MAIN_PAGE,
-      },
-      body: `domain=nenu.edu.cn&type=1&format=json`,
-    });
-
-    const checkResult = <RawRecentMailResponse>await checkResponse.json();
-
-    if (
-      "success" in checkResult &&
-      checkResult.success &&
-      checkResult.emailList.con
-    )
-      return {
-        success: true,
-        unread: Number(checkResult.count),
-        recent: checkResult.emailList.con.var.map(
-          ({ subject, receivedDate, from, id }) => ({
-            subject,
-            receivedDate,
-            name: /"(.*)"/.exec(from)?.[1] ?? from,
-            email: /<(.*)>/.exec(from)?.[1] ?? from,
-            mid: id,
-          }),
-        ),
-      };
-
-    return {
-      success: false,
-      type: "not-initialized",
-      msg: "用户无邮箱或未初始化邮箱",
-    };
-  } catch (err) {
-    const { message } = <Error>err;
-
-    console.error(err);
-
-    return {
-      success: false,
-      msg: message,
-    };
-  }
-};
 
 export const actionRecentEmailHandler: RequestHandler<
   EmptyObject,
@@ -165,7 +114,44 @@ export const actionRecentEmailHandler: RequestHandler<
       req.headers.cookie = result.cookieStore.getHeader(ACTION_SERVER);
     }
 
-    return res.json(await emailInfo(req.headers.cookie));
+    const checkResponse = await fetch(EMAIL_INFO_URL, {
+      method: "POST",
+      headers: {
+        Accept: "application/json, text/javascript, */*; q=0.01",
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        Cookie: req.headers.cookie,
+        Referer: ACTION_MAIN_PAGE,
+      },
+      body: `domain=nenu.edu.cn&type=1&format=json`,
+    });
+
+    const checkResult = <RawRecentMailResponse>await checkResponse.json();
+
+    if (
+      "success" in checkResult &&
+      checkResult.success &&
+      checkResult.emailList.con
+    )
+      return {
+        success: true,
+        unread: Number(checkResult.count),
+        recent: checkResult.emailList.con.var.map(
+          ({ subject, receivedDate, from, id, flags }) => ({
+            subject,
+            receivedDate,
+            name: /"(.*)"/.exec(from)?.[1] ?? from,
+            email: /<(.*)>/.exec(from)?.[1] ?? from,
+            mid: id,
+            unread: !flags.read,
+          }),
+        ),
+      };
+
+    return {
+      success: false,
+      type: "not-initialized",
+      msg: "用户无邮箱或未初始化邮箱",
+    };
   } catch (err) {
     const { message } = <Error>err;
 
