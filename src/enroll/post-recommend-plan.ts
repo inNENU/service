@@ -44,7 +44,7 @@ export const postRecommendPlanHandler: RequestHandler<
   try {
     const response = await fetch(POST_RECOMMEND_PLAN_URL);
 
-    if (response.status !== 200) throw new Error("获取招生计划失败");
+    if (response.status !== 200) throw new Error("获取推免计划失败");
 
     const content = await response.text();
 

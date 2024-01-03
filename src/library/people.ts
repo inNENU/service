@@ -1,5 +1,7 @@
 import type { RequestHandler } from "express";
 
+import type { CommonFailedResponse } from "../typings";
+
 interface LibraryPeopleRawData {
   code: number;
   data: {
@@ -12,17 +14,22 @@ interface LibraryPeopleRawData {
   status: number;
 }
 
-export interface LibraryPeopleResponse {
+export interface LibraryPeopleSuccessResponse {
+  success: true;
   benbu: number;
   benbuMax: number;
   jingyue: number;
   jingyueMax: number;
 }
 
+export type LibraryPeopleResponse =
+  | LibraryPeopleSuccessResponse
+  | CommonFailedResponse;
+
 export const libraryPeopleHandler: RequestHandler = async (_, res) => {
   try {
     const response = await fetch(
-      "http://www.library.nenu.edu.cn/engine2/custom/nenu/onlineUserNum",
+      "https://www.library.nenu.edu.cn/engine2/custom/nenu/onlineUserNum",
     );
 
     const data = <LibraryPeopleRawData>await response.json();

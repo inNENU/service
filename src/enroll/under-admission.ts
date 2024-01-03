@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import type { CommonFailedResponse } from "../typings.js";
+import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 
 export interface UnderAdmissionPostOptions {
   name: string;
@@ -32,94 +32,81 @@ export type UnderAdmissionResponse =
   | UnderAdmissionSuccessResponse
   | CommonFailedResponse;
 
-const getInfo = async ({
-  testId,
-  id,
-  name,
-}: UnderAdmissionPostOptions): Promise<UnderAdmissionResponse> => {
-  const params = {
-    name,
-    idCode: id,
-    stuCode: testId,
-  };
-
-  console.log("Getting params", params);
-
-  const response = await fetch("https://bkzsw.nenu.edu.cn/query", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(params),
-  });
-
-  if (response.status !== 200)
-    return {
-      success: false,
-      msg: "查询通道已关闭",
-    };
-
-  const result = <RawEnrollResult>await response.json();
-
-  if ("code" in result && result.code === -1)
-    return {
-      success: false,
-      msg: "查询失败",
-    };
-
-  const { institute, major, mailCode, hasMailed, admissionMethod } = <
-    RawEnrollSuccessResult
-  >result;
-
-  const info = [
-    {
-      text: "姓名",
-      value: name,
-    },
-    {
-      text: "考生号",
-      value: testId,
-    },
-    {
-      text: "招生方式",
-      value: admissionMethod,
-    },
-    {
-      text: "录取专业",
-      value: major,
-    },
-    {
-      text: "所在学院",
-      value: institute,
-    },
-    {
-      text: "录取通知书单号",
-      value: mailCode,
-    },
-    {
-      text: "是否已寄出",
-      value: hasMailed ? "是" : "否",
-    },
-  ];
-
-  return {
-    // TODO: Remove
-    // @ts-ignore
-    status: "success",
-    success: true,
-    info,
-  };
-};
-
-export const underAdmissionHandler: RequestHandler = async (req, res) => {
+export const underAdmissionHandler: RequestHandler<
+  EmptyObject,
+  EmptyObject,
+  UnderAdmissionPostOptions
+> = async (req, res) => {
   try {
-    // TODO: Remove
-    if (req.method === "GET")
-      res.json({
-        info: ["name", "id", "testId"],
-        captcha: "",
-      });
-    else res.json(await getInfo(<UnderAdmissionPostOptions>req.body));
+    const { testId, id, name } = req.body;
+
+    const params = {
+      name,
+      idCode: id,
+      stuCode: testId,
+    };
+
+    console.log("Getting params", params);
+
+    const response = await fetch("https://bkzsw.nenu.edu.cn/query", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(params),
+    });
+
+    if (response.status !== 200)
+      return {
+        success: false,
+        msg: "查询通道已关闭",
+      };
+
+    const result = <RawEnrollResult>await response.json();
+
+    if ("code" in result)
+      return {
+        success: false,
+        msg: "查询失败",
+      };
+
+    const { institute, major, mailCode, hasMailed, admissionMethod } = result;
+
+    const info = [
+      {
+        text: "姓名",
+        value: name,
+      },
+      {
+        text: "考生号",
+        value: testId,
+      },
+      {
+        text: "招生方式",
+        value: admissionMethod,
+      },
+      {
+        text: "录取专业",
+        value: major,
+      },
+      {
+        text: "所在学院",
+        value: institute,
+      },
+      {
+        text: "录取通知书单号",
+        value: mailCode,
+      },
+      {
+        text: "是否已寄出",
+        value: hasMailed ? "是" : "否",
+      },
+    ];
+
+    return res.json(<UnderAdmissionSuccessResponse>{
+      success: true,
+      info,
+    });
   } catch (err) {
     const { message } = <Error>err;
 

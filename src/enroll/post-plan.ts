@@ -7,7 +7,7 @@ import type { RichTextNode } from "../utils/index.js";
 import { getRichTextNodes } from "../utils/index.js";
 
 const POST_ENROLL_PLAN_URL = "https://yzb.nenu.edu.cn/tmp/2024ssml.html";
-const schollInfoRegExp =
+const schoolInfoRegExp =
   /bXYName\['.*?']="<tr><td colspan=4><a href='(.*?)' target='_blank'>([^<]+) ([^<]+)<\/a><br>联系方式：(\S+?)，(\S+?)，(\S+?)<\/td><\/tr>";/g;
 
 const TABLE_HEADER = `<tr><th>专业代码</th><th>人数</th><th>考试科目</th><th>备注</th></tr>`;
@@ -64,7 +64,7 @@ export const postEnrollPlanHandler: RequestHandler<
       });
 
     const schoolInfo: PostEnrollSchoolPlan[] = await Promise.all(
-      Array.from(content.matchAll(schollInfoRegExp)).map(
+      Array.from(content.matchAll(schoolInfoRegExp)).map(
         async ([, site, code, name, contact, phone, mail]) => {
           const info: PostEnrollSchoolPlan = {
             name,
