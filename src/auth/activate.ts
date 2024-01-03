@@ -184,11 +184,7 @@ export interface ActivateBindPhoneOptions {
 interface PhoneRawSuccessResponse {
   code: 0;
   msg: "成功";
-  data:
-    | {
-        boundStaffNo: string;
-      }
-    | Record<string, string>;
+  data: { boundStaffNo: string } | Record<string, string>;
 }
 
 export interface ActivateBindPhoneConflictResponse {
