@@ -127,7 +127,15 @@ const getStudentArchive = async (
           headers: {
             Cookie: cookieHeader,
           },
-        }).catch(() => "")
+        })
+          .then((res) => res.arrayBuffer())
+          .then(
+            (buffer) =>
+              `data:image/jpeg;base64,${Buffer.from(buffer).toString(
+                "base64",
+              )}`,
+          )
+          .catch(() => "")
       : "",
     examImageLink
       ? fetch(`${UNDER_SYSTEM_SERVER}${examImageLink}`, {
@@ -135,11 +143,20 @@ const getStudentArchive = async (
           headers: {
             Cookie: cookieHeader,
           },
-        }).catch(() => "")
+        })
+          .then((res) => res.arrayBuffer())
+          .then(
+            (buffer) =>
+              `data:image/jpeg;base64,${Buffer.from(buffer).toString(
+                "base64",
+              )}`,
+          )
+          .catch(() => "")
       : "",
   ]);
 
   const path = pathRegExp.exec(content)?.[1] || "";
+  const canRegister = registerButtonRegExp.test(content);
 
   return {
     basic,
@@ -147,8 +164,8 @@ const getStudentArchive = async (
     examImage,
     study,
     family,
-    canRegister: registerButtonRegExp.test(content),
-    isRegistered: isRegisteredRegExp.test(content),
+    canRegister,
+    isRegistered: !canRegister || isRegisteredRegExp.test(content),
     path,
   };
 };

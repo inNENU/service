@@ -1,6 +1,6 @@
 import { MY_SERVER } from "./utils.js";
 
-interface RawCompleteActionData {
+interface RawCompleteApplyResult {
   pageIndex: number;
   pageSize: number;
   totalCount: number;
@@ -26,7 +26,7 @@ interface RawCompleteActionData {
   }[];
 }
 
-export interface MyCompleteActionResult {
+export interface MyApplyResult {
   /** 事项名称 */
   name: string;
   /** 系统名称 */
@@ -45,36 +45,33 @@ export interface MyCompleteActionResult {
   delegateCount?: number;
 }
 
-export const queryMyCompleteActions = async (
+const GET_APPLIES_URL = `${MY_SERVER}/PersonAnalysisController/getMyApplyAnalysis`;
+
+export const queryMyApplies = async (
   cookieHeader: string,
-): Promise<MyCompleteActionResult[]> => {
-  const completeActionsResponse = await fetch(
-    `${MY_SERVER}/PersonAnalysisController/getMyApplyAnalysis`,
-    {
-      method: "POST",
-      headers: {
-        Accept: "application/json, text/javascript, */*; q=0.01",
-        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-        Cookie: cookieHeader,
-      },
-      body: new URLSearchParams({
-        _search: "false",
-        loadType: "myApply",
-        type: "3",
-        nd: Date.now().toString(),
-        limit: "100",
-        page: "1",
-        sidx: "",
-        sord: "desc",
-      }),
+): Promise<MyApplyResult[]> => {
+  const appliesResponse = await fetch(GET_APPLIES_URL, {
+    method: "POST",
+    headers: {
+      Accept: "application/json, text/javascript, */*; q=0.01",
+      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+      Cookie: cookieHeader,
     },
-  );
+    body: new URLSearchParams({
+      _search: "false",
+      loadType: "myApply",
+      type: "3",
+      nd: Date.now().toString(),
+      limit: "100",
+      page: "1",
+      sidx: "",
+      sord: "desc",
+    }),
+  });
 
-  const completeActionsResult = <RawCompleteActionData>(
-    await completeActionsResponse.json()
-  );
+  const appliesResult = <RawCompleteApplyResult>await appliesResponse.json();
 
-  return completeActionsResult.data.map(
+  return appliesResult.data.map(
     ({ SHIXIANG, XTMC, key, unit, unitName, SQCS, YBSL, RN }) => ({
       name: SHIXIANG,
       system: XTMC,
@@ -87,6 +84,8 @@ export const queryMyCompleteActions = async (
     }),
   );
 };
+
+const GET_APPLY_DATA_URL = `${MY_SERVER}/AnalysisForPerson/loadMyApplyData`;
 
 const BUILD_IN_COLUMNS = [
   "TASK_NAME_",
@@ -162,39 +161,36 @@ export const queryMyActions = async <T extends Record<string, unknown>>(
   const userId = USER_ID_REG_EXP.exec(actionPageContent)![1];
   const formId = FORM_ID_REG_EXP.exec(actionPageContent)![1];
 
-  const queryResponse = await fetch(
-    `${MY_SERVER}/AnalysisForPerson/loadMyApplyData`,
-    {
-      method: "POST",
-      headers: {
-        Accept: "application/json, text/javascript, */*; q=0.01",
-        Cookie: cookieHeader,
-        Referer: actionPageUrl,
-      },
-      body: new URLSearchParams({
-        tbName: key,
-        colNames,
-        userId,
-        formId,
-        tabId: "myApplyed",
-        orderCol: "[]",
-        type: "3",
-        startTime: "",
-        endTime: "",
-        loadType: "myApply",
-        wf_unusual: "",
-        avg_time: "",
-        end_status: "",
-        proc_key: key,
-        _search: "false",
-        nd: new Date().getTime().toString(),
-        limit: "100",
-        page: "1",
-        sidx: "CREATE_TIME_",
-        sord: "desc",
-      }),
+  const queryResponse = await fetch(GET_APPLY_DATA_URL, {
+    method: "POST",
+    headers: {
+      Accept: "application/json, text/javascript, */*; q=0.01",
+      Cookie: cookieHeader,
+      Referer: actionPageUrl,
     },
-  );
+    body: new URLSearchParams({
+      tbName: key,
+      colNames,
+      userId,
+      formId,
+      tabId: "myApplyed",
+      orderCol: "[]",
+      type: "3",
+      startTime: "",
+      endTime: "",
+      loadType: "myApply",
+      wf_unusual: "",
+      avg_time: "",
+      end_status: "",
+      proc_key: key,
+      _search: "false",
+      nd: new Date().getTime().toString(),
+      limit: "100",
+      page: "1",
+      sidx: "CREATE_TIME_",
+      sord: "desc",
+    }),
+  });
 
   const queryResult = <RawMyActionData<T>>await queryResponse.json();
 
