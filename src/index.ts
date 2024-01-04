@@ -216,6 +216,8 @@ app.get("/weather", weatherHandler);
 
 app.get("/test", (req, res) => {
   console.log(req.headers);
+  console.log(req.query);
+  console.log(req.path);
   console.log(req.body);
 
   res.cookie("a", "1");
@@ -226,11 +228,15 @@ app.get("/test", (req, res) => {
     headers: req.headers,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     body: req.body,
+    path: req.path,
+    query: req.query,
   });
 });
 
 app.post("/test", (req, res) => {
   console.log(req.headers);
+  console.log(req.query);
+  console.log(req.path);
   console.log(req.body);
 
   res.cookie("a", "1");
@@ -241,6 +247,8 @@ app.post("/test", (req, res) => {
     headers: req.headers,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     body: req.body,
+    path: req.path,
+    query: req.query,
   });
 });
 

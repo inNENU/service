@@ -1,7 +1,18 @@
 import type { RequestHandler } from "express";
 
 import { underSystemLogin } from "./login.js";
-import { UNDER_SYSTEM_SERVER } from "./utils.js";
+import {
+  UNDER_SYSTEM_SERVER,
+  fieldRegExp,
+  keyCodeRegExp,
+  otherFieldsRegExp,
+  printHQLInputRegExp,
+  printHQLJSRegExp,
+  printPageSizeRegExp,
+  sqlStringRegExp,
+  tableFieldsRegExp,
+  totalPagesRegExp,
+} from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import type {
   CommonFailedResponse,
@@ -9,6 +20,21 @@ import type {
   LoginOptions,
 } from "../typings.js";
 import { IE_8_USER_AGENT, getIETimeStamp } from "../utils/index.js";
+
+const gradeItemRegExp = /<tr.+?class="smartTr"[^>]*?>([\s\S]*?)<\/tr>/g;
+const jsGradeItemRegExp = /<tr.+?class=\\"smartTr\\"[^>]*?>(.*?)<\/tr>/g;
+const gradeCellRegExp =
+  /^(?:<td[^>]*?>[^<]*?<\/td>){3}<td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^>]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^>]*?)<\/td><td[^>]*?>(.*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td>/;
+const gradeRegExp = /<a.*?JsMod\('([^']*?)'.*?>([^<]*?)<\/a>/;
+const gradeDetailRegExp =
+  /<tr.*class="smartTr"[^>]+><td[^>]*>([^<]*)<\/td><td[^>]*>([^<]*)<\/td><td[^>]*>([^<]*)<\/td><td[^>]*>([^<]*)<\/td><td[^>]*>([^<]*)<\/td><td[^>]*>([^<]*)<\/td><td[^>]*>([^<]*)<\/td><td[^>]*>([^<]*)<\/td><\/tr>/;
+
+const sqlRegExp =
+  /<input\s+type="hidden"\s+name\s*=\s*"isSql"\s+id\s*=\s*"isSql"\s+value="([^"]*?)">/;
+const keyRegExp =
+  /<input\s+type="hidden"\s+name\s*=\s*"key"\s+id\s*=\s*"key"\s+value="([^"]*?)">/;
+const xsIdRegExp =
+  /<input\s+type="hidden"\s+name\s*=\s*"xsId"\s+id\s*=\s*"xsId"\s+value="([^"]*?)" \/>/;
 
 type UnderCourseType =
   | "通识教育必修课"
@@ -22,19 +48,44 @@ type UnderCourseType =
   | "教师教育必修课"
   | "教师教育选修课";
 
-export interface UnderGradeListOptions extends Partial<LoginOptions> {
-  /** 查询时间 */
-  time?: string;
-  /** 课程名称 */
-  name?: string;
-  /** 课程性质 */
-  courseType?: UnderCourseType | "";
-  gradeType?: "all" | "best";
-}
+const COURSE_TYPES: Record<UnderCourseType, string> = {
+  通识教育必修课: "01",
+  通识教育选修课: "02",
+  专业教育必修课: "03",
+  专业教育选修课: "04",
+  教师职业教育必修课: "05",
+  教师职业教育选修课: "06",
+  任意选修课: "09",
+  发展方向课: "10",
+  教师教育必修课: "11",
+  教师教育选修课: "12",
+};
+const DEFAULT_TABLE_FIELD =
+  "学号:1:1:90:a.xh,姓名:2:1:110:a.xm,开课学期:3:1:120:a.xqmc,课程编号:14:1:120:a.kcbh,课程名称:4:1:130:a.kcmc,难度系数:18:1:70:ndxs,总成绩:5:1:70:a.zcj,学分绩点:19:1:70:jd,成绩标志:6:1:90:cjbsmc,课程性质:7:1:110:kcxzmc,通选课类别:20:1:90:txklb,课程类别:8:1:90:kclbmc,学时:9:1:70:a.zxs,学分:10:1:70:a.xf,考试性质:11:1:100:ksxzmc,补重学期:15:1:100:a.bcxq,审核状态:17:1:100:shzt";
+const DEFAULT_OTHER_FIELD = "null";
+const QUERY_URL = `${UNDER_SYSTEM_SERVER}/xszqcjglAction.do?method=queryxscj`;
+
+const getDisplayTime = (time: string): string => {
+  const [startYear, endYear, semester] = time.split("-");
+
+  return semester === "1" ? `${startYear}年秋季学期` : `${endYear}年春季学期`;
+};
+
 export interface ScoreDetail {
   score: number;
   percent: number;
 }
+
+const getScoreDetail = (content: string): ScoreDetail | null => {
+  if (!content.match(/[\d.]+\/\d+%/) || content === "0/0%") return null;
+
+  const [score, percent] = content.split("/");
+
+  return {
+    score: Number(score),
+    percent: Number(percent.replace("%", "")),
+  };
+};
 
 export interface GradeDetail {
   usual: ScoreDetail[];
@@ -77,84 +128,6 @@ export interface UnderGradeResult {
   /** 审核状态 */
   status: string;
 }
-
-export interface UnderGradeListSuccessResponse {
-  success: true;
-  data: UnderGradeResult[];
-}
-
-export type UnderGradeListResponse =
-  | UnderGradeListSuccessResponse
-  | AuthLoginFailedResult
-  | CommonFailedResponse;
-
-const gradeItemRegExp = /<tr.+?class="smartTr"[^>]*?>([\s\S]*?)<\/tr>/g;
-const jsGradeItemRegExp = /<tr.+?class=\\"smartTr\\"[^>]*?>(.*?)<\/tr>/g;
-const gradeCellRegExp =
-  /^(?:<td[^>]*?>[^<]*?<\/td>){3}<td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^>]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^>]*?)<\/td><td[^>]*?>(.*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td><td[^>]*?>([^<]*?)<\/td>/;
-const gradeRegExp = /<a.*?JsMod\('([^']*?)'.*?>([^<]*?)<\/a>/;
-const gradeDetailRegExp =
-  /<tr.*class="smartTr"[^>]+><td[^>]*>([^<]*)<\/td><td[^>]*>([^<]*)<\/td><td[^>]*>([^<]*)<\/td><td[^>]*>([^<]*)<\/td><td[^>]*>([^<]*)<\/td><td[^>]*>([^<]*)<\/td><td[^>]*>([^<]*)<\/td><td[^>]*>([^<]*)<\/td><\/tr>/;
-
-const tableFieldsRegExp =
-  /<input type="hidden"\s+name\s*=\s*"tableFields"\s+id\s*=\s*"tableFields"\s+value="([^"]+?)">/;
-const sqlRegExp =
-  /<input\s+type="hidden"\s+name\s*=\s*"isSql"\s+id\s*=\s*"isSql"\s+value="([^"]*?)">/;
-const printPageSizeRegExp =
-  /<input\s+type="hidden"\s+name\s*=\s*"printPageSize"\s+id\s*=\s*"printPageSize"\s+value="([^"]*?)">/;
-const keyRegExp =
-  /<input\s+type="hidden"\s+name\s*=\s*"key"\s+id\s*=\s*"key"\s+value="([^"]*?)">/;
-const keyCodeRegExp =
-  /<input\s+type="hidden"\s+name\s*=\s*"keyCode"\s+id\s*=\s*"keyCode"\s+value="([^"]*?)">/;
-const printHQLInputRegExp =
-  /<input\s+type="hidden"\s+name\s*=\s*"printHQL"\s+id\s*=\s*"printHQL"\s+value="([^"]*?)">/;
-const printHQLJSRegExp =
-  /window\.parent\.document\.getElementById\('printHQL'\)\.value = '([^']*?)';/;
-const sqlStringRegExp =
-  /<input\s+type="hidden"\s+name\s*=\s*"sqlString"\s+id\s*=\s*"sqlString"\s+value="([^"]*?)">/;
-
-const fieldRegExp =
-  /<input\s+type="hidden"\s+name\s*=\s*"field"\s+id\s*=\s*"field"\s+value="([^"]*?)">/;
-const totalPagesRegExp =
-  /<input\s+type="hidden"\s+name\s*=\s*"totalPages"\s+id\s*=\s*"totalPages"\s+value="([^"]*?)">/;
-const otherFieldsRegExp =
-  /<input\s+type="hidden"\s+name\s*=\s*"otherFields"\s+id\s*=\s*"otherFields"\s+value="([^"]*?)">/;
-const xsIdRegExp =
-  /<input\s+type="hidden"\s+name\s*=\s*"xsId"\s+id\s*=\s*"xsId"\s+value="([^"]*?)" \/>/;
-
-const COURSE_TYPES: Record<UnderCourseType, string> = {
-  通识教育必修课: "01",
-  通识教育选修课: "02",
-  专业教育必修课: "03",
-  专业教育选修课: "04",
-  教师职业教育必修课: "05",
-  教师职业教育选修课: "06",
-  任意选修课: "09",
-  发展方向课: "10",
-  教师教育必修课: "11",
-  教师教育选修课: "12",
-};
-const DEFAULT_TABLE_FIELD =
-  "学号:1:1:90:a.xh,姓名:2:1:110:a.xm,开课学期:3:1:120:a.xqmc,课程编号:14:1:120:a.kcbh,课程名称:4:1:130:a.kcmc,难度系数:18:1:70:ndxs,总成绩:5:1:70:a.zcj,学分绩点:19:1:70:jd,成绩标志:6:1:90:cjbsmc,课程性质:7:1:110:kcxzmc,通选课类别:20:1:90:txklb,课程类别:8:1:90:kclbmc,学时:9:1:70:a.zxs,学分:10:1:70:a.xf,考试性质:11:1:100:ksxzmc,补重学期:15:1:100:a.bcxq,审核状态:17:1:100:shzt";
-const DEFAULT_OTHER_FIELD = "null";
-const QUERY_URL = `${UNDER_SYSTEM_SERVER}/xszqcjglAction.do?method=queryxscj`;
-
-const getDisplayTime = (time: string): string => {
-  const [startYear, endYear, semester] = time.split("-");
-
-  return semester === "1" ? `${startYear}年秋季学期` : `${endYear}年春季学期`;
-};
-
-const getScoreDetail = (content: string): ScoreDetail | null => {
-  if (!content.match(/[\d.]+\/\d+%/) || content === "0/0%") return null;
-
-  const [score, percent] = content.split("/");
-
-  return {
-    score: Number(score),
-    percent: Number(percent.replace("%", "")),
-  };
-};
 
 const getGrades = (
   cookieHeader: string,
@@ -332,6 +305,26 @@ export const getGradeLists = async (
 
   return grades;
 };
+
+export interface UnderGradeListOptions extends Partial<LoginOptions> {
+  /** 查询时间 */
+  time?: string;
+  /** 课程名称 */
+  name?: string;
+  /** 课程性质 */
+  courseType?: UnderCourseType | "";
+  gradeType?: "all" | "best";
+}
+
+export interface UnderGradeListSuccessResponse {
+  success: true;
+  data: UnderGradeResult[];
+}
+
+export type UnderGradeListResponse =
+  | UnderGradeListSuccessResponse
+  | AuthLoginFailedResult
+  | CommonFailedResponse;
 
 export const underGradeListHandler: RequestHandler<
   EmptyObject,
