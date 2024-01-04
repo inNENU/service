@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { queryCompleteActions } from "./actions.js";
+import { queryMyActions } from "./actions.js";
 import type { MyInfo } from "./info.js";
 import { getMyInfo } from "./info.js";
 import type { MyLoginFailedResult } from "./login.js";
@@ -115,17 +115,24 @@ export const getEmailInfo = async (
   const checkResult = <RawCheckMailData>await checkMailResponse.json();
 
   if (!checkResult.flag) {
-    const { serviceId } = (await queryCompleteActions(cookieHeader)).find(
-      (item) => item.flowName === "个人邮箱申请",
-    )!;
+    const results = await queryMyActions(cookieHeader, APPLY_MAIL_APP_ID);
 
-    const mailInitInfo = await getMailInitInfo(cookieHeader, serviceId);
+    if (!results[0]?.PROC_INST_ID_)
+      return {
+        success: false,
+        msg: "邮箱已创建，但未找到到申请记录",
+      };
+
+    const mailInitInfo = await getMailInitInfo(
+      cookieHeader,
+      results[0]!.PROC_INST_ID_,
+    );
 
     if (mailInitInfo.success === false) return mailInitInfo;
 
     return {
-      hasEmail: true,
       ...mailInitInfo,
+      hasEmail: true,
     };
   }
 
