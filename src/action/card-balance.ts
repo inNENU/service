@@ -84,12 +84,13 @@ export const cardBalanceHandler: RequestHandler<
     if (data.success) {
       const balanceList = data.demo.items.item;
 
+      console.log(balanceList);
+
       return res.json(<CardBalanceSuccessResponse>{
         success: true,
-        data:
-          balanceList[0]?.kye === "number"
-            ? Number(balanceList[0].kye) / 100
-            : 0,
+        data: balanceList[0]?.kye.match(/\d+/)
+          ? Number(balanceList[0].kye) / 100
+          : 0,
       });
     }
 
