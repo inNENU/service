@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
 import { underSystemLogin } from "./login.js";
-import { SERVER, getTimeStamp } from "./utils.js";
+import { UNDER_SERVER, getTimeStamp } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import type {
   CommonFailedResponse,
@@ -21,7 +21,7 @@ const registerButtonRegExp =
   /<input\s+type="button"\s+id="zc"\s+class="button"\s+value="确定注册"\s+onclick="bc\(\)"\/>/;
 const isRegisteredRegExp = /您已经提交注册信息/;
 
-const UNDER_STUDENT_ARCHIVE_QUERY_URL = `${SERVER}/xszhxxAction.do?method=addStudentPic_xszc`;
+const UNDER_STUDENT_ARCHIVE_QUERY_URL = `${UNDER_SERVER}/xszhxxAction.do?method=addStudentPic_xszc`;
 
 export interface UnderBasicInfo {
   text: string;
@@ -122,7 +122,7 @@ const getStudentArchive = async (
 
   const [archiveImage, examImage] = await Promise.all([
     archiveImageLink
-      ? fetch(`${SERVER}${archiveImageLink}`, {
+      ? fetch(`${UNDER_SERVER}${archiveImageLink}`, {
           method: "POST",
           headers: {
             Cookie: cookieHeader,
@@ -130,7 +130,7 @@ const getStudentArchive = async (
         }).catch(() => "")
       : "",
     examImageLink
-      ? fetch(`${SERVER}${examImageLink}`, {
+      ? fetch(`${UNDER_SERVER}${examImageLink}`, {
           method: "POST",
           headers: {
             Cookie: cookieHeader,
@@ -175,7 +175,7 @@ export const getUnderStudentArchive = async (
     {
       headers: {
         Cookie: cookieHeader,
-        Referer: `${SERVER}/framework/new_window.jsp?lianjie=&winid=win3`,
+        Referer: `${UNDER_SERVER}/framework/new_window.jsp?lianjie=&winid=win3`,
         "User-Agent": IE_8_USER_AGENT,
       },
     },
@@ -219,12 +219,12 @@ export const registerStudentArchive = async (
   cookieHeader: string,
   path: string,
 ): Promise<UnderRegisterStudentArchiveResponse> => {
-  const url = `${SERVER}${path}`;
+  const url = `${UNDER_SERVER}${path}`;
 
   const registerResponse = await fetch(url, {
     headers: {
       Cookie: cookieHeader,
-      Referer: `${SERVER}/framework/new_window.jsp?lianjie=&winid=win3`,
+      Referer: `${UNDER_SERVER}/framework/new_window.jsp?lianjie=&winid=win3`,
       "User-Agent": IE_8_USER_AGENT,
     },
   });

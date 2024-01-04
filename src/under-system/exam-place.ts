@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
 import { underSystemLogin } from "./login.js";
-import { SERVER } from "./utils.js";
+import { UNDER_SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import type {
   CommonFailedResponse,
@@ -40,8 +40,8 @@ const DEFAULT_TABLE_FIELD =
   "学号:0:1:90:xh,姓名:1:1:90:xm,课程名称:2:1:130:course_name,考试时间:3:1:260:kw0403.ksqssj,校区名称:4:1:200:xqmc,教学楼:5:1:300:jxl,考场:6:1:420:kw0404.kcmc";
 const DEFAULT_OTHER_FIELD = "null";
 
-const INFO_URL = `${SERVER}/jiaowu/kwgl/kwgl_xsJgfb_soso.jsp`;
-const QUERY_URL = `${SERVER}/kwsjglAction.do?method=sosoXsFb`;
+const INFO_URL = `${UNDER_SERVER}/jiaowu/kwgl/kwgl_xsJgfb_soso.jsp`;
+const QUERY_URL = `${UNDER_SERVER}/kwsjglAction.do?method=sosoXsFb`;
 
 export interface ExamPlace {
   /** 课程 */
@@ -192,7 +192,7 @@ export const underExamPlaceHandler: RequestHandler<
 
       if (!result.success) return res.json(result);
 
-      cookieHeader = result.cookieStore.getHeader(SERVER);
+      cookieHeader = result.cookieStore.getHeader(UNDER_SERVER);
     }
 
     const response = await fetch(INFO_URL, {

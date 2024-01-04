@@ -1,4 +1,4 @@
-export const SERVER = "https://dsjx.webvpn.nenu.edu.cn";
+export const UNDER_SERVER = "https://dsjx.webvpn.nenu.edu.cn";
 
 // IE always rounds the time to the nearest 100ms
 export const getTimeStamp = (): number => {

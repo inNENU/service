@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
 import { underSystemLogin } from "./login.js";
-import { SERVER, getTimeStamp } from "./utils.js";
+import { UNDER_SERVER, getTimeStamp } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import { semesterStartTime } from "../config/semester-start-time.js";
@@ -85,7 +85,7 @@ export const underCourseTableHandler: RequestHandler<
   try {
     const { time } = req.body;
 
-    const QUERY_URL = `${SERVER}/tkglAction.do?${new URLSearchParams({
+    const QUERY_URL = `${UNDER_SERVER}/tkglAction.do?${new URLSearchParams({
       method: "goListKbByXs",
       istsxx: "no",
       xnxqh: time,
@@ -111,7 +111,7 @@ export const underCourseTableHandler: RequestHandler<
     const response = await fetch(QUERY_URL, {
       headers: {
         Cookie: cookieHeader,
-        Referer: `${SERVER}/tkglAction.do?method=kbxxXs&tktime=${getTimeStamp()}`,
+        Referer: `${UNDER_SERVER}/tkglAction.do?method=kbxxXs&tktime=${getTimeStamp()}`,
         "User-Agent": IE_8_USER_AGENT,
       },
       redirect: "manual",

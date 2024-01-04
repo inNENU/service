@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
 import { underSystemLogin } from "./login.js";
-import { SERVER, getTimeStamp } from "./utils.js";
+import { UNDER_SERVER, getTimeStamp } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import type {
   CommonFailedResponse,
@@ -65,14 +65,14 @@ export const underTestQueryHandler: RequestHandler<
 
       if (!result.success) return res.json(result);
 
-      cookieHeader = result.cookieStore.getHeader(SERVER);
+      cookieHeader = result.cookieStore.getHeader(UNDER_SERVER);
     }
 
-    const QUERY_URL = `${SERVER}/kjlbgl.do?method=goStudentSKBm&tktime=${getTimeStamp()}`;
+    const QUERY_URL = `${UNDER_SERVER}/kjlbgl.do?method=goStudentSKBm&tktime=${getTimeStamp()}`;
     const queryResponse = await fetch(QUERY_URL, {
       headers: {
         Cookie: cookieHeader,
-        Referer: `${SERVER}/framework/new_window.jsp?lianjie=&winid=win1`,
+        Referer: `${UNDER_SERVER}/framework/new_window.jsp?lianjie=&winid=win1`,
         "User-Agent": IE_8_USER_AGENT,
       },
     });
@@ -88,7 +88,7 @@ export const underTestQueryHandler: RequestHandler<
       });
 
     const applyListResponse = await fetch(
-      `${SERVER}/kjlbgl.do?method=goStudentSKXx&xs0101id=${idCard}`,
+      `${UNDER_SERVER}/kjlbgl.do?method=goStudentSKXx&xs0101id=${idCard}`,
       {
         headers: {
           Cookie: cookieHeader,
@@ -107,7 +107,7 @@ export const underTestQueryHandler: RequestHandler<
     );
 
     const resultListResponse = await fetch(
-      `${SERVER}/kjlbgl.do?method=goStudentSKYbXx&xs0101id=${idCard}`,
+      `${UNDER_SERVER}/kjlbgl.do?method=goStudentSKYbXx&xs0101id=${idCard}`,
       {
         headers: {
           Cookie: cookieHeader,

@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { SERVER } from "./utils.js";
+import { UNDER_SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
@@ -84,14 +84,14 @@ export const underSystemLogin = async (
     };
 
   if (finalLocation?.includes(";jsessionid=")) {
-    const ssoUrl = `${SERVER}/Logon.do?method=logonBySSO`;
+    const ssoUrl = `${UNDER_SERVER}/Logon.do?method=logonBySSO`;
 
     await fetch(ssoUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
         Cookie: cookieStore.getHeader(ssoUrl),
-        Referer: `${SERVER}/framework/main.jsp`,
+        Referer: `${UNDER_SERVER}/framework/main.jsp`,
         "User-Agent": IE_8_USER_AGENT,
       },
     });
