@@ -22,12 +22,7 @@ interface MailInitSuccessInfo {
   password: string;
 }
 
-interface MailInitFailedInfo {
-  success: false;
-  msg: string;
-}
-
-type MailInitInfo = MailInitSuccessInfo | MailInitFailedInfo;
+type MailInitInfo = MailInitSuccessInfo | CommonFailedResponse;
 
 const getMailInitInfo = async (
   cookieHeader: string,
@@ -92,11 +87,13 @@ export interface GetEmailInfoResponse {
   instanceId: string;
 }
 
-export type GetEmailResponse =
+export type GetEmailSuccessResponse =
   | GetEmailNameResponse
-  | GetEmailInfoResponse
-  | MyLoginFailedResult
-  | CommonFailedResponse;
+  | GetEmailInfoResponse;
+
+export type GetEmailFailedResponse = MyLoginFailedResult | CommonFailedResponse;
+
+export type GetEmailResponse = GetEmailSuccessResponse | GetEmailFailedResponse;
 
 export const getEmailInfo = async (
   cookieHeader: string,
@@ -187,12 +184,14 @@ export interface ActivateEmailOptions extends Partial<LoginOptions> {
   instanceId: string;
 }
 
+export type ActivateMailSuccessResponse = MailInitSuccessInfo;
+
 export type ActivateMailFailedResponse =
   | MyLoginFailedResult
   | CommonFailedResponse;
 
 export type ActivateEmailResponse =
-  | MailInitSuccessInfo
+  | ActivateMailSuccessResponse
   | ActivateMailFailedResponse;
 
 const activateEmail = async (
