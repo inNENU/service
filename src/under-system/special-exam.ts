@@ -1,14 +1,14 @@
 import type { RequestHandler } from "express";
 
 import { underSystemLogin } from "./login.js";
-import { UNDER_SERVER, getTimeStamp } from "./utils.js";
+import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import type {
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import { IE_8_USER_AGENT } from "../utils/index.js";
+import { IE_8_USER_AGENT, getIETimeStamp } from "../utils/index.js";
 
 export interface UnderSpecialExamItem {
   /** 考试时间 */
@@ -53,7 +53,7 @@ const xsIdRegExp =
 const DEFAULT_TABLE_FIELD =
   "学年学期:0:1:120:xqmc,学号:1:1:120:xh,姓名:2:1:120:xm,管理年度:7:1:120:dqszj,专业名称:5:1:120:zymc,上课单位:6:1:150:dwmc,控制名称:4:1:150:skkz,总成绩:3:1:100:zcj";
 const DEFAULT_OTHER_FIELD = "null";
-const QUERY_URL = `${UNDER_SERVER}/jiaowu/cjgl/cxfxtj/zxcjcxxs.jsp`;
+const QUERY_URL = `${UNDER_SYSTEM_SERVER}/jiaowu/cjgl/cxfxtj/zxcjcxxs.jsp`;
 
 const getGrades = (content: string): UnderSpecialExamItem[] =>
   Array.from(content.matchAll(gradeItemRegExp)).map(
@@ -169,10 +169,10 @@ export const underSpecialExamHandler: RequestHandler<
       cookieHeader = result.cookieStore.getHeader(QUERY_URL);
     }
 
-    const response = await fetch(`${QUERY_URL}?tktime=${getTimeStamp()}`, {
+    const response = await fetch(`${QUERY_URL}?tktime=${getIETimeStamp()}`, {
       headers: {
         Cookie: cookieHeader,
-        Referer: `${UNDER_SERVER}/framework/new_window.jsp?lianjie=&winid=win5`,
+        Referer: `${UNDER_SYSTEM_SERVER}/framework/new_window.jsp?lianjie=&winid=win5`,
         "User-Agent": IE_8_USER_AGENT,
       },
     });

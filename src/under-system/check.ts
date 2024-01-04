@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { UNDER_SERVER } from "./utils.js";
+import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type {
   CommonFailedResponse,
   CookieOptions,
@@ -16,7 +16,7 @@ export const underSystemCheckHandler: RequestHandler<
 > = async (req, res) => {
   try {
     const response = await fetch(
-      `${UNDER_SERVER}/framework/userInfo_edit.jsp?winid=win6`,
+      `${UNDER_SYSTEM_SERVER}/framework/userInfo_edit.jsp?winid=win6`,
       {
         headers: {
           Cookie: req.headers.cookie ?? cookies2Header(req.body.cookies),

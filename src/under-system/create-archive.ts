@@ -1,14 +1,14 @@
 import type { RequestHandler } from "express";
 
 import { underSystemLogin } from "./login.js";
-import { UNDER_SERVER, getTimeStamp } from "./utils.js";
+import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import type {
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import { IE_8_USER_AGENT } from "../utils/index.js";
+import { IE_8_USER_AGENT, getIETimeStamp } from "../utils/index.js";
 
 const nextLinkRegExp =
   /<input\s+type="button"\s+class="button"\s+onclick="window.location.href='([^']+)';"\s+value=" 下一步 "\/>/;
@@ -95,11 +95,11 @@ export const getUnderStudentArchiveInfo = async (
   cookieHeader: string,
 ): Promise<GetUnderCreateStudentArchiveInfoResponse> => {
   const welcomePageResponse = await fetch(
-    `${UNDER_SERVER}/ggxx/xj/bdzcsm.jsp?tktime=${getTimeStamp()}`,
+    `${UNDER_SYSTEM_SERVER}/ggxx/xj/bdzcsm.jsp?tktime=${getIETimeStamp()}`,
     {
       headers: {
         Cookie: cookieHeader,
-        Referer: `${UNDER_SERVER}/framework/new_window.jsp?lianjie=&winid=win1`,
+        Referer: `${UNDER_SYSTEM_SERVER}/framework/new_window.jsp?lianjie=&winid=win1`,
         "User-Agent": IE_8_USER_AGENT,
       },
     },
@@ -122,10 +122,10 @@ export const getUnderStudentArchiveInfo = async (
       msg: "未找到注册学籍链接",
     };
 
-  const infoResponse = await fetch(`${UNDER_SERVER}${link}`, {
+  const infoResponse = await fetch(`${UNDER_SYSTEM_SERVER}${link}`, {
     headers: {
       Cookie: cookieHeader,
-      Referer: `${UNDER_SERVER}/ggxx/xj/bdzcsm.jsp`,
+      Referer: `${UNDER_SYSTEM_SERVER}/ggxx/xj/bdzcsm.jsp`,
       "User-Agent": IE_8_USER_AGENT,
     },
   });
@@ -267,7 +267,7 @@ export const submitUnderStudentArchiveInfo = async (
   cookieHeader: string,
   { path, fields }: UnderCreateStudentArchiveSubmitInfoOptions,
 ): Promise<UnderCreateStudentArchiveSubmitInfoResponse> => {
-  const submitResponse = await fetch(`${UNDER_SERVER}${path}`, {
+  const submitResponse = await fetch(`${UNDER_SYSTEM_SERVER}${path}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -333,7 +333,7 @@ export const submitUnderStudentArchiveAddress = async (
   cookieHeader: string,
   { path, fields }: UnderCreateStudentArchiveSubmitAddressOptions,
 ): Promise<UnderCreateStudentArchiveSubmitAddressSuccessResponse> => {
-  const submitResponse = await fetch(`${UNDER_SERVER}${path}`, {
+  const submitResponse = await fetch(`${UNDER_SYSTEM_SERVER}${path}`, {
     method: "POST",
     headers: {
       Cookie: cookieHeader,
@@ -453,7 +453,7 @@ export const submitUnderStudentArchiveStudy = async (
 
   params.jls = `,${study.map((_, index) => index + 1).join(",")}`;
 
-  const submitResponse = await fetch(`${UNDER_SERVER}${path}`, {
+  const submitResponse = await fetch(`${UNDER_SYSTEM_SERVER}${path}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -563,7 +563,7 @@ export const submitUnderStudentArchiveFamily = async (
 
   params.jls = `,${family.map((_, index) => index + 1).join(",")}`;
 
-  const submitResponse = await fetch(`${UNDER_SERVER}${path}`, {
+  const submitResponse = await fetch(`${UNDER_SYSTEM_SERVER}${path}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -610,7 +610,7 @@ export const underCreateStudentArchiveHandler: RequestHandler<
 
       if (!result.success) return res.json(result);
 
-      cookieHeader = result.cookieStore.getHeader(UNDER_SERVER);
+      cookieHeader = result.cookieStore.getHeader(UNDER_SYSTEM_SERVER);
     }
 
     if (req.body.type === "get-info")

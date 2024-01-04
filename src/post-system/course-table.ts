@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
 import { postSystemLogin } from "./login.js";
-import { POST_HTTPS_SERVER, getTimeStamp } from "./utils.js";
+import { POST_SYSTEM_HTTPS_SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import { semesterStartTime } from "../config/semester-start-time.js";
 import type {
@@ -9,7 +9,7 @@ import type {
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import { IE_8_USER_AGENT } from "../utils/index.js";
+import { IE_8_USER_AGENT, getIETimeStamp } from "../utils/index.js";
 
 export interface ClassItem {
   name: string;
@@ -80,7 +80,7 @@ export const postCourseTableHandler: RequestHandler<
   try {
     const { time } = req.body;
 
-    const QUERY_URL = `${POST_HTTPS_SERVER}/tkglAction.do?${new URLSearchParams(
+    const QUERY_URL = `${POST_SYSTEM_HTTPS_SERVER}/tkglAction.do?${new URLSearchParams(
       {
         method: "goListKbByXs",
         xnxqh: time,
@@ -106,7 +106,7 @@ export const postCourseTableHandler: RequestHandler<
     const response = await fetch(QUERY_URL, {
       headers: {
         Cookie: cookieHeader,
-        Referer: `${POST_HTTPS_SERVER}/tkglAction.do?method=kbxxXs&tktime=${getTimeStamp()}`,
+        Referer: `${POST_SYSTEM_HTTPS_SERVER}/tkglAction.do?method=kbxxXs&tktime=${getIETimeStamp()}`,
         "User-Agent": IE_8_USER_AGENT,
       },
     });

@@ -1,35 +1,29 @@
 import type { RequestHandler } from "express";
 
 import { underSystemLogin } from "./login.js";
-import { UNDER_SERVER, getTimeStamp } from "./utils.js";
+import {
+  UNDER_SYSTEM_SERVER,
+  fieldRegExp,
+  keyCodeRegExp,
+  otherFieldsRegExp,
+  printHQLInputRegExp,
+  printHQLJSRegExp,
+  printPageSizeRegExp,
+  sqlStringRegExp,
+  tableFieldsRegExp,
+  totalPagesRegExp,
+} from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import type {
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import { IE_8_USER_AGENT } from "../utils/index.js";
+import { IE_8_USER_AGENT, getIETimeStamp } from "../utils/index.js";
 import type { VPNLoginFailedResult } from "../vpn/login.js";
 
 const headerRegExp = /<title>(.*)<\/title>/;
-const keyCodeRegExp =
-  /<input\s+type="hidden"\s+name\s*=\s*"keyCode"\s+id\s*=\s*"keyCode"\s+value="([^"]*?)">/;
-const printHQLInputRegExp =
-  /<input\s+type="hidden"\s+name\s*=\s*"printHQL"\s+id\s*=\s*"printHQL"\s+value="([^"]*?)">/;
-const printHQLJSRegExp =
-  /window\.parent\.document\.getElementById\('printHQL'\)\.value = '([^']*?)';/;
-const printPageSizeRegExp =
-  /<input\s+type="hidden"\s+name\s*=\s*"printPageSize"\s+id\s*=\s*"printPageSize"\s+value="([^"]*?)">/;
-const sqlStringRegExp =
-  /<input\s+type="hidden"\s+name\s*=\s*"sqlString"\s+id\s*=\s*"sqlString"\s+value="([^"]*?)">/;
-const fieldRegExp =
-  /<input\s+type="hidden"\s+name\s*=\s*"field"\s+id\s*=\s*"field"\s+value="([^"]*?)">/;
-const totalPagesRegExp =
-  /<input\s+type="hidden"\s+name\s*=\s*"totalPages"\s+id\s*=\s*"totalPages"\s+value="([^"]*?)">/;
-const tableFieldsRegExp =
-  /<input type="hidden"\s+name\s*=\s*"tableFields"\s+id\s*=\s*"tableFields"\s+value="([^"]+?)">/;
-const otherFieldsRegExp =
-  /<input\s+type="hidden"\s+name\s*=\s*"otherFields"\s+id\s*=\s*"otherFields"\s+value="([^"]*?)">/;
+
 const planRegExp =
   /<tr[^>]*><td[^>]*>.*?<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<\/tr>/g;
 
@@ -37,7 +31,7 @@ const DEFAULT_TABLE_FIELD =
   "控制名称:12:1:100:e.kzmc,学院:11:1:150:c.dwmc,专业名称:10:1:150:zymc,接收科类:16:1:80:zykl,考核方式:3:1:70:zzykhfs.dmmc,考核时间:4:1:110:khsj,考核地点:5:1:80:khdd,拟转入人数:6:1:90:zrrs,报名人数:17:1:90:jyzrrs,转入条件:15:1:60:zrtj,联系人:18:1:90:lxr,咨询电话:19:1:100:lxdh";
 const DEFAULT_OTHER_FIELD = "null";
 
-const QUERY_URL = `${UNDER_SERVER}/jiaowu/xjgl/zzygl/zzyxxgl_xsd_list.jsp`;
+const QUERY_URL = `${UNDER_SYSTEM_SERVER}/jiaowu/xjgl/zzygl/zzyxxgl_xsd_list.jsp`;
 
 export interface ChangeMajorPlan {
   /** 学院 */
@@ -202,10 +196,10 @@ export const underChangeMajorPlanHandler: RequestHandler<
 
       if (!result.success) return res.json(result);
 
-      cookieHeader = result.cookieStore.getHeader(UNDER_SERVER);
+      cookieHeader = result.cookieStore.getHeader(UNDER_SYSTEM_SERVER);
     }
 
-    const response = await fetch(`${QUERY_URL}?tktime=${getTimeStamp()}`, {
+    const response = await fetch(`${QUERY_URL}?tktime=${getIETimeStamp()}`, {
       headers: {
         Cookie: cookieHeader,
         "User-Agent": IE_8_USER_AGENT,

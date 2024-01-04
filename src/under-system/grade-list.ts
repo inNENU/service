@@ -1,14 +1,14 @@
 import type { RequestHandler } from "express";
 
 import { underSystemLogin } from "./login.js";
-import { UNDER_SERVER, getTimeStamp } from "./utils.js";
+import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import type {
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import { IE_8_USER_AGENT } from "../utils/index.js";
+import { IE_8_USER_AGENT, getIETimeStamp } from "../utils/index.js";
 
 type UnderCourseType =
   | "通识教育必修课"
@@ -137,7 +137,7 @@ const COURSE_TYPES: Record<UnderCourseType, string> = {
 const DEFAULT_TABLE_FIELD =
   "学号:1:1:90:a.xh,姓名:2:1:110:a.xm,开课学期:3:1:120:a.xqmc,课程编号:14:1:120:a.kcbh,课程名称:4:1:130:a.kcmc,难度系数:18:1:70:ndxs,总成绩:5:1:70:a.zcj,学分绩点:19:1:70:jd,成绩标志:6:1:90:cjbsmc,课程性质:7:1:110:kcxzmc,通选课类别:20:1:90:txklb,课程类别:8:1:90:kclbmc,学时:9:1:70:a.zxs,学分:10:1:70:a.xf,考试性质:11:1:100:ksxzmc,补重学期:15:1:100:a.bcxq,审核状态:17:1:100:shzt";
 const DEFAULT_OTHER_FIELD = "null";
-const QUERY_URL = `${UNDER_SERVER}/xszqcjglAction.do?method=queryxscj`;
+const QUERY_URL = `${UNDER_SYSTEM_SERVER}/xszqcjglAction.do?method=queryxscj`;
 
 const getDisplayTime = (time: string): string => {
   const [startYear, endYear, semester] = time.split("-");
@@ -198,7 +198,7 @@ const getGrades = (
       let gradeDetail: GradeDetail | null = null;
 
       if (gradeLink) {
-        const gradeUrl = `${UNDER_SERVER}${gradeLink}&tktime=${getTimeStamp()}`;
+        const gradeUrl = `${UNDER_SYSTEM_SERVER}${gradeLink}&tktime=${getIETimeStamp()}`;
 
         const gradeDetailResponse = await fetch(gradeUrl, {
           headers: {
@@ -365,7 +365,7 @@ export const underGradeListHandler: RequestHandler<
       headers: {
         Cookie: cookieHeader,
         "Content-Type": "application/x-www-form-urlencoded",
-        Referer: `${UNDER_SERVER}/jiaowu/cjgl/xszq/query_xscj.jsp?tktime=${getTimeStamp()}`,
+        Referer: `${UNDER_SYSTEM_SERVER}/jiaowu/cjgl/xszq/query_xscj.jsp?tktime=${getIETimeStamp()}`,
         "User-Agent": IE_8_USER_AGENT,
       },
       body: new URLSearchParams({

@@ -1,7 +1,18 @@
 import type { RequestHandler } from "express";
 
 import { underSystemLogin } from "./login.js";
-import { UNDER_SERVER } from "./utils.js";
+import {
+  UNDER_SYSTEM_SERVER,
+  fieldRegExp,
+  keyCodeRegExp,
+  otherFieldsRegExp,
+  printHQLInputRegExp,
+  printHQLJSRegExp,
+  printPageSizeRegExp,
+  sqlStringRegExp,
+  tableFieldsRegExp,
+  totalPagesRegExp,
+} from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import type {
   CommonFailedResponse,
@@ -15,24 +26,6 @@ const selectRegExp =
   /<select\s+name="kskzid"\s+id="kskzid"[^>]*><option value="">---请选择---<\/option>([\s\S]*?)<\/select>/;
 const optionRegExp = /<option value="([^"]+)">([^<]+)<\/option>/g;
 
-const keyCodeRegExp =
-  /<input\s+type="hidden"\s+name\s*=\s*"keyCode"\s+id\s*=\s*"keyCode"\s+value="([^"]*?)">/;
-const printHQLInputRegExp =
-  /<input\s+type="hidden"\s+name\s*=\s*"printHQL"\s+id\s*=\s*"printHQL"\s+value="([^"]*?)">/;
-const printHQLJSRegExp =
-  /window\.parent\.document\.getElementById\('printHQL'\)\.value = '([^']*?)';/;
-const printPageSizeRegExp =
-  /<input\s+type="hidden"\s+name\s*=\s*"printPageSize"\s+id\s*=\s*"printPageSize"\s+value="([^"]*?)">/;
-const sqlStringRegExp =
-  /<input\s+type="hidden"\s+name\s*=\s*"sqlString"\s+id\s*=\s*"sqlString"\s+value="([^"]*?)">/;
-const fieldRegExp =
-  /<input\s+type="hidden"\s+name\s*=\s*"field"\s+id\s*=\s*"field"\s+value="([^"]*?)">/;
-const totalPagesRegExp =
-  /<input\s+type="hidden"\s+name\s*=\s*"totalPages"\s+id\s*=\s*"totalPages"\s+value="([^"]*?)">/;
-const tableFieldsRegExp =
-  /<input type="hidden"\s+name\s*=\s*"tableFields"\s+id\s*=\s*"tableFields"\s+value="([^"]+?)">/;
-const otherFieldsRegExp =
-  /<input\s+type="hidden"\s+name\s*=\s*"otherFields"\s+id\s*=\s*"otherFields"\s+value="([^"]*?)">/;
 const examRegExp =
   /<tr[^>]*><td[^>]*>.*?<\/td>\s*<td[^>]*>.*?<\/td>\s*<td[^>]*>.*?<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<\/tr>/g;
 
@@ -40,8 +33,8 @@ const DEFAULT_TABLE_FIELD =
   "学号:0:1:90:xh,姓名:1:1:90:xm,课程名称:2:1:130:course_name,考试时间:3:1:260:kw0403.ksqssj,校区名称:4:1:200:xqmc,教学楼:5:1:300:jxl,考场:6:1:420:kw0404.kcmc";
 const DEFAULT_OTHER_FIELD = "null";
 
-const INFO_URL = `${UNDER_SERVER}/jiaowu/kwgl/kwgl_xsJgfb_soso.jsp`;
-const QUERY_URL = `${UNDER_SERVER}/kwsjglAction.do?method=sosoXsFb`;
+const INFO_URL = `${UNDER_SYSTEM_SERVER}/jiaowu/kwgl/kwgl_xsJgfb_soso.jsp`;
+const QUERY_URL = `${UNDER_SYSTEM_SERVER}/kwsjglAction.do?method=sosoXsFb`;
 
 export interface ExamPlace {
   /** 课程 */
@@ -192,7 +185,7 @@ export const underExamPlaceHandler: RequestHandler<
 
       if (!result.success) return res.json(result);
 
-      cookieHeader = result.cookieStore.getHeader(UNDER_SERVER);
+      cookieHeader = result.cookieStore.getHeader(UNDER_SYSTEM_SERVER);
     }
 
     const response = await fetch(INFO_URL, {

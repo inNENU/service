@@ -1,14 +1,14 @@
 import type { RequestHandler } from "express";
 
 import { underSystemLogin } from "./login.js";
-import { UNDER_SERVER, getTimeStamp } from "./utils.js";
+import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import type {
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import { IE_8_USER_AGENT } from "../utils/index.js";
+import { IE_8_USER_AGENT, getIETimeStamp } from "../utils/index.js";
 
 const infoRegExp =
   /<td>(\S+)<\/td>\s+<td colspan="\d">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/g;
@@ -21,7 +21,7 @@ const registerButtonRegExp =
   /<input\s+type="button"\s+id="zc"\s+class="button"\s+value="确定注册"\s+onclick="bc\(\)"\/>/;
 const isRegisteredRegExp = /您已经提交注册信息/;
 
-const UNDER_STUDENT_ARCHIVE_QUERY_URL = `${UNDER_SERVER}/xszhxxAction.do?method=addStudentPic_xszc`;
+const UNDER_STUDENT_ARCHIVE_QUERY_URL = `${UNDER_SYSTEM_SERVER}/xszhxxAction.do?method=addStudentPic_xszc`;
 
 export interface UnderBasicInfo {
   text: string;
@@ -122,7 +122,7 @@ const getStudentArchive = async (
 
   const [archiveImage, examImage] = await Promise.all([
     archiveImageLink
-      ? fetch(`${UNDER_SERVER}${archiveImageLink}`, {
+      ? fetch(`${UNDER_SYSTEM_SERVER}${archiveImageLink}`, {
           method: "POST",
           headers: {
             Cookie: cookieHeader,
@@ -130,7 +130,7 @@ const getStudentArchive = async (
         }).catch(() => "")
       : "",
     examImageLink
-      ? fetch(`${UNDER_SERVER}${examImageLink}`, {
+      ? fetch(`${UNDER_SYSTEM_SERVER}${examImageLink}`, {
           method: "POST",
           headers: {
             Cookie: cookieHeader,
@@ -171,11 +171,11 @@ export const getUnderStudentArchive = async (
   cookieHeader: string,
 ): Promise<UnderGetStudentArchiveResponse> => {
   const response = await fetch(
-    `${UNDER_STUDENT_ARCHIVE_QUERY_URL}&tktime=${getTimeStamp()}`,
+    `${UNDER_STUDENT_ARCHIVE_QUERY_URL}&tktime=${getIETimeStamp()}`,
     {
       headers: {
         Cookie: cookieHeader,
-        Referer: `${UNDER_SERVER}/framework/new_window.jsp?lianjie=&winid=win3`,
+        Referer: `${UNDER_SYSTEM_SERVER}/framework/new_window.jsp?lianjie=&winid=win3`,
         "User-Agent": IE_8_USER_AGENT,
       },
     },
@@ -219,12 +219,12 @@ export const registerStudentArchive = async (
   cookieHeader: string,
   path: string,
 ): Promise<UnderRegisterStudentArchiveResponse> => {
-  const url = `${UNDER_SERVER}${path}`;
+  const url = `${UNDER_SYSTEM_SERVER}${path}`;
 
   const registerResponse = await fetch(url, {
     headers: {
       Cookie: cookieHeader,
-      Referer: `${UNDER_SERVER}/framework/new_window.jsp?lianjie=&winid=win3`,
+      Referer: `${UNDER_SYSTEM_SERVER}/framework/new_window.jsp?lianjie=&winid=win3`,
       "User-Agent": IE_8_USER_AGENT,
     },
   });

@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
 import { underSystemLogin } from "./login.js";
-import { UNDER_SERVER, getTimeStamp } from "./utils.js";
+import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import { semesterStartTime } from "../config/semester-start-time.js";
@@ -10,7 +10,7 @@ import type {
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import { IE_8_USER_AGENT } from "../utils/index.js";
+import { IE_8_USER_AGENT, getIETimeStamp } from "../utils/index.js";
 import type { VPNLoginFailedResult } from "../vpn/login.js";
 
 export interface ClassItem {
@@ -85,12 +85,14 @@ export const underCourseTableHandler: RequestHandler<
   try {
     const { time } = req.body;
 
-    const QUERY_URL = `${UNDER_SERVER}/tkglAction.do?${new URLSearchParams({
-      method: "goListKbByXs",
-      istsxx: "no",
-      xnxqh: time,
-      zc: "",
-    }).toString()}`;
+    const QUERY_URL = `${UNDER_SYSTEM_SERVER}/tkglAction.do?${new URLSearchParams(
+      {
+        method: "goListKbByXs",
+        istsxx: "no",
+        xnxqh: time,
+        zc: "",
+      },
+    ).toString()}`;
 
     let cookieHeader = req.headers.cookie;
 
@@ -111,7 +113,7 @@ export const underCourseTableHandler: RequestHandler<
     const response = await fetch(QUERY_URL, {
       headers: {
         Cookie: cookieHeader,
-        Referer: `${UNDER_SERVER}/tkglAction.do?method=kbxxXs&tktime=${getTimeStamp()}`,
+        Referer: `${UNDER_SYSTEM_SERVER}/tkglAction.do?method=kbxxXs&tktime=${getIETimeStamp()}`,
         "User-Agent": IE_8_USER_AGENT,
       },
       redirect: "manual",

@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { POST_HTTPS_SERVER, POST_HTTP_SERVER } from "./utils.js";
+import { POST_SYSTEM_HTTPS_SERVER, POST_SYSTEM_HTTP_SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { AUTH_SERVER } from "../auth/utils.js";
@@ -29,7 +29,7 @@ export const postSystemLogin = async (
   cookieStore = new CookieStore(),
 ): Promise<PostSystemLoginResult> => {
   const result = await authLogin(options, {
-    service: `${POST_HTTP_SERVER}/`,
+    service: `${POST_SYSTEM_HTTP_SERVER}/`,
     cookieStore,
   });
 
@@ -78,14 +78,14 @@ export const postSystemLogin = async (
     };
 
   if (
-    finalLocation?.startsWith(POST_HTTP_SERVER) ||
-    finalLocation?.startsWith(POST_HTTPS_SERVER)
+    finalLocation?.startsWith(POST_SYSTEM_HTTP_SERVER) ||
+    finalLocation?.startsWith(POST_SYSTEM_HTTPS_SERVER)
   ) {
     const mainResponse = await fetch(finalLocation, {
       method: "GET",
       headers: {
         Cookie: cookieStore.getHeader(finalLocation),
-        Referer: `${POST_HTTPS_SERVER}/`,
+        Referer: `${POST_SYSTEM_HTTPS_SERVER}/`,
         "User-Agent": IE_8_USER_AGENT,
       },
       redirect: "manual",
@@ -94,17 +94,17 @@ export const postSystemLogin = async (
     const location = mainResponse.headers.get("Location");
 
     if (
-      location === `${POST_HTTP_SERVER}/framework/main.jsp` ||
-      location === `${POST_HTTPS_SERVER}/framework/main.jsp`
+      location === `${POST_SYSTEM_HTTP_SERVER}/framework/main.jsp` ||
+      location === `${POST_SYSTEM_HTTPS_SERVER}/framework/main.jsp`
     ) {
-      const ssoUrl = `${POST_HTTPS_SERVER}/Logon.do?method=logonBySSO`;
+      const ssoUrl = `${POST_SYSTEM_HTTPS_SERVER}/Logon.do?method=logonBySSO`;
 
       await fetch(ssoUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
           Cookie: cookieStore.getHeader(ssoUrl),
-          Referer: `${POST_HTTPS_SERVER}/framework/main.jsp`,
+          Referer: `${POST_SYSTEM_HTTPS_SERVER}/framework/main.jsp`,
           "User-Agent": IE_8_USER_AGENT,
         },
       });

@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { POST_HTTPS_SERVER } from "./utils.js";
+import { POST_SYSTEM_HTTPS_SERVER } from "./utils.js";
 import type {
   CommonFailedResponse,
   CookieOptions,
@@ -16,7 +16,7 @@ export const postSystemCheckHandler: RequestHandler<
 > = async (req, res) => {
   try {
     const response = await fetch(
-      `${POST_HTTPS_SERVER}/framework/userInfo_edit.jsp?winid=win6`,
+      `${POST_SYSTEM_HTTPS_SERVER}/framework/userInfo_edit.jsp?winid=win6`,
       {
         headers: {
           Cookie: req.headers.cookie ?? cookies2Header(req.body.cookies),

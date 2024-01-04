@@ -1,14 +1,14 @@
 import type { RequestHandler } from "express";
 
 import { underSystemLogin } from "./login.js";
-import { UNDER_SERVER, getTimeStamp } from "./utils.js";
+import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import type {
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import { IE_8_USER_AGENT } from "../utils/index.js";
+import { IE_8_USER_AGENT, getIETimeStamp } from "../utils/index.js";
 
 const NAME_REGEXP =
   /<td>姓&nbsp;名<\/td>\s+<td colspan="3">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/;
@@ -43,7 +43,7 @@ const PROVINCE_REGEXP =
 const CANDIDATE_TYPE_REGEXP =
   /<td>考生类别<\/td>\s+<td colspan="2">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/;
 
-export const STUDENT_ARCHIVE_QUERY_URL = `${UNDER_SERVER}/xszhxxAction.do?method=addStudentPic_xszc`;
+export const STUDENT_ARCHIVE_QUERY_URL = `${UNDER_SYSTEM_SERVER}/xszhxxAction.do?method=addStudentPic_xszc`;
 
 export interface UnderStudentInfo {
   /** 姓名 */
@@ -146,11 +146,11 @@ export const getUnderInfo = async (
   cookieHeader: string,
 ): Promise<UnderInfoResponse> => {
   const response = await fetch(
-    `${STUDENT_ARCHIVE_QUERY_URL}&tktime=${getTimeStamp()}`,
+    `${STUDENT_ARCHIVE_QUERY_URL}&tktime=${getIETimeStamp()}`,
     {
       headers: {
         Cookie: cookieHeader,
-        Referer: `${UNDER_SERVER}/framework/new_window.jsp?lianjie=&winid=win3`,
+        Referer: `${UNDER_SYSTEM_SERVER}/framework/new_window.jsp?lianjie=&winid=win3`,
         "User-Agent": IE_8_USER_AGENT,
       },
     },
