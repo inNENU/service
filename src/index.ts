@@ -223,6 +223,9 @@ app.get("/test", (req, res) => {
   res.end({
     success: true,
     msg: "test",
+    headers: req.headers,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    body: req.body,
   });
 });
 
@@ -235,6 +238,9 @@ app.post("/test", (req, res) => {
   res.end({
     success: true,
     msg: "test",
+    headers: req.headers,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    body: req.body,
   });
 });
 
