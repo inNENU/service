@@ -70,6 +70,12 @@ import {
   selectLoginHandler,
   studentAmountHandler,
 } from "./select/index.js";
+import {
+  test301Handler,
+  test302Handler,
+  testGetHandler,
+  testPostHandler,
+} from "./test/index.js";
 import type { CommonFailedResponse } from "./typings.js";
 import {
   underNewGradeListHandler,
@@ -214,43 +220,10 @@ app.get("/library/people", libraryPeopleHandler);
 app.get("/qrcode", mpQrCodeHandler);
 app.get("/weather", weatherHandler);
 
-app.get("/test", (req, res) => {
-  console.log(req.headers);
-  console.log(req.query);
-  console.log(req.path);
-  console.log(req.body);
-
-  res.cookie("a", "1");
-  res.cookie("b", "2");
-  res.json({
-    success: true,
-    msg: "test",
-    headers: req.headers,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    body: req.body,
-    path: req.path,
-    query: req.query,
-  });
-});
-
-app.post("/test", (req, res) => {
-  console.log(req.headers);
-  console.log(req.query);
-  console.log(req.path);
-  console.log(req.body);
-
-  res.cookie("a", "1");
-  res.cookie("b", "2");
-  res.json({
-    success: true,
-    msg: "test",
-    headers: req.headers,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    body: req.body,
-    path: req.path,
-    query: req.query,
-  });
-});
+app.get("/test/get", testGetHandler);
+app.post("/test/post", testPostHandler);
+app.post("/test/301", test301Handler);
+app.post("/test/302", test302Handler);
 
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
