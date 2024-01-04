@@ -222,7 +222,7 @@ app.get("/test", (req, res) => {
 
   res.cookie("a", "1");
   res.cookie("b", "2");
-  res.end({
+  res.json({
     success: true,
     msg: "test",
     headers: req.headers,
@@ -241,7 +241,7 @@ app.post("/test", (req, res) => {
 
   res.cookie("a", "1");
   res.cookie("b", "2");
-  res.end({
+  res.json({
     success: true,
     msg: "test",
     headers: req.headers,
