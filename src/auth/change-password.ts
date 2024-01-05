@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { authEncrypt, saltRegExp } from "./auth-encrypt.js";
+import { SALT_REGEXP, authEncrypt } from "./auth-encrypt.js";
 import { authLogin } from "./login.js";
 import { AUTH_SERVER } from "./utils.js";
 import type {
@@ -95,7 +95,7 @@ export const changePasswordHandler: RequestHandler<
       );
 
       const passwordPageContent = await passwordChangePageResponse.text();
-      const salt = saltRegExp.exec(passwordPageContent)![1];
+      const salt = SALT_REGEXP.exec(passwordPageContent)![1];
 
       const recaptchaResponse = await fetch(
         `${AUTH_SERVER}/authserver/captcha.html?ts=${new Date().getMilliseconds()}`,

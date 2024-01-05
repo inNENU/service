@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { authEncrypt, saltRegExp } from "./auth-encrypt.js";
+import { SALT_REGEXP, authEncrypt } from "./auth-encrypt.js";
 import { AUTH_SERVER } from "./utils.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type { MyInfo } from "../my/index.js";
@@ -68,7 +68,7 @@ export const getAuthInit = async (
 
   const content = await loginPageResponse.text();
 
-  const salt = saltRegExp.exec(content)![1];
+  const salt = SALT_REGEXP.exec(content)![1];
   const lt = content.match(/name="lt" value="(.*?)"/)![1];
   const dllt = content.match(/name="dllt" value="(.*?)"/)![1];
   const execution = content.match(/name="execution" value="(.*?)"/)![1];

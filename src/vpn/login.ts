@@ -12,7 +12,7 @@ import type {
 } from "../typings.js";
 import { CookieStore } from "../utils/index.js";
 
-const authenticityTokenRegExp =
+const AUTHENTICITY_TOKEN_REGEXP =
   /<input\s+type="hidden"\s+name="authenticity_token" value="(.*?)" \/>/;
 
 const LOGIN_URL = `${VPN_SERVER}/users/sign_in`;
@@ -51,7 +51,9 @@ export const vpnCASLogin = async (
       { id, password },
       {
         cookieStore,
-        service: `${VPN_SERVER}/users/auth/cas/callback?url=https%3A%2F%2Fwebvpn.nenu.edu.cn%2Fusers%2Fsign_in`,
+        service: `${VPN_SERVER}/users/auth/cas/callback?url=${encodeURIComponent(
+          `${VPN_SERVER}/users/sign_in`,
+        )}`,
       },
     );
 
@@ -80,7 +82,7 @@ export const vpnCASLogin = async (
         return {
           success: false,
           type: LoginFailType.AccountLocked,
-          msg: "短时间内失败登录过多，请 10 分钟后重试",
+          msg: "短时间内登录失败过多，账户已锁定。请 10 分钟后重试",
         };
 
       if (location === UPDATE_KEY_URL) {
@@ -124,7 +126,7 @@ export const vpnLogin = async (
 
   const content = await loginPageResponse.text();
 
-  const authenticityToken = authenticityTokenRegExp.exec(content)![1];
+  const authenticityToken = AUTHENTICITY_TOKEN_REGEXP.exec(content)![1];
 
   const params = new URLSearchParams({
     utf8: "✓",

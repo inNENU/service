@@ -6,7 +6,7 @@ import type { EmptyObject } from "../typings.js";
 const DICT = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678";
 const DICT_LENGTH = DICT.length;
 
-export const saltRegExp = /var pwdDefaultEncryptSalt = "(.*)";/;
+export const SALT_REGEXP = /var pwdDefaultEncryptSalt = "(.*)";/;
 
 const getRandomString = (length: number): string =>
   Array(length)
