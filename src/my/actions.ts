@@ -184,7 +184,7 @@ export const queryMyActions = async <T extends Record<string, unknown>>(
       end_status: "",
       proc_key: key,
       _search: "false",
-      nd: new Date().getTime().toString(),
+      nd: Date.now().toString(),
       limit: "100",
       page: "1",
       sidx: "CREATE_TIME_",

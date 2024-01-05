@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
-import { SALT_REGEXP, authEncrypt } from "./auth-encrypt.js";
-import { AUTH_SERVER, WEB_VPN_AUTH_SERVER } from "./utils.js";
+import { authEncrypt } from "./auth-encrypt.js";
+import { AUTH_SERVER, SALT_REGEXP, WEB_VPN_AUTH_SERVER } from "./utils.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
   CommonFailedResponse,

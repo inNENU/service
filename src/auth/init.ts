@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
-import { SALT_REGEXP, authEncrypt } from "./auth-encrypt.js";
-import { AUTH_SERVER } from "./utils.js";
+import { authEncrypt } from "./auth-encrypt.js";
+import { AUTH_SERVER, SALT_REGEXP } from "./utils.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type { MyInfo } from "../my/index.js";
 import { getMyInfo, myLogin } from "../my/index.js";
@@ -42,7 +42,7 @@ const getCaptcha = async (cookieStore: CookieStore): Promise<string> => {
       headers: {
         Cookie: cookieStore.getHeader(AUTH_SERVER),
         ...COMMON_HEADERS,
-        Referer: `${AUTH_SERVER}/authserver/login`,
+        Referer: LOGIN_URL,
       },
     },
   );
@@ -58,9 +58,7 @@ export const getAuthInit = async (
   id: string,
   cookieStore = new CookieStore(),
 ): Promise<AuthInitInfo> => {
-  const url = `${AUTH_SERVER}/authserver/login`;
-
-  const loginPageResponse = await fetch(url, {
+  const loginPageResponse = await fetch(LOGIN_URL, {
     headers: { ...COMMON_HEADERS, Cookie: cookieStore.getHeader(AUTH_SERVER) },
   });
 
@@ -87,7 +85,7 @@ export const getAuthInit = async (
       headers: {
         Cookie: cookieStore.getHeader(AUTH_SERVER),
         ...COMMON_HEADERS,
-        Referer: `${AUTH_SERVER}/authserver/login`,
+        Referer: LOGIN_URL,
       },
     },
   );
@@ -209,7 +207,7 @@ export const authInit = async (
   }
 
   if (loginResponse.status === 302) {
-    if (location === `${AUTH_SERVER}/authserver/login`)
+    if (location === LOGIN_URL)
       return {
         success: false,
         type: LoginFailType.WrongPassword,

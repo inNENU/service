@@ -1,12 +1,12 @@
-import CryptoJS from "crypto-js";
+import AES from "crypto-js/aes";
+import Utf8 from "crypto-js/enc-utf8";
+import Pkcs7 from "crypto-js/pad-pkcs7";
 import type { RequestHandler } from "express";
 
 import type { EmptyObject } from "../typings.js";
 
 const DICT = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678";
 const DICT_LENGTH = DICT.length;
-
-export const SALT_REGEXP = /var pwdDefaultEncryptSalt = "(.*)";/;
 
 const getRandomString = (length: number): string =>
   Array(length)
@@ -16,13 +16,12 @@ const getRandomString = (length: number): string =>
 
 export const authEncrypt = (password: string, key: string): string => {
   const CONTENT = getRandomString(64) + password;
-  const SECRET_KEY = CryptoJS.enc.Utf8.parse(key);
-  const SECRET_IV = CryptoJS.enc.Utf8.parse(getRandomString(16));
+  const SECRET_KEY = Utf8.parse(key);
+  const SECRET_IV = Utf8.parse(getRandomString(16));
 
-  return CryptoJS.AES.encrypt(CONTENT, SECRET_KEY, {
+  return AES.encrypt(CONTENT, SECRET_KEY, {
     iv: SECRET_IV,
-    mode: CryptoJS.mode.CBC,
-    padding: CryptoJS.pad.Pkcs7,
+    padding: Pkcs7,
   }).toString();
 };
 

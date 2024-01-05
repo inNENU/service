@@ -20,7 +20,7 @@ export class Cookie {
     this.httpOnly = Boolean(cookie.httpOnly);
     this.expires = Number.isInteger(cookie.maxAge)
       ? cookie.maxAge! > 0
-        ? new Date(new Date().getTime() + cookie.maxAge! * 1000)
+        ? new Date(Date.now() + cookie.maxAge! * 1000)
         : "outdate"
       : cookie.expires
         ? new Date(cookie.expires)

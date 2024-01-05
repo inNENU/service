@@ -28,9 +28,7 @@ const getCaptcha = async (): Promise<ResetPasswordCaptchaResult> => {
 
   cookieStore.applyResponse(pageResponse, RESET_PASSWORD_PAGE_URL);
 
-  const captchaResponse = await fetch(
-    `${CAPTCHA_URL}?ts=${new Date().getMilliseconds()}`,
-  );
+  const captchaResponse = await fetch(`${CAPTCHA_URL}?ts=${Date.now()}`);
 
   const base64Image = `data:image/jpeg;base64,${Buffer.from(
     await captchaResponse.arrayBuffer(),

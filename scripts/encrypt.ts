@@ -37,7 +37,7 @@ export default [
         compilerOptions: {
           preserveSymlinks: false,
         },
-        respectExternal: true,
+        respectExternal: false,
       }),
     ],
   },

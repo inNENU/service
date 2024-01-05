@@ -112,7 +112,7 @@ export const noticeListHandler: RequestHandler<
       body: new URLSearchParams({
         type,
         _search: "false",
-        nd: new Date().getTime().toString(),
+        nd: Date.now().toString(),
         limit: limit.toString(),
         page: page.toString(),
       }),
