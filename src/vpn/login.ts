@@ -215,15 +215,24 @@ export const vpnCASLoginHandler: RequestHandler<
   try {
     const { id, password } = req.body;
 
-    const data = await vpnCASLogin({ id, password });
+    const result = await vpnCASLogin({ id, password });
 
-    if (data.success)
-      return res.json(<VPNLoginSuccessResponse>{
-        success: true,
-        cookies: data.cookieStore.getAllCookies().map((item) => item.toJSON()),
+    if (result.success) {
+      const cookies = result.cookieStore
+        .getAllCookies()
+        .map((item) => item.toJSON());
+
+      cookies.forEach(({ name, value, ...rest }) => {
+        res.cookie(name, value, rest);
       });
 
-    return res.json(data);
+      return res.json(<VPNLoginSuccessResponse>{
+        success: true,
+        cookies,
+      });
+    }
+
+    return res.json(result);
   } catch (err) {
     const { message } = <Error>err;
 

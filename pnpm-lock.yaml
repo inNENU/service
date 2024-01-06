@@ -15,11 +15,11 @@ dependencies:
     specifier: 0.4.7
     version: 0.4.7
   '@mptool/net':
-    specifier: 0.6.0-beta.14
-    version: 0.6.0-beta.14(miniprogram-api-typings@3.12.2)
+    specifier: 0.6.0-beta.16
+    version: 0.6.0-beta.16(miniprogram-api-typings@3.12.2)
   '@mptool/parser':
-    specifier: 0.6.0-beta.14
-    version: 0.6.0-beta.14(miniprogram-api-typings@3.12.2)
+    specifier: 0.6.0-beta.16
+    version: 0.6.0-beta.16(miniprogram-api-typings@3.12.2)
   '@types/body-parser':
     specifier: 1.19.5
     version: 1.19.5
@@ -530,27 +530,27 @@ packages:
     resolution: {integrity: sha512-eF2rxCRulEKXHTRiDrDy6erMYWqNw4LPdQ8UQA4huuxaQsVeRPFl2oM8oDGxMFhJUWZf9McpLtJasDDZb/Bpeg==}
     dev: true
 
-  /@mptool/net@0.6.0-beta.14(miniprogram-api-typings@3.12.2):
-    resolution: {integrity: sha512-LpUqy9uV98JnSlf+4abiZ4Xsls1oJ8e3d68Xkiqjnz0vGr4gnQcwfFB6qBPBo7U+JMWeLvVTtWoBBdqm146Fvg==}
+  /@mptool/net@0.6.0-beta.16(miniprogram-api-typings@3.12.2):
+    resolution: {integrity: sha512-0aoz+HVDQrKx84HW3kmVX6zKKTcKpvyjRDnFpa1N0KJr+6mUvwbCzLvFTCpMxtIbVLVLzGZ6TkALDEB+TgTvVA==}
     peerDependencies:
       miniprogram-api-typings: ^3.12.0
     dependencies:
-      '@mptool/shared': 0.6.0-beta.14(miniprogram-api-typings@3.12.2)
+      '@mptool/shared': 0.6.0-beta.16(miniprogram-api-typings@3.12.2)
       miniprogram-api-typings: 3.12.2
     dev: false
 
-  /@mptool/parser@0.6.0-beta.14(miniprogram-api-typings@3.12.2):
-    resolution: {integrity: sha512-R/mU3xzUgN3mCigm8ct7ZgGZ7acNwghgQNusTMox0MaIuMNfThf01rmxnChuCl17K77Bqms1Va2WCdsV87L08Q==}
+  /@mptool/parser@0.6.0-beta.16(miniprogram-api-typings@3.12.2):
+    resolution: {integrity: sha512-7ohsW1mXOU8C7B38F6kV7ecG/0hgPXMi7O32trBASeo9R/6Y/igmk/mSQul42v3Hm/ha3hYs+kvXN3OBxKHf+A==}
     peerDependencies:
       miniprogram-api-typings: ^3.12.0
     dependencies:
-      '@mptool/shared': 0.6.0-beta.14(miniprogram-api-typings@3.12.2)
+      '@mptool/shared': 0.6.0-beta.16(miniprogram-api-typings@3.12.2)
       cheerio: 1.0.0-rc.12
       miniprogram-api-typings: 3.12.2
     dev: false
 
-  /@mptool/shared@0.6.0-beta.14(miniprogram-api-typings@3.12.2):
-    resolution: {integrity: sha512-rAr9wNNUL/ksTsZ+gjXThK0fH+h/1sNqevOTWXLzpk7MMffaKB5eZUXyzcxWCsjxmKUfIE65Zc1VSMKMiLcawA==}
+  /@mptool/shared@0.6.0-beta.16(miniprogram-api-typings@3.12.2):
+    resolution: {integrity: sha512-T3ND/9Iy6igCL8InkwnWMTYvGp/ueqTtNdA7qSYCXk+DxnmVwJ+yrqH5drIFt4aMigS2lV7w3Jkvb1gXtS753A==}
     peerDependencies:
       miniprogram-api-typings: ^3.12.0
     dependencies:

@@ -19,8 +19,8 @@
   "dependencies": {
     "@alicloud/alinlp20200629": "2.1.0",
     "@alicloud/openapi-client": "0.4.7",
-    "@mptool/net": "0.6.0-beta.14",
-    "@mptool/parser": "0.6.0-beta.14",
+    "@mptool/net": "0.6.0-beta.16",
+    "@mptool/parser": "0.6.0-beta.16",
     "@types/body-parser": "1.19.5",
     "@types/compression": "1.7.5",
     "@types/cookie-parser": "1.4.6",
