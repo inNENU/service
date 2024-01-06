@@ -54,7 +54,7 @@ const getCaptcha = async (cookieStore: CookieStore): Promise<string> => {
   return `data:image/png;base64,${Buffer.from(captcha).toString("base64")}`;
 };
 
-export const getAuthInit = async (
+export const authInitInfo = async (
   id: string,
   cookieStore = new CookieStore(),
 ): Promise<AuthInitInfo> => {
@@ -135,7 +135,7 @@ export interface AuthInitFailedResponse extends CommonFailedResponse {
 
 export type AuthInitResult = AuthInitSuccessResult | AuthInitFailedResponse;
 
-export const authInit = async (
+export const initAuth = async (
   { password, salt, captcha, params }: AuthInitOptions,
   cookieHeader: string,
 ): Promise<AuthInitResult> => {
@@ -250,7 +250,7 @@ export const authInitHandler: RequestHandler<
 > = async (req, res) => {
   try {
     if (req.method === "GET") {
-      const result = await getAuthInit(req.query.id);
+      const result = await authInitInfo(req.query.id);
 
       if (result.success) {
         const cookies = result.cookieStore
@@ -275,7 +275,7 @@ export const authInitHandler: RequestHandler<
 
     const { id, password } = req.body;
 
-    const result = await authInit(req.body, req.headers.cookie!);
+    const result = await initAuth(req.body, req.headers.cookie!);
 
     if (result.success) {
       let info: MyInfo | null = null;
