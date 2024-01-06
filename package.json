@@ -1,6 +1,6 @@
 {
   "name": "service",
-  "version": "2024.1.1",
+  "version": "2024.1.6",
   "private": true,
   "type": "module",
   "scripts": {
@@ -13,13 +13,9 @@
     "lint:check": "prettier --check . && eslint . --ext .ts",
     "prepare": "husky install"
   },
-  "engines": {
-    "node": ">= 20"
-  },
-  "packageManager": "pnpm@8.14.0",
   "nano-staged": {
-    "*.{js,ts}": "eslint --fix",
-    "*.{js,ts,json,yaml,yml,md}": "prettier --write"
+    "**/*": "prettier --write --ignore-unknown",
+    "*.ts": "eslint --fix"
   },
   "dependencies": {
     "@alicloud/alinlp20200629": "2.1.0",
@@ -66,5 +62,9 @@
     "rollup-plugin-esbuild": "6.1.0",
     "tsx": "4.7.0",
     "typescript": "5.3.3"
+  },
+  "packageManager": "pnpm@8.14.0",
+  "engines": {
+    "node": ">= 20"
   }
 }

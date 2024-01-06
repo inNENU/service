@@ -189,7 +189,7 @@ export const authLogin = async (
           success: false,
           type: LoginFailType.NeedCaptcha,
           // TODO: Update
-          msg: "需要验证码，无法自动登录。请访问学校统一身份认证官网手动登录，成功登录后后即可继续自动登录。",
+          msg: "登录需要验证码，请重新登陆。",
         };
 
       if (resultContent.includes("不允许使用认证服务来认证您访问的目标应用。"))

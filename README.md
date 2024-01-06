@@ -1,8 +1,8 @@
-# in 东师服务
+# inNENU服务
 
-这里是 in 东师服务源代码。
+这里是 inNENU服务源代码。
 
-in 东师部署在 <https://service.innenu.com>，你可以直接访问来检查服务状态。
+inNENU部署在 <https://service.innenu.com>，你可以直接访问来检查服务状态。
 
 ## 声明
 

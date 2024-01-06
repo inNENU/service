@@ -126,11 +126,11 @@ app.get("/", (_req, res) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>in东师服务</title>
+  <title>inNENU 服务</title>
 </head>
 <body>
   当前版本: ${pkg.version}
-  <h1><a href="https://innenu.com">访问网页版 in东师</a></h1>
+  <h1><a href="https://innenu.com">访问网页版 inNENU</a></h1>
 </body>
 </html>\
 `);
