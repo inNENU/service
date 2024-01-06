@@ -31,7 +31,7 @@ export const postSystemCheckHandler: RequestHandler<
 
       if (
         text.includes("您登录后过长时间没有操作或您的用户名已经在别处登录！") ||
-        text.startsWith("<script languge='javascript'>")
+        text.startsWith("<script")
       )
         return res.json(<CookieVerifySuccessResponse>{
           success: true,

@@ -239,7 +239,7 @@ export const postGradeListHandler: RequestHandler<
 
     const content = await response.text();
 
-    if (content.startsWith("<script languge='javascript'>"))
+    if (content.startsWith("<script"))
       return res.json(<AuthLoginFailedResult>{
         success: false,
         msg: "登录已过期，请重新登录",
