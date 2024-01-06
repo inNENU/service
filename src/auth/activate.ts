@@ -1,8 +1,9 @@
+import type { RichTextNode } from "@mptool/parser";
+import { getRichTextNodes } from "@mptool/parser";
 import type { RequestHandler } from "express";
 
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
-import type { RichTextNode } from "../utils/index.js";
-import { CookieStore, getRichTextNodes } from "../utils/index.js";
+import { CookieStore } from "../utils/index.js";
 
 const ACTIVATE_SERVER = "https://activate.nenu.edu.cn";
 

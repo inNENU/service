@@ -1,10 +1,10 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 
+import type { RichTextNode } from "@mptool/parser";
+import { getRichTextNodes } from "@mptool/parser";
 import type { RequestHandler } from "express";
 
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
-import type { RichTextNode } from "../utils/index.js";
-import { getRichTextNodes } from "../utils/index.js";
 
 const POST_RECOMMEND_PLAN_URL =
   "https://math127.nenu.edu.cn/yjsy/HData/ZSB/ZSJZ2024-TM-1.html";

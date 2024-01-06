@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
 import { authEncrypt } from "./auth-encrypt.js";
-import { AUTH_SERVER, SALT_REGEXP } from "./utils.js";
+import { AUTH_DOMAIN, AUTH_SERVER, SALT_REGEXP } from "./utils.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type { MyInfo } from "../my/index.js";
 import { getMyInfo, myLogin } from "../my/index.js";
@@ -11,12 +11,7 @@ import type {
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import {
-  BLACKLIST_HINT,
-  CookieStore,
-  getDomain,
-  isInBlackList,
-} from "../utils/index.js";
+import { BLACKLIST_HINT, CookieStore, isInBlackList } from "../utils/index.js";
 import { vpnLogin } from "../vpn/login.js";
 
 const COMMON_HEADERS = {
@@ -25,15 +20,6 @@ const COMMON_HEADERS = {
   "User-Agent": "inNENU",
 };
 const LOGIN_URL = `${AUTH_SERVER}/authserver/login`;
-
-export interface AuthInitInfo {
-  success: true;
-  needCaptcha: boolean;
-  cookieStore: CookieStore;
-  captcha: string;
-  params: Record<string, string>;
-  salt: string;
-}
 
 const getCaptcha = async (cookieStore: CookieStore): Promise<string> => {
   const captchaResponse = await fetch(
@@ -54,10 +40,23 @@ const getCaptcha = async (cookieStore: CookieStore): Promise<string> => {
   return `data:image/png;base64,${Buffer.from(captcha).toString("base64")}`;
 };
 
+export interface AuthInitInfoSuccessResult {
+  success: true;
+  needCaptcha: boolean;
+  cookieStore: CookieStore;
+  captcha: string;
+  params: Record<string, string>;
+  salt: string;
+}
+
+export type AuthInitInfoResult =
+  | AuthInitInfoSuccessResult
+  | CommonFailedResponse;
+
 export const authInitInfo = async (
   id: string,
   cookieStore = new CookieStore(),
-): Promise<AuthInitInfo> => {
+): Promise<AuthInitInfoResult> => {
   const loginPageResponse = await fetch(LOGIN_URL, {
     headers: { ...COMMON_HEADERS, Cookie: cookieStore.getHeader(AUTH_SERVER) },
   });
@@ -76,7 +75,7 @@ export const authInitInfo = async (
   cookieStore.set({
     name: "org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE",
     value: "zh_CN",
-    domain: getDomain(AUTH_SERVER),
+    domain: AUTH_DOMAIN,
   });
 
   const captchaCheckResponse = await fetch(
@@ -96,49 +95,48 @@ export const authInitInfo = async (
 
   console.log("Need captcha:", needCaptcha);
 
-  const params = {
-    username: id.toString(),
-    lt,
-    dllt,
-    execution,
-    _eventId,
-    rmShown,
-    rememberMe: "on",
-  };
-
   const captcha = needCaptcha ? await getCaptcha(cookieStore) : null;
 
-  return <AuthInitInfo>{
+  return <AuthInitInfoSuccessResult>{
     success: true,
     needCaptcha,
     captcha,
     cookieStore,
     salt,
-    params,
+    params: {
+      username: id.toString(),
+      lt,
+      dllt,
+      execution,
+      _eventId,
+      rmShown,
+      rememberMe: "on",
+    },
   };
 };
 
-export interface AuthInitOptions extends LoginOptions {
+export interface InitAuthOptions extends LoginOptions {
   params: Record<string, string>;
   salt: string;
   captcha: string;
   openid: string;
 }
 
-export interface AuthInitSuccessResult {
+export interface InitAuthSuccessResult {
   success: true;
+  info: MyInfo | null;
 }
 
-export interface AuthInitFailedResponse extends CommonFailedResponse {
+export interface InitAuthFailedResponse extends CommonFailedResponse {
   type: LoginFailType;
 }
 
-export type AuthInitResult = AuthInitSuccessResult | AuthInitFailedResponse;
+export type InitAuthResult = InitAuthSuccessResult | InitAuthFailedResponse;
 
 export const initAuth = async (
-  { password, salt, captcha, params }: AuthInitOptions,
+  { id, password, salt, captcha, params, openid }: InitAuthOptions,
   cookieHeader: string,
-): Promise<AuthInitResult> => {
+): Promise<InitAuthResult> => {
   const loginResponse = await fetch(LOGIN_URL, {
     method: "POST",
     headers: {
@@ -214,8 +212,39 @@ export const initAuth = async (
         msg: "用户名或密码错误",
       };
 
+    let info: MyInfo | null = null;
+
+    let loginResult = await myLogin({ id, password });
+
+    if ("type" in loginResult && loginResult.type === LoginFailType.Forbidden) {
+      // Activate VPN by login
+      const vpnLoginResult = await vpnLogin({ id, password });
+
+      if (vpnLoginResult.success) loginResult = await myLogin({ id, password });
+      else console.error("VPN login failed", vpnLoginResult);
+    }
+
+    // 获得信息
+    if (loginResult.success) {
+      const studentInfo = await getMyInfo(
+        loginResult.cookieStore.getHeader(MY_SERVER),
+      );
+
+      if (studentInfo.success) info = studentInfo.data;
+
+      console.log(`${id} 登录信息:\n`, JSON.stringify(info, null, 2));
+    }
+
+    if (isInBlackList(id, openid, info))
+      return {
+        success: false,
+        type: LoginFailType.BlackList,
+        msg: BLACKLIST_HINT[Math.floor(Math.random() * BLACKLIST_HINT.length)],
+      };
+
     return {
       success: true,
+      info,
     };
   }
 
@@ -228,7 +257,7 @@ export const initAuth = async (
   };
 };
 
-export interface AuthInitInfoResponse {
+export interface AuthInitInfoSuccessResponse {
   success: true;
   needCaptcha: boolean;
   captcha: string;
@@ -236,16 +265,16 @@ export interface AuthInitInfoResponse {
   salt: string;
 }
 
-export interface AuthInitResponse {
-  success: true;
+export type AuthInitFailedResponse = CommonFailedResponse;
 
-  info: MyInfo | null;
-}
+export type AuthInitInfoResponse =
+  | AuthInitInfoSuccessResponse
+  | AuthInitFailedResponse;
 
 export const authInitHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  AuthInitOptions,
+  InitAuthOptions,
   { id: string }
 > = async (req, res) => {
   try {
@@ -273,54 +302,7 @@ export const authInitHandler: RequestHandler<
       return res.json(result);
     }
 
-    const { id, password } = req.body;
-
-    const result = await initAuth(req.body, req.headers.cookie!);
-
-    if (result.success) {
-      let info: MyInfo | null = null;
-
-      let loginResult = await myLogin({ id, password });
-
-      if (
-        "type" in loginResult &&
-        loginResult.type === LoginFailType.Forbidden
-      ) {
-        // Activate VPN by login
-        const vpnLoginResult = await vpnLogin(req.body);
-
-        if (vpnLoginResult.success)
-          loginResult = await myLogin({ id, password });
-        else console.error("VPN login failed", vpnLoginResult);
-      }
-
-      // 获得信息
-      if (loginResult.success) {
-        const studentInfo = await getMyInfo(
-          loginResult.cookieStore.getHeader(MY_SERVER),
-        );
-
-        if (studentInfo.success) info = studentInfo.data;
-
-        console.log(`${id} 登录信息:\n`, JSON.stringify(info, null, 2));
-      }
-
-      if (isInBlackList(req.body.id, req.body.openid, info))
-        return res.json({
-          success: false,
-          type: LoginFailType.BlackList,
-          msg: BLACKLIST_HINT[
-            Math.floor(Math.random() * BLACKLIST_HINT.length)
-          ],
-        });
-
-      return res.json(<AuthInitResponse>{
-        success: true,
-        info,
-      });
-    }
-
-    return res.json(result);
+    return res.json(await initAuth(req.body, req.headers.cookie!));
   } catch (err) {
     const { message } = <Error>err;
 

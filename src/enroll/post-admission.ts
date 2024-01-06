@@ -1,7 +1,7 @@
+import { CookieStore } from "@mptool/net";
 import type { RequestHandler } from "express";
 
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
-import { CookieStore } from "../utils/index.js";
 
 export interface PostAdmissionPostOptions {
   name: string;

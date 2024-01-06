@@ -1,10 +1,10 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 
+import type { RichTextNode } from "@mptool/parser";
+import { getRichTextNodes } from "@mptool/parser";
 import type { RequestHandler } from "express";
 
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
-import type { RichTextNode } from "../utils/index.js";
-import { getRichTextNodes } from "../utils/index.js";
 
 const POST_ENROLL_PLAN_URL = "https://yzb.nenu.edu.cn/tmp/2024ssml.html";
 const schoolInfoRegExp =

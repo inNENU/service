@@ -5,7 +5,7 @@ import esbuild from "rollup-plugin-esbuild";
 
 export default [
   {
-    input: "./src/module/encrypt.ts",
+    input: "./lib/encrypt.js",
     output: [
       {
         file: "./dist/encrypt.js",

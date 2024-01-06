@@ -1,9 +1,9 @@
+import type { RichTextNode } from "@mptool/parser";
+import { getRichTextNodes } from "@mptool/parser";
 import type { RequestHandler } from "express";
 
 import { MAIN_URL, getPageView } from "./utils.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
-import type { RichTextNode } from "../utils/index.js";
-import { getRichTextNodes } from "../utils/index.js";
 
 const infoRegExp =
   /<div class="ar_tit">\s*<h3>([^>]+)<\/h3>\s*<h6>([\s\S]+?)<\/h6>/;
@@ -61,18 +61,24 @@ export const academicInfoHandler: RequestHandler<
       time,
       pageView,
       content: await getRichTextNodes(content, {
-        getClass: (tag, className) =>
-          tag === "img"
-            ? className
-              ? `img ${className}`
-              : "img"
-            : className ?? null,
-        getImageSrc: (src) =>
-          src.includes("/fileTypeImages/")
-            ? null
-            : src.startsWith("/")
-              ? `${MAIN_URL}${src}`
-              : src,
+        transform: {
+          img: (node) => {
+            const src = node.attrs?.src;
+
+            if (src) {
+              if (src.includes("/fileTypeImages/")) return null;
+
+              if (src.startsWith("/")) node.attrs!.src = `${MAIN_URL}${src}`;
+            }
+
+            return node;
+          },
+          td: (node) => {
+            delete node.attrs?.style;
+
+            return node;
+          },
+        },
       }),
     });
   } catch (err) {

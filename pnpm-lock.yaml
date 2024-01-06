@@ -11,6 +11,12 @@ dependencies:
   '@alicloud/openapi-client':
     specifier: 0.4.7
     version: 0.4.7
+  '@mptool/net':
+    specifier: 0.6.0-beta.14
+    version: 0.6.0-beta.14(miniprogram-api-typings@3.12.2)
+  '@mptool/parser':
+    specifier: 0.6.0-beta.14
+    version: 0.6.0-beta.14(miniprogram-api-typings@3.12.2)
   '@types/body-parser':
     specifier: 1.19.5
     version: 1.19.5
@@ -35,9 +41,6 @@ dependencies:
   '@types/qrcode':
     specifier: 1.5.5
     version: 1.5.5
-  '@types/set-cookie-parser':
-    specifier: 2.4.7
-    version: 2.4.7
   body-parser:
     specifier: 1.20.2
     version: 1.20.2
@@ -71,9 +74,6 @@ dependencies:
   qrcode:
     specifier: 1.5.3
     version: 1.5.3
-  set-cookie-parser:
-    specifier: 2.6.0
-    version: 2.6.0
 
 devDependencies:
   '@rollup/plugin-commonjs':
@@ -527,6 +527,33 @@ packages:
     resolution: {integrity: sha512-eF2rxCRulEKXHTRiDrDy6erMYWqNw4LPdQ8UQA4huuxaQsVeRPFl2oM8oDGxMFhJUWZf9McpLtJasDDZb/Bpeg==}
     dev: true
 
+  /@mptool/net@0.6.0-beta.14(miniprogram-api-typings@3.12.2):
+    resolution: {integrity: sha512-LpUqy9uV98JnSlf+4abiZ4Xsls1oJ8e3d68Xkiqjnz0vGr4gnQcwfFB6qBPBo7U+JMWeLvVTtWoBBdqm146Fvg==}
+    peerDependencies:
+      miniprogram-api-typings: ^3.12.0
+    dependencies:
+      '@mptool/shared': 0.6.0-beta.14(miniprogram-api-typings@3.12.2)
+      miniprogram-api-typings: 3.12.2
+    dev: false
+
+  /@mptool/parser@0.6.0-beta.14(miniprogram-api-typings@3.12.2):
+    resolution: {integrity: sha512-R/mU3xzUgN3mCigm8ct7ZgGZ7acNwghgQNusTMox0MaIuMNfThf01rmxnChuCl17K77Bqms1Va2WCdsV87L08Q==}
+    peerDependencies:
+      miniprogram-api-typings: ^3.12.0
+    dependencies:
+      '@mptool/shared': 0.6.0-beta.14(miniprogram-api-typings@3.12.2)
+      cheerio: 1.0.0-rc.12
+      miniprogram-api-typings: 3.12.2
+    dev: false
+
+  /@mptool/shared@0.6.0-beta.14(miniprogram-api-typings@3.12.2):
+    resolution: {integrity: sha512-rAr9wNNUL/ksTsZ+gjXThK0fH+h/1sNqevOTWXLzpk7MMffaKB5eZUXyzcxWCsjxmKUfIE65Zc1VSMKMiLcawA==}
+    peerDependencies:
+      miniprogram-api-typings: ^3.12.0
+    dependencies:
+      miniprogram-api-typings: 3.12.2
+    dev: false
+
   /@nodelib/fs.scandir@2.1.5:
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
     engines: {node: '>= 8'}
@@ -842,12 +869,6 @@ packages:
     dependencies:
       '@types/http-errors': 2.0.4
       '@types/mime': 3.0.4
-      '@types/node': 20.10.6
-    dev: false
-
-  /@types/set-cookie-parser@2.4.7:
-    resolution: {integrity: sha512-+ge/loa0oTozxip6zmhRIk8Z/boU51wl9Q6QdLZcokIGMzY5lFXYy/x7Htj2HTC6/KZP1hUbZ1ekx8DYXICvWg==}
-    dependencies:
       '@types/node': 20.10.6
     dev: false
 
@@ -2589,6 +2610,10 @@ packages:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
     dev: true
 
+  /miniprogram-api-typings@3.12.2:
+    resolution: {integrity: sha512-OJB2uVAfhycX4teG/zEVpoThushQqLOx946XACDpVc6OQydiJWjn7djVzvNCbv0VOA7sbHGPQp/RkXD9vMCDEw==}
+    dev: false
+
   /morgan@1.10.0:
     resolution: {integrity: sha512-AbegBVI4sh6El+1gNwvD5YIck7nSA36weD7xvIxG4in80j/UoK8AEGaWnnz8v1GxonMCltmlNs5ZKbGvl9b1XQ==}
     engines: {node: '>= 0.8.0'}
@@ -3083,10 +3108,6 @@ packages:
 
   /set-blocking@2.0.0:
     resolution: {integrity: sha512-KiKBS8AnWGEyLzofFfmvKwpdPzqiy16LvQfK3yv/fVH7Bj13/wl3JSR1J+rfgRE9q7xUJK4qvgS8raSOeLUehw==}
-    dev: false
-
-  /set-cookie-parser@2.6.0:
-    resolution: {integrity: sha512-RVnVQxTXuerk653XfuliOxBP81Sf0+qfQE73LIYKcyMYHG94AuH0kgrQpRDuTZnSmjpysHmzxJXKNfa6PjFhyQ==}
     dev: false
 
   /set-function-length@1.1.1:

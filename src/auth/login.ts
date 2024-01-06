@@ -1,7 +1,12 @@
 import type { RequestHandler } from "express";
 
 import { authEncrypt } from "./auth-encrypt.js";
-import { AUTH_SERVER, SALT_REGEXP, WEB_VPN_AUTH_SERVER } from "./utils.js";
+import {
+  AUTH_DOMAIN,
+  AUTH_SERVER,
+  SALT_REGEXP,
+  WEB_VPN_AUTH_SERVER,
+} from "./utils.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
   CommonFailedResponse,
@@ -9,12 +14,7 @@ import type {
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import {
-  BLACKLIST_HINT,
-  CookieStore,
-  getDomain,
-  isInBlackList,
-} from "../utils/index.js";
+import { BLACKLIST_HINT, CookieStore, isInBlackList } from "../utils/index.js";
 
 const COMMON_HEADERS = {
   DNT: "1",
@@ -99,7 +99,7 @@ export const authLogin = async (
     cookieStore.set({
       name: "org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE",
       value: "zh_CN",
-      domain: getDomain(server),
+      domain: AUTH_DOMAIN,
     });
 
     const captchaCheckResponse = await fetch(

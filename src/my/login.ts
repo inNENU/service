@@ -4,6 +4,7 @@ import { MY_MAIN_PAGE } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
+import { LoginFailType } from "../config/loginFailTypes.js";
 import type { CookieType, EmptyObject, LoginOptions } from "../typings.js";
 import { CookieStore } from "../utils/index.js";
 import type { VPNLoginFailedResult } from "../vpn/login.js";
@@ -12,8 +13,6 @@ import { vpnCASLogin } from "../vpn/login.js";
 export interface MyLoginSuccessResult {
   success: true;
   cookieStore: CookieStore;
-  identify: string;
-  orgCode: number;
 }
 
 export type MyLoginFailedResult = AuthLoginFailedResult | VPNLoginFailedResult;
@@ -64,7 +63,7 @@ export const myLogin = async (
   if (ticketResponse.status !== 302)
     return <AuthLoginFailedResult>{
       success: false,
-      type: "unknown",
+      type: LoginFailType.Unknown,
       msg: "登录失败",
     };
 
@@ -92,7 +91,7 @@ export const myLogin = async (
 
   return <AuthLoginFailedResult>{
     success: false,
-    type: "unknown",
+    type: LoginFailType.Unknown,
     msg: "登录失败",
   };
 };

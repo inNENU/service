@@ -1,6 +1,6 @@
-import AES from "crypto-js/aes";
-import Utf8 from "crypto-js/enc-utf8";
-import Pkcs7 from "crypto-js/pad-pkcs7";
+import AES from "crypto-js/aes.js";
+import Utf8 from "crypto-js/enc-utf8.js";
+import Pkcs7 from "crypto-js/pad-pkcs7.js";
 import type { RequestHandler } from "express";
 
 import type { EmptyObject } from "../typings.js";
