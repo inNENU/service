@@ -41,6 +41,13 @@ export const selectLogin = async (
   cookieStore = new CookieStore(),
 ): Promise<SelectLoginResult> => {
   const isUnder = id.toString()[4] === "0";
+
+  if (!isUnder)
+    return {
+      success: false,
+      msg: "暂未适配研究生选课新系统",
+    };
+
   const homePage = isUnder
     ? "http://xk.nenu.edu.cn"
     : "http://yjsxk.nenu.edu.cn/";
