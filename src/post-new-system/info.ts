@@ -121,6 +121,12 @@ export const getPostInfo = async (
 
     const content = await response.text();
 
+    if (content.includes("错误:当前时间不在本功能有效时间范围内!"))
+      return {
+        success: false,
+        msg: "功能当前暂未开放",
+      };
+
     const info = getInfo(content);
 
     return <InfoSuccessResponse>{
