@@ -53,7 +53,7 @@ export const mpLoginHandler: RequestHandler<
   } catch (err) {
     console.error(err);
 
-    res.status(500).end(<CommonFailedResponse>{
+    res.status(500).json(<CommonFailedResponse>{
       success: false,
       msg: "获取失败",
     });

@@ -68,7 +68,7 @@ export const underStudyLogin = async (
     const ssoResponse = await fetch(SSO_LOGIN_URL, {
       headers: {
         Cookie: cookieStore.getHeader(SSO_LOGIN_URL),
-        Referer: `${UNDER_STUDY_SERVER}/framework/main.jsp`,
+        Referer: UNDER_STUDY_SERVER,
         ...EDGE_USER_AGENT_HEADERS,
       },
       redirect: "manual",

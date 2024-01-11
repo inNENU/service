@@ -426,7 +426,7 @@ export const mpSearchHandler: RequestHandler<
   } catch (err) {
     console.error(err);
 
-    res.status(500).end({
+    res.status(500).json({
       success: false,
       msg: "获取失败",
     });

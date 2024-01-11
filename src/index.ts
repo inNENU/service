@@ -232,7 +232,7 @@ app.post("/test/302", test302Handler);
 app.use((err: Error, req, res: Response, _next: () => void) => {
   console.error(err.stack);
 
-  res.status(500).send(<CommonFailedResponse>{
+  res.status(500).json(<CommonFailedResponse>{
     success: false,
     msg: "我们出了问题! 请联系 Mr.Hope",
   });
