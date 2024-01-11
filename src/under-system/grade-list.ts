@@ -68,7 +68,9 @@ const QUERY_URL = `${UNDER_SYSTEM_SERVER}/xszqcjglAction.do?method=queryxscj`;
 const getDisplayTime = (time: string): string => {
   const [startYear, endYear, semester] = time.split("-");
 
-  return semester === "1" ? `${startYear}年秋季学期` : `${endYear}年春季学期`;
+  return semester === "1"
+    ? `${startYear.substring(2)}年秋`
+    : `${endYear.substring(2)}年春`;
 };
 
 export interface ScoreDetail {
