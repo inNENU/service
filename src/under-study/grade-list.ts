@@ -167,7 +167,7 @@ const getGradeLists = (
       cjdm,
       kcptbh,
     }) => ({
-      time: xnxqmc,
+      time: xnxqmc.replace(/^20/, "").replace(/季学期$/, ""),
       cid: kcptbh,
       name: kcmc,
       grade: zcjfs,
