@@ -1,8 +1,9 @@
 import type { RequestHandler } from "express";
 
-import { underNewSystemLogin } from "./login.js";
-import { SERVER } from "./utils.js";
+import { underStudyLogin } from "./login.js";
+import { UNDER_STUDY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
+import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
   CommonFailedResponse,
   EmptyObject,
@@ -24,7 +25,7 @@ export interface GradeDetail {
   exam: ScoreDetail | null;
 }
 
-export interface RawUnderGradeResultItem {
+interface RawUnderGradeResultItem {
   /** 上课时间 */
   xnxqmc: string;
   /** 课程名称 */
@@ -93,13 +94,23 @@ export interface RawUnderGradeResultItem {
   wzcbz: "";
 }
 
-export interface RawUnderGradeResult {
+interface RawUnderGradeSuccessResult {
   data: "";
   rows: RawUnderGradeResultItem[];
   total: number;
 }
 
-export interface UnderNewGradeResult {
+interface RawUnderGradeFailedResult {
+  code: number;
+  data: string;
+  message: string;
+}
+
+type RawUnderGradeResult =
+  | RawUnderGradeSuccessResult
+  | RawUnderGradeFailedResult;
+
+export interface UnderStudyGradeResult {
   /** 修读时间 */
   time: string;
   /** 课程 id */
@@ -127,7 +138,7 @@ export interface UnderNewGradeResult {
 
 export interface UnderGradeListSuccessResponse {
   success: true;
-  data: UnderNewGradeResult[];
+  data: UnderStudyGradeResult[];
 }
 
 export type UnderGradeListResponse =
@@ -135,11 +146,11 @@ export type UnderGradeListResponse =
   | AuthLoginFailedResult
   | CommonFailedResponse;
 
-const QUERY_URL = `${SERVER}/new/student/xskccj/kccjDatas`;
+const QUERY_URL = `${UNDER_STUDY_SERVER}/new/student/xskccj/kccjDatas`;
 
 const getGradeLists = (
   records: RawUnderGradeResultItem[],
-): UnderNewGradeResult[] =>
+): UnderStudyGradeResult[] =>
   records.map(
     ({
       xnxqmc,
@@ -172,7 +183,7 @@ const getGradeLists = (
     }),
   );
 
-export const underNewGradeListHandler: RequestHandler<
+export const underStudyGradeListHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
   UnderGradeListOptions
@@ -188,7 +199,7 @@ export const underNewGradeListHandler: RequestHandler<
           msg: "请提供账号密码",
         });
 
-      const result = await underNewSystemLogin(<LoginOptions>req.body);
+      const result = await underStudyLogin(<LoginOptions>req.body);
 
       if (!result.success) return res.json(result);
       cookieHeader = result.cookieStore.getHeader(QUERY_URL);
@@ -199,7 +210,7 @@ export const underNewGradeListHandler: RequestHandler<
       headers: {
         Cookie: cookieHeader,
         "Content-Type": "application/x-www-form-urlencoded",
-        Referer: `${SERVER}/new/student/xskccj/kccjList.page`,
+        Referer: `${UNDER_STUDY_SERVER}/new/student/xskccj/kccjList.page`,
         ...EDGE_USER_AGENT_HEADERS,
       },
       body: new URLSearchParams({
@@ -213,9 +224,23 @@ export const underNewGradeListHandler: RequestHandler<
       }),
     });
 
-    const { rows: records } = <RawUnderGradeResult>await response.json();
+    const data = <RawUnderGradeResult>await response.json();
 
-    const gradeList = getGradeLists(records);
+    if ("code" in data) {
+      if (data.message === "尚未登录，请先登录")
+        return {
+          success: false,
+          type: LoginFailType.Expired,
+          msg: "登录过期，请重新登录",
+        };
+
+      return {
+        success: false,
+        msg: data.message,
+      };
+    }
+
+    const gradeList = getGradeLists(data.rows);
 
     return res.json(<UnderGradeListSuccessResponse>{
       success: true,
