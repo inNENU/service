@@ -32,7 +32,11 @@ import {
   underAdmissionHandler,
   underEnrollPlanHandler,
 } from "./enroll/index.js";
-import { libraryPeopleHandler } from "./library/people.js";
+import {
+  libraryLoanHandler,
+  libraryLoginHandler,
+  libraryPeopleHandler,
+} from "./library/index.js";
 import {
   academicInfoHandler,
   academicListHandler,
@@ -218,7 +222,10 @@ app.post("/mp/report", mpReportHandler);
 app.post("/mp/search", mpSearchHandler);
 app.get("/mp/qrcode", mpQrCodeHandler);
 
+app.post("/library/loan", libraryLoanHandler);
+app.post("/library/login", libraryLoginHandler);
 app.get("/library/people", libraryPeopleHandler);
+
 app.get("/qrcode", mpQrCodeHandler);
 app.get("/weather", weatherHandler);
 
