@@ -82,6 +82,7 @@ import {
   underStudyGradeDetailHandler,
   underStudyGradeListHandler,
   underStudyLoginHandler,
+  underStudySpecialExamHandler,
 } from "./under-study/index.js";
 import {
   underChangeMajorPlanHandler,
@@ -169,6 +170,7 @@ app.post("/under-study/check", underStudyCheckHandler);
 app.post("/under-study/grade-detail", underStudyGradeDetailHandler);
 app.post("/under-study/grade-list", underStudyGradeListHandler);
 app.post("/under-study/login", underStudyLoginHandler);
+app.post("/under-study/special-exam", underStudySpecialExamHandler);
 
 app.post("/under-system/login", underSystemLoginHandler);
 app.post("/under-system/check", underSystemCheckHandler);
@@ -179,6 +181,7 @@ app.post("/under-system/exam-place", underExamPlaceHandler);
 /** @deprecated Replaced by "/under-study/grade-detail" and "/under-study/grade-list" */
 app.post("/under-system/grade-list", underGradeListHandler);
 app.post("/under-system/info", underInfoHandler);
+/** @deprecated Replaced by "/under-study/special-exam" */
 app.post("/under-system/special-exam", underSpecialExamHandler);
 app.post("/under-system/student-archive", underStudentArchiveHandler);
 app.post("/under-system/test-query", underTestQueryHandler);

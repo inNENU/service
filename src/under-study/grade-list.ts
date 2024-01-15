@@ -15,18 +15,9 @@ export interface UnderGradeListOptions extends Partial<LoginOptions> {
   /** 查询时间 */
   time?: string;
 }
-export interface ScoreDetail {
-  score: number;
-  percent: number;
-}
-
-export interface GradeDetail {
-  usual: ScoreDetail[];
-  exam: ScoreDetail | null;
-}
 
 interface RawUnderGradeResultItem {
-  /** 上课时间 */
+  /** 修读学期 */
   xnxqmc: string;
   /** 课程名称 */
   kcmc: string;
@@ -43,9 +34,9 @@ interface RawUnderGradeResultItem {
   /** 成绩方式 */
   cjfsmc: "百分制" | "五级制";
   /** 学分 */
-  xf: 3;
+  xf: number;
   /** 总学时 */
-  zxs: 28;
+  zxs: number;
   /** 修读方式名称 */
   xdfsmc: string;
   /** 开课单位 */
@@ -78,7 +69,7 @@ interface RawUnderGradeResultItem {
   xsdm: string;
 
   xsckcj: "0";
-  rownum_: 1;
+  rownum_: number;
   ismax: "1" | "0";
   isactive: "1";
   wpjbz: "";
