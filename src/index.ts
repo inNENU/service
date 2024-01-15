@@ -79,6 +79,7 @@ import {
 import type { CommonFailedResponse } from "./typings.js";
 import {
   underStudyCheckHandler,
+  underStudyGradeDetailHandler,
   underStudyGradeListHandler,
   underStudyLoginHandler,
 } from "./under-study/index.js";
@@ -165,6 +166,7 @@ app.post("/my/login", myLoginHandler);
 app.post("/my/email", emailHandler);
 
 app.post("/under-study/check", underStudyCheckHandler);
+app.post("/under-study/grade-detail", underStudyGradeDetailHandler);
 app.post("/under-study/grade-list", underStudyGradeListHandler);
 app.post("/under-study/login", underStudyLoginHandler);
 
@@ -174,6 +176,7 @@ app.post("/under-system/change-major-plan", underChangeMajorPlanHandler);
 app.post("/under-system/course-table", underCourseTableHandler);
 app.post("/under-system/create-archive", underCreateStudentArchiveHandler);
 app.post("/under-system/exam-place", underExamPlaceHandler);
+/** @deprecated Replaced by "/under-study/grade-detail" and "/under-study/grade-list" */
 app.post("/under-system/grade-list", underGradeListHandler);
 app.post("/under-system/info", underInfoHandler);
 app.post("/under-system/special-exam", underSpecialExamHandler);
