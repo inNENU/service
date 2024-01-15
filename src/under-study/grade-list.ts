@@ -213,8 +213,8 @@ export const underStudyGradeListHandler: RequestHandler<
     const response = await fetch(QUERY_URL, {
       method: "POST",
       headers: {
+        Accept: "application/json, text/javascript, */*; q=0.01",
         Cookie: cookieHeader,
-        "Content-Type": "application/x-www-form-urlencoded",
         Referer: `${UNDER_STUDY_SERVER}/new/student/xskccj/kccjList.page`,
         ...EDGE_USER_AGENT_HEADERS,
       },

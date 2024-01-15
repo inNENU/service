@@ -155,6 +155,7 @@ export const underStudyGradeDetailHandler: RequestHandler<
 
     const response = await fetch(queryUrl, {
       headers: {
+        Accept: "application/json, text/javascript, */*; q=0.01",
         Cookie: cookieHeader,
         Referer: `${UNDER_STUDY_SERVER}/new/student/xskccj/kccjList.page`,
         ...EDGE_USER_AGENT_HEADERS,
