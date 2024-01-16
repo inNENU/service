@@ -7,11 +7,14 @@ import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 export type AppID = "wx33acb831ee1831a5" | "wx9ce37d9662499df3" | 1109559721;
 export type Env = "qq" | "wx" | "web";
 
-export interface MPLoginOptions {
+export interface MPLoginCodeOptions {
   appID: AppID;
   env: string;
   code: string;
-  openid?: string;
+}
+
+export interface MPLoginOpenidOptions {
+  openid: string;
 }
 
 export interface MPloginSuccessResponse {
@@ -28,24 +31,31 @@ export type MPLoginResponse = MPloginSuccessResponse | MPloginFailResponse;
 export const mpLoginHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  MPLoginOptions
+  MPLoginCodeOptions | MPLoginOpenidOptions
 > = async (req, res) => {
   try {
-    const { env, appID, code } = req.body;
-    let { openid } = req.body;
+    if ("openid" in req.body) {
+      const { openid } = req.body;
 
-    if (!openid) {
-      const url = `https://api.${
-        env === "qq" ? "q" : "weixin"
-      }.qq.com/sns/jscode2session?appid=${appID}&secret=${
-        appIDInfo[appID]
-      }&js_code=${code}&grant_type=authorization_code`;
-      const response = await fetch(url);
-
-      ({ openid } = <{ openid: string }>await response.json());
+      return res.json(<MPloginSuccessResponse>{
+        openid,
+        inBLACKLIST: OPENID_BLACK_LIST.includes(openid),
+        isAdmin: false,
+      });
     }
 
-    res.json(<MPloginSuccessResponse>{
+    const { env, appID, code } = req.body;
+
+    const url = `https://api.${
+      env === "qq" ? "q" : "weixin"
+    }.qq.com/sns/jscode2session?appid=${appID}&secret=${
+      appIDInfo[appID]
+    }&js_code=${code}&grant_type=authorization_code`;
+    const response = await fetch(url);
+
+    const { openid } = <{ openid: string }>await response.json();
+
+    return res.json(<MPloginSuccessResponse>{
       openid,
       inBLACKLIST: OPENID_BLACK_LIST.includes(openid),
       isAdmin: false,
