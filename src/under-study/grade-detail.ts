@@ -162,6 +162,13 @@ export const underStudyGradeDetailHandler: RequestHandler<
       },
     });
 
+    if (response.headers.get("content-type")?.includes("text/html"))
+      return res.json({
+        success: false,
+        type: LoginFailType.Expired,
+        msg: "登录过期，请重新登录",
+      });
+
     const data = <RawUnderGradeResult>await response.json();
 
     if (data.code === 0) {
