@@ -122,7 +122,7 @@ export const getEmailInfo = async (
 
     const mailInitInfo = await getMailInitInfo(
       cookieHeader,
-      results[0]!.PROC_INST_ID_,
+      results[0].PROC_INST_ID_,
     );
 
     if (mailInitInfo.success === false) return mailInitInfo;
