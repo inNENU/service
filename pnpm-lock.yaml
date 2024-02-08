@@ -4,9 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  xml2js: 0.6.2
-
 dependencies:
   '@alicloud/alinlp20200629':
     specifier: 2.2.0

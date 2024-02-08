@@ -54,6 +54,13 @@ export const postSystemLogin = async (
     redirect: "manual",
   });
 
+  if (ticketResponse.status === 502)
+    return {
+      success: false,
+      type: LoginFailType.Unknown,
+      msg: "学校服务器已崩溃，请稍后重试",
+    };
+
   cookieStore.applyResponse(ticketResponse, result.location);
 
   if (ticketResponse.status !== 302) {
