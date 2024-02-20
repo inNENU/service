@@ -50,6 +50,7 @@ import {
 import {
   emailHandler,
   myCheckHandler,
+  myIdentityHandler,
   myInfoHandler,
   myLoginHandler,
 } from "./my/index.js";
@@ -162,9 +163,10 @@ app.get("/auth/reset", resetPasswordHandler);
 app.post("/auth/reset", resetPasswordHandler);
 
 app.post("/my/check", myCheckHandler);
+app.post("/my/email", emailHandler);
 app.post("/my/info", myInfoHandler);
 app.post("/my/login", myLoginHandler);
-app.post("/my/email", emailHandler);
+app.post("/my/identity", myIdentityHandler);
 
 app.post("/under-study/check", underStudyCheckHandler);
 app.post("/under-study/grade-detail", underStudyGradeDetailHandler);
