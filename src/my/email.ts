@@ -194,6 +194,7 @@ export type ActivateEmailResponse =
   | ActivateMailSuccessResponse
   | ActivateMailFailedResponse;
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const activateEmail = async (
   cookieHeader: string,
   { name, phone, suffix, taskId, instanceId }: ActivateEmailOptions,
@@ -289,7 +290,11 @@ export const emailHandler: RequestHandler<
     if (!info.success) return res.json(info);
 
     if (req.body.type === "set")
-      return res.json(await activateEmail(cookieHeader, req.body, info.data));
+      return res.json({
+        success: false,
+        msg: "邮箱申请已移动至学校 OA 系统，正在适配中...",
+      });
+    // return res.json(await activateEmail(cookieHeader, req.body, info.data));
 
     return res.json(await getEmailInfo(cookieHeader, info.data));
   } catch (err) {
