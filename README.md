@@ -1,8 +1,8 @@
-# inNENU服务
+# inNENU 服务
 
-这里是 inNENU服务源代码。
+这里是 inNENU 服务源代码。
 
-inNENU部署在 <https://service.innenu.com>，你可以直接访问来检查服务状态。
+inNENU 部署在 <https://service.innenu.com>，你可以直接访问来检查服务状态。
 
 ## 声明
 
