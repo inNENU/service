@@ -113,6 +113,12 @@ export const postCourseTableHandler: RequestHandler<
 
     const content = await response.text();
 
+    if (content.includes("该学期无课表时间信息"))
+      return res.json({
+        success: false,
+        msg: "该学期无课表时间信息",
+      });
+
     const tableData = getCourses(content);
 
     return res.json(<PostCourseTableSuccessResponse>{
