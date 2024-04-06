@@ -205,7 +205,7 @@ export const underExamPlaceHandler: RequestHandler<
     const data = await Promise.all(
       options.map(async ({ name, value }) => ({
         name,
-        exams: await getExamList(cookieHeader!, value),
+        exams: await getExamList(cookieHeader, value),
       })),
     );
 

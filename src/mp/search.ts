@@ -202,7 +202,7 @@ export const getSearchWord = async (
 
     words: for (const word of words)
       if (indexContent[0] === SearchItemType.Page) {
-        const [, title, , tags] = <PageIndex>indexContent;
+        const [, title, , tags] = indexContent;
 
         if (title.includes(word)) {
           suggestions.set(title, word.length);
@@ -216,7 +216,7 @@ export const getSearchWord = async (
               continue words;
             }
       } else {
-        const [, title, indexes] = <IDContentIndex>indexContent;
+        const [, title, indexes] = indexContent;
 
         if (title.includes(word)) suggestions.set(title, word.length);
 
@@ -265,7 +265,7 @@ export const getSearchResult = async (
     let matchedWords = 0;
 
     if (indexContent[0] === SearchItemType.Page) {
-      const [, title, icon, tags] = <PageIndex>indexContent;
+      const [, title, icon, tags] = indexContent;
 
       for (const word of words)
         if (title.includes(word) || tags?.some((tag) => tag.includes(word)))
@@ -279,7 +279,7 @@ export const getSearchResult = async (
           url: idOrUrl,
         });
     } else {
-      const [, title, indexes] = <IDContentIndex>indexContent;
+      const [, title, indexes] = indexContent;
 
       const indexedContent = new Map<string, number>();
       const record = {
