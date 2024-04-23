@@ -152,12 +152,12 @@ export const postAdmissionHandler: RequestHandler<
   try {
     res.json(await getInfo(req.body));
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<CommonFailedResponse>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as CommonFailedResponse);
   }
 };

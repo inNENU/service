@@ -71,10 +71,10 @@ export const underEnrollPlanHandler: RequestHandler<
     });
 
     if (searchResponse.status === 404)
-      return res.json(<CommonFailedResponse>{
+      return res.json({
         success: false,
         msg: "招生工作已结束，此功能暂不开放",
-      });
+      } as CommonFailedResponse);
 
     const content = await searchResponse.text();
 
@@ -98,17 +98,17 @@ export const underEnrollPlanHandler: RequestHandler<
 
     console.log(`Getting ${planInfo.length} items`);
 
-    return res.json(<UnderEnrollPlanSuccessResponse>{
+    return res.json({
       success: true,
       data: planInfo,
-    });
+    } as UnderEnrollPlanSuccessResponse);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<CommonFailedResponse>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as CommonFailedResponse);
   }
 };

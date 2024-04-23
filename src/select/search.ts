@@ -61,12 +61,12 @@ export const searchHandler: RequestHandler<
   try {
     if (!req.headers.cookie) {
       if (!req.body.id || !req.body.password)
-        return res.json(<CommonFailedResponse>{
+        return res.json({
           success: false,
           msg: "请提供账号密码",
-        });
+        } as CommonFailedResponse);
 
-      const result = await selectLogin(<LoginOptions>req.body);
+      const result = await selectLogin(req.body as LoginOptions);
 
       if (!result.success) return res.json(result);
 
@@ -114,13 +114,13 @@ export const searchHandler: RequestHandler<
     const rawData = await response.text();
 
     if (rawData.match(/\s+<!DOCTYPE html/))
-      return res.json(<SelectSearchFailedResponse>{
+      return res.json({
         success: false,
         msg: "请重新登录",
         type: LoginFailType.Expired,
-      });
+      } as SelectSearchFailedResponse);
 
-    const courses = (<Record<string, string>[]>JSON.parse(rawData)).map(
+    const courses = (JSON.parse(rawData) as Record<string, string>[]).map(
       ({ kch, kcmc, kkdw, szklb }) => ({
         id: kch,
         name: kcmc,
@@ -131,17 +131,17 @@ export const searchHandler: RequestHandler<
 
     console.log(`Getting ${courses.length} courses`);
 
-    res.json(<SelectSearchSuccessResponse>{
+    res.json({
       success: true,
 
       courses,
-    });
+    } as SelectSearchSuccessResponse);
   } catch (err) {
     console.error(err);
 
-    return res.json(<SelectSearchFailedResponse>{
+    return res.json({
       success: false,
-      msg: (<Error>err).message,
-    });
+      msg: (err as Error).message,
+    } as SelectSearchFailedResponse);
   }
 };

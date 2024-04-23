@@ -62,7 +62,7 @@ export const underAdmissionHandler: RequestHandler<
         msg: "查询通道已关闭",
       };
 
-    const result = <RawEnrollResult>await response.json();
+    const result = (await response.json()) as RawEnrollResult;
 
     if ("code" in result)
       return {
@@ -103,17 +103,17 @@ export const underAdmissionHandler: RequestHandler<
       },
     ];
 
-    return res.json(<UnderAdmissionSuccessResponse>{
+    return res.json({
       success: true,
       info,
-    });
+    } as UnderAdmissionSuccessResponse);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<CommonFailedResponse>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as CommonFailedResponse);
   }
 };

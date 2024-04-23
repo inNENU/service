@@ -69,7 +69,8 @@ export const queryMyApplies = async (
     }),
   });
 
-  const appliesResult = <RawCompleteApplyResult>await appliesResponse.json();
+  const appliesResult =
+    (await appliesResponse.json()) as RawCompleteApplyResult;
 
   return appliesResult.data.map(
     ({ SHIXIANG, XTMC, key, unit, unitName, SQCS, YBSL, RN }) => ({
@@ -192,7 +193,7 @@ export const queryMyActions = async <T extends Record<string, unknown>>(
     }),
   });
 
-  const queryResult = <RawMyActionData<T>>await queryResponse.json();
+  const queryResult = (await queryResponse.json()) as RawMyActionData<T>;
 
   return queryResult.data;
 };

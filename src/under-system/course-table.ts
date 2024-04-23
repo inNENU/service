@@ -98,12 +98,12 @@ export const underCourseTableHandler: RequestHandler<
 
     if (!cookieHeader) {
       if (!req.body.id || !req.body.password)
-        return res.json(<CommonFailedResponse>{
+        return res.json({
           success: false,
           msg: "请提供账号密码",
-        });
+        } as CommonFailedResponse);
 
-      const result = await underSystemLogin(<LoginOptions>req.body);
+      const result = await underSystemLogin(req.body as LoginOptions);
 
       if (!result.success) return res.json(result);
 
@@ -120,34 +120,34 @@ export const underCourseTableHandler: RequestHandler<
     });
 
     if (response.status === 302)
-      return res.json(<CommonFailedResponse>{
+      return res.json({
         success: false,
         type: LoginFailType.Expired,
         msg: "登录已过期，请重试",
-      });
+      } as CommonFailedResponse);
 
     const content = await response.text();
 
     if (content.includes("评教未完成，不能查看课表！"))
-      return res.json(<CommonFailedResponse>{
+      return res.json({
         success: false,
         msg: "上学期评教未完成，不能查看本学期课表",
-      });
+      } as CommonFailedResponse);
 
     const tableData = getCourses(content);
 
-    return res.json(<UnderCourseTableSuccessResponse>{
+    return res.json({
       success: true,
       data: tableData,
       startTime: semesterStartTime[time],
-    });
+    } as UnderCourseTableSuccessResponse);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<AuthLoginFailedResult>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as AuthLoginFailedResult);
   }
 };

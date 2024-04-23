@@ -55,10 +55,10 @@ export const announcementListHandler: RequestHandler<
     );
 
     if (response.status !== 200)
-      return res.json(<CommonFailedResponse>{
+      return res.json({
         success: false,
         msg: "请求失败",
-      });
+      } as CommonFailedResponse);
 
     const text = await response.text();
 
@@ -80,19 +80,19 @@ export const announcementListHandler: RequestHandler<
       }),
     );
 
-    return res.json(<AnnouncementListSuccessResponse>{
+    return res.json({
       success: true,
       data,
       page,
       totalPage: totalPageState,
-    });
+    } as AnnouncementListSuccessResponse);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<CommonFailedResponse>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as CommonFailedResponse);
   }
 };

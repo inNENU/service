@@ -36,11 +36,11 @@ export const myLogin = async (
   if (!result.success) {
     console.error(result.msg);
 
-    return <AuthLoginFailedResult>{
+    return {
       success: false,
       type: result.type,
       msg: result.msg,
-    };
+    } as AuthLoginFailedResult;
   }
 
   const ticketUrl = result.location;
@@ -61,11 +61,11 @@ export const myLogin = async (
   );
 
   if (ticketResponse.status !== 302)
-    return <AuthLoginFailedResult>{
+    return {
       success: false,
       type: LoginFailType.Unknown,
       msg: "登录失败",
-    };
+    } as AuthLoginFailedResult;
 
   const sessionLocation = ticketResponse.headers.get("Location");
 
@@ -83,17 +83,17 @@ export const myLogin = async (
     const content = await mainResponse.text();
 
     if (content.includes("<title>网上服务大厅</title>"))
-      return <MyLoginResult>{
+      return {
         success: true,
         cookieStore,
-      };
+      } as MyLoginResult;
   }
 
-  return <AuthLoginFailedResult>{
+  return {
     success: false,
     type: LoginFailType.Unknown,
     msg: "登录失败",
-  };
+  } as AuthLoginFailedResult;
 };
 
 export interface MyLoginSuccessResponse {
@@ -121,20 +121,20 @@ export const myLoginHandler: RequestHandler<
         res.cookie(name, value, rest);
       });
 
-      return res.json(<MyLoginSuccessResponse>{
+      return res.json({
         success: true,
         cookies,
-      });
+      } as MyLoginSuccessResponse);
     }
 
     return res.json(result);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<MyLoginFailedResult>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as MyLoginFailedResult);
   }
 };

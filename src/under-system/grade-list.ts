@@ -160,7 +160,7 @@ const getGrades = (
       ] = Array.from(gradeCellRegExp.exec(item)!).map((item) =>
         item.replace(/&nbsp;/g, " ").trim(),
       );
-      const [, gradeLink, gradeText] = gradeRegExp.exec(grade) || [];
+      const [, gradeLink, gradeText] = gradeRegExp.exec(grade) ?? [];
       const actualDifficulty = Number(difficulty) || 1;
 
       const actualGrade =
@@ -202,7 +202,7 @@ const getGrades = (
               .filter((item): item is ScoreDetail => !!item);
             const exam = getScoreDetail(examGrade);
 
-            if (exam || usualGrades.length)
+            if (exam ?? usualGrades.length)
               gradeDetail = {
                 usual: usualGrades,
                 exam,
@@ -344,12 +344,12 @@ export const underGradeListHandler: RequestHandler<
 
     if (!cookieHeader) {
       if (!req.body.id || !req.body.password)
-        return res.json(<CommonFailedResponse>{
+        return res.json({
           success: false,
           msg: "请提供账号密码",
-        });
+        } as CommonFailedResponse);
 
-      const result = await underSystemLogin(<LoginOptions>req.body);
+      const result = await underSystemLogin(req.body as LoginOptions);
 
       if (!result.success) return res.json(result);
       cookieHeader = result.cookieStore.getHeader(QUERY_URL);
@@ -375,26 +375,26 @@ export const underGradeListHandler: RequestHandler<
     const content = await response.text();
 
     if (content.includes("评教未完成，不能查询成绩！"))
-      return res.json(<CommonFailedResponse>{
+      return res.json({
         success: false,
         msg: time
           ? "此学期评教未完成，不能查询成绩！"
           : "部分学期评教未完成，不能查阅全部成绩! 请分学期查询。",
-      });
+      } as CommonFailedResponse);
 
     const gradeList = await getGradeLists(cookieHeader, content);
 
-    return res.json(<UnderGradeListSuccessResponse>{
+    return res.json({
       success: true,
       data: gradeList,
-    });
+    } as UnderGradeListSuccessResponse);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<AuthLoginFailedResult>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as AuthLoginFailedResult);
   }
 };

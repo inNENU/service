@@ -68,10 +68,10 @@ export const historyGradeHandler: RequestHandler<
     });
 
     if (searchResponse.status === 404)
-      return res.json(<CommonFailedResponse>{
+      return res.json({
         success: false,
         msg: "招生工作已结束，此功能暂不开放",
-      });
+      } as CommonFailedResponse);
 
     const content = (await searchResponse.text()).split("WeishilgBt")[1];
 
@@ -108,23 +108,23 @@ export const historyGradeHandler: RequestHandler<
 
       console.log(`Getting ${historyInfos.length} items`);
 
-      return res.json(<EnrollGradeSuccessResponse>{
+      return res.json({
         success: true,
         data: { titles, items: historyInfos },
-      });
+      } as EnrollGradeSuccessResponse);
     }
 
-    return res.json(<CommonFailedResponse>{
+    return res.json({
       success: false,
       msg: "获取数据失败，请重试",
-    });
+    } as CommonFailedResponse);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<CommonFailedResponse>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as CommonFailedResponse);
   }
 };

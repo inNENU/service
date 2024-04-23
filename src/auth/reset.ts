@@ -93,7 +93,7 @@ const verifyAccount = async (
 
   cookieStore.applyResponse(verifyResponse, RESET_PASSWORD_URL);
 
-  const data = <RawResetPasswordInfoData>await verifyResponse.json();
+  const data = (await verifyResponse.json()) as RawResetPasswordInfoData;
 
   if (data.success)
     return {
@@ -162,7 +162,7 @@ const sendSMS = async (
 
   cookieStore.applyResponse(sendSMSResponse, RESET_PASSWORD_URL);
 
-  const data = <RawResetPasswordSendSMSData>await sendSMSResponse.json();
+  const data = (await sendSMSResponse.json()) as RawResetPasswordSendSMSData;
 
   if (data.success)
     return {
@@ -236,7 +236,8 @@ const verifySMS = async (
 
   cookieStore.applyResponse(verifySMSResponse, RESET_PASSWORD_URL);
 
-  const data = <RawResetPasswordVerifySMSData>await verifySMSResponse.json();
+  const data =
+    (await verifySMSResponse.json()) as RawResetPasswordVerifySMSData;
 
   if (data.success)
     return {
@@ -311,7 +312,8 @@ const setNewPassword = async (
     }),
   });
 
-  const data = <RawResetPasswordSetNewData>await setNewPasswordResponse.json();
+  const data =
+    (await setNewPasswordResponse.json()) as RawResetPasswordSetNewData;
 
   if (data.success)
     return {
@@ -378,10 +380,10 @@ export const resetPasswordHandler: RequestHandler<
         res.cookie(name, value, rest);
       });
 
-      return res.json(<ResetPasswordCaptchaResponse>{
+      return res.json({
         success: true,
         captcha,
-      });
+      } as ResetPasswordCaptchaResponse);
     }
 
     const options = req.body;
@@ -398,10 +400,10 @@ export const resetPasswordHandler: RequestHandler<
           res.cookie(name, value, rest);
         });
 
-        return res.json(<ResetPasswordInfoSuccessResponse>{
+        return res.json({
           success: true,
           sign: result.sign,
-        });
+        } as ResetPasswordInfoSuccessResponse);
       }
 
       return res.json(result);
@@ -419,10 +421,10 @@ export const resetPasswordHandler: RequestHandler<
           res.cookie(name, value, rest);
         });
 
-        return res.json(<ResetPasswordSendSMSSuccessResponse>{
+        return res.json({
           success: true,
           sign: result.sign,
-        });
+        } as ResetPasswordSendSMSSuccessResponse);
       }
 
       return res.json(result);
@@ -440,11 +442,11 @@ export const resetPasswordHandler: RequestHandler<
           res.cookie(name, value, rest);
         });
 
-        return res.json(<ResetPasswordVerifySMSSuccessResponse>{
+        return res.json({
           success: true,
           sign: result.sign,
           salt: result.salt,
-        });
+        } as ResetPasswordVerifySMSSuccessResponse);
       }
 
       return res.json(result);
@@ -454,9 +456,9 @@ export const resetPasswordHandler: RequestHandler<
       const result = await setNewPassword(options, req.headers.cookie ?? "");
 
       if (result.success)
-        return res.json(<ResetPasswordSetNewSuccessResponse>{
+        return res.json({
           success: true,
-        });
+        } as ResetPasswordSetNewSuccessResponse);
 
       return res.json(result);
     }
@@ -466,13 +468,13 @@ export const resetPasswordHandler: RequestHandler<
       msg: "Invalid options",
     });
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
 
-    return res.json(<CommonFailedResponse>{
+    return res.json({
       success: false,
       msg: message,
-    });
+    } as CommonFailedResponse);
   }
 };

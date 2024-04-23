@@ -26,30 +26,30 @@ export const actionCheckHandler: RequestHandler<
 
     if (response.status === 200)
       try {
-        const result = <{ success: boolean }>await response.json();
+        const result = (await response.json()) as { success: boolean };
 
-        return res.json(<CookieVerifySuccessResponse>{
+        return res.json({
           success: true,
           valid: result.success,
-        });
+        } as CookieVerifySuccessResponse);
       } catch (err) {
-        return res.json(<CookieVerifySuccessResponse>{
+        return res.json({
           success: true,
           valid: false,
-        });
+        } as CookieVerifySuccessResponse);
       }
 
-    return res.json(<CookieVerifySuccessResponse>{
+    return res.json({
       success: true,
       valid: false,
-    });
+    } as CookieVerifySuccessResponse);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<CommonFailedResponse>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as CommonFailedResponse);
   }
 };

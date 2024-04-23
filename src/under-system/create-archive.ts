@@ -179,8 +179,8 @@ export const getUnderStudentArchiveInfo = async (
             return result;
           },
           {
-            category: <{ value: string; text: string }[]>[],
-            values: <{ value: string; text: string }[][]>[],
+            category: [] as { value: string; text: string }[],
+            values: [] as { value: string; text: string }[][],
           },
         );
 
@@ -217,7 +217,7 @@ export const getUnderStudentArchiveInfo = async (
   return {
     success: true,
     readonly: readonlyFields.map(([text, value, , , remark]) => {
-      const realValue = /<font[^>]*>(.*)<\/font>/.exec(value)?.[1] || value;
+      const realValue = /<font[^>]*>(.*)<\/font>/.exec(value)?.[1] ?? value;
 
       return {
         text,
@@ -350,15 +350,15 @@ export const submitUnderStudentArchiveAddress = async (
   const existingData = studyDataRegExp.exec(content)?.[1];
 
   const study = existingData
-    ? (<
-        {
+    ? (
+        JSON.parse(existingData) as {
           qsrq: string;
           zzrq: string;
           szdw: string;
           gznr: string;
           zmr: string;
         }[]
-      >JSON.parse(existingData)).map(({ qsrq, zzrq, szdw, gznr, zmr }) => ({
+      ).map(({ qsrq, zzrq, szdw, gznr, zmr }) => ({
         startTime: qsrq,
         endTime: zzrq,
         school: szdw,
@@ -468,15 +468,15 @@ export const submitUnderStudentArchiveStudy = async (
   const existingData = familyDataRegExp.exec(content)?.[1];
 
   const family = existingData
-    ? (<
-        {
+    ? (
+        JSON.parse(existingData) as {
           gxm: string;
           cyxm: string;
           gzdw: string;
           cym: string;
           gzdwxq: string;
         }[]
-      >JSON.parse(existingData)).map(({ gxm, cyxm, gzdw, cym, gzdwxq }) => ({
+      ).map(({ gxm, cyxm, gzdw, cym, gzdwxq }) => ({
         relation: gxm,
         name: cyxm,
         office: gzdw,
@@ -601,12 +601,12 @@ export const underCreateStudentArchiveHandler: RequestHandler<
 
     if (!cookieHeader) {
       if (!req.body.id || !req.body.password)
-        return res.json(<CommonFailedResponse>{
+        return res.json({
           success: false,
           msg: "请提供账号密码",
-        });
+        } as CommonFailedResponse);
 
-      const result = await underSystemLogin(<LoginOptions>req.body);
+      const result = await underSystemLogin(req.body as LoginOptions);
 
       if (!result.success) return res.json(result);
 
@@ -634,12 +634,12 @@ export const underCreateStudentArchiveHandler: RequestHandler<
       msg: "未知操作",
     });
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<AuthLoginFailedResult>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as AuthLoginFailedResult);
   }
 };

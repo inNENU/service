@@ -57,11 +57,11 @@ export const selectLogin = async (
   cookieStore.applyResponse(homePageResponse, homePage);
 
   if (homePageResponse.status !== 200)
-    return <CommonFailedResponse>{
+    return {
       success: false,
       type: LoginFailType.Closed,
       msg: "无法连接到选课系统",
-    };
+    } as CommonFailedResponse;
 
   const content = await getResponseContent(homePageResponse);
 
@@ -112,23 +112,23 @@ export const selectLogin = async (
       : await finalResponse.text();
 
     if (text.includes("请先登录系统"))
-      return <CommonFailedResponse>{
+      return {
         success: false,
         msg: "登录失败",
-      };
+      } as CommonFailedResponse;
 
-    return <SelectLoginSuccessResult>{
+    return {
       success: true,
       cookieStore,
       server,
-    };
+    } as SelectLoginSuccessResult;
   }
 
-  return <CommonFailedResponse>{
+  return {
     success: false,
     type: LoginFailType.WrongPassword,
     msg: "用户名或密码错误",
-  };
+  } as CommonFailedResponse;
 };
 
 export const selectLoginHandler: RequestHandler<
@@ -151,27 +151,27 @@ export const selectLoginHandler: RequestHandler<
           res.cookie(name, value, rest);
         });
 
-        return res.json(<SelectLoginSuccessResponse>{
+        return res.json({
           success: true,
           cookies,
           server: result.server,
-        });
+        } as SelectLoginSuccessResponse);
       }
 
       return res.json(result);
     }
 
-    return res.json(<CommonFailedResponse>{
+    return res.json({
       success: false,
       msg: "请传入必须参数",
-    });
+    } as CommonFailedResponse);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<CommonFailedResponse>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as CommonFailedResponse);
   }
 };

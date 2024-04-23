@@ -323,10 +323,10 @@ export const selectInfo = async (
   const documentContent = await getResponseContent(response);
 
   if (documentContent.includes("不在选课时间范围内，无法选课!"))
-    return <CommonFailedResponse>{
+    return {
       success: false,
       msg: "不在选课时间范围内，无法选课!",
-    };
+    } as CommonFailedResponse;
 
   const courseTable = getCourseTable(documentContent);
 
@@ -352,7 +352,7 @@ export const selectInfo = async (
 
   console.log("Personal Information:", currentGrade, currentMajor);
 
-  return <SelectInfoSuccessResponse>{
+  return {
     success: true,
     ...(type === "under" ? underParamsStore : postParamsStore).state!,
     currentLocation,
@@ -368,7 +368,7 @@ export const selectInfo = async (
       ? underCoursesOfficeStore
       : postCoursesStore
     ).state,
-  };
+  } as SelectInfoSuccessResponse;
 };
 
 export interface SelectInfoOptions extends Partial<LoginOptions> {
@@ -384,12 +384,12 @@ export const selectInfoHandler: RequestHandler<
   try {
     if (!req.headers.cookie) {
       if (!req.body.id || !req.body.password)
-        return res.json(<CommonFailedResponse>{
+        return res.json({
           success: false,
           msg: "请提供账号密码",
-        });
+        } as CommonFailedResponse);
 
-      const result = await selectLogin(<LoginOptions>req.body);
+      const result = await selectLogin(req.body as LoginOptions);
 
       if (!result.success) return res.json(result);
 
@@ -404,12 +404,12 @@ export const selectInfoHandler: RequestHandler<
 
     return res.json(result);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<CommonFailedResponse>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as CommonFailedResponse);
   }
 };

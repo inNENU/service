@@ -51,7 +51,7 @@ const getWechatQRCode = async (
   const image = Buffer.from(await response.arrayBuffer());
 
   if (image.byteLength < 1024)
-    return <WechatQRCodeError>JSON.parse(image.toString());
+    return JSON.parse(image.toString()) as WechatQRCodeError;
 
   return image;
 };
@@ -71,10 +71,10 @@ export const mpQrCodeHandler: RequestHandler<
     console.log("Requesting qrcode with", req.query);
 
     if (!appIDInfo[appID])
-      return res.json(<CommonFailedResponse>{
+      return res.json({
         success: false,
         msg: "AppID 非法",
-      });
+      } as CommonFailedResponse);
 
     if (Number.isNaN(Number(appID))) {
       const wechatAccessToken = await getWechatAccessToken(appID);
@@ -82,7 +82,7 @@ export const mpQrCodeHandler: RequestHandler<
       const image = await getWechatQRCode(
         wechatAccessToken,
         page,
-        (<WechatQRCodeOptions>req.query).scene,
+        (req.query as WechatQRCodeOptions).scene,
       );
 
       if (image instanceof Buffer) {
@@ -94,10 +94,10 @@ export const mpQrCodeHandler: RequestHandler<
         return res.end(image);
       }
 
-      return res.json(<CommonFailedResponse>{
+      return res.json({
         success: false,
         msg: image.errmsg,
-      });
+      } as CommonFailedResponse);
     }
 
     const image = await getQQQRCode(appID, page);
@@ -109,13 +109,13 @@ export const mpQrCodeHandler: RequestHandler<
 
     return res.end(image);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
 
-    res.json(<CommonFailedResponse>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as CommonFailedResponse);
   }
 };

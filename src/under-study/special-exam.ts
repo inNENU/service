@@ -111,12 +111,12 @@ export const underStudySpecialExamHandler: RequestHandler<
 
     if (!cookieHeader) {
       if (!req.body.id || !req.body.password)
-        return res.json(<CommonFailedResponse>{
+        return res.json({
           success: false,
           msg: "请提供账号密码",
-        });
+        } as CommonFailedResponse);
 
-      const result = await underStudyLogin(<LoginOptions>req.body);
+      const result = await underStudyLogin(req.body as LoginOptions);
 
       if (!result.success) return res.json(result);
       cookieHeader = result.cookieStore.getHeader(QUERY_URL);
@@ -145,7 +145,7 @@ export const underStudySpecialExamHandler: RequestHandler<
         msg: "登录过期，请重新登录",
       });
 
-    const data = <RawUnderSpecialExamResult>await response.json();
+    const data = (await response.json()) as RawUnderSpecialExamResult;
 
     if ("code" in data) {
       if (data.message === "尚未登录，请先登录")
@@ -163,17 +163,17 @@ export const underStudySpecialExamHandler: RequestHandler<
 
     const records = getSpecialExamResults(data.rows);
 
-    return res.json(<UnderSpecialExamSuccessResponse>{
+    return res.json({
       success: true,
       data: records,
-    });
+    } as UnderSpecialExamSuccessResponse);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<AuthLoginFailedResult>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as AuthLoginFailedResult);
   }
 };

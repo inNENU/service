@@ -43,10 +43,10 @@ export const announcementInfoHandler: RequestHandler<
     const response = await fetch(`${MAIN_URL}/${url}`);
 
     if (response.status !== 200)
-      return res.json(<CommonFailedResponse>{
+      return res.json({
         success: false,
         msg: "请求失败",
-      });
+      } as CommonFailedResponse);
 
     const text = await response.text();
 
@@ -60,7 +60,7 @@ export const announcementInfoHandler: RequestHandler<
 
     const pageView = await getPageView(id, owner);
 
-    return res.json(<AnnouncementInfoSuccessResponse>{
+    return res.json({
       success: true,
       title,
       time,
@@ -86,14 +86,14 @@ export const announcementInfoHandler: RequestHandler<
           },
         },
       }),
-    });
+    } as AnnouncementInfoSuccessResponse);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<CommonFailedResponse>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as CommonFailedResponse);
   }
 };

@@ -32,7 +32,7 @@ export const libraryPeopleHandler: RequestHandler = async (_, res) => {
       "https://www.library.nenu.edu.cn/engine2/custom/nenu/onlineUserNum",
     );
 
-    const data = <LibraryPeopleRawData>await response.json();
+    const data = (await response.json()) as LibraryPeopleRawData;
 
     if (data.code === 1 && data.status === 200) {
       const { MainNum, JingYueNum, AbleJingYueNum, AbleMainNum } = data.data;

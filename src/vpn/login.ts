@@ -226,22 +226,22 @@ export const vpnCASLoginHandler: RequestHandler<
         res.cookie(name, value, rest);
       });
 
-      return res.json(<VPNLoginSuccessResponse>{
+      return res.json({
         success: true,
         cookies,
-      });
+      } as VPNLoginSuccessResponse);
     }
 
     return res.json(result);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
 
-    return res.json(<VPNLoginFailedResult>{
+    return res.json({
       success: false,
       msg: message,
-    });
+    } as VPNLoginFailedResult);
   }
 };
 
@@ -275,19 +275,19 @@ export const vpnLoginHandler: RequestHandler<
         res.cookie(name, value, rest);
       });
 
-      return res.json(<VPNLoginSuccessResponse>{
+      return res.json({
         success: true,
         cookies,
-      });
+      } as VPNLoginSuccessResponse);
     }
 
     return res.json(result);
   } catch (err) {
     console.error(err);
 
-    return res.json(<VPNLoginFailedResult>{
+    return res.json({
       success: false,
       msg: "参数错误",
-    });
+    } as VPNLoginFailedResult);
   }
 };

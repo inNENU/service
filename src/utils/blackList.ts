@@ -34,11 +34,13 @@ export const BLACKLIST_HINT = [
 const testCondition = (info: MyInfo, condition: ConditionBlackList): boolean =>
   Object.entries(condition).every(([key, value]) => {
     if (value instanceof RegExp)
-      return value.test(<string>info[<keyof MyInfo>key]);
+      return value.test(info[key as keyof MyInfo] as string);
 
-    if (typeof value === "number") return info[<keyof MyInfo>key] === value;
+    if (typeof value === "number") return info[key as keyof MyInfo] === value;
 
-    return info[<keyof MyInfo>key] === Buffer.from(value, "base64").toString();
+    return (
+      info[key as keyof MyInfo] === Buffer.from(value, "base64").toString()
+    );
   });
 
 export const isInBlackList = (
@@ -64,7 +66,7 @@ export const isInBlackList = (
   if (result)
     fs.writeFileSync(
       "blacklist",
-      `${id} new ${openid || ""} ${JSON.stringify(info)}\n`,
+      `${id} new ${openid ?? ""} ${JSON.stringify(info)}\n`,
       {
         encoding: "utf8",
         flag: "a",

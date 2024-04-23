@@ -27,23 +27,23 @@ export const underStudyCheckHandler: RequestHandler<
       const location = response.headers.get("location");
 
       if (location === `${UNDER_STUDY_SERVER}/new/welcome.page`)
-        return res.json(<CookieVerifySuccessResponse>{
+        return res.json({
           success: true,
           valid: true,
-        });
+        } as CookieVerifySuccessResponse);
     }
 
-    return res.json(<CookieVerifySuccessResponse>{
+    return res.json({
       success: true,
       valid: false,
-    });
+    } as CookieVerifySuccessResponse);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<CommonFailedResponse>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as CommonFailedResponse);
   }
 };

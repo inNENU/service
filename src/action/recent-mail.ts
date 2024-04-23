@@ -102,12 +102,12 @@ export const actionRecentEmailHandler: RequestHandler<
   try {
     if (!req.headers.cookie) {
       if (!req.body.id || !req.body.password)
-        return res.json(<CommonFailedResponse>{
+        return res.json({
           success: false,
           msg: "请提供账号密码",
-        });
+        } as CommonFailedResponse);
 
-      const result = await actionLogin(<LoginOptions>req.body);
+      const result = await actionLogin(req.body as LoginOptions);
 
       if (!result.success) return res.json(result);
 
@@ -125,7 +125,7 @@ export const actionRecentEmailHandler: RequestHandler<
       body: `domain=nenu.edu.cn&type=1&format=json`,
     });
 
-    const checkResult = <RawRecentMailResponse>await checkResponse.json();
+    const checkResult = (await checkResponse.json()) as RawRecentMailResponse;
 
     if (
       "success" in checkResult &&
@@ -153,12 +153,12 @@ export const actionRecentEmailHandler: RequestHandler<
       msg: "用户无邮箱或未初始化邮箱",
     };
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<CommonFailedResponse>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as CommonFailedResponse);
   }
 };

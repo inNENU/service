@@ -48,12 +48,12 @@ export const cardBalanceHandler: RequestHandler<
   try {
     if (!req.headers.cookie) {
       if (!req.body.id || !req.body.password)
-        return res.json(<CommonFailedResponse>{
+        return res.json({
           success: false,
           msg: "请提供账号密码",
-        });
+        } as CommonFailedResponse);
 
-      const result = await actionLogin(<LoginOptions>req.body);
+      const result = await actionLogin(req.body as LoginOptions);
 
       if (!result.success) return res.json(result);
 
@@ -73,38 +73,38 @@ export const cardBalanceHandler: RequestHandler<
     });
 
     if (response.status === 302)
-      return res.json(<AuthLoginFailedResponse>{
+      return res.json({
         success: false,
         type: LoginFailType.Expired,
         msg: "登录信息已过期，请重新登录",
-      });
+      } as AuthLoginFailedResponse);
 
-    const data = <RawCardBalanceData>await response.json();
+    const data = (await response.json()) as RawCardBalanceData;
 
     if (data.success) {
       const balanceList = data.demo.items.item;
 
       console.log(balanceList);
 
-      return res.json(<CardBalanceSuccessResponse>{
+      return res.json({
         success: true,
         data: balanceList[0]?.kye.match(/\d+/)
           ? Number(balanceList[0].kye) / 100
           : 0,
-      });
+      } as CardBalanceSuccessResponse);
     }
 
-    return res.json(<AuthLoginFailedResult>{
+    return res.json({
       success: false,
       msg: JSON.stringify(data),
-    });
+    } as AuthLoginFailedResult);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<AuthLoginFailedResult>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as AuthLoginFailedResult);
   }
 };

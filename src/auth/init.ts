@@ -91,13 +91,13 @@ export const authInitInfo = async (
 
   cookieStore.applyResponse(captchaCheckResponse, AUTH_SERVER);
 
-  const needCaptcha = await (<Promise<boolean>>captchaCheckResponse.json());
+  const needCaptcha = await (captchaCheckResponse.json() as Promise<boolean>);
 
   console.log("Need captcha:", needCaptcha);
 
   const captcha = needCaptcha ? await getCaptcha(cookieStore) : null;
 
-  return <AuthInitInfoSuccessResult>{
+  return {
     success: true,
     needCaptcha,
     captcha,
@@ -112,7 +112,7 @@ export const authInitInfo = async (
       rmShown,
       rememberMe: "on",
     },
-  };
+  } as AuthInitInfoSuccessResult;
 };
 
 export interface InitAuthOptions extends LoginOptions {
@@ -290,13 +290,13 @@ export const authInitHandler: RequestHandler<
           res.cookie(name, value, rest);
         });
 
-        return res.json(<AuthInitInfoResponse>{
+        return res.json({
           success: true,
           needCaptcha: result.needCaptcha,
           captcha: result.captcha,
           params: result.params,
           salt: result.salt,
-        });
+        } as AuthInitInfoResponse);
       }
 
       return res.json(result);
@@ -304,13 +304,13 @@ export const authInitHandler: RequestHandler<
 
     return res.json(await initAuth(req.body, req.headers.cookie!));
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
 
-    return res.json(<CommonFailedResponse>{
+    return res.json({
       success: false,
       msg: message,
-    });
+    } as CommonFailedResponse);
   }
 };

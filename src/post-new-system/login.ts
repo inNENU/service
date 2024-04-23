@@ -28,11 +28,11 @@ export const postNewSystemLogin = async (
   if (!result.success) {
     console.error(result.msg);
 
-    return <AuthLoginFailedResult>{
+    return {
       success: false,
       type: result.type,
       msg: result.msg,
-    };
+    } as AuthLoginFailedResult;
   }
 
   const ticketResponse = await fetch(result.location, {
@@ -78,10 +78,10 @@ export const postNewSystemLogin = async (
 
     cookieStore.applyResponse(indexResponse, finalLocation);
 
-    return <PostSystemLoginSuccessResult>{
+    return {
       success: true,
       cookieStore,
-    };
+    } as PostSystemLoginSuccessResult;
   }
 
   return {
@@ -118,20 +118,20 @@ export const postNewSystemLoginHandler: RequestHandler<
         res.cookie(name, value, rest);
       });
 
-      return res.json(<PostSystemLoginSuccessResponse>{
+      return res.json({
         success: true,
         cookies,
-      });
+      } as PostSystemLoginSuccessResponse);
     }
 
     return res.json(result);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<AuthLoginFailedResult>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as AuthLoginFailedResult);
   }
 };

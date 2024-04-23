@@ -127,12 +127,12 @@ export const borrowBooksHandler: RequestHandler<
   try {
     if (!req.headers.cookie) {
       if (!req.body.id || !req.body.password)
-        return res.json(<CommonFailedResponse>{
+        return res.json({
           success: false,
           msg: "请提供账号密码",
-        });
+        } as CommonFailedResponse);
 
-      const result = await actionLogin(<LoginOptions>req.body);
+      const result = await actionLogin(req.body as LoginOptions);
 
       if (!result.success) return res.json(result);
 
@@ -149,31 +149,31 @@ export const borrowBooksHandler: RequestHandler<
     });
 
     if (response.status === 302)
-      return res.json(<AuthLoginFailedResponse>{
+      return res.json({
         success: false,
         type: LoginFailType.Expired,
         msg: "登录信息已过期，请重新登录",
-      });
+      } as AuthLoginFailedResponse);
 
-    const data = <RawBorrowBooksData>await response.json();
+    const data = (await response.json()) as RawBorrowBooksData;
 
     if (data.success)
-      return res.json(<BorrowBooksSuccessResponse>{
+      return res.json({
         success: true,
         data: data.data.map(getBookData),
-      });
+      } as BorrowBooksSuccessResponse);
 
-    return res.json(<BorrowBooksSuccessResponse>{
+    return res.json({
       success: true,
       data: [],
-    });
+    } as BorrowBooksSuccessResponse);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<CommonFailedResponse>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as CommonFailedResponse);
   }
 };

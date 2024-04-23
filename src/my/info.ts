@@ -122,7 +122,7 @@ export const getMyInfo = async (
       body: "serviceAddress=dataCenter2.0%2Fsoap%2F00001_00036_01_02_20170918192121",
     });
 
-    const infoResult = <RawInfo>await infoResponse.json();
+    const infoResult = (await infoResponse.json()) as RawInfo;
 
     if (
       infoResult.success &&
@@ -266,12 +266,12 @@ export const myInfoHandler: RequestHandler<
 
     return res.json(info);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<MyLoginFailedResult>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as MyLoginFailedResult);
   }
 };

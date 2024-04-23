@@ -176,12 +176,12 @@ export const underExamPlaceHandler: RequestHandler<
 
     if (!cookieHeader) {
       if (!req.body.id || !req.body.password)
-        return res.json(<CommonFailedResponse>{
+        return res.json({
           success: false,
           msg: "请提供账号密码",
-        });
+        } as CommonFailedResponse);
 
-      const result = await underSystemLogin(<LoginOptions>req.body);
+      const result = await underSystemLogin(req.body as LoginOptions);
 
       if (!result.success) return res.json(result);
 
@@ -209,17 +209,17 @@ export const underExamPlaceHandler: RequestHandler<
       })),
     );
 
-    return res.json(<UnderExamPlaceSuccessResponse>{
+    return res.json({
       success: true,
       data,
-    });
+    } as UnderExamPlaceSuccessResponse);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<AuthLoginFailedResult>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as AuthLoginFailedResult);
   }
 };

@@ -42,10 +42,10 @@ export const getBasicInfo = async (
   console.log("Getting username", userName);
 
   if (!userName)
-    return <CommonFailedResponse>{
+    return {
       success: false,
       msg: "获取姓名失败",
-    };
+    } as CommonFailedResponse;
 
   const aliasResponse = await fetch(
     `${AUTH_SERVER}/authserver/userAttributesEdit.do`,
@@ -64,16 +64,16 @@ export const getBasicInfo = async (
   console.log("Getting alias: ", alias);
 
   if (typeof alias !== "string")
-    return <CommonFailedResponse>{
+    return {
       success: false,
       msg: "获取别名失败",
-    };
+    } as CommonFailedResponse;
 
-  return <InfoSuccessResponse>{
+  return {
     success: true,
     name: userName,
     alias: alias || "未设置别名",
-  };
+  } as InfoSuccessResponse;
 };
 
 export const infoHandler: RequestHandler<
@@ -86,12 +86,12 @@ export const infoHandler: RequestHandler<
       return res.json(await getBasicInfo(req.headers.cookie));
 
     if (!req.body.id || !req.body.password)
-      return res.json(<CommonFailedResponse>{
+      return res.json({
         success: false,
         msg: "请提供账号密码",
-      });
+      } as CommonFailedResponse);
 
-    const result = await authLogin(<LoginOptions>req.body);
+    const result = await authLogin(req.body as LoginOptions);
 
     if (result.success) {
       const cookieHeader = result.cookieStore.getHeader(
@@ -101,18 +101,18 @@ export const infoHandler: RequestHandler<
       return res.json(await getBasicInfo(cookieHeader));
     }
 
-    return res.json(<CommonFailedResponse>{
+    return res.json({
       success: false,
       msg: "登录失败，无法获取信息。",
-    });
+    } as CommonFailedResponse);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
 
-    return res.json(<CommonFailedResponse>{
+    return res.json({
       success: false,
       msg: message,
-    });
+    } as CommonFailedResponse);
   }
 };

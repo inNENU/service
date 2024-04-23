@@ -47,14 +47,14 @@ export const getProcess = async (
   });
 
   if (response.status === 302)
-    return <AuthLoginFailedResponse>{
+    return {
       success: false,
       type: LoginFailType.Expired,
       msg: "登录信息已过期，请重新登录",
-    };
+    } as AuthLoginFailedResponse;
 
   if (response.status === 200) {
-    const content = <RawProcessResult>await response.json();
+    const content = (await response.json()) as RawProcessResult;
 
     return {
       success: true,

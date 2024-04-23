@@ -115,7 +115,7 @@ export const authLogin = async (
 
     cookieStore.applyResponse(captchaCheckResponse, server);
 
-    const needCaptcha = await (<Promise<boolean>>captchaCheckResponse.json());
+    const needCaptcha = await (captchaCheckResponse.json() as Promise<boolean>);
 
     if (needCaptcha)
       return {
@@ -267,22 +267,22 @@ export const authLoginHandler: RequestHandler<
         res.cookie(name, value, rest);
       });
 
-      return res.json(<AuthLoginSuccessResponse>{
+      return res.json({
         success: true,
         cookies,
         location: result.location,
-      });
+      } as AuthLoginSuccessResponse);
     }
 
     return res.json(result);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
 
-    return res.json(<CommonFailedResponse>{
+    return res.json({
       success: false,
       msg: message,
-    });
+    } as CommonFailedResponse);
   }
 };

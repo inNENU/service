@@ -37,9 +37,8 @@ export const changePasswordHandler: RequestHandler<
 > = async (req, res) => {
   try {
     if (req.method === "PATCH") {
-      const { authCookie, captcha, oldPassword, newPassword, salt } = <
-        ChangePasswordOptions
-      >req.body;
+      const { authCookie, captcha, oldPassword, newPassword, salt } =
+        req.body as ChangePasswordOptions;
 
       console.log("Getting params", req.body);
 
@@ -65,17 +64,17 @@ export const changePasswordHandler: RequestHandler<
       console.log(`Getting:`, changePasswordResponseText);
 
       if (changePasswordResponseText.includes("个人密码修改成功"))
-        return res.json(<ChangePasswordSuccessResponse>{
+        return res.json({
           success: true,
-        });
+        } as ChangePasswordSuccessResponse);
 
-      return res.json(<CommonFailedResponse>{
+      return res.json({
         success: false,
         msg: "修改失败",
-      });
+      } as CommonFailedResponse);
     }
 
-    const { id, password } = <LoginOptions>req.body;
+    const { id, password } = req.body as LoginOptions;
 
     console.log("Getting params", req.body);
 
@@ -120,18 +119,18 @@ export const changePasswordHandler: RequestHandler<
       return res.end(Buffer.from(recaptchaImage));
     }
 
-    return res.json(<CommonFailedResponse>{
+    return res.json({
       success: false,
       msg: "登录失败",
-    });
+    } as CommonFailedResponse);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
 
-    return res.json(<CommonFailedResponse>{
+    return res.json({
       success: false,
       msg: message,
-    });
+    } as CommonFailedResponse);
   }
 };

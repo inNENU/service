@@ -9,6 +9,6 @@ export const getWechatAccessToken = (
       appid
     ]!}`,
   )
-    .then((response) => <Promise<{ access_token: string }>>response.json())
+    .then((response) => response.json() as Promise<{ access_token: string }>)
     // eslint-disable-next-line @typescript-eslint/naming-convention
     .then(({ access_token }) => access_token);

@@ -39,12 +39,12 @@ export const actionEmailPageHandler: RequestHandler<
   try {
     if (!req.headers.cookie) {
       if (!req.body.id || !req.body.password)
-        return res.json(<CommonFailedResponse>{
+        return res.json({
           success: false,
           msg: "请提供账号密码",
-        });
+        } as CommonFailedResponse);
 
-      const result = await actionLogin(<LoginOptions>req.body);
+      const result = await actionLogin(req.body as LoginOptions);
 
       if (!result.success) return res.json(result);
 
@@ -67,9 +67,8 @@ export const actionEmailPageHandler: RequestHandler<
       }),
     });
 
-    const emailPageResult = <RawEmailPageResponse>(
-      await emailPageResponse.json()
-    );
+    const emailPageResult =
+      (await emailPageResponse.json()) as RawEmailPageResponse;
 
     if (emailPageResult.success)
       return res.json({
@@ -82,12 +81,12 @@ export const actionEmailPageHandler: RequestHandler<
       msg: "获取邮件页面失败",
     });
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<CommonFailedResponse>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as CommonFailedResponse);
   }
 };

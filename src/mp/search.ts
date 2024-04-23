@@ -107,7 +107,7 @@ const updateIndex = async (): Promise<void> => {
 
   let changed = false;
 
-  const version = <Record<string, number>>await versionResponse.json();
+  const version = (await versionResponse.json()) as Record<string, number>;
 
   if (
     versionInfo.guide !== version.guide ||
@@ -123,7 +123,7 @@ const updateIndex = async (): Promise<void> => {
       },
     );
 
-    guideIndex = <SearchMap>await guideResponse.json();
+    guideIndex = (await guideResponse.json()) as SearchMap;
     changed = true;
   }
 
@@ -142,7 +142,7 @@ const updateIndex = async (): Promise<void> => {
       },
     );
 
-    introIndex = <SearchMap>await introResponse.json();
+    introIndex = (await introResponse.json()) as SearchMap;
 
     changed = true;
   }
@@ -158,7 +158,7 @@ const updateIndex = async (): Promise<void> => {
       },
     );
 
-    functionIndex = <SearchMap>await functionResponse.json();
+    functionIndex = (await functionResponse.json()) as SearchMap;
 
     changed = true;
   }
@@ -258,7 +258,7 @@ export const getSearchResult = async (
     (a, b) => a.length - b.length,
   );
   const searchIndex = getIndex(scope);
-  const results = <Result[]>[];
+  const results = [] as Result[];
 
   for (const idOrUrl in searchIndex) {
     const indexContent = searchIndex[idOrUrl];
@@ -286,7 +286,7 @@ export const getSearchResult = async (
         title,
         weight: 0,
         path: idOrUrl,
-        indexes: <[string, unknown][]>[],
+        indexes: [] as [string, unknown][],
       };
 
       for (const word of words) {

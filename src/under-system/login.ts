@@ -42,11 +42,11 @@ export const underSystemLogin = async (
   if (!result.success) {
     console.error(result.msg);
 
-    return <AuthLoginFailedResult>{
+    return {
       success: false,
       type: result.type,
       msg: result.msg,
-    };
+    } as AuthLoginFailedResult;
   }
 
   console.log("Login location", result.location);
@@ -96,10 +96,10 @@ export const underSystemLogin = async (
       },
     });
 
-    return <UnderSystemLoginSuccessResult>{
+    return {
       success: true,
       cookieStore,
-    };
+    } as UnderSystemLoginSuccessResult;
   }
 
   return {
@@ -137,20 +137,20 @@ export const underSystemLoginHandler: RequestHandler<
         res.cookie(name, value, rest);
       });
 
-      return res.json(<UnderSystemLoginSuccessResponse>{
+      return res.json({
         success: true,
         cookies,
-      });
+      } as UnderSystemLoginSuccessResponse);
     }
 
     return res.json(result);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<AuthLoginFailedResult>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as AuthLoginFailedResult);
   }
 };

@@ -235,15 +235,15 @@ app.post("/test/post", testPostHandler);
 app.post("/test/301", test301Handler);
 app.post("/test/302", test302Handler);
 
-// @ts-ignore
+// @ts-expect-error: Express type issue
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-app.use((err: Error, req, res: Response, _next: () => void) => {
+app.use((err: Error, _req: Request, res: Response, _next: () => void) => {
   console.error(err.stack);
 
-  res.status(500).json(<CommonFailedResponse>{
+  res.status(500).json({
     success: false,
     msg: "我们出了问题! 请联系 Mr.Hope",
-  });
+  } as CommonFailedResponse);
 });
 
 app.listen(port, () => {

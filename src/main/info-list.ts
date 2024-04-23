@@ -62,10 +62,10 @@ export const mainInfoListHandler: RequestHandler<
     const { type, page = 1, totalPage = totalPageState[type] || 0 } = req.body;
 
     if (!["social", "science", "news", "media"].includes(type))
-      return res.json(<CommonFailedResponse>{
+      return res.json({
         success: false,
         msg: "type 参数错误",
-      });
+      } as CommonFailedResponse);
 
     const response = await fetch(
       totalPage && page !== 1
@@ -74,10 +74,10 @@ export const mainInfoListHandler: RequestHandler<
     );
 
     if (response.status !== 200)
-      return res.json(<CommonFailedResponse>{
+      return res.json({
         success: false,
         msg: "请求失败",
-      });
+      } as CommonFailedResponse);
 
     const content = await response.text();
 
@@ -104,19 +104,19 @@ export const mainInfoListHandler: RequestHandler<
         : {}),
     }));
 
-    return res.json(<MainInfoListSuccessResponse>{
+    return res.json({
       success: true,
       data,
       page,
       totalPage: totalPageState[type],
-    });
+    } as MainInfoListSuccessResponse);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<CommonFailedResponse>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as CommonFailedResponse);
   }
 };

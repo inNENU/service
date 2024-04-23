@@ -56,11 +56,11 @@ export const postEnrollPlanHandler: RequestHandler<
     )
       return res.json({
         success: true,
-        data: <PostEnrollSchoolPlan[]>JSON.parse(
+        data: JSON.parse(
           readFileSync("./cache/post-plan.json", {
             encoding: "utf-8",
           }),
-        ),
+        ) as PostEnrollSchoolPlan[],
       });
 
     const schoolInfo: PostEnrollSchoolPlan[] = await Promise.all(
@@ -135,12 +135,12 @@ export const postEnrollPlanHandler: RequestHandler<
 
     return res.json({ success: true, data: schoolInfo });
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<CommonFailedResponse>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as CommonFailedResponse);
   }
 };

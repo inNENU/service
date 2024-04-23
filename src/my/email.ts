@@ -40,14 +40,12 @@ const getMailInitInfo = async (
     }),
   });
 
-  const { MESSAGE, MAILNAME, PASSWORD } = <
-    {
-      result: "0";
-      MESSAGE: string;
-      MAILNAME: string;
-      PASSWORD: string;
-    }
-  >await mailInfoResponse.json();
+  const { MESSAGE, MAILNAME, PASSWORD } = (await mailInfoResponse.json()) as {
+    result: "0";
+    MESSAGE: string;
+    MAILNAME: string;
+    PASSWORD: string;
+  };
 
   if (MESSAGE === "邮箱创建成功")
     return {
@@ -109,7 +107,7 @@ export const getEmailInfo = async (
     body: `userId=${info.id}`,
   });
 
-  const checkResult = <RawCheckMailData>await checkMailResponse.json();
+  const checkResult = (await checkMailResponse.json()) as RawCheckMailData;
 
   if (!checkResult.flag) {
     const results = await queryMyActions(cookieHeader, APPLY_MAIL_APP_ID);
@@ -156,7 +154,8 @@ export const getEmailInfo = async (
     },
   );
 
-  const accountListResult = <RawAccountList>await accountListResponse.json();
+  const accountListResult =
+    (await accountListResponse.json()) as RawAccountList;
 
   if (accountListResult.success)
     return {
@@ -213,9 +212,10 @@ const activateEmail = async (
     },
   );
 
-  const checkResult = <{ suc: boolean; error_code: string }>(
-    await checkMailAccountResponse.json()
-  );
+  const checkResult = (await checkMailAccountResponse.json()) as {
+    suc: boolean;
+    error_code: string;
+  };
 
   if (checkResult.suc || !checkResult.error_code.startsWith("ACCOUNT.NOTEXIST"))
     return {
@@ -257,7 +257,7 @@ const activateEmail = async (
     },
   );
 
-  const setMailResult = <{ success: boolean }>await setMailResponse.json();
+  const setMailResult = (await setMailResponse.json()) as { success: boolean };
 
   if (setMailResult.success === false)
     return {
@@ -279,7 +279,7 @@ export const emailHandler: RequestHandler<
     let cookieHeader = req.headers.cookie;
 
     if (!cookieHeader) {
-      const result = await myLogin(<LoginOptions>req.body);
+      const result = await myLogin(req.body as LoginOptions);
 
       if (!result.success) return res.json(result);
       cookieHeader = result.cookieStore.getHeader(MY_SERVER);
@@ -298,12 +298,12 @@ export const emailHandler: RequestHandler<
 
     return res.json(await getEmailInfo(cookieHeader, info.data));
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<CommonFailedResponse>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as CommonFailedResponse);
   }
 };

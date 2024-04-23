@@ -51,21 +51,21 @@ export const noticeHandler: RequestHandler<
     const { noticeID } = req.body;
 
     if (!noticeID)
-      return res.json(<CommonFailedResponse>{
+      return res.json({
         success: false,
         msg: "ID is required",
-      });
+      } as CommonFailedResponse);
 
     const noticeUrl = `${ACTION_SERVER}/page/viewNews?ID=${noticeID}`;
 
     if (!req.headers.cookie) {
       if (!req.body.id || !req.body.password)
-        return res.json(<CommonFailedResponse>{
+        return res.json({
           success: false,
           msg: "请提供账号密码",
-        });
+        } as CommonFailedResponse);
 
-      const result = await actionLogin(<LoginOptions>req.body);
+      const result = await actionLogin(req.body as LoginOptions);
 
       if (!result.success) return res.json(result);
 
@@ -80,11 +80,11 @@ export const noticeHandler: RequestHandler<
     });
 
     if (response.status === 302)
-      return res.json(<AuthLoginFailedResponse>{
+      return res.json({
         success: false,
         type: LoginFailType.Expired,
         msg: "登录信息已过期，请重新登录",
-      });
+      } as AuthLoginFailedResponse);
 
     const responseText = await response.text();
 
@@ -95,7 +95,7 @@ export const noticeHandler: RequestHandler<
     const pageView = pageViewRegExp.exec(responseText)![1];
     const content = contentRegExp.exec(responseText)![1];
 
-    return res.json(<NoticeSuccessResponse>{
+    return res.json({
       success: true,
       title,
       author,
@@ -120,14 +120,14 @@ export const noticeHandler: RequestHandler<
           img: () => null,
         },
       }),
-    });
+    } as NoticeSuccessResponse);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<AuthLoginFailedResult>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as AuthLoginFailedResult);
   }
 };

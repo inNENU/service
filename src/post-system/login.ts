@@ -36,11 +36,11 @@ export const postSystemLogin = async (
   if (!result.success) {
     console.error(result.msg);
 
-    return <AuthLoginFailedResult>{
+    return {
       success: false,
       type: result.type,
       msg: result.msg,
-    };
+    } as AuthLoginFailedResult;
   }
 
   console.log("Login location", result.location);
@@ -85,7 +85,7 @@ export const postSystemLogin = async (
     };
 
   if (
-    finalLocation?.startsWith(POST_SYSTEM_HTTP_SERVER) ||
+    finalLocation?.startsWith(POST_SYSTEM_HTTP_SERVER) ??
     finalLocation?.startsWith(POST_SYSTEM_HTTPS_SERVER)
   ) {
     const mainResponse = await fetch(finalLocation, {
@@ -116,10 +116,10 @@ export const postSystemLogin = async (
         },
       });
 
-      return <PostSystemLoginSuccessResult>{
+      return {
         success: true,
         cookieStore,
-      };
+      } as PostSystemLoginSuccessResult;
     }
   }
 
@@ -158,20 +158,20 @@ export const postSystemLoginHandler: RequestHandler<
         res.cookie(name, value, rest);
       });
 
-      return res.json(<PostSystemLoginSuccessResponse>{
+      return res.json({
         success: true,
         cookies,
-      });
+      } as PostSystemLoginSuccessResponse);
     }
 
     return res.json(result);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<AuthLoginFailedResult>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as AuthLoginFailedResult);
   }
 };

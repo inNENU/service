@@ -37,11 +37,11 @@ export const mpLoginHandler: RequestHandler<
     if ("openid" in req.body) {
       const { openid } = req.body;
 
-      return res.json(<MPloginSuccessResponse>{
+      return res.json({
         openid,
         inBLACKLIST: OPENID_BLACK_LIST.includes(openid),
         isAdmin: false,
-      });
+      } as MPloginSuccessResponse);
     }
 
     const { env, appID, code } = req.body;
@@ -53,19 +53,19 @@ export const mpLoginHandler: RequestHandler<
     }&js_code=${code}&grant_type=authorization_code`;
     const response = await fetch(url);
 
-    const { openid } = <{ openid: string }>await response.json();
+    const { openid } = (await response.json()) as { openid: string };
 
-    return res.json(<MPloginSuccessResponse>{
+    return res.json({
       openid,
       inBLACKLIST: OPENID_BLACK_LIST.includes(openid),
       isAdmin: false,
-    });
+    } as MPloginSuccessResponse);
   } catch (err) {
     console.error(err);
 
-    res.status(500).json(<CommonFailedResponse>{
+    res.status(500).json({
       success: false,
       msg: "获取失败",
-    });
+    } as CommonFailedResponse);
   }
 };

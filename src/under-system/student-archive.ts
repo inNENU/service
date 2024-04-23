@@ -131,9 +131,7 @@ const getStudentArchive = async (
           .then((res) => res.arrayBuffer())
           .then(
             (buffer) =>
-              `data:image/jpeg;base64,${Buffer.from(buffer).toString(
-                "base64",
-              )}`,
+              `data:image/jpeg;base64,${Buffer.from(buffer).toString("base64")}`,
           )
           .catch(() => "")
       : "",
@@ -147,15 +145,13 @@ const getStudentArchive = async (
           .then((res) => res.arrayBuffer())
           .then(
             (buffer) =>
-              `data:image/jpeg;base64,${Buffer.from(buffer).toString(
-                "base64",
-              )}`,
+              `data:image/jpeg;base64,${Buffer.from(buffer).toString("base64")}`,
           )
           .catch(() => "")
       : "",
   ]);
 
-  const path = pathRegExp.exec(content)?.[1] || "";
+  const path = pathRegExp.exec(content)?.[1] ?? "";
   const canRegister = registerButtonRegExp.test(content);
 
   return {
@@ -203,10 +199,10 @@ export const getUnderStudentArchive = async (
   if (content.includes("学生学籍卡片")) {
     const info = await getStudentArchive(cookieHeader, content);
 
-    return <UnderGetStudentArchiveSuccessResponse>{
+    return {
       success: true,
       info,
-    };
+    } as UnderGetStudentArchiveSuccessResponse;
   }
 
   return {
@@ -248,7 +244,7 @@ export const registerStudentArchive = async (
 
   const response = await registerResponse.text();
 
-  const alert = alertRegExp.exec(response)?.[1] || "注册失败";
+  const alert = alertRegExp.exec(response)?.[1] ?? "注册失败";
 
   if (alert === "注册成功。") return { success: true };
 
@@ -268,12 +264,12 @@ export const underStudentArchiveHandler: RequestHandler<
 
     if (!cookieHeader) {
       if (!req.body.id || !req.body.password)
-        return res.json(<CommonFailedResponse>{
+        return res.json({
           success: false,
           msg: "请提供账号密码",
-        });
+        } as CommonFailedResponse);
 
-      const result = await underSystemLogin(<LoginOptions>req.body);
+      const result = await underSystemLogin(req.body as LoginOptions);
 
       if (!result.success) return res.json(result);
 
@@ -289,12 +285,12 @@ export const underStudentArchiveHandler: RequestHandler<
 
     return res.json(await getUnderStudentArchive(cookieHeader));
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<AuthLoginFailedResult>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as AuthLoginFailedResult);
   }
 };

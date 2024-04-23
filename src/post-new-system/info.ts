@@ -71,7 +71,7 @@ const getInfo = (content: string): PostStudentInfo => {
 
   return {
     name: values[nameIndex],
-    gender: <"男" | "女">values[genderIndex],
+    gender: values[genderIndex] as "男" | "女",
     idCard,
     people: values[peopleIndex],
     politicalType: values[politicalTypeIndex],
@@ -129,10 +129,10 @@ export const getPostInfo = async (
 
     const info = getInfo(content);
 
-    return <InfoSuccessResponse>{
+    return {
       success: true,
       info,
-    };
+    } as InfoSuccessResponse;
   }
 
   return {
@@ -151,12 +151,12 @@ export const postNewInfoHandler: RequestHandler<
 
     if (!cookieHeader) {
       if (!req.body.id || !req.body.password)
-        return res.json(<CommonFailedResponse>{
+        return res.json({
           success: false,
           msg: "请提供账号密码",
-        });
+        } as CommonFailedResponse);
 
-      const result = await postNewSystemLogin(<LoginOptions>req.body);
+      const result = await postNewSystemLogin(req.body as LoginOptions);
 
       if (!result.success) return res.json(result);
 
@@ -165,12 +165,12 @@ export const postNewInfoHandler: RequestHandler<
 
     return res.json(await getPostInfo(cookieHeader));
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<AuthLoginFailedResult>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as AuthLoginFailedResult);
   }
 };

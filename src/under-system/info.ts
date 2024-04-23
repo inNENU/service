@@ -88,7 +88,7 @@ export interface UnderStudentInfo {
 
 const getInfo = (content: string): UnderStudentInfo => {
   const name = NAME_REGEXP.exec(content)![1];
-  const gender = <"男" | "女">GENDER_REGEXP.exec(content)![1];
+  const gender = GENDER_REGEXP.exec(content)![1] as "男" | "女";
   const people = PEOPLE_REGEXP.exec(content)![1];
   const idCard = ID_CARD_REGEXP.exec(content)![1];
   const politicalType = POLITICAL_TYPE_REGEXP.exec(content)![1];
@@ -161,10 +161,10 @@ export const getUnderInfo = async (
   if (content.includes("学生学籍卡片")) {
     const info = getInfo(content);
 
-    return <UnderInfoSuccessResponse>{
+    return {
       success: true,
       info,
-    };
+    } as UnderInfoSuccessResponse;
   }
 
   return {
@@ -183,12 +183,12 @@ export const underInfoHandler: RequestHandler<
 
     if (!cookieHeader) {
       if (!req.body.id || !req.body.password)
-        return res.json(<CommonFailedResponse>{
+        return res.json({
           success: false,
           msg: "请提供账号密码",
-        });
+        } as CommonFailedResponse);
 
-      const result = await underSystemLogin(<LoginOptions>req.body);
+      const result = await underSystemLogin(req.body as LoginOptions);
 
       if (!result.success) return res.json(result);
 
@@ -197,12 +197,12 @@ export const underInfoHandler: RequestHandler<
 
     return res.json(await getUnderInfo(cookieHeader));
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<AuthLoginFailedResult>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as AuthLoginFailedResult);
   }
 };

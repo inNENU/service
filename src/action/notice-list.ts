@@ -87,12 +87,12 @@ export const noticeListHandler: RequestHandler<
 
     if (!cookieHeader) {
       if (!req.body.id || !req.body.password)
-        return res.json(<CommonFailedResponse>{
+        return res.json({
           success: false,
           msg: "请提供账号密码",
-        });
+        } as CommonFailedResponse);
 
-      const result = await actionLogin(<LoginOptions>req.body);
+      const result = await actionLogin(req.body as LoginOptions);
 
       if (!result.success) return res.json(result);
 
@@ -120,37 +120,36 @@ export const noticeListHandler: RequestHandler<
     });
 
     if (response.status === 302)
-      return res.json(<AuthLoginFailedResponse>{
+      return res.json({
         success: false,
         type: LoginFailType.Expired,
         msg: "登录信息已过期，请重新登录",
-      });
+      } as AuthLoginFailedResponse);
 
-    const { data, pageIndex, pageSize, totalCount, totalPage } = <
-      RawNoticeListData
-    >await response.json();
+    const { data, pageIndex, pageSize, totalCount, totalPage } =
+      (await response.json()) as RawNoticeListData;
 
     if (data.length)
-      return res.json(<NoticeListSuccessResponse>{
+      return res.json({
         success: true,
         data: data.map(getNoticeItem),
         pageIndex,
         pageSize,
         totalCount,
         totalPage,
-      });
+      } as NoticeListSuccessResponse);
 
-    return res.json(<AuthLoginFailedResult>{
+    return res.json({
       success: false,
       msg: JSON.stringify(data),
-    });
+    } as AuthLoginFailedResult);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<AuthLoginFailedResult>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as AuthLoginFailedResult);
   }
 };

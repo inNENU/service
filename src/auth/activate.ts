@@ -102,9 +102,9 @@ const checkAccount = async (
     }),
   });
 
-  const activateResult = <ActivateRawSuccessResponse | RawErrorResponse>(
-    await response.json()
-  );
+  const activateResult = (await response.json()) as
+    | ActivateRawSuccessResponse
+    | RawErrorResponse;
 
   if (activateResult.code !== 0)
     return {
@@ -163,9 +163,9 @@ const sendSms = async (
     },
   );
 
-  const sendCodeResult = <CodeRawSuccessResponse | CodeRawFailedResponse>(
-    await sendCodeResponse.json()
-  );
+  const sendCodeResult = (await sendCodeResponse.json()) as
+    | CodeRawSuccessResponse
+    | CodeRawFailedResponse;
 
   if (sendCodeResult.code !== 0)
     return {
@@ -211,9 +211,9 @@ const bindPhone = async (
     body: JSON.stringify({ activationId, mobile, checkCode: code }),
   });
 
-  const content = <PhoneRawSuccessResponse | RawErrorResponse>(
-    await response.json()
-  );
+  const content = (await response.json()) as
+    | PhoneRawSuccessResponse
+    | RawErrorResponse;
 
   if (content.code !== 0)
     return {
@@ -261,9 +261,9 @@ const replacePhone = async (
     },
   );
 
-  const content = <PhoneRawSuccessResponse | RawErrorResponse>(
-    await response.json()
-  );
+  const content = (await response.json()) as
+    | PhoneRawSuccessResponse
+    | RawErrorResponse;
 
   if (content.code !== 0)
     return {
@@ -302,9 +302,9 @@ const setPassword = async (
     },
   );
 
-  const content = <ActivateRawSuccessResponse | RawErrorResponse>(
-    await response.json()
-  );
+  const content = (await response.json()) as
+    | ActivateRawSuccessResponse
+    | RawErrorResponse;
 
   if (content.code !== 0)
     return {
@@ -364,19 +364,19 @@ export const activateHandler: RequestHandler<
         );
       }
 
-      return res.json(<CommonFailedResponse>{
+      return res.json({
         success: false,
         msg: "cookie 缺失",
-      });
+      } as CommonFailedResponse);
     } catch (err) {
-      const { message } = <Error>err;
+      const { message } = err as Error;
 
       console.error(err);
 
-      return res.json(<CommonFailedResponse>{
+      return res.json({
         success: false,
         msg: message,
-      });
+      } as CommonFailedResponse);
     }
   }
 };

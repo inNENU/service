@@ -57,11 +57,11 @@ export const postRecommendPlanHandler: RequestHandler<
     )
       return res.json({
         success: true,
-        data: <PostRecommendSchoolPlan[]>JSON.parse(
+        data: JSON.parse(
           readFileSync("./cache/post-recommend-plan.json", {
             encoding: "utf-8",
           }),
-        ),
+        ) as PostRecommendSchoolPlan[],
       });
 
     const schoolInfo: PostRecommendSchoolPlan[] = await Promise.all(
@@ -130,12 +130,12 @@ export const postRecommendPlanHandler: RequestHandler<
 
     return res.json({ success: true, data: schoolInfo });
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<CommonFailedResponse>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as CommonFailedResponse);
   }
 };

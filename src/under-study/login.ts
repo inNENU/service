@@ -31,11 +31,11 @@ export const underStudyLogin = async (
   if (!result.success) {
     console.error(result.msg);
 
-    return <AuthLoginFailedResult>{
+    return {
       success: false,
       type: result.type,
       msg: result.msg,
-    };
+    } as AuthLoginFailedResult;
   }
 
   console.log("Login location", result.location);
@@ -79,10 +79,10 @@ export const underStudyLogin = async (
       ssoResponse.headers.get("Location") ===
         `${UNDER_STUDY_SERVER}/new/welcome.page`
     )
-      return <UnderStudyLoginSuccessResult>{
+      return {
         success: true,
         cookieStore,
-      };
+      } as UnderStudyLoginSuccessResult;
   }
 
   return {
@@ -119,20 +119,20 @@ export const underStudyLoginHandler: RequestHandler<
         res.cookie(name, value, rest);
       });
 
-      return res.json(<UnderStudyLoginSuccessResponse>{
+      return res.json({
         success: true,
         cookies,
-      });
+      } as UnderStudyLoginSuccessResponse);
     }
 
     return res.json(result);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<AuthLoginFailedResult>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as AuthLoginFailedResult);
   }
 };

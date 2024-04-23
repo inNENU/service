@@ -23,16 +23,18 @@ export const myCheckHandler: RequestHandler<
   });
 
   try {
-    const identityResult = <{ success: boolean }>await identityResponse.json();
+    const identityResult = (await identityResponse.json()) as {
+      success: boolean;
+    };
 
-    return res.json(<CookieVerifySuccessResponse>{
+    return res.json({
       success: true,
       valid: identityResult.success,
-    });
+    } as CookieVerifySuccessResponse);
   } catch (err) {
-    return res.json(<CookieVerifySuccessResponse>{
+    return res.json({
       success: true,
       valid: false,
-    });
+    } as CookieVerifySuccessResponse);
   }
 };

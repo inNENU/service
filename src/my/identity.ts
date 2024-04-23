@@ -38,7 +38,7 @@ export const getMyIdentity = async (
       },
     });
 
-    const identityResult = <IdentityInfo>await infoResponse.json();
+    const identityResult = (await infoResponse.json()) as IdentityInfo;
 
     if (identityResult.success)
       return {
@@ -83,12 +83,12 @@ export const myIdentityHandler: RequestHandler<
 
     return res.json(identity);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<MyLoginFailedResult>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as MyLoginFailedResult);
   }
 };

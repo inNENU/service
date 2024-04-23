@@ -133,21 +133,21 @@ export const underStudyGradeDetailHandler: RequestHandler<
     let cookieHeader = req.headers.cookie;
 
     if (!gradeCode)
-      return res.json(<CommonFailedResponse>{
+      return res.json({
         success: false,
         msg: "请提供课程代码",
-      });
+      } as CommonFailedResponse);
 
     const queryUrl = `${UNDER_STUDY_SERVER}/new/student/xskccj/getDetail?cjdm=${gradeCode}`;
 
     if (!cookieHeader) {
       if (!req.body.id || !req.body.password)
-        return res.json(<CommonFailedResponse>{
+        return res.json({
           success: false,
           msg: "请提供账号密码",
-        });
+        } as CommonFailedResponse);
 
-      const result = await underStudyLogin(<LoginOptions>req.body);
+      const result = await underStudyLogin(req.body as LoginOptions);
 
       if (!result.success) return res.json(result);
       cookieHeader = result.cookieStore.getHeader(queryUrl);
@@ -169,17 +169,17 @@ export const underStudyGradeDetailHandler: RequestHandler<
         msg: "登录过期，请重新登录",
       });
 
-    const data = <RawUnderGradeResult>await response.json();
+    const data = (await response.json()) as RawUnderGradeResult;
 
     if (data.code === 0) {
       const gradeDetail = getGradeDetail(
-        (<RawUnderGradeDetailItem[]>data.data)[0],
+        (data.data as RawUnderGradeDetailItem[])[0],
       );
 
-      return res.json(<UnderGradeDetailSuccessResponse>{
+      return res.json({
         success: true,
         data: gradeDetail,
-      });
+      } as UnderGradeDetailSuccessResponse);
     }
 
     if (data.message === "尚未登录，请先登录")
@@ -194,12 +194,12 @@ export const underStudyGradeDetailHandler: RequestHandler<
       msg: data.message,
     };
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<AuthLoginFailedResult>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as AuthLoginFailedResult);
   }
 };

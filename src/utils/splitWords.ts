@@ -17,11 +17,10 @@ const config = new Config({
   regionId: "cn-hangzhou",
 });
 
-// @ts-ignore
+// @ts-expect-error: Type Error
 // eslint-disable-next-line
 const client: Client = Client.default
-  ? // eslint-disable-next-line
-    // @ts-ignore
+  ? // @ts-expect-error: Type Error
     // eslint-disable-next-line
     new Client.default(config)
   : new Client(config);
@@ -34,7 +33,7 @@ export const splitWords = async (text: string): Promise<string[]> => {
     }),
   );
 
-  return (<NLPWeChGeneralResponse>JSON.parse(response.body.data!)).result.map(
-    ({ word }) => word,
-  );
+  return (
+    JSON.parse(response.body!.data!) as NLPWeChGeneralResponse
+  ).result.map(({ word }) => word);
 };

@@ -48,12 +48,12 @@ export const studentAmountHandler: RequestHandler<
   try {
     if (!req.headers.cookie) {
       if (!req.body.id || !req.body.password)
-        return res.json(<CommonFailedResponse>{
+        return res.json({
           success: false,
           msg: "请提供账号密码",
-        });
+        } as CommonFailedResponse);
 
-      const result = await selectLogin(<LoginOptions>req.body);
+      const result = await selectLogin(req.body as LoginOptions);
 
       if (!result.success) return res.json(result);
 
@@ -81,29 +81,29 @@ export const studentAmountHandler: RequestHandler<
     const rawData = await response.text();
 
     if (rawData.match(/\s+<!DOCTYPE html/))
-      return res.json(<StudentAmountFailedResponse>{
+      return res.json({
         success: false,
         msg: "请重新登录",
         type: LoginFailType.Expired,
-      });
+      } as StudentAmountFailedResponse);
 
-    const data: StudentAmountData[] = (<StudentAmountRaw[]>(
-      JSON.parse(rawData)
-    )).map(({ jx0404id, rs }) => ({
+    const data: StudentAmountData[] = (
+      JSON.parse(rawData) as StudentAmountRaw[]
+    ).map(({ jx0404id, rs }) => ({
       cid: jx0404id,
       amount: rs,
     }));
 
-    res.json(<StudentAmountSuccessResponse>{
+    res.json({
       success: true,
 
       data,
-    });
+    } as StudentAmountSuccessResponse);
   } catch (err) {
     console.error(err);
-    res.json(<StudentAmountFailedResponse>{
+    res.json({
       success: false,
-      msg: (<Error>err).message,
-    });
+      msg: (err as Error).message,
+    } as StudentAmountFailedResponse);
   }
 };

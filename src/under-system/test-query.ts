@@ -56,12 +56,12 @@ export const underTestQueryHandler: RequestHandler<
 
     if (!cookieHeader) {
       if (!req.body.id || !req.body.password)
-        return res.json(<CommonFailedResponse>{
+        return res.json({
           success: false,
           msg: "请提供账号密码",
-        });
+        } as CommonFailedResponse);
 
-      const result = await underSystemLogin(<LoginOptions>req.body);
+      const result = await underSystemLogin(req.body as LoginOptions);
 
       if (!result.success) return res.json(result);
 
@@ -82,10 +82,10 @@ export const underTestQueryHandler: RequestHandler<
     const idCard = idCardRegExp.exec(queryContent)?.[1];
 
     if (!idCard)
-      return res.json(<CommonFailedResponse>{
+      return res.json({
         success: false,
         msg: "获取失败",
-      });
+      } as CommonFailedResponse);
 
     const applyListResponse = await fetch(
       `${UNDER_SYSTEM_SERVER}/kjlbgl.do?method=goStudentSKXx&xs0101id=${idCard}`,
@@ -125,18 +125,18 @@ export const underTestQueryHandler: RequestHandler<
       ([, name, time, type, status]) => ({ name, time, type, status }),
     );
 
-    return res.json(<UnderTestQueySuccessResponse>{
+    return res.json({
       success: true,
       apply: applyList,
       result: resultList,
-    });
+    } as UnderTestQueySuccessResponse);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<AuthLoginFailedResult>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as AuthLoginFailedResult);
   }
 };

@@ -35,11 +35,11 @@ export const actionLogin = async (
   if (!result.success) {
     console.error(result.msg);
 
-    return <AuthLoginFailedResult>{
+    return {
       success: false,
       type: result.type,
       msg: result.msg,
-    };
+    } as AuthLoginFailedResult;
   }
 
   const ticketResponse = await fetch(result.location, {
@@ -59,25 +59,25 @@ export const actionLogin = async (
   );
 
   if (ticketResponse.status !== 302)
-    return <AuthLoginFailedResult>{
+    return {
       success: false,
       type: "unknown",
       msg: "登录失败",
-    };
+    } as AuthLoginFailedResult;
 
   const finalLocation = ticketResponse.headers.get("Location");
 
   if (finalLocation?.startsWith(`${ACTION_SERVER}/portal_main/toPortalPage`))
-    return <ActionLoginResult>{
+    return {
       success: true,
       cookieStore,
-    };
+    } as ActionLoginResult;
 
-  return <AuthLoginFailedResult>{
+  return {
     success: false,
     type: "unknown",
     msg: "登录失败",
-  };
+  } as AuthLoginFailedResult;
 };
 
 export interface ActionLoginSuccessResponse {
@@ -108,20 +108,20 @@ export const actionLoginHandler: RequestHandler<
         res.cookie(name, value, rest);
       });
 
-      return res.json(<ActionLoginSuccessResponse>{
+      return res.json({
         success: true,
         cookies,
-      });
+      } as ActionLoginSuccessResponse);
     }
 
     return res.json(result);
   } catch (err) {
-    const { message } = <Error>err;
+    const { message } = err as Error;
 
     console.error(err);
-    res.json(<AuthLoginFailedResult>{
+    res.json({
       success: false,
       msg: message,
-    });
+    } as AuthLoginFailedResult);
   }
 };
