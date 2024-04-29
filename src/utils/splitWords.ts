@@ -33,7 +33,7 @@ export const splitWords = async (text: string): Promise<string[]> => {
     }),
   );
 
-  return (
-    JSON.parse(response.body!.data!) as NLPWeChGeneralResponse
-  ).result.map(({ word }) => word);
+  const data = JSON.parse(response.body!.data!) as NLPWeChGeneralResponse;
+
+  return data.success ? data.result.map(({ word }) => word) : [text];
 };
