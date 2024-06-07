@@ -6,7 +6,7 @@ import type { RequestHandler } from "express";
 
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 
-const POST_ENROLL_PLAN_URL = "https://yzb.nenu.edu.cn/tmp/2024ssml.html";
+const POST_ENROLL_PLAN_URL = "https://yz.nenu.edu.cn/source/ssml/2024zsml.html";
 const schoolInfoRegExp =
   /bXYName\['.*?']="<tr><td colspan=4><a href='(.*?)' target='_blank'>([^<]+) ([^<]+)<\/a><br>联系方式：(\S+?)，(\S+?)，(\S+?)<\/td><\/tr>";/g;
 
