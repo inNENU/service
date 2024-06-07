@@ -25,12 +25,12 @@ import {
   resetPasswordHandler,
 } from "./auth/index.js";
 import {
-  historyGradeHandler,
   postAdmissionHandler,
   postEnrollPlanHandler,
   postRecommendPlanHandler,
   underAdmissionHandler,
   underEnrollPlanHandler,
+  underHistoryGradeHandler,
 } from "./enroll/index.js";
 import { libraryPeopleHandler } from "./library/people.js";
 import {
@@ -203,9 +203,9 @@ app.post("/main/announcement-list", announcementListHandler);
 app.get("/main/info", mainInfoHandler);
 app.post("/main/info-list", mainInfoListHandler);
 
-app.post("/enroll/grade", historyGradeHandler);
 app.get("/enroll/under-admission", underAdmissionHandler);
 app.post("/enroll/under-admission", underAdmissionHandler);
+app.post("/enroll/under-history-grade", underHistoryGradeHandler);
 app.post("/enroll/under-plan", underEnrollPlanHandler);
 app.post("/enroll/post-admission", postAdmissionHandler);
 app.post("/enroll/post-recommend-plan", postRecommendPlanHandler);
