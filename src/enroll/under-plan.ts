@@ -139,6 +139,7 @@ export interface UnderEnrollPlanQueryOptions {
   majorType: string;
   plan: string;
   province: string;
+  year: string;
 }
 
 export interface RawUnderEnrollPlanConfig {
