@@ -179,12 +179,18 @@ const getUnderEnrollPlans = async (
   const rawPlans = (await searchResponse.json()) as RawUnderEnrollPlanConfig[];
 
   return rawPlans.map(
-    ({ major, major_attr, admission_num, admission_len, admission_cost }) => ({
+    ({
       major,
-      majorType: major_attr,
-      count: admission_num,
-      years: admission_len,
-      fee: admission_cost,
+      major_attr: majorType,
+      admission_num: count,
+      admission_len: years,
+      admission_cost: fee,
+    }) => ({
+      major,
+      majorType,
+      count,
+      years,
+      fee,
     }),
   );
 };

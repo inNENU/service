@@ -198,20 +198,20 @@ const getUnderHistoryGrades = async (
   return rawPlans.map(
     ({
       major,
-      admission_type,
+      admission_type: majorType,
       baseline,
-      min_major_achievement,
-      min_cultural_achievement,
-      min_admission_achievement,
-      max_admission_achievement,
+      min_major_achievement: minMajorScore,
+      min_cultural_achievement: minCulturalScore,
+      min_admission_achievement: minAdmissionScore,
+      max_admission_achievement: maxAdmissionScore,
     }) => ({
       major,
-      majorType: admission_type,
+      majorType,
       baseline,
-      minMajorScore: min_major_achievement,
-      minCulturalScore: min_cultural_achievement,
-      minAdmissionScore: min_admission_achievement,
-      maxAdmissionScore: max_admission_achievement,
+      minMajorScore,
+      minCulturalScore,
+      minAdmissionScore,
+      maxAdmissionScore,
     }),
   );
 };
