@@ -6,9 +6,9 @@ import { MAIN_URL, getPageView } from "./utils.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 
 const infoRegExp =
-  /<div class="ar_tit">\s*<h3>([^>]+)<\/h3>\s*<h6>([\s\S]+?)<\/h6>/;
+  /<div class="ar_tit">\s*<h3>([^>]+)<\/h3>\s*<h6>([^]+?)<\/h6>/;
 const contentRegExp =
-  /<div class="v_news_content">([\s\S]+?)<\/div><\/div><div id="div_vote_id">/;
+  /<div class="v_news_content">([^]+?)<\/div><\/div><div id="div_vote_id">/;
 
 const infoTimeRegExp = /<span>发布时间：([^<]*)<\/span>/;
 const infoFromRegExp = /<span>发布单位：([^<]*)<\/span>/;

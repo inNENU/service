@@ -48,7 +48,7 @@ export type PostGradeListResponse =
   | AuthLoginFailedResult
   | CommonFailedResponse;
 
-const gradeItemRegExp = /<tr.+?class="smartTr"[^>]*?>([\s\S]*?)<\/tr>/g;
+const gradeItemRegExp = /<tr.+?class="smartTr"[^>]*?>([^]*?)<\/tr>/g;
 const jsGradeItemRegExp = /<tr.+?class=\\"smartTr\\"[^>]*?>(.*?)<\/tr>/g;
 const gradeCellRegExp =
   /^(?:<td[^>]*?>[^<]*?<\/td>\s*){3}<td[^>]*?>([^<]*?)<\/td>\s*<td[^>]*?>([^<]*?)<\/td>\s*<td[^>]*?>([^<]*?)<\/td>\s*<td[^>]*?>([^<]*?)<\/td>\s*<td[^>]*?>([^<]*?)<\/td>\s*<td[^>]*?>([^<]*?)<\/td>\s*<td[^>]*?>([^<]*?)<\/td>\s*<td[^>]*?>([^<]*?)<\/td>\s*<td[^>]*?>([^<]*?)<\/td>\s*<td[^>]*?>([^<]*?)<\/td>/;

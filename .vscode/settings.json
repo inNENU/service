@@ -1,3 +1,4 @@
 {
-  "cSpell.words": ["authserver", "nenu", "wechat", "qq", "qrcode"]
+  "cSpell.words": ["authserver", "nenu", "wechat", "qq", "qrcode"],
+  "typescript.tsdk": "node_modules\\typescript\\lib"
 }

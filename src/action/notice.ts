@@ -24,7 +24,7 @@ const timeRegExp =
 const pageViewRegExp =
   /<span style="margin: 0 10px;font-size: 13px;color: #787878;font-family: 'Microsoft YaHei';">\s+阅览：(\d+)\s+<\/span>/;
 const contentRegExp =
-  /<div class="read" id="WBNR">\s+([\s\S]*?)\s+<\/div>\s+<p id="zrbj"/;
+  /<div class="read" id="WBNR">\s+([^]*?)\s+<\/div>\s+<p id="zrbj"/;
 
 export interface NoticeOptions extends Partial<LoginOptions> {
   noticeID: string;

@@ -3,12 +3,12 @@ import type { RequestHandler } from "express";
 import { MAIN_URL, getPageView } from "./utils.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 
-const listBodyRegExp = /<ul class=".*? dsyw">([\s\S]+?)<\/ul>/;
+const listBodyRegExp = /<ul class=".*? dsyw">([^]+?)<\/ul>/;
 const totalItemsRegExp = /<span class="p_t">共(\d+)条<\/span>/;
 const pageViewRegExp =
   /_showDynClickBatch\(\[[^\]]+\],\s*\[([^\]]+)\],\s*"wbnews",\s*(\d+)\)/;
 const researchItemRegExp =
-  /data-aos="fade-up">\s*<a href="(?:\.\.\/)+([^"]+)"[^>]+>\s+<div[^>]*>\s+<div class="time">\s+<h3>(.*?)\.(.*?)<\/h3>\s*<h6>(.*?)<\/h6>\s*<\/div>\s*<\/div>\s*<div class="rr">\s*<h4[^>]*>(.*)<\/h4>\s+<p[^>]*>\s*([^<]*?)\s*<\/p>\s*<\/div>\s*(?:<div class="img slow imgBox">[\s\S]*?src="(.*?)"[\s\S]+?)?<\/a>/g;
+  /data-aos="fade-up">\s*<a href="(?:\.\.\/)+([^"]+)"[^>]+>\s+<div[^>]*>\s+<div class="time">\s+<h3>(.*?)\.(.*?)<\/h3>\s*<h6>(.*?)<\/h6>\s*<\/div>\s*<\/div>\s*<div class="rr">\s*<h4[^>]*>(.*)<\/h4>\s+<p[^>]*>\s*([^<]*?)\s*<\/p>\s*<\/div>\s*(?:<div class="img slow imgBox">[^]*?src="(.*?)"[^]+?)?<\/a>/g;
 
 export type MainInfoType = "social" | "science" | "news" | "media";
 

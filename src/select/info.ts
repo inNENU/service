@@ -76,11 +76,11 @@ export type SelectInfoResponse =
   | SelectInfoSuccessResponse
   | CommonFailedResponse;
 
-const officesReg = /<select id="kkdws" name="kkdws"[\s\S]*?<\/select>/;
+const officesReg = /<select id="kkdws" name="kkdws"[^]*?<\/select>/;
 const officeReg = /<option value="(.*?)" ?>/g;
-const gradesReg = /<select id="njs" name="njs"[\s\S]*?<\/select>/;
+const gradesReg = /<select id="njs" name="njs"[^]*?<\/select>/;
 const gradeReg = /<option value="(.*?)" (?:selected)?>(.*?)<\/option>/g;
-const majorsReg = /<select id="zys" name="zys"[\s\S]*?<\/select>/;
+const majorsReg = /<select id="zys" name="zys"[^]*?<\/select>/;
 const majorReg = /<option value="(.*?)" (?:selected)?>(.*?)<\/option>/g;
 const infoReg =
   /class='tr_bg'\s*>\s*<font color="white">(.*?)&nbsp;&nbsp;.*选课 选课阶段：(.*?)<\/font><br>\s*<font color="white">姓名：(.*?)&nbsp;&nbsp;学号：(.*?)&nbsp;&nbsp;年级：(\d+)&nbsp;&nbsp;专业：(.*?)<\/font>/;
@@ -89,13 +89,13 @@ const maxCreditReg = /最多可选学分：(\d+)学分/;
 const currentGradeReg = /<option value="(.*?)" selected>/;
 const currentMajorReg = /<option value="(.*?)" selected>/;
 
-const tableReg = /function binkbfzy()[\s\S]*?"<\/table>"/;
+const tableReg = /function binkbfzy()[^]*?"<\/table>"/;
 const courseRowReg =
   /str\+="<tr align='center' height='50' width='70'\s+bgcolor="\+ys\+" bordercolor='#E6E6E6'><td>.*?<\/td>/g;
 const underCourseInfoReg =
-  /tmpKc\[0\] = ".+";\s+tmpKc\[1\] = "(.*)";\s+tmpKc\[2\] = "(.*?)";\s+tmpKc\[3\] = "(.*?)";\s+tmpKc\[4\] = "(.*?)";[\s\S]+?tmpKc\[6\] = (\d+);\s+tmpKc\[7\] = "(.*?)";\s+tmpKc\[8\] = "(.*?)";\s+tmpKc\[9\] = "(.*?)";\s+tmpKc\[10\] = "(.*?)";\s+tmpKc\[11\] = "(.*?)";\s+tmpKc\[12\] = "(.*?)";[\s\S]*?tmpKc\[18\]="(.*?)";\s+tmpKc\[19\]="(.*?)";\s+tmpKc\[20\]="(.*?)";\s+tmpKc\[21\]="(.*?)"/g;
+  /tmpKc\[0\] = ".+";\s+tmpKc\[1\] = "(.*)";\s+tmpKc\[2\] = "(.*?)";\s+tmpKc\[3\] = "(.*?)";\s+tmpKc\[4\] = "(.*?)";[^]+?tmpKc\[6\] = (\d+);\s+tmpKc\[7\] = "(.*?)";\s+tmpKc\[8\] = "(.*?)";\s+tmpKc\[9\] = "(.*?)";\s+tmpKc\[10\] = "(.*?)";\s+tmpKc\[11\] = "(.*?)";\s+tmpKc\[12\] = "(.*?)";[^]*?tmpKc\[18\]="(.*?)";\s+tmpKc\[19\]="(.*?)";\s+tmpKc\[20\]="(.*?)";\s+tmpKc\[21\]="(.*?)"/g;
 const postCourseInfoReg =
-  /tmpKc\[0\] = ".+";\s+tmpKc\[1\] = "<a[^>]*?>\s*(.*)\s*<\/a>";\s+tmpKc\[2\] = "(.*?)";\s+tmpKc\[3\] = "(.*?)";\s+tmpKc\[4\] = "(.*?)";[\s\S]+?tmpKc\[6\] = (\d+);\s+tmpKc\[7\] = "(.*?)";\s+tmpKc\[8\] = "(.*?)";\s+tmpKc\[9\] = "(.*?)";\s+tmpKc\[10\] = "(.*?)";\s+tmpKc\[11\] = "(.*?)";\s+tmpKc\[12\] = "(.*?)";[\s\S]*?tmpKc\[18\]="(.*?)";\s+tmpKc\[19\]="(.*?)";\s+tmpKc\[20\]="(.*?)";\s+tmpKc\[21\]="(.*?)"/g;
+  /tmpKc\[0\] = ".+";\s+tmpKc\[1\] = "<a[^>]*?>\s*(.*)\s*<\/a>";\s+tmpKc\[2\] = "(.*?)";\s+tmpKc\[3\] = "(.*?)";\s+tmpKc\[4\] = "(.*?)";[^]+?tmpKc\[6\] = (\d+);\s+tmpKc\[7\] = "(.*?)";\s+tmpKc\[8\] = "(.*?)";\s+tmpKc\[9\] = "(.*?)";\s+tmpKc\[10\] = "(.*?)";\s+tmpKc\[11\] = "(.*?)";\s+tmpKc\[12\] = "(.*?)";[^]*?tmpKc\[18\]="(.*?)";\s+tmpKc\[19\]="(.*?)";\s+tmpKc\[20\]="(.*?)";\s+tmpKc\[21\]="(.*?)"/g;
 
 const setGrades = (gradesText: string): void => {
   if (!gradesStore.state.length) {

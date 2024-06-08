@@ -17,7 +17,7 @@ export type PostActionResponse =
   | AuthLoginFailedResult
   | CommonFailedResponse;
 
-const ACTION_REG_EXP = /xPageIDs\s*=\s*'(.*?)';[\s\S]+xPageAbc\s*=\s*'(.*?)';/;
+const ACTION_REG_EXP = /xPageIDs\s*=\s*'(.*?)';[^]+xPageAbc\s*=\s*'(.*?)';/;
 
 export const getAction = async (
   cookieHeader: string,

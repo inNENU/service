@@ -23,7 +23,7 @@ import { IE_8_USER_AGENT } from "../utils/index.js";
 import type { VPNLoginFailedResult } from "../vpn/login.js";
 
 const selectRegExp =
-  /<select\s+name="kskzid"\s+id="kskzid"[^>]*><option value="">---请选择---<\/option>([\s\S]*?)<\/select>/;
+  /<select\s+name="kskzid"\s+id="kskzid"[^>]*><option value="">---请选择---<\/option>([^]*?)<\/select>/;
 const optionRegExp = /<option value="([^"]+)">([^<]+)<\/option>/g;
 
 const examRegExp =

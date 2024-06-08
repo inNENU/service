@@ -23,9 +23,9 @@ export type RowItem = CellItem[];
 export type TableItem = RowItem[];
 
 const courseRowRegExp =
-  /<tr>\s+<td[^>]*>\s+\d+\s+<\/td>\s+((?:<td[^>]*>[\s\S]+?<\/td>\s*?)+)\s+<\/tr>/g;
+  /<tr>\s+<td[^>]*>\s+\d+\s+<\/td>\s+((?:<td[^>]*>[^]+?<\/td>\s*?)+)\s+<\/tr>/g;
 const courseCellRegExp =
-  /<td .*?>[\s\S]+?<div id="\d-\d-\d"\s+style="display: none;"\s?>(?:&nbsp;)*([\s\S]+?)<\/div>[\s\S]+?<\/td>/g;
+  /<td .*?>[^]+?<div id="\d-\d-\d"\s+style="display: none;"\s?>(?:&nbsp;)*([^]+?)<\/div>[^]+?<\/td>/g;
 
 const classRegExp =
   /(.+?)<br>(?:.+?)<br>(.+?)<br>\s*<nobr>\s*(\S+?)<nobr><br>(.+?)<br>\s*/g;
