@@ -179,7 +179,7 @@ export interface UnderHistoryGradeConfig {
   maxAdmissionScore: number;
 }
 
-const QUERY_URL = "https://bkzsw.nenu.edu.cn/queryPlan";
+const QUERY_URL = "https://bkzsw.nenu.edu.cn/queryScore";
 
 const getUnderHistoryGrades = async (
   options: UnderHistoryGradeQueryOptions,
