@@ -61,7 +61,7 @@ const getMailInitInfo = async (
 };
 
 export interface GetEmailInfoOptions extends Partial<LoginOptions> {
-  type?: "get";
+  type: "get";
 }
 
 type RawCheckMailData = { flag: false; yxmc: string } | { flag: true };
