@@ -80,6 +80,7 @@ import {
 import type { CommonFailedResponse } from "./typings.js";
 import {
   underStudyCheckHandler,
+  underStudyCourseCommentaryHandler,
   underStudyGradeDetailHandler,
   underStudyGradeListHandler,
   underStudyLoginHandler,
@@ -169,6 +170,7 @@ app.post("/my/login", myLoginHandler);
 app.post("/my/identity", myIdentityHandler);
 
 app.post("/under-study/check", underStudyCheckHandler);
+app.post("/under-study/course-commentary", underStudyCourseCommentaryHandler);
 app.post("/under-study/grade-detail", underStudyGradeDetailHandler);
 app.post("/under-study/grade-list", underStudyGradeListHandler);
 app.post("/under-study/login", underStudyLoginHandler);
