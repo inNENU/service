@@ -11,12 +11,19 @@ import { underStudyLogin } from "../login.js";
 import { UNDER_STUDY_SERVER } from "../utils.js";
 
 export interface UnderSelectCategoryItem {
+  /** 学期 */
   term: string;
+  /** 选课阶段 */
   stage: string;
+  /** 是否可退选 */
   canRemove: boolean;
+  /** 分类名称 */
   name: string;
+  /** 分类链接 */
   link: string;
+  /** 分类开始时间 */
   startTime: string;
+  /** 分类结束时间 */
   endTime: string;
 }
 
