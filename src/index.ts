@@ -84,6 +84,7 @@ import {
   underStudyGradeDetailHandler,
   underStudyGradeListHandler,
   underStudyLoginHandler,
+  underStudySelectCategoryHandler,
   underStudySpecialExamHandler,
 } from "./under-study/index.js";
 import {
@@ -174,6 +175,7 @@ app.post("/under-study/course-commentary", underStudyCourseCommentaryHandler);
 app.post("/under-study/grade-detail", underStudyGradeDetailHandler);
 app.post("/under-study/grade-list", underStudyGradeListHandler);
 app.post("/under-study/login", underStudyLoginHandler);
+app.post("/under-study/select/category", underStudySelectCategoryHandler);
 app.post("/under-study/special-exam", underStudySpecialExamHandler);
 
 app.post("/under-system/login", underSystemLoginHandler);
@@ -213,7 +215,9 @@ app.post("/enroll/post-admission", postAdmissionHandler);
 app.post("/enroll/post-recommend-plan", postRecommendPlanHandler);
 app.post("/enroll/post-plan", postEnrollPlanHandler);
 
+/** @deprecated Replaced by "/under-study/login" */
 app.post("/select/login", selectLoginHandler);
+/** @deprecated Replaced by "/under-study/select/category" */
 app.post("/select/info", selectInfoHandler);
 app.post("/select/search", searchHandler);
 app.post("/select/student-amount", studentAmountHandler);
