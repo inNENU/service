@@ -28,7 +28,7 @@ export interface UnderSelectCategorySuccessResponse {
 export type UnderSelectCategoryResponse =
   | UnderSelectCategorySuccessResponse
   | AuthLoginFailedResult
-  | CommonFailedResponse;
+  | (CommonFailedResponse & { type: "not-initialized" });
 
 const CATEGORY_PAGE = `${UNDER_STUDY_SERVER}/new/student/xsxk/`;
 
@@ -78,6 +78,14 @@ export const underStudySelectCategoryHandler: RequestHandler<
     });
 
     const content = await response.text();
+
+    if (content.includes("选课正在初始化")) {
+      return res.json({
+        success: false,
+        msg: "选课正在初始化，请稍后再试",
+        type: "not-initialized",
+      } as CommonFailedResponse);
+    }
 
     return res.json({
       success: true,
