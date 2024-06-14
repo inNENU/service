@@ -36,14 +36,14 @@ export interface UnderSelectInfo {
   /** 可用年级 */
   grades: number[];
   /** 可用校区 */
-  locations: UnderSelectOption[];
+  areas: UnderSelectOption[];
   /** 可用开课单位 */
   courseOffices: UnderSelectOption[];
   /** 可用课程类别 */
   courseTypes: UnderSelectOption[];
 
   /** 当前校区 */
-  currentLocation: string;
+  currentArea: string;
   /** 当前年级 */
   currentGrade: number;
 }
@@ -61,9 +61,9 @@ export type UnderSelectInfoResponse =
 const COURSE_OFFICES_REGEXP =
   /<select id='kkyxdm' name='kkyxdm'.*?><option value=''>\(请选择\)<\/option>(.*?)<\/select>/;
 const COURSE_OFFICE_ITEM_REGEXP = /<option value='(.+?)' >\d+-(.*?)<\/option>/g;
-const LOCATIONS_REGEXP =
+const AREAS_REGEXP =
   /<select id='xqdm' name='xqdm'.*?><option value=''>\(请选择\)<\/option>(.*?)<\/select>/;
-const LOCATION_ITEM_REGEXP = /<option value='(.+?)' >\d+-(.*?)<\/option>/g;
+const AREA_ITEM_REGEXP = /<option value='(.+?)' >\d+-(.*?)<\/option>/g;
 const COURSE_TYPES_REGEXP =
   /<select id='kcdldm' name='kcdldm'.*?><option value=''>\(请选择\)<\/option>(.*?)<\/select>/;
 const COURSE_TYPE_ITEM_REGEXP = /<option value='(.+?)' >(.*?)<\/option>/g;
@@ -81,8 +81,8 @@ const getSelectInfo = (content: string): UnderSelectInfo => {
     value,
     name,
   }));
-  const locationText = content.match(LOCATIONS_REGEXP)![1];
-  const locations = Array.from(locationText.matchAll(LOCATION_ITEM_REGEXP)).map(
+  const areaText = content.match(AREAS_REGEXP)![1];
+  const areas = Array.from(areaText.matchAll(AREA_ITEM_REGEXP)).map(
     ([, value, name]) => ({
       value,
       name,
@@ -110,11 +110,11 @@ const getSelectInfo = (content: string): UnderSelectInfo => {
     endTime,
 
     grades,
-    locations,
+    areas,
     courseOffices,
     courseTypes,
 
-    currentLocation: name.includes("本部")
+    currentArea: name.includes("本部")
       ? "本部"
       : name.includes("净月")
         ? "净月"
