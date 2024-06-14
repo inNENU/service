@@ -65,10 +65,10 @@ import {
   postSystemLoginHandler,
 } from "./post-system/index.js";
 import {
-  processHandler,
-  searchHandler,
-  selectInfoHandler,
-  selectLoginHandler,
+  // processHandler,
+  // searchHandler,
+  // selectInfoHandler,
+  // selectLoginHandler,
   studentAmountHandler,
 } from "./select/index.js";
 import {
@@ -84,6 +84,7 @@ import {
   underStudyGradeDetailHandler,
   underStudyGradeListHandler,
   underStudyLoginHandler,
+  underStudySearchCourseHandler,
   underStudySelectCategoryHandler,
   underStudySelectInfoHandler,
   underStudySelectedCourseHandler,
@@ -95,9 +96,9 @@ import {
   underCourseTableHandler,
   underCreateStudentArchiveHandler,
   underExamPlaceHandler,
-  underGradeListHandler,
+  // underGradeListHandler,
   underInfoHandler,
-  underSpecialExamHandler,
+  // underSpecialExamHandler,
   underStudentArchiveHandler,
   underSystemCheckHandler,
   underSystemLoginHandler,
@@ -180,6 +181,7 @@ app.post("/under-study/grade-list", underStudyGradeListHandler);
 app.post("/under-study/login", underStudyLoginHandler);
 app.post("/under-study/select/category", underStudySelectCategoryHandler);
 app.post("/under-study/select/info", underStudySelectInfoHandler);
+app.post("/under-study/select/search", underStudySearchCourseHandler);
 app.post("/under-study/select/process", underStudyProcessCourseHandler);
 app.post("/under-study/select/selected", underStudySelectedCourseHandler);
 app.post("/under-study/special-exam", underStudySpecialExamHandler);
@@ -191,10 +193,10 @@ app.post("/under-system/course-table", underCourseTableHandler);
 app.post("/under-system/create-archive", underCreateStudentArchiveHandler);
 app.post("/under-system/exam-place", underExamPlaceHandler);
 /** @deprecated Replaced by "/under-study/grade-detail" and "/under-study/grade-list" */
-app.post("/under-system/grade-list", underGradeListHandler);
+// app.post("/under-system/grade-list", underGradeListHandler);
 app.post("/under-system/info", underInfoHandler);
 /** @deprecated Replaced by "/under-study/special-exam" */
-app.post("/under-system/special-exam", underSpecialExamHandler);
+// app.post("/under-system/special-exam", underSpecialExamHandler);
 app.post("/under-system/student-archive", underStudentArchiveHandler);
 app.post("/under-system/test-query", underTestQueryHandler);
 
@@ -222,13 +224,15 @@ app.post("/enroll/post-recommend-plan", postRecommendPlanHandler);
 app.post("/enroll/post-plan", postEnrollPlanHandler);
 
 /** @deprecated Replaced by "/under-study/login" */
-app.post("/select/login", selectLoginHandler);
+// app.post("/select/login", selectLoginHandler);
 /** @deprecated Replaced by "/under-study/select/category" and "/under-study/select/info" */
-app.post("/select/info", selectInfoHandler);
-app.post("/select/search", searchHandler);
+// app.post("/select/info", selectInfoHandler);
+/** @deprecated Replaced by "/under-study/select/search" */
+// app.post("/select/search", searchHandler);
 app.post("/select/student-amount", studentAmountHandler);
-app.delete("/select/process", processHandler);
-app.put("/select/process", processHandler);
+/** @deprecated Replaced by "/under-study/select/process" */
+// app.delete("/select/process", processHandler);
+// app.put("/select/process", processHandler);
 
 app.post("/vpn/cas-login", vpnCASLoginHandler);
 app.post("/vpn/login", vpnLoginHandler);
