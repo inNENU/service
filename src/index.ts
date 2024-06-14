@@ -86,8 +86,10 @@ import {
   underStudyLoginHandler,
   underStudySelectCategoryHandler,
   underStudySelectInfoHandler,
+  underStudySelectedCourseHandler,
   underStudySpecialExamHandler,
 } from "./under-study/index.js";
+import { underStudyProcessCourseHandler } from "./under-study/select/process.js";
 import {
   underChangeMajorPlanHandler,
   underCourseTableHandler,
@@ -178,6 +180,8 @@ app.post("/under-study/grade-list", underStudyGradeListHandler);
 app.post("/under-study/login", underStudyLoginHandler);
 app.post("/under-study/select/category", underStudySelectCategoryHandler);
 app.post("/under-study/select/info", underStudySelectInfoHandler);
+app.post("/under-study/select/process", underStudyProcessCourseHandler);
+app.post("/under-study/select/selected", underStudySelectedCourseHandler);
 app.post("/under-study/special-exam", underStudySpecialExamHandler);
 
 app.post("/under-system/login", underSystemLoginHandler);
