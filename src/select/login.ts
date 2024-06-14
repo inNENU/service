@@ -45,8 +45,13 @@ export const selectLogin = async (
   if (!isUnder)
     return {
       success: false,
-      msg: "暂未适配研究生选课新系统",
+      msg: "研究生选课已于2024年1月使用全新系统，暂未适配。",
     };
+
+  return {
+    success: false,
+    msg: "本次教务处首次使用全新选课系统，暂未适配",
+  };
 
   const homePage = isUnder
     ? "http://xk.nenu.edu.cn"
