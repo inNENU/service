@@ -9,7 +9,7 @@ export default [
     output: [
       {
         file: "./dist/encrypt.js",
-        format: "cjs",
+        format: "esm",
         sourcemap: true,
       },
     ],
@@ -19,7 +19,7 @@ export default [
       esbuild({
         charset: "utf8",
         minify: true,
-        target: "es2015",
+        target: "es2017",
       }),
     ],
   },
