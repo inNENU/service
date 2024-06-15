@@ -190,49 +190,52 @@ const getSelectInfo = (content: string): UnderSelectInfo => {
 
 const checkCourseCommentary = async (
   cookieHeader: string,
+  categoryUrl: string,
 ): Promise<{ completed: boolean; msg: string }> => {
   const response = await fetch(`${CHECK_URL}?xnxqdm=&_=${Date.now()}`, {
     headers: {
       Cookie: cookieHeader,
+      Referer: categoryUrl,
       ...EDGE_USER_AGENT_HEADERS,
     },
   });
 
-  if (
-    response.status !== 200 ||
-    response.headers.get("content-type")?.includes("text/html")
-  ) {
+  if (response.status !== 200) {
     throw new Error("评教检查失败");
   }
 
-  const result = (await response.json()) as {
-    code: number;
-    data: "";
-    message: string;
-  };
+  try {
+    const { code, message } = (await response.json()) as {
+      code: number;
+      data: "";
+      message: string;
+    };
 
-  if (result.code === 0 && result.message.includes("评价已完成")) {
-    return { completed: true, msg: result.message };
-  }
-
-  if (result.code === -1) {
-    if (result.message.includes("下次可检查时间为：")) {
-      const time = /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.exec(
-        result.message,
-      )?.[0];
-
-      return { completed: false, msg: `检查过于频繁，请于 ${time} 后重试` };
+    if (code === 0 && message.includes("评价已完成")) {
+      return { completed: true, msg: message };
     }
 
-    if (result.message.includes("评价未完成")) {
-      return { completed: false, msg: result.message };
-    }
-  }
+    if (code === -1) {
+      if (message.includes("下次可检查时间为：")) {
+        const time = /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.exec(message)?.[0];
 
-  return {
-    completed: false,
-    msg: result.message,
-  };
+        return { completed: false, msg: `检查过于频繁，请于 ${time} 后重试` };
+      }
+
+      if (message.includes("评价未完成")) {
+        return { completed: false, msg: message };
+      }
+    }
+
+    return {
+      completed: false,
+      msg: message,
+    };
+  } catch (err) {
+    console.error(err);
+
+    throw new Error("评教检查失败");
+  }
 };
 
 export const underStudySelectInfoHandler: RequestHandler<
@@ -265,20 +268,23 @@ export const underStudySelectInfoHandler: RequestHandler<
       } as CommonFailedResponse);
     }
 
-    const infoUrl = `${UNDER_STUDY_SERVER}${link}`;
+    const categoryUrl = `${UNDER_STUDY_SERVER}${link}`;
 
-    const response = await fetch(infoUrl, {
+    const response = await fetch(categoryUrl, {
       headers: {
         Cookie: cookieHeader,
-        Referer: infoUrl,
+        Referer: categoryUrl,
         ...EDGE_USER_AGENT_HEADERS,
       },
     });
 
     let content = await response.text();
 
-    if (content.includes("<title>评教检查</title>")) {
-      const { completed } = await checkCourseCommentary(cookieHeader);
+    if (content.match(/<title>.*?评教检查<\/title>/)) {
+      const { completed } = await checkCourseCommentary(
+        cookieHeader,
+        categoryUrl,
+      );
 
       if (!completed) {
         return res.json({
@@ -289,10 +295,10 @@ export const underStudySelectInfoHandler: RequestHandler<
       }
 
       // 重新请求选课信息
-      content = await fetch(infoUrl, {
+      content = await fetch(categoryUrl, {
         headers: {
           Cookie: cookieHeader,
-          Referer: infoUrl,
+          Referer: categoryUrl,
           ...EDGE_USER_AGENT_HEADERS,
         },
       }).then((res) => res.text());

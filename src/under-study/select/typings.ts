@@ -2,7 +2,7 @@
  * 原始班级数据
  */
 export interface RawUnderSelectClassItem {
-  /* ========= 基础信息 ========== */
+  /* ========= 课程基础信息 ========== */
 
   /**
    * 课程名称
@@ -41,18 +41,6 @@ export interface RawUnderSelectClassItem {
    */
   kcflmc: string;
   /**
-   * 班级名称，可能为空
-   *
-   * @example "理科1班"
-   */
-  jxbmc: string;
-  /**
-   * 课容量
-   *
-   * @example 125
-   */
-  pkrs: number;
-  /**
    * 学分
    *
    * @example 3
@@ -65,8 +53,20 @@ export interface RawUnderSelectClassItem {
    */
   zxs: number;
 
-  /* ========= 上课信息 ========== */
+  /* ========= 班级信息 ========== */
 
+  /**
+   * 班级名称，可能为空
+   *
+   * @example "理科1班"
+   */
+  jxbmc: string;
+  /**
+   * 课容量
+   *
+   * @example 125
+   */
+  pkrs: number;
   /**
    * 教师姓名
    *
@@ -74,9 +74,9 @@ export interface RawUnderSelectClassItem {
    */
   teaxm: string;
   /**
-   * 教师姓名 (多个)
+   * 教师姓名 (多个)，用英文逗号分隔
    *
-   * @example "?????"
+   * @example "王庆勇,单桂晔,郭晋芝,周亚洲,邢海军,王玲玲,高志华,曹峻鸣"
    */
   teaxms: string;
   /**
@@ -86,9 +86,9 @@ export interface RawUnderSelectClassItem {
    */
   jxcdmc: "逸夫教学楼104室";
   /**
-   * 上课地址 (多个)
+   * 上课地址 (多个)，用英文逗号分隔
    *
-   * @example "????"
+   * @example "物理学院116室,物理学院113,物理学院204室,电学实验五室（222室）,电学实验三室（218室）,力热实验二室（201室）,力热实验三室（229室）,力热实验五室（245室）,电学实验二室（217室）,光学实验一室（216室）,力热实验六室（227室）"
    */
   jxcdmcs: string;
   /**
@@ -128,11 +128,17 @@ export interface RawUnderSelectClassItem {
   /** 课程代码 */
   kcdm: string;
 
+  /**
+   * 当前选择人数
+   *
+   * @example "281"
+   */
+  jxbrs: string;
+
   /** ?? */
   xq: "2";
   xzfsmc: "预选";
   jcdm2: "2-08,2-07,5-05,5-06";
-  jxbrs: "281";
   kkbmdm: "SXXBHB2zzI";
   kcfldm: "4";
   zc: "1";
@@ -152,29 +158,45 @@ export interface RawUnderSelectClassItem {
   sdm: "13253262";
 }
 
+/** 课程信息 */
+export interface UnderSelectCourseInfo {
+  /** 课程名称 */
+  name: string;
+  /** 开课单位 */
+  courseOffice: string;
+  /** 课程类别简称  */
+  courseShortType: string;
+  /** 课程类别 */
+  courseType: string;
+  /** 课程分类 */
+  courseCategory: string;
+
+  /** 学分 */
+  point: number;
+  /** 总学时 */
+  hours: number;
+
+  /** 课程 ID  */
+  courseId: string;
+  /** 课程号 */
+  courseNumber: string;
+}
+
 /** 班级信息 */
-export interface UnderSelectSearchClass {
+export interface UnderSelectSearchClass extends UnderSelectCourseInfo {
+  /** 班级名称 */
+  className: string;
+  /** 教师 */
+  teacher: string;
+  /** 地点 */
+  location: string;
   /** 上课时间 */
   time: string;
   /** 课容量 */
   capacity: number;
 
-  /** 课程类别 */
-  courseType: string;
-  /** 课程分类 */
-  courseCategory: string;
-  /** 教师 */
-  teacher: string;
-  /** 地点 */
-  location: string;
-  /** 开课单位 */
-  courseOffice: string;
-  /** 总学时 */
-  hours: number;
   /** 班级代码 */
   classCode: string;
-  /** 课程 ID  */
-  courseId: string;
   /** 班级 ID */
   classId: string;
 }
