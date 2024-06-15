@@ -6,67 +6,69 @@ import type { RequestHandler } from "express";
 
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 
-const POST_ENROLL_PLAN_URL = "https://yz.nenu.edu.cn/source/ssml/2024zsml.html";
+const POST_RECOMMEND_PLAN_URL =
+  "https://math127.nenu.edu.cn/yjsy/HData/ZSB/ZSJZ2024-TM-1.html";
 const schoolInfoRegExp =
-  /bXYName\['.*?']="<tr><td colspan=4><a href='(.*?)' target='_blank'>([^<]+) ([^<]+)<\/a><br>联系方式：(\S+?)，(\S+?)，(\S+?)<\/td><\/tr>";/g;
+  /bXYName\['.*?']="<tr><td colspan=6><a href='(.*?)' target='_blank'>([^<]+) ([^<]+)<\/a><br>联系方式：(\S+?)，(\S+?)，(\S+?)<\/td><\/tr>";/g;
 
-const TABLE_HEADER = `<tr><th>专业代码</th><th>人数</th><th>考试科目</th><th>备注</th></tr>`;
+const TABLE_HEADER = `<tr><th>招生专业</th><th>研究方向</th><th>学习方式</th><th>招生类型</th><th>拟接收人数</th><th>备注</th></tr>`;
 
-export interface PostEnrollPlanInfo {
+export interface GradRecommendPlanInfo {
   major: string;
   code: string;
-  type: string;
   content: RichTextNode[];
 }
 
-export interface PostEnrollSchoolPlan {
+export interface GradRecommendSchoolPlan {
   name: string;
   code: string;
   site: string;
   contact: string;
   phone: string;
   mail: string;
-  majors: PostEnrollPlanInfo[];
+  majors: GradRecommendPlanInfo[];
 }
 
-export interface PostEnrollSuccessResponse {
+export interface GradRecommendSuccessResponse {
   success: true;
-  data: PostEnrollSchoolPlan[];
+  data: GradRecommendSchoolPlan[];
 }
 
 if (!existsSync("./cache")) mkdirSync("./cache");
 
-export const postEnrollPlanHandler: RequestHandler<
+export const gradRecommendPlanHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
   EmptyObject
 > = async (_req, res) => {
   try {
-    const response = await fetch(POST_ENROLL_PLAN_URL);
+    const response = await fetch(POST_RECOMMEND_PLAN_URL);
 
-    if (response.status !== 200) throw new Error("获取招生计划失败");
+    if (response.status !== 200) throw new Error("获取推免计划失败");
 
     const content = await response.text();
 
     // check cache
     if (
-      existsSync("./cache/post-plan.html") &&
+      existsSync("./cache/enroll-grad-recommend-plan.html") &&
       content.length ===
-        readFileSync("./cache/post-plan.html", { encoding: "utf-8" }).length
+        readFileSync("./cache/enroll-grad-recommend-plan.html", {
+          encoding: "utf-8",
+        }).length
     )
       return res.json({
         success: true,
         data: JSON.parse(
-          readFileSync("./cache/post-plan.json", {
+          readFileSync("./cache/enroll-grad-recommend-plan.json", {
             encoding: "utf-8",
           }),
-        ) as PostEnrollSchoolPlan[],
+        ) as GradRecommendSchoolPlan[],
       });
 
-    const schoolInfo: PostEnrollSchoolPlan[] = await Promise.all(
+    const schoolInfo: GradRecommendSchoolPlan[] = await Promise.all(
       Array.from(content.matchAll(schoolInfoRegExp)).map(
         async ([, site, code, name, contact, phone, mail]) => {
-          const info: PostEnrollSchoolPlan = {
+          const info: GradRecommendSchoolPlan = {
             name,
             site,
             code,
@@ -92,30 +94,20 @@ export const postEnrollPlanHandler: RequestHandler<
             majorCodes.map(async ([, code], index) => {
               const [, majorName] = majorNameRegExp[index];
 
-              const majorTypeRegExp = new RegExp(
-                `dXYName\\['${name}'\\]\\['(${code})'\\]\\.push\\("<tr><td colspan=4><b>\\1\\s+\\S+【(\\S+)】<\\/b><\\/td><\\/tr>"`,
-              );
-
-              const startLine = `dXYName['${name}']['${code}'].push("<tr>");`;
-
-              const start = content.indexOf(startLine) + startLine.length;
-              const end = content.lastIndexOf(
-                `dXYName['${name}']['${code}'].push("</tr>");`,
-              );
-              const majorContent = content.substring(start, end);
-
               const lines = Array.from(
-                majorContent.matchAll(
-                  /dXYName\['.*?'\]\['[^']+'\]\.push\("(.*)"\)/g,
+                content.matchAll(
+                  new RegExp(
+                    `dXYName\\['${name}'\\]\\['${code}'\\]\\.push\\('(.*)'\\)`,
+                    "g",
+                  ),
                 ),
               ).map(([, line]) => line.replace(/<\/?center>/g, ""));
 
               return {
                 major: majorName,
                 code,
-                type: majorTypeRegExp.exec(content)?.[2] ?? "",
                 content: await getRichTextNodes(
-                  `<table>${TABLE_HEADER}<tr>${lines.join("\n")}</tr></table>`,
+                  `<table>${TABLE_HEADER}${lines.join("\n")}</table>`,
                 ),
               };
             }),
@@ -126,12 +118,16 @@ export const postEnrollPlanHandler: RequestHandler<
       ),
     );
 
-    writeFileSync("./cache/post-plan.html", content, {
+    writeFileSync("./cache/enroll-grad-recommend-plan.html", content, {
       encoding: "utf-8",
     });
-    writeFileSync("./cache/post-plan.json", JSON.stringify(schoolInfo), {
-      encoding: "utf-8",
-    });
+    writeFileSync(
+      "./cache/enroll-grad-recommend-plan.json",
+      JSON.stringify(schoolInfo),
+      {
+        encoding: "utf-8",
+      },
+    );
 
     return res.json({ success: true, data: schoolInfo });
   } catch (err) {

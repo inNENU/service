@@ -3,24 +3,24 @@ import type { RequestHandler } from "express";
 
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 
-export interface PostAdmissionPostOptions {
+export interface GradAdmissionOptions {
   name: string;
   id: string;
 }
 
-export interface PostAdmissionSuccessResponse {
+export interface GradAdmissionSuccessResponse {
   success: true;
   info: { text: string; value: string }[];
 }
 
-export type PostAdmissionResponse =
-  | PostAdmissionSuccessResponse
+export type GradAdmissionResponse =
+  | GradAdmissionSuccessResponse
   | CommonFailedResponse;
 
 const getInfo = async ({
   id,
   name,
-}: PostAdmissionPostOptions): Promise<PostAdmissionResponse> => {
+}: GradAdmissionOptions): Promise<GradAdmissionResponse> => {
   const cookieStore = new CookieStore();
   const mainPageResponse = await fetch("https://yzb.nenu.edu.cn/yjs/sslq/", {
     method: "GET",
@@ -144,10 +144,10 @@ const getInfo = async ({
   };
 };
 
-export const postAdmissionHandler: RequestHandler<
+export const gradAdmissionHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  PostAdmissionPostOptions
+  GradAdmissionOptions
 > = async (req, res) => {
   try {
     res.json(await getInfo(req.body));

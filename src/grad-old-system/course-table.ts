@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
-import { postSystemLogin } from "./login.js";
-import { POST_SYSTEM_HTTPS_SERVER } from "./utils.js";
+import { gradOldSystemLogin } from "./login.js";
+import { GRAD_OLD_SYSTEM_HTTPS_SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import { semesterStartTime } from "../config/semester-start-time.js";
 import type {
@@ -55,32 +55,32 @@ const getCourses = (content: string): TableItem =>
     }),
   );
 
-export interface PostCourseTableOptions extends Partial<LoginOptions> {
+export interface GradCourseTableOptions extends Partial<LoginOptions> {
   /** 查询时间 */
   time: string;
 }
 
-export interface PostCourseTableSuccessResponse {
+export interface GradCourseTableSuccessResponse {
   success: true;
   data: TableItem;
   startTime: string;
 }
 
-export type PostCourseTableFailedResponse = AuthLoginFailedResult;
+export type GradCourseTableFailedResponse = AuthLoginFailedResult;
 
-export type PostCourseTableResponse =
-  | PostCourseTableSuccessResponse
-  | PostCourseTableFailedResponse;
+export type GradCourseTableResponse =
+  | GradCourseTableSuccessResponse
+  | GradCourseTableFailedResponse;
 
-export const postCourseTableHandler: RequestHandler<
+export const gradOldCourseTableHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  PostCourseTableOptions
+  GradCourseTableOptions
 > = async (req, res) => {
   try {
     const { time } = req.body;
 
-    const QUERY_URL = `${POST_SYSTEM_HTTPS_SERVER}/tkglAction.do?${new URLSearchParams(
+    const QUERY_URL = `${GRAD_OLD_SYSTEM_HTTPS_SERVER}/tkglAction.do?${new URLSearchParams(
       {
         method: "goListKbByXs",
         xnxqh: time,
@@ -96,7 +96,7 @@ export const postCourseTableHandler: RequestHandler<
           msg: "请提供账号密码",
         } as CommonFailedResponse);
 
-      const result = await postSystemLogin(req.body as LoginOptions);
+      const result = await gradOldSystemLogin(req.body as LoginOptions);
 
       if (!result.success) return res.json(result);
 
@@ -106,7 +106,7 @@ export const postCourseTableHandler: RequestHandler<
     const response = await fetch(QUERY_URL, {
       headers: {
         Cookie: cookieHeader,
-        Referer: `${POST_SYSTEM_HTTPS_SERVER}/tkglAction.do?method=kbxxXs&tktime=${getIETimeStamp()}`,
+        Referer: `${GRAD_OLD_SYSTEM_HTTPS_SERVER}/tkglAction.do?method=kbxxXs&tktime=${getIETimeStamp()}`,
         "User-Agent": IE_8_USER_AGENT,
       },
     });
@@ -125,7 +125,7 @@ export const postCourseTableHandler: RequestHandler<
       success: true,
       data: tableData,
       startTime: semesterStartTime[time],
-    } as PostCourseTableSuccessResponse);
+    } as GradCourseTableSuccessResponse);
   } catch (err) {
     const { message } = err as Error;
 

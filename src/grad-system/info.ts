@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
 import { getAction } from "./action.js";
-import { postNewSystemLogin } from "./login.js";
+import { gradSystemLogin } from "./login.js";
 import { MAIN_URL, SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import type {
@@ -13,7 +13,7 @@ import type {
 const TITLE_REG_EXP = /aField\s?="(.*?)"\.split\("\t"\);/;
 const VALUE_REG_EXP = /aDataLS\s?="(.*?)"\.split\("\t"\);/;
 
-export interface PostStudentInfo {
+export interface GradStudentInfo {
   /** 姓名 */
   name: string;
   /** 性别 */
@@ -45,7 +45,7 @@ export interface PostStudentInfo {
   inDate: string;
 }
 
-const getInfo = (content: string): PostStudentInfo => {
+const getInfo = (content: string): GradStudentInfo => {
   const titles = TITLE_REG_EXP.exec(content)![1].split("\t");
   const values = VALUE_REG_EXP.exec(content)![1].split("\t");
 
@@ -90,7 +90,7 @@ const getInfo = (content: string): PostStudentInfo => {
 
 export interface InfoSuccessResponse {
   success: true;
-  info: PostStudentInfo;
+  info: GradStudentInfo;
 }
 
 export type InfoResponse =
@@ -98,7 +98,7 @@ export type InfoResponse =
   | AuthLoginFailedResult
   | CommonFailedResponse;
 
-export const getPostInfo = async (
+export const getGradInfo = async (
   cookieHeader: string,
 ): Promise<InfoResponse> => {
   const result = await getAction(cookieHeader);
@@ -141,7 +141,7 @@ export const getPostInfo = async (
   };
 };
 
-export const postNewInfoHandler: RequestHandler<
+export const gradInfoHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
   Partial<LoginOptions>
@@ -156,14 +156,14 @@ export const postNewInfoHandler: RequestHandler<
           msg: "请提供账号密码",
         } as CommonFailedResponse);
 
-      const result = await postNewSystemLogin(req.body as LoginOptions);
+      const result = await gradSystemLogin(req.body as LoginOptions);
 
       if (!result.success) return res.json(result);
 
       cookieHeader = result.cookieStore.getHeader(SERVER);
     }
 
-    return res.json(await getPostInfo(cookieHeader));
+    return res.json(await getGradInfo(cookieHeader));
   } catch (err) {
     const { message } = err as Error;
 

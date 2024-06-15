@@ -25,13 +25,23 @@ import {
   resetPasswordHandler,
 } from "./auth/index.js";
 import {
-  postAdmissionHandler,
-  postEnrollPlanHandler,
-  postRecommendPlanHandler,
+  gradAdmissionHandler,
+  gradEnrollPlanHandler,
+  gradRecommendPlanHandler,
   underAdmissionHandler,
   underEnrollPlanHandler,
   underHistoryGradeHandler,
 } from "./enroll/index.js";
+import {
+  gradOldCourseTableHandler,
+  gradOldGradeListHandler,
+  gradOldSystemCheckHandler,
+  gradOldSystemLoginHandler,
+} from "./grad-old-system/index.js";
+import {
+  gradInfoHandler,
+  gradSystemLoginHandler,
+} from "./grad-system/index.js";
 import { libraryPeopleHandler } from "./library/people.js";
 import {
   academicInfoHandler,
@@ -54,23 +64,6 @@ import {
   myInfoHandler,
   myLoginHandler,
 } from "./my/index.js";
-import {
-  postNewInfoHandler,
-  postNewSystemLoginHandler,
-} from "./post-new-system/index.js";
-import {
-  postCourseTableHandler,
-  postGradeListHandler,
-  postSystemCheckHandler,
-  postSystemLoginHandler,
-} from "./post-system/index.js";
-import {
-  // processHandler,
-  // searchHandler,
-  // selectInfoHandler,
-  // selectLoginHandler,
-  studentAmountHandler,
-} from "./select/index.js";
 import {
   test301Handler,
   test302Handler,
@@ -192,21 +185,29 @@ app.post("/under-system/change-major-plan", underChangeMajorPlanHandler);
 app.post("/under-system/course-table", underCourseTableHandler);
 app.post("/under-system/create-archive", underCreateStudentArchiveHandler);
 app.post("/under-system/exam-place", underExamPlaceHandler);
-/** @deprecated Replaced by "/under-study/grade-detail" and "/under-study/grade-list" */
-// app.post("/under-system/grade-list", underGradeListHandler);
 app.post("/under-system/info", underInfoHandler);
-/** @deprecated Replaced by "/under-study/special-exam" */
-// app.post("/under-system/special-exam", underSpecialExamHandler);
 app.post("/under-system/student-archive", underStudentArchiveHandler);
 app.post("/under-system/test-query", underTestQueryHandler);
 
-app.post("/post-new-system/login", postNewSystemLoginHandler);
-app.post("/post-new-system/info", postNewInfoHandler);
+app.post("/grad-system/login", gradSystemLoginHandler);
+app.post("/grad-system/info", gradInfoHandler);
+/** @deprecated */
+app.post("/post-new-system/login", gradSystemLoginHandler);
+/** @deprecated */
+app.post("/post-new-system/info", gradInfoHandler);
 
-app.post("/post-system/login", postSystemLoginHandler);
-app.post("/post-system/check", postSystemCheckHandler);
-app.post("/post-system/course-table", postCourseTableHandler);
-app.post("/post-system/grade-list", postGradeListHandler);
+app.post("/grad-old-system/login", gradOldSystemLoginHandler);
+app.post("/grad-old-system/check", gradOldSystemCheckHandler);
+app.post("/grad-old-system/course-table", gradOldCourseTableHandler);
+app.post("/grad-old-system/grade-list", gradOldGradeListHandler);
+/** @deprecated */
+app.post("/post-system/login", gradOldSystemLoginHandler);
+/** @deprecated */
+app.post("/post-system/check", gradOldSystemCheckHandler);
+/** @deprecated */
+app.post("/post-system/course-table", gradOldCourseTableHandler);
+/** @deprecated */
+app.post("/post-system/grade-list", gradOldGradeListHandler);
 
 app.get("/main/academic", academicInfoHandler);
 app.post("/main/academic-list", academicListHandler);
@@ -219,20 +220,15 @@ app.get("/enroll/under-admission", underAdmissionHandler);
 app.post("/enroll/under-admission", underAdmissionHandler);
 app.post("/enroll/under-history-grade", underHistoryGradeHandler);
 app.post("/enroll/under-plan", underEnrollPlanHandler);
-app.post("/enroll/post-admission", postAdmissionHandler);
-app.post("/enroll/post-recommend-plan", postRecommendPlanHandler);
-app.post("/enroll/post-plan", postEnrollPlanHandler);
-
-/** @deprecated Replaced by "/under-study/login" */
-// app.post("/select/login", selectLoginHandler);
-/** @deprecated Replaced by "/under-study/select/category" and "/under-study/select/info" */
-// app.post("/select/info", selectInfoHandler);
-/** @deprecated Replaced by "/under-study/select/search" */
-// app.post("/select/search", searchHandler);
-app.post("/select/student-amount", studentAmountHandler);
-/** @deprecated Replaced by "/under-study/select/process" */
-// app.delete("/select/process", processHandler);
-// app.put("/select/process", processHandler);
+app.post("/enroll/grad-admission", gradAdmissionHandler);
+app.post("/enroll/grad-recommend-plan", gradRecommendPlanHandler);
+app.post("/enroll/grad-plan", gradEnrollPlanHandler);
+/** @deprecated */
+app.post("/enroll/post-admission", gradAdmissionHandler);
+/** @deprecated */
+app.post("/enroll/post-recommend-plan", gradRecommendPlanHandler);
+/** @deprecated */
+app.post("/enroll/post-plan", gradEnrollPlanHandler);
 
 app.post("/vpn/cas-login", vpnCASLoginHandler);
 app.post("/vpn/login", vpnLoginHandler);

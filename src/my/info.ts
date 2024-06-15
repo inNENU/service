@@ -152,7 +152,7 @@ export const getMyInfo = async (
         birth: personInfo.csrq,
       };
 
-      // fix post birth
+      // fix grad birth
       if (/[A-Z]/.test(personInfo.csrq)) {
         const [day, month, year] = personInfo.csrq.split("-");
 

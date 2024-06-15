@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { POST_SYSTEM_HTTPS_SERVER } from "./utils.js";
+import { GRAD_OLD_SYSTEM_HTTPS_SERVER } from "./utils.js";
 import type {
   CommonFailedResponse,
   CookieOptions,
@@ -9,14 +9,14 @@ import type {
 } from "../typings.js";
 import { IE_8_USER_AGENT, cookies2Header } from "../utils/index.js";
 
-export const postSystemCheckHandler: RequestHandler<
+export const gradOldSystemCheckHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
   CookieOptions
 > = async (req, res) => {
   try {
     const response = await fetch(
-      `${POST_SYSTEM_HTTPS_SERVER}/framework/userInfo_edit.jsp?winid=win6`,
+      `${GRAD_OLD_SYSTEM_HTTPS_SERVER}/framework/userInfo_edit.jsp?winid=win6`,
       {
         headers: {
           Cookie: req.headers.cookie ?? cookies2Header(req.body.cookies),

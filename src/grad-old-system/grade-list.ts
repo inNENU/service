@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
-import { postSystemLogin } from "./login.js";
-import { POST_SYSTEM_HTTPS_SERVER } from "./utils.js";
+import { gradOldSystemLogin } from "./login.js";
+import { GRAD_OLD_SYSTEM_HTTPS_SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
@@ -11,7 +11,7 @@ import type {
 } from "../typings.js";
 import { IE_8_USER_AGENT, getIETimeStamp } from "../utils/index.js";
 
-export interface PostGradeResult {
+export interface GradGradeResult {
   /** 修读时间 */
   time: string;
   /** 课程名称 */
@@ -38,13 +38,13 @@ export interface PostGradeResult {
   reLearn: string;
 }
 
-export interface PostGradeListSuccessResponse {
+export interface GradGradeListSuccessResponse {
   success: true;
-  data: PostGradeResult[];
+  data: GradGradeResult[];
 }
 
-export type PostGradeListResponse =
-  | PostGradeListSuccessResponse
+export type GradGradeListResponse =
+  | GradGradeListSuccessResponse
   | AuthLoginFailedResult
   | CommonFailedResponse;
 
@@ -80,7 +80,7 @@ const otherFieldsRegExp =
 const DEFAULT_TABLE_FIELD =
   "学号:1:1:90:a.xh,姓名:2:1:110:a.xm,开课学期:3:1:120:a.xqmc,课程名称:4:1:130:a.kcmc,总成绩:5:1:70:a.zcj,成绩标志:6:1:90:,课程性质:7:1:110:,课程类别:8:1:90:,学时:9:1:70:a.zxs,学分:10:1:70:a.xf,考试性质:11:1:100:ksxz.dmmc,补重学期:15:1:100:";
 const DEFAULT_OTHER_FIELD = "null";
-const QUERY_URL = `${POST_SYSTEM_HTTPS_SERVER}/xszqcjglAction.do?method=queryxscj`;
+const QUERY_URL = `${GRAD_OLD_SYSTEM_HTTPS_SERVER}/xszqcjglAction.do?method=queryxscj`;
 
 const getDisplayTime = (time: string): string => {
   const [startYear, endYear, semester] = time.split("-");
@@ -90,7 +90,7 @@ const getDisplayTime = (time: string): string => {
     : `${endYear.substring(2)}年春`;
 };
 
-export const getGrades = (content: string, isJS = false): PostGradeResult[] =>
+export const getGrades = (content: string, isJS = false): GradGradeResult[] =>
   Array.from(content.matchAll(isJS ? jsGradeItemRegExp : gradeItemRegExp)).map(
     ([, item]) => {
       const [
@@ -139,7 +139,7 @@ export const getGrades = (content: string, isJS = false): PostGradeResult[] =>
 export const getGradeLists = async (
   cookieHeader: string,
   content: string,
-): Promise<PostGradeResult[]> => {
+): Promise<GradGradeResult[]> => {
   // We force writing these 2 field to ensure we care getting the default table structure
   const tableFields = tableFieldsRegExp.exec(content)![1];
   const otherFields = String(otherFieldsRegExp.exec(content)?.[1]);
@@ -208,7 +208,7 @@ export const getGradeLists = async (
   return grades;
 };
 
-export const postGradeListHandler: RequestHandler<
+export const gradOldGradeListHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
   Partial<LoginOptions>
@@ -223,7 +223,7 @@ export const postGradeListHandler: RequestHandler<
           msg: "请提供账号密码",
         } as CommonFailedResponse);
 
-      const result = await postSystemLogin(req.body as LoginOptions);
+      const result = await gradOldSystemLogin(req.body as LoginOptions);
 
       if (!result.success) return res.json(result);
       cookieHeader = result.cookieStore.getHeader(QUERY_URL);
@@ -234,7 +234,7 @@ export const postGradeListHandler: RequestHandler<
       headers: {
         Cookie: cookieHeader,
         "Content-Type": "application/x-www-form-urlencoded",
-        Referer: `${POST_SYSTEM_HTTPS_SERVER}/jiaowu/cjgl/xszq/query_xscj.jsp?tktime=${getIETimeStamp()}`,
+        Referer: `${GRAD_OLD_SYSTEM_HTTPS_SERVER}/jiaowu/cjgl/xszq/query_xscj.jsp?tktime=${getIETimeStamp()}`,
         "User-Agent": IE_8_USER_AGENT,
       },
     });
@@ -253,7 +253,7 @@ export const postGradeListHandler: RequestHandler<
     return res.json({
       success: true,
       data: gradeList,
-    } as PostGradeListSuccessResponse);
+    } as GradGradeListSuccessResponse);
   } catch (err) {
     const { message } = err as Error;
 

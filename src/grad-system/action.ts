@@ -2,18 +2,18 @@ import { MAIN_ACTIONS_URL, MAIN_URL } from "./utils";
 import type { AuthLoginFailedResult } from "../auth";
 import type { CommonFailedResponse } from "../typings";
 
-export interface PostAction {
+export interface GradAction {
   name: string;
   id: string;
 }
 
-export interface PostActionSuccessResponse {
+export interface GradActionSuccessResponse {
   success: true;
-  actions: PostAction[];
+  actions: GradAction[];
 }
 
-export type PostActionResponse =
-  | PostActionSuccessResponse
+export type GradActionResponse =
+  | GradActionSuccessResponse
   | AuthLoginFailedResult
   | CommonFailedResponse;
 
@@ -21,7 +21,7 @@ const ACTION_REG_EXP = /xPageIDs\s*=\s*'(.*?)';[^]+xPageAbc\s*=\s*'(.*?)';/;
 
 export const getAction = async (
   cookieHeader: string,
-): Promise<PostActionResponse> => {
+): Promise<GradActionResponse> => {
   const response = await fetch(MAIN_ACTIONS_URL, {
     headers: {
       Cookie: cookieHeader,

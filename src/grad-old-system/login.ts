@@ -1,6 +1,9 @@
 import type { RequestHandler } from "express";
 
-import { POST_SYSTEM_HTTPS_SERVER, POST_SYSTEM_HTTP_SERVER } from "./utils.js";
+import {
+  GRAD_OLD_SYSTEM_HTTPS_SERVER,
+  GRAD_OLD_SYSTEM_HTTP_SERVER,
+} from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { AUTH_SERVER } from "../auth/utils.js";
@@ -9,13 +12,13 @@ import type { CookieType, EmptyObject, LoginOptions } from "../typings.js";
 import { CookieStore, IE_8_USER_AGENT } from "../utils/index.js";
 import type { VPNLoginFailedResult } from "../vpn/login.js";
 
-export interface PostSystemLoginSuccessResult {
+export interface GradSystemLoginSuccessResult {
   success: true;
   cookieStore: CookieStore;
 }
 
-export type PostSystemLoginResult =
-  | PostSystemLoginSuccessResult
+export type GradSystemLoginResult =
+  | GradSystemLoginSuccessResult
   | AuthLoginFailedResult
   | VPNLoginFailedResult;
 
@@ -24,12 +27,12 @@ const COMMON_HEADERS = {
     "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 10.0; WOW64; Trident/7.0; .NET4.0C; .NET4.0E; .NET CLR 2.0.50727; .NET CLR 3.0.30729; .NET CLR 3.5.30729; Tablet PC 2.0)",
 };
 
-export const postSystemLogin = async (
+export const gradOldSystemLogin = async (
   options: LoginOptions,
   cookieStore = new CookieStore(),
-): Promise<PostSystemLoginResult> => {
+): Promise<GradSystemLoginResult> => {
   const result = await authLogin(options, {
-    service: `${POST_SYSTEM_HTTP_SERVER}/`,
+    service: `${GRAD_OLD_SYSTEM_HTTP_SERVER}/`,
     cookieStore,
   });
 
@@ -85,14 +88,14 @@ export const postSystemLogin = async (
     };
 
   if (
-    finalLocation?.startsWith(POST_SYSTEM_HTTP_SERVER) ??
-    finalLocation?.startsWith(POST_SYSTEM_HTTPS_SERVER)
+    finalLocation?.startsWith(GRAD_OLD_SYSTEM_HTTP_SERVER) ??
+    finalLocation?.startsWith(GRAD_OLD_SYSTEM_HTTPS_SERVER)
   ) {
     const mainResponse = await fetch(finalLocation, {
       method: "GET",
       headers: {
         Cookie: cookieStore.getHeader(finalLocation),
-        Referer: `${POST_SYSTEM_HTTPS_SERVER}/`,
+        Referer: `${GRAD_OLD_SYSTEM_HTTPS_SERVER}/`,
         "User-Agent": IE_8_USER_AGENT,
       },
       redirect: "manual",
@@ -101,17 +104,17 @@ export const postSystemLogin = async (
     const location = mainResponse.headers.get("Location");
 
     if (
-      location === `${POST_SYSTEM_HTTP_SERVER}/framework/main.jsp` ||
-      location === `${POST_SYSTEM_HTTPS_SERVER}/framework/main.jsp`
+      location === `${GRAD_OLD_SYSTEM_HTTP_SERVER}/framework/main.jsp` ||
+      location === `${GRAD_OLD_SYSTEM_HTTPS_SERVER}/framework/main.jsp`
     ) {
-      const ssoUrl = `${POST_SYSTEM_HTTPS_SERVER}/Logon.do?method=logonBySSO`;
+      const ssoUrl = `${GRAD_OLD_SYSTEM_HTTPS_SERVER}/Logon.do?method=logonBySSO`;
 
       await fetch(ssoUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
           Cookie: cookieStore.getHeader(ssoUrl),
-          Referer: `${POST_SYSTEM_HTTPS_SERVER}/framework/main.jsp`,
+          Referer: `${GRAD_OLD_SYSTEM_HTTPS_SERVER}/framework/main.jsp`,
           "User-Agent": IE_8_USER_AGENT,
         },
       });
@@ -119,7 +122,7 @@ export const postSystemLogin = async (
       return {
         success: true,
         cookieStore,
-      } as PostSystemLoginSuccessResult;
+      } as GradSystemLoginSuccessResult;
     }
   }
 
@@ -130,24 +133,24 @@ export const postSystemLogin = async (
   };
 };
 
-export interface PostSystemLoginSuccessResponse {
+export interface GradSystemLoginSuccessResponse {
   success: true;
   /** @deprecated */
   cookies: CookieType[];
 }
 
-export type PostSystemLoginResponse =
-  | PostSystemLoginSuccessResponse
+export type GradSystemLoginResponse =
+  | GradSystemLoginSuccessResponse
   | AuthLoginFailedResult
   | VPNLoginFailedResult;
 
-export const postSystemLoginHandler: RequestHandler<
+export const gradOldSystemLoginHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
   LoginOptions
 > = async (req, res) => {
   try {
-    const result = await postSystemLogin(req.body);
+    const result = await gradOldSystemLogin(req.body);
 
     if (result.success) {
       const cookies = result.cookieStore
@@ -161,7 +164,7 @@ export const postSystemLoginHandler: RequestHandler<
       return res.json({
         success: true,
         cookies,
-      } as PostSystemLoginSuccessResponse);
+      } as GradSystemLoginSuccessResponse);
     }
 
     return res.json(result);

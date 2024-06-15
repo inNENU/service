@@ -7,19 +7,19 @@ import { LoginFailType } from "../config/loginFailTypes.js";
 import type { CookieType, EmptyObject, LoginOptions } from "../typings.js";
 import { CookieStore } from "../utils/index.js";
 
-export interface PostSystemLoginSuccessResult {
+export interface GradSystemLoginSuccessResult {
   success: true;
   cookieStore: CookieStore;
 }
 
-export type PostSystemLoginResult =
-  | PostSystemLoginSuccessResult
+export type GradSystemLoginResult =
+  | GradSystemLoginSuccessResult
   | AuthLoginFailedResult;
 
-export const postNewSystemLogin = async (
+export const gradSystemLogin = async (
   options: LoginOptions,
   cookieStore = new CookieStore(),
-): Promise<PostSystemLoginResult> => {
+): Promise<GradSystemLoginResult> => {
   const result = await authLogin(options, {
     service: `${SERVER}/HProg/yjsy/index_pc.php`,
     cookieStore,
@@ -81,7 +81,7 @@ export const postNewSystemLogin = async (
     return {
       success: true,
       cookieStore,
-    } as PostSystemLoginSuccessResult;
+    } as GradSystemLoginSuccessResult;
   }
 
   return {
@@ -91,23 +91,23 @@ export const postNewSystemLogin = async (
   };
 };
 
-export interface PostSystemLoginSuccessResponse {
+export interface GradSystemLoginSuccessResponse {
   success: true;
   /** @deprecated */
   cookies: CookieType[];
 }
 
-export type PostSystemLoginResponse =
-  | PostSystemLoginSuccessResponse
+export type GradSystemLoginResponse =
+  | GradSystemLoginSuccessResponse
   | AuthLoginFailedResult;
 
-export const postNewSystemLoginHandler: RequestHandler<
+export const gradSystemLoginHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
   LoginOptions
 > = async (req, res) => {
   try {
-    const result = await postNewSystemLogin(req.body);
+    const result = await gradSystemLogin(req.body);
 
     if (result.success) {
       const cookies = result.cookieStore
@@ -121,7 +121,7 @@ export const postNewSystemLoginHandler: RequestHandler<
       return res.json({
         success: true,
         cookies,
-      } as PostSystemLoginSuccessResponse);
+      } as GradSystemLoginSuccessResponse);
     }
 
     return res.json(result);

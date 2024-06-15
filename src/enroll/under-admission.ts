@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 
-export interface UnderAdmissionPostOptions {
+export interface UnderAdmissionOptions {
   name: string;
   id: string;
   testId: string;
@@ -35,7 +35,7 @@ export type UnderAdmissionResponse =
 export const underAdmissionHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  UnderAdmissionPostOptions
+  UnderAdmissionOptions
 > = async (req, res) => {
   try {
     const { testId, id, name } = req.body;
