@@ -47,15 +47,14 @@ export const vpnCASLogin = async (
   cookieStore.applyResponse(casResponse, VPN_DOMAIN);
 
   if (casResponse.status === 302) {
-    const authResult = await authLogin(
-      { id, password },
-      {
-        cookieStore,
-        service: `${VPN_SERVER}/users/auth/cas/callback?url=${encodeURIComponent(
-          `${VPN_SERVER}/users/sign_in`,
-        )}`,
-      },
-    );
+    const authResult = await authLogin({
+      id,
+      password,
+      service: `${VPN_SERVER}/users/auth/cas/callback?url=${encodeURIComponent(
+        `${VPN_SERVER}/users/sign_in`,
+      )}`,
+      cookieStore,
+    });
 
     if (!authResult.success) return authResult;
 

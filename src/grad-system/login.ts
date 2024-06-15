@@ -20,7 +20,8 @@ export const gradSystemLogin = async (
   options: LoginOptions,
   cookieStore = new CookieStore(),
 ): Promise<GradSystemLoginResult> => {
-  const result = await authLogin(options, {
+  const result = await authLogin({
+    ...options,
     service: `${SERVER}/HProg/yjsy/index_pc.php`,
     cookieStore,
   });

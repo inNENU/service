@@ -31,7 +31,8 @@ export const gradOldSystemLogin = async (
   options: LoginOptions,
   cookieStore = new CookieStore(),
 ): Promise<GradSystemLoginResult> => {
-  const result = await authLogin(options, {
+  const result = await authLogin({
+    ...options,
     service: `${GRAD_OLD_SYSTEM_HTTP_SERVER}/`,
     cookieStore,
   });

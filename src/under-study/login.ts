@@ -23,7 +23,8 @@ export const underStudyLogin = async (
   options: LoginOptions,
   cookieStore = new CookieStore(),
 ): Promise<UnderStudyLoginResult> => {
-  const result = await authLogin(options, {
+  const result = await authLogin({
+    ...options,
     service: SSO_LOGIN_URL,
     cookieStore,
   });

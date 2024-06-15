@@ -33,7 +33,8 @@ export const underSystemLogin = async (
 
   if (!vpnLoginResult.success) return vpnLoginResult;
 
-  const result = await authLogin(options, {
+  const result = await authLogin({
+    ...options,
     service: "http://dsjx.nenu.edu.cn:80/",
     webVPN: true,
     cookieStore,

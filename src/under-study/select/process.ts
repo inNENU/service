@@ -119,7 +119,7 @@ export const underStudyProcessCourseHandler: RequestHandler<
           ...EDGE_USER_AGENT_HEADERS,
         },
         body: new URLSearchParams({
-          kcmc: req.body.name || "",
+          kcmc: req.body.name ?? "",
           kcrwdm: req.body.classId,
           qz: String(req.body.weight ?? -1),
           // NOTE: This is an unknown field, and currently can be omitted
@@ -158,9 +158,9 @@ export const underStudyProcessCourseHandler: RequestHandler<
           ...EDGE_USER_AGENT_HEADERS,
         },
         body: new URLSearchParams({
-          jxbdm: req.body.classCode || "",
+          jxbdm: req.body.classCode ?? "",
           kcrwdm: req.body.classId,
-          kcmc: req.body.name || "",
+          kcmc: req.body.name ?? "",
         }),
       });
 

@@ -22,10 +22,9 @@ const COMMON_HEADERS = {
   "User-Agent": "inNENU",
 };
 
-export interface AuthLoginOptions {
+export interface AuthLoginOptions extends LoginOptions {
   service?: string;
   webVPN?: boolean;
-  cookieStore?: CookieStore;
 }
 
 export interface AuthLoginSuccessResult {
@@ -40,14 +39,15 @@ export interface AuthLoginFailedResult extends CommonFailedResponse {
 
 export type AuthLoginResult = AuthLoginSuccessResult | AuthLoginFailedResult;
 
-export const authLogin = async (
-  { id, password }: LoginOptions,
-  {
-    service = "",
-    webVPN = false,
-    cookieStore = new CookieStore(),
-  }: AuthLoginOptions = {},
-): Promise<AuthLoginResult> => {
+export const authLogin = async ({
+  id,
+  password,
+  service = "",
+  webVPN = false,
+  cookieStore = new CookieStore(),
+}: AuthLoginOptions & {
+  cookieStore?: CookieStore;
+}): Promise<AuthLoginResult> => {
   if (isInBlackList(id))
     return {
       success: false,
@@ -253,7 +253,7 @@ export type AuthLoginResponse =
 export const authLoginHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  LoginOptions
+  AuthLoginOptions
 > = async (req, res) => {
   try {
     const result = await authLogin(req.body);
