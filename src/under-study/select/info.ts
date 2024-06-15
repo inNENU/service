@@ -1,5 +1,12 @@
 import type { RequestHandler } from "express";
 
+import type { SelectOptionConfig } from "./store.js";
+import {
+  areasStore,
+  courseOfficesStore,
+  courseTypesStore,
+  majorsStore,
+} from "./store.js";
 import type { AuthLoginFailedResult } from "../../auth/index.js";
 import type {
   CommonFailedResponse,
@@ -10,13 +17,10 @@ import { EDGE_USER_AGENT_HEADERS } from "../../utils/index.js";
 import { underStudyLogin } from "../login.js";
 import { UNDER_STUDY_SERVER } from "../utils.js";
 
+const CHECK_URL = `${UNDER_STUDY_SERVER}/new/student/xsxk/checkFinishPj`;
+
 export interface UnderSelectInfoOptions extends Partial<LoginOptions> {
   link: string;
-}
-
-export interface UnderSelectOption {
-  value: string;
-  name: string;
 }
 
 export interface UnderSelectInfo {
@@ -36,14 +40,18 @@ export interface UnderSelectInfo {
   /** 可用年级 */
   grades: number[];
   /** 可用校区 */
-  locations: UnderSelectOption[];
+  areas: SelectOptionConfig[];
+  /** 可用专业 */
+  majors: SelectOptionConfig[];
   /** 可用开课单位 */
-  courseOffices: UnderSelectOption[];
+  courseOffices: SelectOptionConfig[];
   /** 可用课程类别 */
-  courseTypes: UnderSelectOption[];
+  courseTypes: SelectOptionConfig[];
 
   /** 当前校区 */
-  currentLocation: string;
+  currentArea: string;
+  /** 当前专业 */
+  currentMajor: string;
   /** 当前年级 */
   currentGrade: number;
 }
@@ -56,50 +64,105 @@ export interface UnderSelectInfoSuccessResponse {
 export type UnderSelectInfoResponse =
   | UnderSelectInfoSuccessResponse
   | AuthLoginFailedResult
-  | (CommonFailedResponse & { type: "not-initialized" });
+  | (CommonFailedResponse & {
+      type: "not-initialized" | "missing-commentary";
+    });
 
 const COURSE_OFFICES_REGEXP =
   /<select id='kkyxdm' name='kkyxdm'.*?><option value=''>\(请选择\)<\/option>(.*?)<\/select>/;
 const COURSE_OFFICE_ITEM_REGEXP = /<option value='(.+?)' >\d+-(.*?)<\/option>/g;
-const LOCATIONS_REGEXP =
+const AREAS_REGEXP =
   /<select id='xqdm' name='xqdm'.*?><option value=''>\(请选择\)<\/option>(.*?)<\/select>/;
-const LOCATION_ITEM_REGEXP = /<option value='(.+?)' >\d+-(.*?)<\/option>/g;
+const AREA_ITEM_REGEXP = /<option value='(.+?)' >\d+-(.*?)<\/option>/g;
 const COURSE_TYPES_REGEXP =
   /<select id='kcdldm' name='kcdldm'.*?><option value=''>\(请选择\)<\/option>(.*?)<\/select>/;
 const COURSE_TYPE_ITEM_REGEXP = /<option value='(.+?)' >(.*?)<\/option>/g;
 const CURRENT_GRADE_REGEXP = /<option value='(\d+)' selected>\1<\/option>/;
+const MAJORS_REGEXP =
+  /<select id='zydm' name='zydm'.*?><option value=''>\(全部\)<\/option>(.*?)<\/select>/;
+const MAJOR_ITEM_REGEXP =
+  /<option value='(\d+?)' (?:selected)?>\d+-(.*?)<\/option>/g;
+const CURRENT_MAJOR_REGEXP =
+  /<option value='(\d{6,7})' selected>\d+-(.*?)<\/option>/g;
 const INFO_REGEXP =
   /<span id="title">(.*?)学期&nbsp;&nbsp;(.*?)&nbsp;&nbsp;<span.*?>(.*?)<\/span><\/span>\s+?<br>\s+?<span id="sub-title">\s+?<div id="text">现在是(.*?)时间\s+（(\d\d:\d\d:\d\d)--(\d\d:\d\d:\d\d)）/;
+
+const setMajors = (content: string): void => {
+  if (!majorsStore.state.length) {
+    const majorText = content.match(MAJORS_REGEXP)![1];
+
+    const majors = Array.from(majorText.matchAll(MAJOR_ITEM_REGEXP)).map(
+      ([, value, name]) => ({
+        value,
+        name,
+      }),
+    );
+
+    majorsStore.setState(majors);
+  }
+};
+
+const setCourseOffices = (content: string): void => {
+  if (!courseOfficesStore.state.length) {
+    const courseOfficeText = content.match(COURSE_OFFICES_REGEXP)![1];
+
+    const courseOffices = Array.from(
+      courseOfficeText.matchAll(COURSE_OFFICE_ITEM_REGEXP),
+    ).map(([, value, name]) => ({
+      value,
+      name,
+    }));
+
+    courseOfficesStore.setState(courseOffices);
+  }
+};
+
+const setCourseTypes = (content: string): void => {
+  if (!courseTypesStore.state.length) {
+    const courseTypeText = content.match(COURSE_TYPES_REGEXP)![1];
+
+    const courseTypes = Array.from(
+      courseTypeText.matchAll(COURSE_TYPE_ITEM_REGEXP),
+    ).map(([, value, name]) => ({
+      value,
+      name,
+    }));
+
+    courseTypesStore.setState(courseTypes);
+  }
+};
+
+const setAreas = (content: string): void => {
+  if (!areasStore.state.length) {
+    const areaText = content.match(AREAS_REGEXP)![1];
+
+    const areas = Array.from(areaText.matchAll(AREA_ITEM_REGEXP)).map(
+      ([, value, name]) => ({
+        value,
+        name,
+      }),
+    );
+
+    areasStore.setState(areas);
+  }
+};
 
 const getSelectInfo = (content: string): UnderSelectInfo => {
   const [, term, name, canCancelText, stage, startTime, endTime] =
     content.match(INFO_REGEXP)!;
-  const courseOfficeText = content.match(COURSE_OFFICES_REGEXP)![1];
-  const courseOffices = Array.from(
-    courseOfficeText.matchAll(COURSE_OFFICE_ITEM_REGEXP),
-  ).map(([, value, name]) => ({
-    value,
-    name,
-  }));
-  const locationText = content.match(LOCATIONS_REGEXP)![1];
-  const locations = Array.from(locationText.matchAll(LOCATION_ITEM_REGEXP)).map(
-    ([, value, name]) => ({
-      value,
-      name,
-    }),
-  );
+
+  const currentGrade = Number(content.match(CURRENT_GRADE_REGEXP)![1]);
+  const currentMajor = content.match(CURRENT_MAJOR_REGEXP)![1];
+
   const currentYear = new Date().getFullYear();
   const grades = Array(6)
     .fill(null)
     .map((_, i) => currentYear - i);
-  const currentGrade = Number(content.match(CURRENT_GRADE_REGEXP)![1]);
-  const courseTypeText = content.match(COURSE_TYPES_REGEXP)![1];
-  const courseTypes = Array.from(
-    courseTypeText.matchAll(COURSE_TYPE_ITEM_REGEXP),
-  ).map(([, value, name]) => ({
-    value,
-    name,
-  }));
+
+  setAreas(content);
+  setCourseOffices(content);
+  setCourseTypes(content);
+  setMajors(content);
 
   return {
     term,
@@ -110,16 +173,65 @@ const getSelectInfo = (content: string): UnderSelectInfo => {
     endTime,
 
     grades,
-    locations,
-    courseOffices,
-    courseTypes,
+    majors: majorsStore.state,
+    areas: areasStore.state,
+    courseOffices: courseOfficesStore.state,
+    courseTypes: courseTypesStore.state,
 
-    currentLocation: name.includes("本部")
+    currentArea: name.includes("本部")
       ? "本部"
       : name.includes("净月")
         ? "净月"
         : "",
     currentGrade,
+    currentMajor,
+  };
+};
+
+const checkCourseCommentary = async (
+  cookieHeader: string,
+): Promise<{ completed: boolean; msg: string }> => {
+  const response = await fetch(`${CHECK_URL}?xnxqdm=&_=${Date.now()}`, {
+    headers: {
+      Cookie: cookieHeader,
+      ...EDGE_USER_AGENT_HEADERS,
+    },
+  });
+
+  if (
+    response.status !== 200 ||
+    response.headers.get("content-type")?.includes("text/html")
+  ) {
+    throw new Error("评教检查失败");
+  }
+
+  const result = (await response.json()) as {
+    code: number;
+    data: "";
+    message: string;
+  };
+
+  if (result.code === 0 && result.message.includes("评价已完成")) {
+    return { completed: true, msg: result.message };
+  }
+
+  if (result.code === -1) {
+    if (result.message.includes("下次可检查时间为：")) {
+      const time = /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.exec(
+        result.message,
+      )?.[0];
+
+      return { completed: false, msg: `检查过于频繁，请于 ${time} 后重试` };
+    }
+
+    if (result.message.includes("评价未完成")) {
+      return { completed: false, msg: result.message };
+    }
+  }
+
+  return {
+    completed: false,
+    msg: result.message,
   };
 };
 
@@ -163,7 +275,28 @@ export const underStudySelectInfoHandler: RequestHandler<
       },
     });
 
-    const content = await response.text();
+    let content = await response.text();
+
+    if (content.includes("<title>评教检查</title>")) {
+      const { completed } = await checkCourseCommentary(cookieHeader);
+
+      if (!completed) {
+        return res.json({
+          success: false,
+          msg: "未完成评教",
+          type: "missing-commentary",
+        } as CommonFailedResponse);
+      }
+
+      // 重新请求选课信息
+      content = await fetch(infoUrl, {
+        headers: {
+          Cookie: cookieHeader,
+          Referer: infoUrl,
+          ...EDGE_USER_AGENT_HEADERS,
+        },
+      }).then((res) => res.text());
+    }
 
     if (content.includes("选课正在初始化")) {
       return res.json({
