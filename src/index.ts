@@ -144,7 +144,7 @@ app.post("/action/card-balance", cardBalanceHandler);
 app.get("/action/email-page", actionEmailPageHandler);
 app.post("/action/email-page", actionEmailPageHandler);
 app.post("/action/recent-email", actionRecentEmailHandler);
-app.post("/action/notice", noticeHandler);
+app.post("/action/notice-detail", noticeHandler);
 app.post("/action/notice-list", noticeListHandler);
 
 app.get("/auth/activate", activateHandler);
