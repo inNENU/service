@@ -191,23 +191,11 @@ app.post("/under-system/test-query", underTestQueryHandler);
 
 app.post("/grad-system/login", gradSystemLoginHandler);
 app.post("/grad-system/info", gradInfoHandler);
-/** @deprecated */
-app.post("/post-new-system/login", gradSystemLoginHandler);
-/** @deprecated */
-app.post("/post-new-system/info", gradInfoHandler);
 
 app.post("/grad-old-system/login", gradOldSystemLoginHandler);
 app.post("/grad-old-system/check", gradOldSystemCheckHandler);
 app.post("/grad-old-system/course-table", gradOldCourseTableHandler);
 app.post("/grad-old-system/grade-list", gradOldGradeListHandler);
-/** @deprecated */
-app.post("/post-system/login", gradOldSystemLoginHandler);
-/** @deprecated */
-app.post("/post-system/check", gradOldSystemCheckHandler);
-/** @deprecated */
-app.post("/post-system/course-table", gradOldCourseTableHandler);
-/** @deprecated */
-app.post("/post-system/grade-list", gradOldGradeListHandler);
 
 /*  ------------ 官网相关 ------------ */
 
@@ -227,12 +215,6 @@ app.post("/enroll/under-plan", underEnrollPlanHandler);
 app.post("/enroll/grad-admission", gradAdmissionHandler);
 app.post("/enroll/grad-recommend-plan", gradRecommendPlanHandler);
 app.post("/enroll/grad-plan", gradEnrollPlanHandler);
-/** @deprecated */
-app.post("/enroll/post-admission", gradAdmissionHandler);
-/** @deprecated */
-app.post("/enroll/post-recommend-plan", gradRecommendPlanHandler);
-/** @deprecated */
-app.post("/enroll/post-plan", gradEnrollPlanHandler);
 
 app.post("/vpn/cas-login", vpnCASLoginHandler);
 app.post("/vpn/login", vpnLoginHandler);
