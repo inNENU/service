@@ -5,6 +5,7 @@ import { ACTION_MAIN_PAGE, ACTION_SERVER } from "./utils.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
+  CommonSuccessResponse,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
@@ -22,10 +23,7 @@ interface RawEmailPageResponse {
   url: string;
 }
 
-export interface ActionEmailPageSuccessResponse {
-  success: true;
-  url: string;
-}
+export type ActionEmailPageSuccessResponse = CommonSuccessResponse<string>;
 
 export type ActionEmailPageResponse =
   | ActionEmailPageSuccessResponse
@@ -71,8 +69,8 @@ export const actionEmailPageHandler: RequestHandler<
     if (emailPageResult.success)
       return res.json({
         success: true,
-        url: emailPageResult.url,
-      });
+        data: emailPageResult.url,
+      } as ActionEmailPageSuccessResponse);
 
     throw new Error("获取邮件页面失败");
   } catch (err) {

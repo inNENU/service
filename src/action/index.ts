@@ -3,7 +3,7 @@ export * from "./card-balance.js";
 export * from "./check.js";
 export * from "./email-page.js";
 export * from "./login.js";
-export * from "./notice.js";
+export * from "./notice-detail.js";
 export * from "./recent-mail.js";
 export * from "./notice-list.js";
 export * from "./utils.js";

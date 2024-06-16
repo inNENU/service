@@ -7,6 +7,7 @@ import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
+  CommonSuccessResponse,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
@@ -100,10 +101,9 @@ const getBookData = ({
   status: policy.description,
 });
 
-export interface BorrowBooksSuccessResponse {
-  success: true;
-  data: BorrowBookData[];
-}
+export type BorrowBooksSuccessResponse = CommonSuccessResponse<
+  BorrowBookData[]
+>;
 
 export type BorrowBooksResponse =
   | BorrowBooksSuccessResponse

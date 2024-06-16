@@ -10,6 +10,7 @@ import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
+  CommonSuccessResponse,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
@@ -30,10 +31,7 @@ type RawCardBalanceData =
     }
   | { success: false };
 
-export interface CardBalanceSuccessResponse {
-  success: true;
-  data: number;
-}
+export type CardBalanceSuccessResponse = CommonSuccessResponse<number>;
 
 export type CardBalanceResponse =
   | CardBalanceSuccessResponse

@@ -13,26 +13,26 @@ import { MY_SERVER } from "../my/utils.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
+  CommonSuccessResponse,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
 
-const titleRegExp = /var title = '(.*?)';/;
-const fromRegExp = /var ly = '(.*?)'/;
-const authorRegExp = /var wz = '(.*?)'/;
-const timeRegExp =
+const TITLE_REGEXP = /var title = '(.*?)';/;
+const FROM_REGEXP = /var ly = '(.*?)'/;
+const AUTHOR_REGEXP = /var wz = '(.*?)'/;
+const TIME_REGEXP =
   /<span style="margin: 0 10px;font-size: 13px;color: #787878;font-family: 'Microsoft YaHei';">\s+时间：(.*?)(?:&nbsp;)*?\s+<\/span>/;
-const pageViewRegExp =
+const PAGEVIEW_REGEXP =
   /<span style="margin: 0 10px;font-size: 13px;color: #787878;font-family: 'Microsoft YaHei';">\s+阅览：(\d+)\s+<\/span>/;
-const contentRegExp =
+const CONTENT_REGEXP =
   /<div class="read" id="WBNR">\s+([^]*?)\s+<\/div>\s+<p id="zrbj"/;
 
 export interface NoticeOptions extends LoginOptions {
   noticeID: string;
 }
 
-export interface NoticeSuccessResponse {
-  success: true;
+export interface NoticeData {
   title: string;
   author: string;
   time: string;
@@ -40,6 +40,8 @@ export interface NoticeSuccessResponse {
   pageView: number;
   content: RichTextNode[];
 }
+
+export type NoticeSuccessResponse = CommonSuccessResponse<NoticeData>;
 
 export type NoticeResponse = NoticeSuccessResponse | CommonFailedResponse;
 
@@ -80,17 +82,16 @@ export const noticeHandler: RequestHandler<
         msg: "登录信息已过期，请重新登录",
       } as AuthLoginFailedResponse);
 
-    const responseText = await response.text();
+    const text = await response.text();
 
-    const title = titleRegExp.exec(responseText)![1];
-    const author = authorRegExp.exec(responseText)![1];
-    const time = timeRegExp.exec(responseText)![1];
-    const from = fromRegExp.exec(responseText)![1];
-    const pageView = pageViewRegExp.exec(responseText)![1];
-    const content = contentRegExp.exec(responseText)![1];
+    const title = TITLE_REGEXP.exec(text)![1];
+    const author = AUTHOR_REGEXP.exec(text)![1];
+    const time = TIME_REGEXP.exec(text)![1];
+    const from = FROM_REGEXP.exec(text)![1];
+    const pageView = PAGEVIEW_REGEXP.exec(text)![1];
+    const content = CONTENT_REGEXP.exec(text)![1];
 
-    return res.json({
-      success: true,
+    const data = {
       title,
       author,
       from,
@@ -114,6 +115,11 @@ export const noticeHandler: RequestHandler<
           img: () => null,
         },
       }),
+    };
+
+    return res.json({
+      success: true,
+      data,
     } as NoticeSuccessResponse);
   } catch (err) {
     const { message } = err as Error;
