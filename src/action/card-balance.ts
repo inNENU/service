@@ -82,8 +82,6 @@ export const cardBalanceHandler: RequestHandler<
     if (data.success) {
       const balanceList = data.demo.items.item;
 
-      console.log(balanceList);
-
       return res.json({
         success: true,
         data: balanceList[0]?.kye.match(/\d+/)

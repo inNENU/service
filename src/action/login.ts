@@ -54,12 +54,6 @@ export const actionLogin = async (
 
   cookieStore.applyResponse(ticketResponse, result.location);
 
-  console.log(
-    "ticket",
-    ticketResponse.headers.get("Location"),
-    await ticketResponse.text(),
-  );
-
   if (ticketResponse.status !== 302)
     return {
       success: false,

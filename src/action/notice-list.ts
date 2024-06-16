@@ -7,11 +7,33 @@ import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
+  CommonListSuccessResponse,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
 
 const NOTICE_LIST_QUERY_URL = `${ACTION_SERVER}/page/queryList`;
+
+export interface NoticeListOptions extends LoginOptions {
+  /**
+   * 类型
+   *
+   * @default "notice"
+   */
+  type?: "notice" | "news";
+  /**
+   * 每页尺寸
+   *
+   * @default 20
+   */
+  size?: number;
+  /**
+   * 当前页面
+   *
+   * @default 1
+   */
+  current?: number;
+}
 
 interface RawNoticeItem {
   LLCS: number;
@@ -33,16 +55,7 @@ interface RawNoticeListData {
   totalCount: number;
 }
 
-export interface NoticeListOptions extends LoginOptions {
-  /** @default 20 */
-  limit?: number;
-  /** @default 1 */
-  page?: number;
-  /** @default "notice" */
-  type?: "notice" | "news";
-}
-
-export interface NoticeItem {
+export interface NoticeInfo {
   title: string;
   from: string;
   time: string;
@@ -50,25 +63,21 @@ export interface NoticeItem {
 }
 
 const getNoticeItem = ({
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  ID__,
-  CJBM,
-  KEYWORDS_,
-  FBSJ,
-}: RawNoticeItem): NoticeItem => ({
-  title: KEYWORDS_,
-  id: ID__,
-  time: FBSJ,
-  from: CJBM,
+  ID__: id,
+  CJBM: from,
+  KEYWORDS_: title,
+  FBSJ: time,
+}: RawNoticeItem): NoticeInfo => ({
+  id,
+  title,
+  from,
+  time,
 });
 
-export interface NoticeListSuccessResponse {
-  success: true;
-  data: NoticeItem[];
-  pageIndex: number;
-  pageSize: number;
-  totalPage: number;
-  totalCount: number;
+export interface NoticeListSuccessResponse
+  extends CommonListSuccessResponse<NoticeInfo[]> {
+  size: number;
+  count: number;
 }
 
 export type NoticeListResponse =
@@ -94,7 +103,7 @@ export const noticeListHandler: RequestHandler<
       cookieHeader = result.cookieStore.getHeader(NOTICE_LIST_QUERY_URL);
     }
 
-    const { limit = 20, page = 1, type = "notice" } = req.body;
+    const { type = "notice", size = 20, current = 1 } = req.body;
 
     const response = await fetch(NOTICE_LIST_QUERY_URL, {
       method: "POST",
@@ -108,8 +117,8 @@ export const noticeListHandler: RequestHandler<
         type,
         _search: "false",
         nd: Date.now().toString(),
-        limit: limit.toString(),
-        page: page.toString(),
+        limit: size.toString(),
+        page: current.toString(),
       }),
       redirect: "manual",
     });
@@ -128,10 +137,10 @@ export const noticeListHandler: RequestHandler<
       return res.json({
         success: true,
         data: data.map(getNoticeItem),
-        pageIndex,
-        pageSize,
-        totalCount,
-        totalPage,
+        count: totalCount,
+        size: pageSize,
+        current: pageIndex,
+        total: totalPage,
       } as NoticeListSuccessResponse);
 
     throw new Error(`获取公告列表失败: ${JSON.stringify(data, null, 2)}`);
