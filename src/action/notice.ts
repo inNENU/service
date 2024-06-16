@@ -11,6 +11,7 @@ import type {
 import { LoginFailType } from "../config/loginFailTypes.js";
 import { MY_SERVER } from "../my/utils.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
@@ -26,7 +27,7 @@ const pageViewRegExp =
 const contentRegExp =
   /<div class="read" id="WBNR">\s+([^]*?)\s+<\/div>\s+<p id="zrbj"/;
 
-export interface NoticeOptions extends Partial<LoginOptions> {
+export interface NoticeOptions extends LoginOptions {
   noticeID: string;
 }
 
@@ -65,7 +66,7 @@ export const noticeHandler: RequestHandler<
           msg: "请提供账号密码",
         } as CommonFailedResponse);
 
-      const result = await actionLogin(req.body as LoginOptions);
+      const result = await actionLogin(req.body as AccountInfo);
 
       if (!result.success) return res.json(result);
 

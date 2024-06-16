@@ -5,6 +5,7 @@ import { gradSystemLogin } from "./login.js";
 import { MAIN_URL, SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
@@ -144,7 +145,7 @@ export const getGradInfo = async (
 export const gradInfoHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  Partial<LoginOptions>
+  LoginOptions
 > = async (req, res) => {
   try {
     let cookieHeader = req.headers.cookie;
@@ -156,7 +157,7 @@ export const gradInfoHandler: RequestHandler<
           msg: "请提供账号密码",
         } as CommonFailedResponse);
 
-      const result = await gradSystemLogin(req.body as LoginOptions);
+      const result = await gradSystemLogin(req.body as AccountInfo);
 
       if (!result.success) return res.json(result);
 

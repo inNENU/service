@@ -9,6 +9,7 @@ import {
 } from "./store.js";
 import type { AuthLoginFailedResult } from "../../auth/index.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
@@ -19,7 +20,7 @@ import { UNDER_STUDY_SERVER } from "../utils.js";
 
 const CHECK_URL = `${UNDER_STUDY_SERVER}/new/student/xsxk/checkFinishPj`;
 
-export interface UnderSelectInfoOptions extends Partial<LoginOptions> {
+export interface UnderSelectInfoOptions extends LoginOptions {
   link: string;
 }
 
@@ -253,7 +254,7 @@ export const underStudySelectInfoHandler: RequestHandler<
           msg: "请提供账号密码",
         } as CommonFailedResponse);
 
-      const result = await underStudyLogin(req.body as LoginOptions);
+      const result = await underStudyLogin(req.body as AccountInfo);
 
       if (!result.success) return res.json(result);
       cookieHeader = result.cookieStore.getHeader(UNDER_STUDY_SERVER);

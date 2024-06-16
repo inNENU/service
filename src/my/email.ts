@@ -8,6 +8,7 @@ import { myLogin } from "./login.js";
 import { getProcess } from "./process.js";
 import { MY_SERVER } from "./utils.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
@@ -60,7 +61,7 @@ const getMailInitInfo = async (
   };
 };
 
-export interface GetEmailInfoOptions extends Partial<LoginOptions> {
+export interface GetEmailInfoOptions extends LoginOptions {
   type: "get";
 }
 
@@ -174,7 +175,7 @@ export const getEmailInfo = async (
   };
 };
 
-export interface ActivateEmailOptions extends Partial<LoginOptions> {
+export interface ActivateEmailOptions extends LoginOptions {
   type: "set";
   name: string;
   phone: number | string;
@@ -279,7 +280,7 @@ export const emailHandler: RequestHandler<
     let cookieHeader = req.headers.cookie;
 
     if (!cookieHeader) {
-      const result = await myLogin(req.body as LoginOptions);
+      const result = await myLogin(req.body as AccountInfo);
 
       if (!result.success) return res.json(result);
       cookieHeader = result.cookieStore.getHeader(MY_SERVER);

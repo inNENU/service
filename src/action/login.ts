@@ -1,9 +1,10 @@
+import type { CookieType } from "@mptool/net";
 import type { RequestHandler } from "express";
 
 import { ACTION_SERVER } from "./utils.js";
 import { WEB_VPN_AUTH_SERVER, authLogin } from "../auth/index.js";
 import type { AuthLoginFailedResult } from "../auth/login.js";
-import type { CookieType, EmptyObject, LoginOptions } from "../typings.js";
+import type { AccountInfo, EmptyObject } from "../typings.js";
 import { CookieStore } from "../utils/index.js";
 import type { VPNLoginFailedResult } from "../vpn/login.js";
 import { vpnCASLogin } from "../vpn/login.js";
@@ -19,7 +20,7 @@ export type ActionLoginResult =
   | VPNLoginFailedResult;
 
 export const actionLogin = async (
-  options: LoginOptions,
+  options: AccountInfo,
   cookieStore = new CookieStore(),
 ): Promise<ActionLoginResult> => {
   const vpnLoginResult = await vpnCASLogin(options, cookieStore);
@@ -95,7 +96,7 @@ export type ActionLoginResponse =
 export const actionLoginHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  LoginOptions
+  AccountInfo
 > = async (req, res) => {
   try {
     const result = await actionLogin(req.body);

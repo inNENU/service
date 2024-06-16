@@ -4,9 +4,9 @@ import type { MyLoginFailedResult } from "./login.js";
 import { myLogin } from "./login.js";
 import { MY_SERVER } from "./utils.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
-  LoginOptions,
 } from "../typings.js";
 
 interface IdentityInfo {
@@ -67,7 +67,7 @@ export type MyIdentityResponse = MyIdentitySuccessResult | MyLoginFailedResult;
 export const myIdentityHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  LoginOptions
+  AccountInfo
 > = async (req, res) => {
   try {
     let cookieHeader = req.headers.cookie;

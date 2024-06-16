@@ -1,3 +1,4 @@
+import type { CookieType } from "@mptool/net";
 import type { RequestHandler } from "express";
 
 import { UNDER_STUDY_SERVER } from "./utils.js";
@@ -5,7 +6,7 @@ import type { AuthLoginFailedResult } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { AUTH_SERVER } from "../auth/utils.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
-import type { CookieType, EmptyObject, LoginOptions } from "../typings.js";
+import type { AccountInfo, EmptyObject } from "../typings.js";
 import { CookieStore, EDGE_USER_AGENT_HEADERS } from "../utils/index.js";
 
 export interface UnderStudyLoginSuccessResult {
@@ -20,7 +21,7 @@ export type UnderStudyLoginResult =
 const SSO_LOGIN_URL = `${UNDER_STUDY_SERVER}/new/ssoLogin`;
 
 export const underStudyLogin = async (
-  options: LoginOptions,
+  options: AccountInfo,
   cookieStore = new CookieStore(),
 ): Promise<UnderStudyLoginResult> => {
   const result = await authLogin({
@@ -106,7 +107,7 @@ export type UnderStudyLoginResponse =
 export const underStudyLoginHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  LoginOptions
+  AccountInfo
 > = async (req, res) => {
   try {
     const result = await underStudyLogin(req.body);

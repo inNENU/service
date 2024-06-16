@@ -1,55 +1,30 @@
-export interface CookieType {
-  /**
-   * cookie name
-   */
-  name: string;
-  /**
-   * cookie value
-   */
-  value: string;
-  /**
-   * cookie path
-   */
-  path?: string | undefined;
-  /**
-   * absolute expiration date for the cookie
-   */
-  expires?: Date | undefined;
-  /**
-   * relative max age of the cookie in seconds from when the client receives it (integer or undefined)
-   * Note: when using with express's res.cookie() method, multiply maxAge by 1000 to convert to miliseconds
-   */
-  maxAge?: number | undefined;
-  /**
-   * domain for the cookie,
-   * may begin with "." to indicate the named domain or any subdomain of it
-   */
-  domain?: string | undefined;
-  /**
-   * indicates that this cookie should only be sent over HTTPs
-   */
-  secure?: boolean | undefined;
-  /**
-   * indicates that this cookie should not be accessible to client-side JavaScript
-   */
-  httpOnly?: boolean | undefined;
-  /**
-   * indicates a cookie ought not to be sent along with cross-site requests
-   */
-  sameSite?: boolean | "lax" | "strict" | "none" | undefined;
-}
+import type { CookieType } from "@mptool/net";
 
 export type EmptyObject = Record<never, never>;
 
-export interface LoginOptions {
+export interface AccountInfo {
   /** 学号 */
   id: number;
   /** 密码 */
   password: string;
 }
 
+export type LoginOptions = Partial<AccountInfo>;
+
 export interface CookieOptions {
   cookies: CookieType[];
+}
+
+export interface CommonSuccessResponse<T = EmptyObject> {
+  success: true;
+  data: T;
+}
+
+export interface CommonListSuccessResponse<T = EmptyObject> {
+  success: true;
+  data: T;
+  current: number;
+  total: number;
 }
 
 export interface CommonFailedResponse {

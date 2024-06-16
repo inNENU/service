@@ -5,13 +5,14 @@ import { UNDER_STUDY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
 import { EDGE_USER_AGENT_HEADERS } from "../utils/index.js";
 
-export interface UnderGradeDetailOptions extends Partial<LoginOptions> {
+export interface UnderGradeDetailOptions extends LoginOptions {
   /** 成绩代码 */
   gradeCode: string;
 }
@@ -147,7 +148,7 @@ export const underStudyGradeDetailHandler: RequestHandler<
           msg: "请提供账号密码",
         } as CommonFailedResponse);
 
-      const result = await underStudyLogin(req.body as LoginOptions);
+      const result = await underStudyLogin(req.body as AccountInfo);
 
       if (!result.success) return res.json(result);
       cookieHeader = result.cookieStore.getHeader(queryUrl);

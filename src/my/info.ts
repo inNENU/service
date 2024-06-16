@@ -8,9 +8,9 @@ import { MY_SERVER } from "./utils.js";
 import { code2major } from "../config/major.js";
 import { code2org } from "../config/org.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
-  LoginOptions,
 } from "../typings.js";
 
 interface RawInfo {
@@ -250,7 +250,7 @@ export type MyInfoResponse = MyInfoSuccessResult | MyLoginFailedResult;
 export const myInfoHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  LoginOptions
+  AccountInfo
 > = async (req, res) => {
   try {
     let cookieHeader = req.headers.cookie;

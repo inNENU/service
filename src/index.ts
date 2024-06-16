@@ -44,14 +44,6 @@ import {
 } from "./grad-system/index.js";
 import { libraryPeopleHandler } from "./library/people.js";
 import {
-  academicInfoHandler,
-  academicListHandler,
-  announcementInfoHandler,
-  announcementListHandler,
-  mainInfoHandler,
-  mainInfoListHandler,
-} from "./main/index.js";
-import {
   mpLoginHandler,
   mpQrCodeHandler,
   mpReportHandler,
@@ -64,6 +56,14 @@ import {
   myInfoHandler,
   myLoginHandler,
 } from "./my/index.js";
+import {
+  officialAcademicDetailHandler,
+  officialAcademicListHandler,
+  officialInfoDetailHandler,
+  officialInfoListHandler,
+  officialNoticeDetailHandler,
+  officialNoticeListHandler,
+} from "./official/index.js";
 import {
   test301Handler,
   test302Handler,
@@ -209,12 +209,16 @@ app.post("/post-system/course-table", gradOldCourseTableHandler);
 /** @deprecated */
 app.post("/post-system/grade-list", gradOldGradeListHandler);
 
-app.get("/main/academic", academicInfoHandler);
-app.post("/main/academic-list", academicListHandler);
-app.get("/main/announcement", announcementInfoHandler);
-app.post("/main/announcement-list", announcementListHandler);
-app.get("/main/info", mainInfoHandler);
-app.post("/main/info-list", mainInfoListHandler);
+/*  ------------ 官网相关 ------------ */
+
+app.get("/official/academic-detail", officialAcademicDetailHandler);
+app.post("/official/academic-list", officialAcademicListHandler);
+app.get("/official/info-detail", officialInfoDetailHandler);
+app.post("/official/info-list", officialInfoListHandler);
+app.get("/official/notice-detail", officialNoticeDetailHandler);
+app.post("/official/notice-list", officialNoticeListHandler);
+
+/*  ------------ 招生相关 ------------ */
 
 app.get("/enroll/under-admission", underAdmissionHandler);
 app.post("/enroll/under-admission", underAdmissionHandler);

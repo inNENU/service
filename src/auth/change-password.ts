@@ -4,9 +4,9 @@ import { authEncrypt } from "./auth-encrypt.js";
 import { authLogin } from "./login.js";
 import { AUTH_SERVER, SALT_REGEXP } from "./utils.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
-  LoginOptions,
 } from "../typings.js";
 
 export interface ChangePasswordOptions {
@@ -33,7 +33,7 @@ export type ChangePasswordResponse =
 export const changePasswordHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  LoginOptions | ChangePasswordOptions
+  AccountInfo | ChangePasswordOptions
 > = async (req, res) => {
   try {
     if (req.method === "PATCH") {
@@ -74,7 +74,7 @@ export const changePasswordHandler: RequestHandler<
       } as CommonFailedResponse);
     }
 
-    const { id, password } = req.body as LoginOptions;
+    const { id, password } = req.body as AccountInfo;
 
     console.log("Getting params", req.body);
 

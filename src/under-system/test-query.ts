@@ -4,6 +4,7 @@ import { underSystemLogin } from "./login.js";
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
@@ -49,7 +50,7 @@ export type UnderTestQueyResponse =
 export const underTestQueryHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  Partial<LoginOptions>
+  LoginOptions
 > = async (req, res) => {
   try {
     let cookieHeader = req.headers.cookie;
@@ -61,7 +62,7 @@ export const underTestQueryHandler: RequestHandler<
           msg: "请提供账号密码",
         } as CommonFailedResponse);
 
-      const result = await underSystemLogin(req.body as LoginOptions);
+      const result = await underSystemLogin(req.body as AccountInfo);
 
       if (!result.success) return res.json(result);
 

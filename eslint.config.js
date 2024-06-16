@@ -56,21 +56,4 @@ export default config(
       "@typescript-eslint/prefer-nullish-coalescing": "warn",
     },
   },
-
-  // {
-  //   files: ["**/*.ts"],
-  //   rules: {
-  //     "@typescript-eslint/consistent-type-imports": "warn",
-  //     "@typescript-eslint/explicit-function-return-type": [
-  //       "warn",
-  //       {
-  //         allowHigherOrderFunctions: true,
-  //         allowDirectConstAssertionInArrowFunctions: true,
-  //         allowTypedFunctionExpressions: true,
-  //       },
-  //     ],
-
-  //     "@typescript-eslint/no-explicit-any": ["warn", { ignoreRestArgs: true }],
-  //   },
-  // },
 );

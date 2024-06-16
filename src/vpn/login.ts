@@ -1,3 +1,4 @@
+import type { CookieType } from "@mptool/net";
 import type { RequestHandler } from "express";
 
 import { VPN_DOMAIN, VPN_SERVER } from "./utils.js";
@@ -5,10 +6,9 @@ import type { AuthLoginFailedResult } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
-  CookieType,
   EmptyObject,
-  LoginOptions,
 } from "../typings.js";
 import { CookieStore } from "../utils/index.js";
 
@@ -37,7 +37,7 @@ export type VPNLoginResult =
   | AuthLoginFailedResult;
 
 export const vpnCASLogin = async (
-  { id, password }: LoginOptions,
+  { id, password }: AccountInfo,
   cookieStore = new CookieStore(),
 ): Promise<VPNLoginResult> => {
   const casResponse = await fetch(CAS_LOGIN_URL, {
@@ -116,7 +116,7 @@ export const vpnCASLogin = async (
 };
 
 export const vpnLogin = async (
-  { id, password }: LoginOptions,
+  { id, password }: AccountInfo,
   cookieStore = new CookieStore(),
 ): Promise<VPNLoginResult> => {
   const loginPageResponse = await fetch(LOGIN_URL);
@@ -209,7 +209,7 @@ export const vpnLogin = async (
 export const vpnCASLoginHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  LoginOptions
+  AccountInfo
 > = async (req, res) => {
   try {
     const { id, password } = req.body;
@@ -258,7 +258,7 @@ export type VPNLoginResponse =
 export const vpnLoginHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  LoginOptions
+  AccountInfo
 > = async (req, res) => {
   try {
     const { id, password } = req.body;

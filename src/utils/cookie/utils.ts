@@ -1,4 +1,4 @@
-import type { CookieType } from "../../typings.js";
+import type { CookieType } from "@mptool/net";
 
 export const cookies2Header = (cookies: CookieType[]): string => {
   const finalCookies = cookies.filter(

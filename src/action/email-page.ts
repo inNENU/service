@@ -3,6 +3,7 @@ import type { RequestHandler } from "express";
 import { actionLogin } from "./login.js";
 import { ACTION_MAIN_PAGE, ACTION_SERVER } from "./utils.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
@@ -11,7 +12,7 @@ import type {
 const EMAIL_PAGE_URL = `${ACTION_SERVER}/extract/sendRedirect2Email`;
 const EMAIL_URL = `${ACTION_SERVER}/extract/sendRedirect2EmailPage`;
 
-export interface ActionEmailPageOptions extends Partial<LoginOptions> {
+export interface ActionEmailPageOptions extends LoginOptions {
   /** 邮件 ID */
   mid?: string;
 }
@@ -44,7 +45,7 @@ export const actionEmailPageHandler: RequestHandler<
           msg: "请提供账号密码",
         } as CommonFailedResponse);
 
-      const result = await actionLogin(req.body as LoginOptions);
+      const result = await actionLogin(req.body as AccountInfo);
 
       if (!result.success) return res.json(result);
 

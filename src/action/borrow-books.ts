@@ -5,6 +5,7 @@ import { ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
@@ -122,7 +123,7 @@ export type BorrowBooksResponse =
 export const borrowBooksHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  Partial<LoginOptions>
+  LoginOptions
 > = async (req, res) => {
   try {
     if (!req.headers.cookie) {
@@ -132,7 +133,7 @@ export const borrowBooksHandler: RequestHandler<
           msg: "请提供账号密码",
         } as CommonFailedResponse);
 
-      const result = await actionLogin(req.body as LoginOptions);
+      const result = await actionLogin(req.body as AccountInfo);
 
       if (!result.success) return res.json(result);
 

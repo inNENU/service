@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 
 import type { AuthLoginFailedResult } from "../../auth/index.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
@@ -58,7 +59,7 @@ const getSelectCategories = (content: string): UnderSelectCategoryItem[] =>
 export const underStudySelectCategoryHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  Partial<LoginOptions>
+  LoginOptions
 > = async (req, res) => {
   try {
     let cookieHeader = req.headers.cookie;
@@ -70,7 +71,7 @@ export const underStudySelectCategoryHandler: RequestHandler<
           msg: "请提供账号密码",
         } as CommonFailedResponse);
 
-      const result = await underStudyLogin(req.body as LoginOptions);
+      const result = await underStudyLogin(req.body as AccountInfo);
 
       if (!result.success) return res.json(result);
       cookieHeader = result.cookieStore.getHeader(CATEGORY_PAGE);

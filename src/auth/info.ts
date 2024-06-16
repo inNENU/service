@@ -3,6 +3,7 @@ import type { RequestHandler } from "express";
 import { authLogin } from "./login.js";
 import { AUTH_SERVER } from "./utils.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
@@ -79,7 +80,7 @@ export const getBasicInfo = async (
 export const infoHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  Partial<LoginOptions>
+  LoginOptions
 > = async (req, res) => {
   try {
     if (req.headers.cookie)
@@ -91,7 +92,7 @@ export const infoHandler: RequestHandler<
         msg: "请提供账号密码",
       } as CommonFailedResponse);
 
-    const result = await authLogin(req.body as LoginOptions);
+    const result = await authLogin(req.body as AccountInfo);
 
     if (result.success) {
       const cookieHeader = result.cookieStore.getHeader(

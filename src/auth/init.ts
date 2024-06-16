@@ -7,9 +7,9 @@ import type { MyInfo } from "../my/index.js";
 import { getMyInfo, myLogin } from "../my/index.js";
 import { MY_SERVER } from "../my/utils.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
-  LoginOptions,
 } from "../typings.js";
 import { BLACKLIST_HINT, CookieStore, isInBlackList } from "../utils/index.js";
 import { vpnLogin } from "../vpn/login.js";
@@ -115,7 +115,7 @@ export const authInitInfo = async (
   } as AuthInitInfoSuccessResult;
 };
 
-export interface InitAuthOptions extends LoginOptions {
+export interface InitAuthOptions extends AccountInfo {
   params: Record<string, string>;
   salt: string;
   captcha: string;

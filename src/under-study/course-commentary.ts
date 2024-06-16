@@ -5,20 +5,20 @@ import { UNDER_STUDY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
 import { EDGE_USER_AGENT_HEADERS } from "../utils/index.js";
 
-export interface GetUnderCourseCommentaryListOptions
-  extends Partial<LoginOptions> {
+export interface GetUnderCourseCommentaryListOptions extends LoginOptions {
   type: "list";
   /** 查询时间 */
   time?: string;
 }
 
-export interface GetUnderCourseCommentaryOptions extends Partial<LoginOptions> {
+export interface GetUnderCourseCommentaryOptions extends LoginOptions {
   type: "get";
   /** 教师代码 */
   teacherCode: string;
@@ -27,7 +27,7 @@ export interface GetUnderCourseCommentaryOptions extends Partial<LoginOptions> {
 }
 
 export interface SubmitUnderCourseCommentaryOptions
-  extends Partial<LoginOptions>,
+  extends LoginOptions,
     UnderCourseCommentaryInfo {
   type: "submit";
   /** 选项 */
@@ -219,8 +219,7 @@ interface RawUnderCourseCommentaryScore {
   zbmc: string;
 }
 
-export interface ViewUnderCourseCommentaryOptions
-  extends Partial<LoginOptions> {
+export interface ViewUnderCourseCommentaryOptions extends LoginOptions {
   type: "view";
   commentaryCode: string;
 }
@@ -317,7 +316,7 @@ export const underStudyCourseCommentaryHandler: RequestHandler<
           msg: "请提供账号密码",
         } as CommonFailedResponse);
 
-      const result = await underStudyLogin(req.body as LoginOptions);
+      const result = await underStudyLogin(req.body as AccountInfo);
 
       if (!result.success) return res.json(result);
       cookieHeader = result.cookieStore.getHeader(LIST_URL);

@@ -3,6 +3,7 @@ import type { RequestHandler } from "express";
 import { actionLogin } from "./login.js";
 import { ACTION_MAIN_PAGE, ACTION_SERVER } from "./utils.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
@@ -96,8 +97,8 @@ export type ActionRecentMailResponse =
 export const actionRecentEmailHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  Partial<LoginOptions>,
-  Partial<LoginOptions> & { mid?: string }
+  LoginOptions,
+  LoginOptions & { mid?: string }
 > = async (req, res) => {
   try {
     if (!req.headers.cookie) {
@@ -107,7 +108,7 @@ export const actionRecentEmailHandler: RequestHandler<
           msg: "请提供账号密码",
         } as CommonFailedResponse);
 
-      const result = await actionLogin(req.body as LoginOptions);
+      const result = await actionLogin(req.body as AccountInfo);
 
       if (!result.success) return res.json(result);
 

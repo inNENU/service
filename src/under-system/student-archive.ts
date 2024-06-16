@@ -4,6 +4,7 @@ import { underSystemLogin } from "./login.js";
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
@@ -166,7 +167,7 @@ const getStudentArchive = async (
   };
 };
 
-export interface GetUnderStudentArchiveOptions extends Partial<LoginOptions> {
+export interface GetUnderStudentArchiveOptions extends LoginOptions {
   type?: "get";
 }
 
@@ -213,8 +214,7 @@ export const getUnderStudentArchive = async (
 
 const alertRegExp = /window.alert\('(.+?)'\)/;
 
-export interface RegisterUnderStudentArchiveOptions
-  extends Partial<LoginOptions> {
+export interface RegisterUnderStudentArchiveOptions extends LoginOptions {
   type?: "register";
   path: string;
 }
@@ -269,7 +269,7 @@ export const underStudentArchiveHandler: RequestHandler<
           msg: "请提供账号密码",
         } as CommonFailedResponse);
 
-      const result = await underSystemLogin(req.body as LoginOptions);
+      const result = await underSystemLogin(req.body as AccountInfo);
 
       if (!result.success) return res.json(result);
 

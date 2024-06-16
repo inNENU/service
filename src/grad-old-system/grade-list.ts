@@ -5,6 +5,7 @@ import { GRAD_OLD_SYSTEM_HTTPS_SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
@@ -211,7 +212,7 @@ export const getGradeLists = async (
 export const gradOldGradeListHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  Partial<LoginOptions>
+  LoginOptions
 > = async (req, res) => {
   try {
     let cookieHeader = req.headers.cookie;
@@ -223,7 +224,7 @@ export const gradOldGradeListHandler: RequestHandler<
           msg: "请提供账号密码",
         } as CommonFailedResponse);
 
-      const result = await gradOldSystemLogin(req.body as LoginOptions);
+      const result = await gradOldSystemLogin(req.body as AccountInfo);
 
       if (!result.success) return res.json(result);
       cookieHeader = result.cookieStore.getHeader(QUERY_URL);

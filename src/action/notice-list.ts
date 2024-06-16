@@ -8,6 +8,7 @@ import type {
 } from "../auth/index.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
@@ -35,7 +36,7 @@ interface RawNoticeListData {
   totalCount: number;
 }
 
-export interface NoticeListOptions extends Partial<LoginOptions> {
+export interface NoticeListOptions extends LoginOptions {
   /** @default 20 */
   limit?: number;
   /** @default 1 */
@@ -92,7 +93,7 @@ export const noticeListHandler: RequestHandler<
           msg: "请提供账号密码",
         } as CommonFailedResponse);
 
-      const result = await actionLogin(req.body as LoginOptions);
+      const result = await actionLogin(req.body as AccountInfo);
 
       if (!result.success) return res.json(result);
 

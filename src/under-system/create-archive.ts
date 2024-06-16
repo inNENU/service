@@ -4,6 +4,7 @@ import { underSystemLogin } from "./login.js";
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
@@ -73,8 +74,7 @@ export interface MultiSelectUnderArchiveInfo {
   values: { text: string; value: string }[][];
 }
 
-export interface UnderCreateStudentArchiveGetInfoOptions
-  extends Partial<LoginOptions> {
+export interface UnderCreateStudentArchiveGetInfoOptions extends LoginOptions {
   type: "get-info";
 }
 
@@ -245,7 +245,7 @@ export const getUnderStudentArchiveInfo = async (
 };
 
 export interface UnderCreateStudentArchiveSubmitInfoOptions
-  extends Partial<LoginOptions> {
+  extends LoginOptions {
   type: "submit-info";
   fields: UnderArchiveFieldInfo[];
   path: string;
@@ -311,7 +311,7 @@ export const submitUnderStudentArchiveInfo = async (
 };
 
 export interface UnderCreateStudentArchiveSubmitAddressOptions
-  extends Partial<LoginOptions> {
+  extends LoginOptions {
   type: "submit-address";
   fields: UnderArchiveFieldInfo[];
   path: string;
@@ -402,7 +402,7 @@ export interface UnderStudyOptions {
 }
 
 export interface UnderCreateStudentArchiveSubmitStudyOptions
-  extends Partial<LoginOptions> {
+  extends LoginOptions {
   type: "submit-study";
   fields: UnderArchiveFieldInfo[];
   path: string;
@@ -520,7 +520,7 @@ export interface UnderFamilyOptions {
 }
 
 export interface UnderCreateStudentArchiveSubmitFamilyOptions
-  extends Partial<LoginOptions> {
+  extends LoginOptions {
   type: "submit-family";
   fields: UnderArchiveFieldInfo[];
   path: string;
@@ -606,7 +606,7 @@ export const underCreateStudentArchiveHandler: RequestHandler<
           msg: "请提供账号密码",
         } as CommonFailedResponse);
 
-      const result = await underSystemLogin(req.body as LoginOptions);
+      const result = await underSystemLogin(req.body as AccountInfo);
 
       if (!result.success) return res.json(result);
 

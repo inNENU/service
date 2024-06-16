@@ -6,6 +6,7 @@ import type { AuthLoginFailedResult } from "../auth/index.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import { semesterStartTime } from "../config/semester-start-time.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
@@ -57,7 +58,7 @@ const getCourses = (content: string): TableItem =>
     }),
   );
 
-export interface UnderCourseTableOptions extends Partial<LoginOptions> {
+export interface UnderCourseTableOptions extends LoginOptions {
   /** 查询时间 */
   time: string;
 }
@@ -103,7 +104,7 @@ export const underCourseTableHandler: RequestHandler<
           msg: "请提供账号密码",
         } as CommonFailedResponse);
 
-      const result = await underSystemLogin(req.body as LoginOptions);
+      const result = await underSystemLogin(req.body as AccountInfo);
 
       if (!result.success) return res.json(result);
 

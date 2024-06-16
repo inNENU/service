@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 
 import type { AuthLoginFailedResult } from "../../auth/index.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
@@ -10,7 +11,7 @@ import { EDGE_USER_AGENT_HEADERS } from "../../utils/index.js";
 import { underStudyLogin } from "../login.js";
 import { UNDER_STUDY_SERVER } from "../utils.js";
 
-export interface UnderSelectAddOptions extends Partial<LoginOptions> {
+export interface UnderSelectAddOptions extends LoginOptions {
   type: "add";
   /** 课程分类链接 */
   link: string;
@@ -28,7 +29,7 @@ export interface UnderSelectAddOptions extends Partial<LoginOptions> {
   weight?: number;
 }
 
-export interface UnderSelectRemoveOptions extends Partial<LoginOptions> {
+export interface UnderSelectRemoveOptions extends LoginOptions {
   type: "remove";
   /** 课程分类链接 */
   link: string;
@@ -86,7 +87,7 @@ export const underStudyProcessCourseHandler: RequestHandler<
           msg: "请提供账号密码",
         } as CommonFailedResponse);
 
-      const result = await underStudyLogin(req.body as LoginOptions);
+      const result = await underStudyLogin(req.body as AccountInfo);
 
       if (!result.success) return res.json(result);
       cookieHeader = result.cookieStore.getHeader(UNDER_STUDY_SERVER);

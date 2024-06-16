@@ -5,6 +5,7 @@ import { GRAD_OLD_SYSTEM_HTTPS_SERVER } from "./utils.js";
 import type { AuthLoginFailedResult } from "../auth/index.js";
 import { semesterStartTime } from "../config/semester-start-time.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
@@ -55,7 +56,7 @@ const getCourses = (content: string): TableItem =>
     }),
   );
 
-export interface GradCourseTableOptions extends Partial<LoginOptions> {
+export interface GradCourseTableOptions extends LoginOptions {
   /** 查询时间 */
   time: string;
 }
@@ -96,7 +97,7 @@ export const gradOldCourseTableHandler: RequestHandler<
           msg: "请提供账号密码",
         } as CommonFailedResponse);
 
-      const result = await gradOldSystemLogin(req.body as LoginOptions);
+      const result = await gradOldSystemLogin(req.body as AccountInfo);
 
       if (!result.success) return res.json(result);
 

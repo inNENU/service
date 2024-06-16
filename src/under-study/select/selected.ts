@@ -7,6 +7,7 @@ import type {
 import { getClasses } from "./utils.js";
 import type { AuthLoginFailedResult } from "../../auth/index.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
@@ -15,7 +16,7 @@ import { EDGE_USER_AGENT_HEADERS } from "../../utils/index.js";
 import { underStudyLogin } from "../login.js";
 import { UNDER_STUDY_SERVER } from "../utils.js";
 
-export interface UnderSelectSelectedOptions extends Partial<LoginOptions> {
+export interface UnderSelectSelectedOptions extends LoginOptions {
   /** 课程分类链接 */
   link: string;
 }
@@ -51,7 +52,7 @@ export const underStudySelectedCourseHandler: RequestHandler<
           msg: "请提供账号密码",
         } as CommonFailedResponse);
 
-      const result = await underStudyLogin(req.body as LoginOptions);
+      const result = await underStudyLogin(req.body as AccountInfo);
 
       if (!result.success) return res.json(result);
       cookieHeader = result.cookieStore.getHeader(UNDER_STUDY_SERVER);

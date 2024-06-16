@@ -1,3 +1,4 @@
+import type { CookieType } from "@mptool/net";
 import type { RequestHandler } from "express";
 
 import { authEncrypt } from "./auth-encrypt.js";
@@ -9,10 +10,9 @@ import {
 } from "./utils.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
-  CookieType,
   EmptyObject,
-  LoginOptions,
 } from "../typings.js";
 import { BLACKLIST_HINT, CookieStore, isInBlackList } from "../utils/index.js";
 
@@ -22,7 +22,7 @@ const COMMON_HEADERS = {
   "User-Agent": "inNENU",
 };
 
-export interface AuthLoginOptions extends LoginOptions {
+export interface AuthLoginOptions extends AccountInfo {
   service?: string;
   webVPN?: boolean;
 }
