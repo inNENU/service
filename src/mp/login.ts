@@ -4,7 +4,7 @@ import { appIDInfo } from "../config/appID.js";
 import { OPENID_BLACK_LIST } from "../config/blacklist.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 
-export type AppID = "wx33acb831ee1831a5" | "wx9ce37d9662499df3" | 1109559721;
+export type AppID = "wx33acb831ee1831a5" | "wx2550e3fd373b79a8" | 1109559721;
 export type Env = "qq" | "wx" | "web";
 
 export interface MPLoginCodeOptions {

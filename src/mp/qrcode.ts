@@ -6,7 +6,7 @@ import type { CommonFailedResponse } from "../typings.js";
 import { getWechatAccessToken } from "../utils/wechatAccessToken.js";
 
 export interface WechatQRCodeOptions {
-  appID: "wx33acb831ee1831a5" | "wx9ce37d9662499df3";
+  appID: "wx33acb831ee1831a5" | "wx2550e3fd373b79a8";
   page: string;
   scene: string;
 }
