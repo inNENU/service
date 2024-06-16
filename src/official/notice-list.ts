@@ -35,7 +35,7 @@ export type OfficialNoticeSuccessResponse = CommonListSuccessResponse<
   OfficialNoticeInfoItem[]
 >;
 
-export type AnnouncementListResponse =
+export type OfficialNoticeListResponse =
   | OfficialNoticeSuccessResponse
   | CommonFailedResponse;
 
