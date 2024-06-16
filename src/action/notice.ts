@@ -51,20 +51,13 @@ export const noticeHandler: RequestHandler<
   try {
     const { noticeID } = req.body;
 
-    if (!noticeID)
-      return res.json({
-        success: false,
-        msg: "ID is required",
-      } as CommonFailedResponse);
+    if (!noticeID) throw new Error("ID is required");
 
     const noticeUrl = `${ACTION_SERVER}/page/viewNews?ID=${noticeID}`;
 
     if (!req.headers.cookie) {
       if (!req.body.id || !req.body.password)
-        return res.json({
-          success: false,
-          msg: "请提供账号密码",
-        } as CommonFailedResponse);
+        throw new Error(`"id" and password" field is required!`);
 
       const result = await actionLogin(req.body as AccountInfo);
 
@@ -126,7 +119,8 @@ export const noticeHandler: RequestHandler<
     const { message } = err as Error;
 
     console.error(err);
-    res.json({
+
+    return res.json({
       success: false,
       msg: message,
     } as AuthLoginFailedResult);

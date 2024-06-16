@@ -52,7 +52,8 @@ export const gradOldSystemCheckHandler: RequestHandler<
     const { message } = err as Error;
 
     console.error(err);
-    res.json({
+
+    return res.json({
       success: false,
       msg: message,
     } as CommonFailedResponse);

@@ -348,26 +348,27 @@ export const activateHandler: RequestHandler<
     try {
       const options = req.body;
 
-      if (req.headers.cookie) {
-        const cookieHeader = req.headers.cookie;
+      if (!req.headers.cookie) throw new Error(`Cookie is missing!`);
 
-        return res.json(
-          options.type === "info"
-            ? checkAccount(options, cookieHeader)
-            : options.type === "sms"
-              ? sendSms(options, cookieHeader)
-              : options.type === "bind-phone"
-                ? bindPhone(options, cookieHeader)
-                : options.type === "replace-phone"
-                  ? replacePhone(options, cookieHeader)
-                  : setPassword(options, cookieHeader),
-        );
-      }
+      const cookieHeader = req.headers.cookie;
 
-      return res.json({
-        success: false,
-        msg: "cookie 缺失",
-      } as CommonFailedResponse);
+      if (options.type === "info")
+        return res.json(checkAccount(options, cookieHeader));
+
+      if (options.type === "sms")
+        return res.json(sendSms(options, cookieHeader));
+
+      if (options.type === "bind-phone")
+        return res.json(bindPhone(options, cookieHeader));
+
+      if (options.type === "replace-phone")
+        return res.json(replacePhone(options, cookieHeader));
+
+      if (options.type === "password")
+        return res.json(setPassword(options, cookieHeader));
+
+      // @ts-expect-error: Type is not expected
+      throw new Error(`Unknown type: ${options.type}`);
     } catch (err) {
       const { message } = err as Error;
 

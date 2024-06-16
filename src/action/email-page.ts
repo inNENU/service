@@ -40,10 +40,7 @@ export const actionEmailPageHandler: RequestHandler<
   try {
     if (!req.headers.cookie) {
       if (!req.body.id || !req.body.password)
-        return res.json({
-          success: false,
-          msg: "请提供账号密码",
-        } as CommonFailedResponse);
+        throw new Error(`"id" and password" field is required!`);
 
       const result = await actionLogin(req.body as AccountInfo);
 
@@ -77,15 +74,13 @@ export const actionEmailPageHandler: RequestHandler<
         url: emailPageResult.url,
       });
 
-    return res.json({
-      success: false,
-      msg: "获取邮件页面失败",
-    });
+    throw new Error("获取邮件页面失败");
   } catch (err) {
     const { message } = err as Error;
 
     console.error(err);
-    res.json({
+
+    return res.json({
       success: false,
       msg: message,
     } as CommonFailedResponse);

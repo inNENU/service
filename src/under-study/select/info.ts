@@ -249,10 +249,7 @@ export const underStudySelectInfoHandler: RequestHandler<
 
     if (!cookieHeader) {
       if (!req.body.id || !req.body.password)
-        return res.json({
-          success: false,
-          msg: "请提供账号密码",
-        } as CommonFailedResponse);
+        throw new Error(`"id" and password" field is required!`);
 
       const result = await underStudyLogin(req.body as AccountInfo);
 

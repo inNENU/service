@@ -219,10 +219,7 @@ export const gradOldGradeListHandler: RequestHandler<
 
     if (!cookieHeader) {
       if (!req.body.id || !req.body.password)
-        return res.json({
-          success: false,
-          msg: "请提供账号密码",
-        } as CommonFailedResponse);
+        throw new Error(`"id" and password" field is required!`);
 
       const result = await gradOldSystemLogin(req.body as AccountInfo);
 
@@ -259,9 +256,10 @@ export const gradOldGradeListHandler: RequestHandler<
     const { message } = err as Error;
 
     console.error(err);
-    res.json({
+
+    return res.json({
       success: false,
       msg: message,
-    } as AuthLoginFailedResult);
+    } as CommonFailedResponse);
   }
 };

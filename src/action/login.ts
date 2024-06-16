@@ -121,7 +121,8 @@ export const actionLoginHandler: RequestHandler<
     const { message } = err as Error;
 
     console.error(err);
-    res.json({
+
+    return res.json({
       success: false,
       msg: message,
     } as AuthLoginFailedResult);

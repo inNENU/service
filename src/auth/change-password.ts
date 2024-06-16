@@ -68,10 +68,7 @@ export const changePasswordHandler: RequestHandler<
           success: true,
         } as ChangePasswordSuccessResponse);
 
-      return res.json({
-        success: false,
-        msg: "修改失败",
-      } as CommonFailedResponse);
+      throw new Error("修改密码失败");
     }
 
     const { id, password } = req.body as AccountInfo;
@@ -119,10 +116,7 @@ export const changePasswordHandler: RequestHandler<
       return res.end(Buffer.from(recaptchaImage));
     }
 
-    return res.json({
-      success: false,
-      msg: "登录失败",
-    } as CommonFailedResponse);
+    throw new Error("登录失败");
   } catch (err) {
     const { message } = err as Error;
 

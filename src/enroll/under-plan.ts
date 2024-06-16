@@ -276,15 +276,14 @@ export const underEnrollPlanHandler: RequestHandler<
       } as UnderEnrollPlanSuccessResponse);
     }
 
-    res.json({
-      success: false,
-      msg: "未知的请求类型",
-    } as CommonFailedResponse);
+    // @ts-expect-error: Unexpected type
+    throw new Error(`Unknown type ${req.body.type}`);
   } catch (err) {
     const { message } = err as Error;
 
     console.error(err);
-    res.json({
+
+    return res.json({
       success: false,
       msg: message,
     } as CommonFailedResponse);

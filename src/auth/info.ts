@@ -42,11 +42,7 @@ export const getBasicInfo = async (
 
   console.log("Getting username", userName);
 
-  if (!userName)
-    return {
-      success: false,
-      msg: "获取姓名失败",
-    } as CommonFailedResponse;
+  if (!userName) throw new Error("获取姓名失败");
 
   const aliasResponse = await fetch(
     `${AUTH_SERVER}/authserver/userAttributesEdit.do`,
@@ -64,11 +60,7 @@ export const getBasicInfo = async (
 
   console.log("Getting alias: ", alias);
 
-  if (typeof alias !== "string")
-    return {
-      success: false,
-      msg: "获取别名失败",
-    } as CommonFailedResponse;
+  if (typeof alias !== "string") throw new Error("获取别名失败");
 
   return {
     success: true,
@@ -87,10 +79,7 @@ export const infoHandler: RequestHandler<
       return res.json(await getBasicInfo(req.headers.cookie));
 
     if (!req.body.id || !req.body.password)
-      return res.json({
-        success: false,
-        msg: "请提供账号密码",
-      } as CommonFailedResponse);
+      throw new Error(`"id" and "password" field is required!`);
 
     const result = await authLogin(req.body as AccountInfo);
 
@@ -102,10 +91,7 @@ export const infoHandler: RequestHandler<
       return res.json(await getBasicInfo(cookieHeader));
     }
 
-    return res.json({
-      success: false,
-      msg: "登录失败，无法获取信息。",
-    } as CommonFailedResponse);
+    throw new Error("登录失败，无法获取信息。");
   } catch (err) {
     const { message } = err as Error;
 

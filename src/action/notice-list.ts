@@ -2,10 +2,7 @@ import type { RequestHandler } from "express";
 
 import { actionLogin } from "./login.js";
 import { ACTION_SERVER } from "./utils.js";
-import type {
-  AuthLoginFailedResponse,
-  AuthLoginFailedResult,
-} from "../auth/index.js";
+import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { LoginFailType } from "../config/loginFailTypes.js";
 import type {
   AccountInfo,
@@ -88,10 +85,7 @@ export const noticeListHandler: RequestHandler<
 
     if (!cookieHeader) {
       if (!req.body.id || !req.body.password)
-        return res.json({
-          success: false,
-          msg: "请提供账号密码",
-        } as CommonFailedResponse);
+        throw new Error(`"id" and password" field is required!`);
 
       const result = await actionLogin(req.body as AccountInfo);
 
@@ -140,17 +134,15 @@ export const noticeListHandler: RequestHandler<
         totalPage,
       } as NoticeListSuccessResponse);
 
-    return res.json({
-      success: false,
-      msg: JSON.stringify(data),
-    } as AuthLoginFailedResult);
+    throw new Error(`获取公告列表失败: ${JSON.stringify(data, null, 2)}`);
   } catch (err) {
     const { message } = err as Error;
 
     console.error(err);
-    res.json({
+
+    return res.json({
       success: false,
       msg: message,
-    } as AuthLoginFailedResult);
+    } as CommonFailedResponse);
   }
 };

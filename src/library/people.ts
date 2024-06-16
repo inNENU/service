@@ -46,15 +46,15 @@ export const libraryPeopleHandler: RequestHandler = async (_, res) => {
       });
     }
 
-    return res.json({
-      success: false,
-    });
+    throw new Error("Failed");
   } catch (err) {
+    const msg = (err as Error).message;
+
     console.error(err);
 
-    res.status(500).json({
+    return res.json({
       success: false,
-      msg: "获取失败",
+      msg,
     });
   }
 };

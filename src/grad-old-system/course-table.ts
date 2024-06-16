@@ -92,10 +92,7 @@ export const gradOldCourseTableHandler: RequestHandler<
 
     if (!cookieHeader) {
       if (!req.body.id || !req.body.password)
-        return res.json({
-          success: false,
-          msg: "请提供账号密码",
-        } as CommonFailedResponse);
+        throw new Error(`"id" and password" field is required!`);
 
       const result = await gradOldSystemLogin(req.body as AccountInfo);
 
@@ -115,10 +112,7 @@ export const gradOldCourseTableHandler: RequestHandler<
     const content = await response.text();
 
     if (content.includes("该学期无课表时间信息"))
-      return res.json({
-        success: false,
-        msg: "该学期无课表时间信息",
-      });
+      throw new Error("该学期无课表时间信息");
 
     const tableData = getCourses(content);
 
@@ -131,9 +125,10 @@ export const gradOldCourseTableHandler: RequestHandler<
     const { message } = err as Error;
 
     console.error(err);
-    res.json({
+
+    return res.json({
       success: false,
       msg: message,
-    } as AuthLoginFailedResult);
+    } as CommonFailedResponse);
   }
 };

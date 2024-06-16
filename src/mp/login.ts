@@ -61,11 +61,13 @@ export const mpLoginHandler: RequestHandler<
       isAdmin: false,
     } as MPloginSuccessResponse);
   } catch (err) {
+    const msg = (err as Error).message;
+
     console.error(err);
 
-    res.status(500).json({
+    return res.json({
       success: false,
-      msg: "获取失败",
+      msg,
     } as CommonFailedResponse);
   }
 };

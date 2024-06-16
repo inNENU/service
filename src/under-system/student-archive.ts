@@ -264,10 +264,7 @@ export const underStudentArchiveHandler: RequestHandler<
 
     if (!cookieHeader) {
       if (!req.body.id || !req.body.password)
-        return res.json({
-          success: false,
-          msg: "请提供账号密码",
-        } as CommonFailedResponse);
+        throw new Error(`"id" and password" field is required!`);
 
       const result = await underSystemLogin(req.body as AccountInfo);
 
@@ -288,7 +285,8 @@ export const underStudentArchiveHandler: RequestHandler<
     const { message } = err as Error;
 
     console.error(err);
-    res.json({
+
+    return res.json({
       success: false,
       msg: message,
     } as AuthLoginFailedResult);

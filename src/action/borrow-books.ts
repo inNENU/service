@@ -77,36 +77,27 @@ export interface BorrowBookData {
 const getBookData = ({
   title,
   author,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  loan_date,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  due_date,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  item_barcode,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  location_code,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  call_number,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  process_status,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  last_renew_date,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  item_policy,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  publication_year,
+  loan_date: loanDate,
+  due_date: dueDate,
+  item_barcode: barcode,
+  location_code: locationCode,
+  call_number: shelfNumber,
+  process_status: status,
+  last_renew_date: renewTime,
+  item_policy: policy,
+  publication_year: year,
 }: RawBorrowBookData): BorrowBookData => ({
   name: title,
   author,
-  loanDate: loan_date,
-  dueDate: due_date,
-  year: Number(publication_year),
-  barcode: item_barcode,
-  location: location_code.name,
-  shelfNumber: call_number,
-  renew: process_status === "RENEW",
-  renewTime: last_renew_date,
-  status: item_policy.description,
+  loanDate,
+  dueDate,
+  year: Number(year),
+  barcode,
+  location: locationCode.name,
+  shelfNumber,
+  renew: status === "RENEW",
+  renewTime,
+  status: policy.description,
 });
 
 export interface BorrowBooksSuccessResponse {
@@ -128,10 +119,7 @@ export const borrowBooksHandler: RequestHandler<
   try {
     if (!req.headers.cookie) {
       if (!req.body.id || !req.body.password)
-        return res.json({
-          success: false,
-          msg: "请提供账号密码",
-        } as CommonFailedResponse);
+        throw new Error(`"id" and password" field is required!`);
 
       const result = await actionLogin(req.body as AccountInfo);
 
@@ -172,7 +160,8 @@ export const borrowBooksHandler: RequestHandler<
     const { message } = err as Error;
 
     console.error(err);
-    res.json({
+
+    return res.json({
       success: false,
       msg: message,
     } as CommonFailedResponse);
