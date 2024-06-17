@@ -16,6 +16,8 @@ export const enum ActionFailType {
 
   /** 登陆过期 */
   Expired = "expired",
+  /** 冲突 */
+  Conflict = "conflict",
 
   /** 无权限 */
   Forbidden = "forbidden",
