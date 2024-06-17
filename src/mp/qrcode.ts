@@ -87,7 +87,7 @@ export const mpQrCodeHandler: RequestHandler<
 
       if (image instanceof Buffer) {
         res.set({
-          "Content-Disposition": `qrcode.jpg`,
+          "Content-Disposition": "qrcode.jpg",
           "Content-Type": "image/jpeg",
         });
 

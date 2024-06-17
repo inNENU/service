@@ -169,6 +169,7 @@ const getCurrentTime = async (
     headers: {
       Cookie: cookieHeader,
       ...EDGE_USER_AGENT_HEADERS,
+      referer: `${UNDER_STUDY_SERVER}/new/student/teapj`,
     },
   });
 
