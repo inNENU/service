@@ -202,9 +202,7 @@ const checkCourseCommentary = async (
     },
   });
 
-  if (response.status !== 200) {
-    throw new Error("评教检查失败");
-  }
+  if (response.status !== 200) throw new Error("评教检查失败");
 
   try {
     const content = await response.text();

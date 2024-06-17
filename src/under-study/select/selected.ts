@@ -57,12 +57,7 @@ export const underStudySelectedCourseHandler: RequestHandler<
 
     const { link } = req.body;
 
-    if (!link) {
-      return res.json({
-        success: false,
-        msg: "请提供选课信息链接",
-      } as CommonFailedResponse);
-    }
+    if (!link) throw new Error(`"link" is required!`);
 
     const infoUrl = `${UNDER_STUDY_SERVER}${link}/yxkc`;
 
@@ -96,6 +91,6 @@ export const underStudySelectedCourseHandler: RequestHandler<
     return res.json({
       success: false,
       msg: message,
-    } as AuthLoginFailedResult);
+    } as CommonFailedResponse);
   }
 };

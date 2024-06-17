@@ -125,17 +125,16 @@ export const underStudyProcessCourseHandler: RequestHandler<
             success: false,
             msg: data.message,
             type: "not-opened",
-          } as CommonFailedResponse);
+          });
 
         return res.json({
           success: false,
           msg: data.message,
-        } as AuthLoginFailedResult);
+        });
       }
 
       return res.json({
         success: true,
-        msg: data.message,
       });
     }
 
@@ -163,17 +162,16 @@ export const underStudyProcessCourseHandler: RequestHandler<
             success: false,
             msg: data.message,
             type: "not-opened",
-          } as CommonFailedResponse);
+          });
 
         return res.json({
           success: false,
           msg: data.message,
-        } as AuthLoginFailedResult);
+        });
       }
 
       return res.json({
         success: true,
-        msg: data.message,
       });
     }
 
@@ -186,6 +184,6 @@ export const underStudyProcessCourseHandler: RequestHandler<
     return res.json({
       success: false,
       msg: message,
-    } as AuthLoginFailedResult);
+    });
   }
 };
