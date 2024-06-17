@@ -4,7 +4,7 @@ import { GRAD_OLD_SYSTEM_HTTPS_SERVER } from "./utils.js";
 import type {
   CommonFailedResponse,
   CookieOptions,
-  CookieVerifySuccessResponse,
+  CookieVerifyResponse,
   EmptyObject,
 } from "../typings.js";
 import { IE_8_USER_AGENT, cookies2Header } from "../utils/index.js";
@@ -36,18 +36,18 @@ export const gradOldSystemCheckHandler: RequestHandler<
         return res.json({
           success: true,
           valid: false,
-        } as CookieVerifySuccessResponse);
+        } as CookieVerifyResponse);
 
       return res.json({
         success: true,
         valid: true,
-      } as CookieVerifySuccessResponse);
+      } as CookieVerifyResponse);
     }
 
     return res.json({
       success: true,
       valid: false,
-    } as CookieVerifySuccessResponse);
+    } as CookieVerifyResponse);
   } catch (err) {
     const { message } = err as Error;
 

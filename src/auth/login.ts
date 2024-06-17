@@ -8,7 +8,7 @@ import {
   SALT_REGEXP,
   WEB_VPN_AUTH_SERVER,
 } from "./utils.js";
-import { LoginFailType } from "../config/loginFailTypes.js";
+import { ActionFailType } from "../config/actionFailType.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -33,11 +33,17 @@ export interface AuthLoginSuccessResult {
   location: string;
 }
 
-export interface AuthLoginFailedResult extends CommonFailedResponse {
-  type: Exclude<LoginFailType, LoginFailType.WrongCaptcha>;
-}
+export type AuthLoginFailedResponse = CommonFailedResponse<
+  | ActionFailType.AccountLocked
+  | ActionFailType.BlackList
+  | ActionFailType.EnabledSSO
+  | ActionFailType.Forbidden
+  | ActionFailType.NeedCaptcha
+  | ActionFailType.WrongPassword
+  | ActionFailType.Unknown
+>;
 
-export type AuthLoginResult = AuthLoginSuccessResult | AuthLoginFailedResult;
+export type AuthLoginResult = AuthLoginSuccessResult | AuthLoginFailedResponse;
 
 export const authLogin = async ({
   id,
@@ -51,7 +57,7 @@ export const authLogin = async ({
   if (isInBlackList(id))
     return {
       success: false,
-      type: LoginFailType.BlackList,
+      type: ActionFailType.BlackList,
       msg: BLACKLIST_HINT[Math.floor(Math.random() * BLACKLIST_HINT.length)],
     };
 
@@ -85,7 +91,7 @@ export const authLogin = async ({
     )
       return {
         success: false,
-        type: LoginFailType.Forbidden,
+        type: ActionFailType.Forbidden,
         msg: "用户账号没有此服务权限。",
       };
 
@@ -120,7 +126,7 @@ export const authLogin = async ({
     if (needCaptcha)
       return {
         success: false,
-        type: LoginFailType.NeedCaptcha,
+        type: ActionFailType.NeedCaptcha,
         msg: "需要验证码，请重新登录",
       };
 
@@ -160,7 +166,7 @@ export const authLogin = async ({
       if (resultContent.includes("您提供的用户名或者密码有误"))
         return {
           success: false,
-          type: LoginFailType.WrongPassword,
+          type: ActionFailType.WrongPassword,
           msg: "用户名或密码错误",
         };
 
@@ -169,7 +175,7 @@ export const authLogin = async ({
       )
         return {
           success: false,
-          type: LoginFailType.AccountLocked,
+          type: ActionFailType.AccountLocked,
           msg: "该帐号已经被锁定，请使用小程序的“账号激活”功能",
         };
 
@@ -180,14 +186,14 @@ export const authLogin = async ({
       )
         return {
           success: false,
-          type: LoginFailType.EnabledSSO,
+          type: ActionFailType.EnabledSSO,
           msg: "您已开启单点登录，请访问学校统一身份认证官网，在个人设置中关闭单点登录后重试。",
         };
 
       if (resultContent.includes("请输入验证码"))
         return {
           success: false,
-          type: LoginFailType.NeedCaptcha,
+          type: ActionFailType.NeedCaptcha,
           // TODO: Update
           msg: "登录需要验证码，请重新登陆。",
         };
@@ -195,7 +201,7 @@ export const authLogin = async ({
       if (resultContent.includes("不允许使用认证服务来认证您访问的目标应用。"))
         return {
           success: false,
-          type: LoginFailType.Forbidden,
+          type: ActionFailType.Forbidden,
           msg: "用户账号没有此服务权限。",
         };
 
@@ -203,7 +209,7 @@ export const authLogin = async ({
 
       return {
         success: false,
-        type: LoginFailType.Unknown,
+        type: ActionFailType.Unknown,
         msg: "未知错误",
       };
     }
@@ -212,7 +218,7 @@ export const authLogin = async ({
       if (location === `${server}/authserver/login`)
         return {
           success: false,
-          type: LoginFailType.WrongPassword,
+          type: ActionFailType.WrongPassword,
           msg: "用户名或密码错误",
         };
 
@@ -228,7 +234,7 @@ export const authLogin = async ({
 
   return {
     success: false,
-    type: LoginFailType.Unknown,
+    type: ActionFailType.Unknown,
     msg: "未知错误",
   };
 };
@@ -243,8 +249,6 @@ export interface AuthLoginSuccessResponse {
   cookies: CookieType[];
   location: string;
 }
-
-export type AuthLoginFailedResponse = AuthLoginFailedResult;
 
 export type AuthLoginResponse =
   | AuthLoginSuccessResponse

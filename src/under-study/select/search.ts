@@ -5,7 +5,7 @@ import type {
   UnderSelectCourseInfo,
 } from "./typings.js";
 import { getCourses } from "./utils.js";
-import type { AuthLoginFailedResult } from "../../auth/index.js";
+import type { AuthLoginFailedResponse } from "../../auth/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -48,7 +48,7 @@ export interface UnderSelectSearchSuccessResponse {
 
 export type UnderSelectSearchResponse =
   | UnderSelectSearchSuccessResponse
-  | AuthLoginFailedResult
+  | AuthLoginFailedResponse
   | (CommonFailedResponse & { type: "not-initialized" });
 
 export const underStudySearchCourseHandler: RequestHandler<
@@ -128,6 +128,6 @@ export const underStudySearchCourseHandler: RequestHandler<
     return res.json({
       success: false,
       msg: message,
-    } as AuthLoginFailedResult);
+    } as AuthLoginFailedResponse);
   }
 };

@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import type { AuthLoginFailedResult } from "../../auth/index.js";
+import type { AuthLoginFailedResponse } from "../../auth/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -35,7 +35,7 @@ export interface UnderSelectCategorySuccessResponse {
 
 export type UnderSelectCategoryResponse =
   | UnderSelectCategorySuccessResponse
-  | AuthLoginFailedResult
+  | AuthLoginFailedResponse
   | (CommonFailedResponse & { type: "not-initialized" });
 
 const CATEGORY_PAGE = `${UNDER_STUDY_SERVER}/new/student/xsxk/`;
@@ -104,6 +104,6 @@ export const underStudySelectCategoryHandler: RequestHandler<
     return res.json({
       success: false,
       msg: message,
-    } as AuthLoginFailedResult);
+    } as AuthLoginFailedResponse);
   }
 };

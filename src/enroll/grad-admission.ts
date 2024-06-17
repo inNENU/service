@@ -1,6 +1,7 @@
 import { CookieStore } from "@mptool/net";
 import type { RequestHandler } from "express";
 
+import { ActionFailType } from "../config/actionFailType.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 
 export interface GradAdmissionOptions {
@@ -15,7 +16,7 @@ export interface GradAdmissionSuccessResponse {
 
 export type GradAdmissionResponse =
   | GradAdmissionSuccessResponse
-  | CommonFailedResponse;
+  | CommonFailedResponse<ActionFailType.Unknown | ActionFailType.Forbidden>;
 
 const getInfo = async ({
   id,
@@ -57,6 +58,7 @@ const getInfo = async ({
   if (response.status !== 200)
     return {
       success: false,
+      type: ActionFailType.Forbidden,
       msg: "查询已关闭",
     };
 
@@ -65,6 +67,7 @@ const getInfo = async ({
   if (/<button type="submit" >查询<\/button>/.test(content))
     return {
       success: false,
+      type: ActionFailType.Unknown,
       msg: "暂无信息",
     };
 

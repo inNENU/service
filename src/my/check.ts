@@ -3,7 +3,7 @@ import type { RequestHandler } from "express";
 import { MY_SERVER } from "./utils.js";
 import type {
   CookieOptions,
-  CookieVerifySuccessResponse,
+  CookieVerifyResponse,
   EmptyObject,
 } from "../typings.js";
 import { cookies2Header } from "../utils/index.js";
@@ -30,11 +30,11 @@ export const myCheckHandler: RequestHandler<
     return res.json({
       success: true,
       valid: identityResult.success,
-    } as CookieVerifySuccessResponse);
+    } as CookieVerifyResponse);
   } catch (err) {
     return res.json({
       success: true,
       valid: false,
-    } as CookieVerifySuccessResponse);
+    } as CookieVerifyResponse);
   }
 };

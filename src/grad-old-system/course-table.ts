@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 
 import { gradOldSystemLogin } from "./login.js";
 import { GRAD_OLD_SYSTEM_HTTPS_SERVER } from "./utils.js";
-import type { AuthLoginFailedResult } from "../auth/index.js";
+import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { semesterStartTime } from "../config/semester-start-time.js";
 import type {
   AccountInfo,
@@ -67,7 +67,7 @@ export interface GradCourseTableSuccessResponse {
   startTime: string;
 }
 
-export type GradCourseTableFailedResponse = AuthLoginFailedResult;
+export type GradCourseTableFailedResponse = AuthLoginFailedResponse;
 
 export type GradCourseTableResponse =
   | GradCourseTableSuccessResponse

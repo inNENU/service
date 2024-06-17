@@ -3,7 +3,7 @@ import type { RequestHandler } from "express";
 import { actionLogin } from "./login.js";
 import { ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { LoginFailType } from "../config/loginFailTypes.js";
+import { ActionFailType } from "../config/actionFailType.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -126,7 +126,7 @@ export const noticeListHandler: RequestHandler<
     if (response.status === 302)
       return res.json({
         success: false,
-        type: LoginFailType.Expired,
+        type: ActionFailType.Expired,
         msg: "登录信息已过期，请重新登录",
       } as AuthLoginFailedResponse);
 

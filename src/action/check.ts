@@ -2,9 +2,8 @@ import type { RequestHandler } from "express";
 
 import { ACTION_SERVER } from "./utils.js";
 import type {
-  CommonFailedResponse,
   CookieOptions,
-  CookieVerifySuccessResponse,
+  CookieVerifyResponse,
   EmptyObject,
 } from "../typings.js";
 import { cookies2Header } from "../utils/index.js";
@@ -24,33 +23,20 @@ export const actionCheckHandler: RequestHandler<
       redirect: "manual",
     });
 
-    if (response.status === 200)
-      try {
-        const result = (await response.json()) as { success: boolean };
+    if (response.status !== 200) throw -1;
 
-        return res.json({
-          success: true,
-          valid: result.success,
-        } as CookieVerifySuccessResponse);
-      } catch (err) {
-        return res.json({
-          success: true,
-          valid: false,
-        } as CookieVerifySuccessResponse);
-      }
+    const result = (await response.json()) as { success: boolean };
+
+    return res.json({
+      success: true,
+      valid: result.success,
+    } as CookieVerifyResponse);
+  } catch (err) {
+    console.error(err);
 
     return res.json({
       success: true,
       valid: false,
-    } as CookieVerifySuccessResponse);
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json({
-      success: false,
-      msg: message,
-    } as CommonFailedResponse);
+    } as CookieVerifyResponse);
   }
 };

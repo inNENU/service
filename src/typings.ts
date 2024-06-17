@@ -1,5 +1,7 @@
 import type { CookieType } from "@mptool/net";
 
+import type { ActionFailType } from "./config/actionFailType";
+
 export type EmptyObject = Record<never, never>;
 
 export interface AccountInfo {
@@ -27,16 +29,15 @@ export interface CommonListSuccessResponse<T = EmptyObject> {
   total: number;
 }
 
-export interface CommonFailedResponse {
+export interface CommonFailedResponse<
+  T extends ActionFailType = ActionFailType.Unknown,
+> {
   success: false;
+  type: T;
   msg: string;
 }
 
-export interface CookieVerifySuccessResponse {
+export interface CookieVerifyResponse {
   success: true;
   valid: boolean;
 }
-
-export type CookieVerifyResponse =
-  | CookieVerifySuccessResponse
-  | CommonFailedResponse;

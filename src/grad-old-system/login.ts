@@ -5,10 +5,10 @@ import {
   GRAD_OLD_SYSTEM_HTTPS_SERVER,
   GRAD_OLD_SYSTEM_HTTP_SERVER,
 } from "./utils.js";
-import type { AuthLoginFailedResult } from "../auth/login.js";
+import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { AUTH_SERVER } from "../auth/utils.js";
-import { LoginFailType } from "../config/loginFailTypes.js";
+import { ActionFailType } from "../config/actionFailType.js";
 import type { AccountInfo, EmptyObject } from "../typings.js";
 import { CookieStore, IE_8_USER_AGENT } from "../utils/index.js";
 import type { VPNLoginFailedResult } from "../vpn/login.js";
@@ -20,7 +20,7 @@ export interface GradSystemLoginSuccessResult {
 
 export type GradSystemLoginResult =
   | GradSystemLoginSuccessResult
-  | AuthLoginFailedResult
+  | AuthLoginFailedResponse
   | VPNLoginFailedResult;
 
 const COMMON_HEADERS = {
@@ -45,7 +45,7 @@ export const gradOldSystemLogin = async (
       success: false,
       type: result.type,
       msg: result.msg,
-    } as AuthLoginFailedResult;
+    } as AuthLoginFailedResponse;
   }
 
   console.log("Login location", result.location);
@@ -62,7 +62,7 @@ export const gradOldSystemLogin = async (
   if (ticketResponse.status === 502)
     return {
       success: false,
-      type: LoginFailType.Unknown,
+      type: ActionFailType.Unknown,
       msg: "学校服务器已崩溃，请稍后重试",
     };
 
@@ -73,7 +73,7 @@ export const gradOldSystemLogin = async (
 
     return {
       success: false,
-      type: LoginFailType.Unknown,
+      type: ActionFailType.Unknown,
       msg: "登录失败",
     };
   }
@@ -85,7 +85,7 @@ export const gradOldSystemLogin = async (
   if (finalLocation?.includes("http://wafnenu.nenu.edu.cn/offCampus.html"))
     return {
       success: false,
-      type: LoginFailType.Forbidden,
+      type: ActionFailType.Forbidden,
       msg: "此账户无法登录研究生教学服务系统",
     };
 
@@ -130,7 +130,7 @@ export const gradOldSystemLogin = async (
 
   return {
     success: false,
-    type: LoginFailType.Unknown,
+    type: ActionFailType.Unknown,
     msg: "登录失败",
   };
 };
@@ -143,7 +143,7 @@ export interface GradSystemLoginSuccessResponse {
 
 export type GradSystemLoginResponse =
   | GradSystemLoginSuccessResponse
-  | AuthLoginFailedResult
+  | AuthLoginFailedResponse
   | VPNLoginFailedResult;
 
 export const gradOldSystemLoginHandler: RequestHandler<
@@ -178,6 +178,6 @@ export const gradOldSystemLoginHandler: RequestHandler<
     return res.json({
       success: false,
       msg: message,
-    } as AuthLoginFailedResult);
+    } as AuthLoginFailedResponse);
   }
 };

@@ -7,7 +7,7 @@ import {
   courseTypesStore,
   majorsStore,
 } from "./store.js";
-import type { AuthLoginFailedResult } from "../../auth/index.js";
+import type { AuthLoginFailedResponse } from "../../auth/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -64,7 +64,7 @@ export interface UnderSelectInfoSuccessResponse {
 
 export type UnderSelectInfoResponse =
   | UnderSelectInfoSuccessResponse
-  | AuthLoginFailedResult
+  | AuthLoginFailedResponse
   | (CommonFailedResponse & {
       type: "not-initialized" | "missing-commentary";
     });
@@ -322,6 +322,6 @@ export const underStudySelectInfoHandler: RequestHandler<
     return res.json({
       success: false,
       msg: message,
-    } as AuthLoginFailedResult);
+    } as AuthLoginFailedResponse);
   }
 };

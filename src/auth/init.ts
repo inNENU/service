@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 
 import { authEncrypt } from "./auth-encrypt.js";
 import { AUTH_DOMAIN, AUTH_SERVER, SALT_REGEXP } from "./utils.js";
-import { LoginFailType } from "../config/loginFailTypes.js";
+import { ActionFailType } from "../config/actionFailType.js";
 import type { MyInfo } from "../my/index.js";
 import { getMyInfo, myLogin } from "../my/index.js";
 import { MY_SERVER } from "../my/utils.js";
@@ -44,7 +44,7 @@ export interface AuthInitInfoSuccessResult {
   success: true;
   needCaptcha: boolean;
   cookieStore: CookieStore;
-  captcha: string;
+  captcha: string | null;
   params: Record<string, string>;
   salt: string;
 }
@@ -112,7 +112,7 @@ export const authInitInfo = async (
       rmShown,
       rememberMe: "on",
     },
-  } as AuthInitInfoSuccessResult;
+  };
 };
 
 export interface InitAuthOptions extends AccountInfo {
@@ -127,9 +127,15 @@ export interface InitAuthSuccessResult {
   info: MyInfo | null;
 }
 
-export interface InitAuthFailedResponse extends CommonFailedResponse {
-  type: LoginFailType;
-}
+export type InitAuthFailedResponse = CommonFailedResponse<
+  | ActionFailType.AccountLocked
+  | ActionFailType.BlackList
+  | ActionFailType.EnabledSSO
+  | ActionFailType.NeedCaptcha
+  | ActionFailType.Unknown
+  | ActionFailType.WrongCaptcha
+  | ActionFailType.WrongPassword
+>;
 
 export type InitAuthResult = InitAuthSuccessResult | InitAuthFailedResponse;
 
@@ -165,14 +171,14 @@ export const initAuth = async (
     if (resultContent.includes("无效的验证码"))
       return {
         success: false,
-        type: LoginFailType.WrongCaptcha,
+        type: ActionFailType.WrongCaptcha,
         msg: "验证码错误",
       };
 
     if (resultContent.includes("您提供的用户名或者密码有误"))
       return {
         success: false,
-        type: LoginFailType.WrongPassword,
+        type: ActionFailType.WrongPassword,
         msg: "用户名或密码错误",
       };
 
@@ -181,7 +187,7 @@ export const initAuth = async (
     )
       return {
         success: false,
-        type: LoginFailType.AccountLocked,
+        type: ActionFailType.AccountLocked,
         msg: "该帐号已经被锁定，请使用小程序的“账号激活”功能",
       };
 
@@ -192,14 +198,14 @@ export const initAuth = async (
     )
       return {
         success: false,
-        type: LoginFailType.EnabledSSO,
+        type: ActionFailType.EnabledSSO,
         msg: "您已开启单点登录，请访问学校统一身份认证官网，在个人设置中关闭单点登录后重试。",
       };
 
     if (resultContent.includes("请输入验证码"))
       return {
         success: false,
-        type: LoginFailType.NeedCaptcha,
+        type: ActionFailType.NeedCaptcha,
         msg: "需要验证码",
       };
   }
@@ -208,7 +214,7 @@ export const initAuth = async (
     if (location === LOGIN_URL)
       return {
         success: false,
-        type: LoginFailType.WrongPassword,
+        type: ActionFailType.WrongPassword,
         msg: "用户名或密码错误",
       };
 
@@ -216,7 +222,10 @@ export const initAuth = async (
 
     let loginResult = await myLogin({ id, password });
 
-    if ("type" in loginResult && loginResult.type === LoginFailType.Forbidden) {
+    if (
+      "type" in loginResult &&
+      loginResult.type === ActionFailType.Forbidden
+    ) {
       // Activate VPN by login
       const vpnLoginResult = await vpnLogin({ id, password });
 
@@ -238,7 +247,7 @@ export const initAuth = async (
     if (isInBlackList(id, openid, info))
       return {
         success: false,
-        type: LoginFailType.BlackList,
+        type: ActionFailType.BlackList,
         msg: BLACKLIST_HINT[Math.floor(Math.random() * BLACKLIST_HINT.length)],
       };
 
@@ -252,7 +261,7 @@ export const initAuth = async (
 
   return {
     success: false,
-    type: LoginFailType.Unknown,
+    type: ActionFailType.Unknown,
     msg: "未知错误",
   };
 };
@@ -265,11 +274,7 @@ export interface AuthInitInfoSuccessResponse {
   salt: string;
 }
 
-export type AuthInitFailedResponse = CommonFailedResponse;
-
-export type AuthInitInfoResponse =
-  | AuthInitInfoSuccessResponse
-  | AuthInitFailedResponse;
+export type AuthInitInfoResponse = AuthInitInfoSuccessResponse | InitAuthResult;
 
 export const authInitHandler: RequestHandler<
   EmptyObject,
@@ -310,6 +315,7 @@ export const authInitHandler: RequestHandler<
 
     return res.json({
       success: false,
+      type: ActionFailType.Unknown,
       msg: message,
     } as CommonFailedResponse);
   }

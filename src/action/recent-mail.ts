@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 
 import { actionLogin } from "./login.js";
 import { ACTION_MAIN_PAGE, ACTION_SERVER } from "./utils.js";
+import { ActionFailType } from "../config/actionFailType.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -86,9 +87,9 @@ export interface ActionRecentMailSuccessResponse {
   recent: EmailItem[];
 }
 
-export interface ActionRecentMailFailedResponse extends CommonFailedResponse {
-  type?: "not-initialized";
-}
+export type ActionRecentMailFailedResponse = CommonFailedResponse<
+  ActionFailType.NotInitialized | ActionFailType.Unknown
+>;
 
 export type ActionRecentMailResponse =
   | ActionRecentMailSuccessResponse
@@ -147,7 +148,7 @@ export const actionRecentEmailHandler: RequestHandler<
 
     return {
       success: false,
-      type: "not-initialized",
+      type: ActionFailType.NotInitialized,
       msg: "用户无邮箱或未初始化邮箱",
     };
   } catch (err) {
@@ -157,6 +158,7 @@ export const actionRecentEmailHandler: RequestHandler<
 
     return res.json({
       success: false,
+      type: ActionFailType.Unknown,
       msg: message,
     } as CommonFailedResponse);
   }

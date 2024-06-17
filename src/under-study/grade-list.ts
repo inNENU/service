@@ -2,8 +2,8 @@ import type { RequestHandler } from "express";
 
 import { underStudyLogin } from "./login.js";
 import { UNDER_STUDY_SERVER } from "./utils.js";
-import type { AuthLoginFailedResult } from "../auth/index.js";
-import { LoginFailType } from "../config/loginFailTypes.js";
+import type { AuthLoginFailedResponse } from "../auth/index.js";
+import { ActionFailType } from "../config/actionFailType.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -138,7 +138,7 @@ export interface UnderGradeListSuccessResponse {
 
 export type UnderGradeListResponse =
   | UnderGradeListSuccessResponse
-  | AuthLoginFailedResult
+  | AuthLoginFailedResponse
   | CommonFailedResponse;
 
 const QUERY_URL = `${UNDER_STUDY_SERVER}/new/student/xskccj/kccjDatas`;
@@ -221,7 +221,7 @@ export const underStudyGradeListHandler: RequestHandler<
     if (response.headers.get("content-type")?.includes("text/html"))
       return res.json({
         success: false,
-        type: LoginFailType.Expired,
+        type: ActionFailType.Expired,
         msg: "登录过期，请重新登录",
       });
 
@@ -231,7 +231,7 @@ export const underStudyGradeListHandler: RequestHandler<
       if (data.message === "尚未登录，请先登录")
         return {
           success: false,
-          type: LoginFailType.Expired,
+          type: ActionFailType.Expired,
           msg: "登录过期，请重新登录",
         };
 
@@ -255,6 +255,6 @@ export const underStudyGradeListHandler: RequestHandler<
     return res.json({
       success: false,
       msg: message,
-    } as AuthLoginFailedResult);
+    } as AuthLoginFailedResponse);
   }
 };

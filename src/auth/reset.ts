@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 
 import { authEncrypt } from "./auth-encrypt.js";
 import { AUTH_SERVER } from "./utils.js";
+import { ActionFailType } from "../config/actionFailType.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 import { CookieStore } from "../utils/index.js";
 
@@ -68,7 +69,12 @@ interface ResetPasswordInfoSuccessResult {
 
 type ResetPasswordInfoResult =
   | ResetPasswordInfoSuccessResult
-  | CommonFailedResponse;
+  | CommonFailedResponse<
+      | ActionFailType.WrongCellphone
+      | ActionFailType.WrongCaptcha
+      | ActionFailType.WrongUserName
+      | ActionFailType.Unknown
+    >;
 
 const verifyAccount = async (
   { id, mobile, captcha }: ResetPasswordInfoOptions,
@@ -104,6 +110,14 @@ const verifyAccount = async (
 
   return {
     success: false,
+    type:
+      data.code === 1
+        ? ActionFailType.WrongUserName
+        : data.code === 2
+          ? ActionFailType.WrongCellphone
+          : data.code === 3
+            ? ActionFailType.WrongCaptcha
+            : ActionFailType.Unknown,
     msg: data.message,
   };
 };
@@ -148,7 +162,6 @@ const sendSMS = async (
     headers: {
       Accept: "application/json, text/javascript, */*; q=0.01",
       Cookie: cookieHeader,
-      // TODO:
       "Content-Type": "application/x-www-form-urlencoded",
     },
     body: new URLSearchParams({
@@ -173,6 +186,7 @@ const sendSMS = async (
 
   return {
     success: false,
+    type: ActionFailType.Unknown,
     msg: data.message,
   };
 };
@@ -221,7 +235,6 @@ const verifySMS = async (
     headers: {
       Accept: "application/json, text/javascript, */*; q=0.01",
       Cookie: cookieHeader,
-      // TODO:
       "Content-Type": "application/x-www-form-urlencoded",
     },
     body: new URLSearchParams({
@@ -249,6 +262,7 @@ const verifySMS = async (
 
   return {
     success: false,
+    type: ActionFailType.Unknown,
     msg: data.message,
   };
 };
@@ -282,7 +296,7 @@ export interface ResetPasswordSetNewSuccessResponse {
 
 export type ResetPasswordSetNewResponse =
   | ResetPasswordSetNewSuccessResponse
-  | CommonFailedResponse;
+  | CommonFailedResponse<ActionFailType.WrongCaptcha | ActionFailType.Unknown>;
 
 const setNewPassword = async (
   { id, mobile, code, password, salt, sign }: ResetPasswordSetNewOptions,
@@ -295,7 +309,6 @@ const setNewPassword = async (
     headers: {
       Accept: "application/json, text/javascript, */*; q=0.01",
       Cookie: cookieHeader,
-      // TODO:
       "Content-Type": "application/x-www-form-urlencoded",
     },
     body: new URLSearchParams({
@@ -322,6 +335,8 @@ const setNewPassword = async (
 
   return {
     success: false,
+    type:
+      data.code === 4 ? ActionFailType.WrongCaptcha : ActionFailType.Unknown,
     msg: data.message,
   };
 };

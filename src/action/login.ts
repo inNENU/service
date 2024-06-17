@@ -3,8 +3,13 @@ import type { RequestHandler } from "express";
 
 import { ACTION_SERVER } from "./utils.js";
 import { WEB_VPN_AUTH_SERVER, authLogin } from "../auth/index.js";
-import type { AuthLoginFailedResult } from "../auth/login.js";
-import type { AccountInfo, EmptyObject } from "../typings.js";
+import type { AuthLoginFailedResponse } from "../auth/login.js";
+import { ActionFailType } from "../config/actionFailType.js";
+import type {
+  AccountInfo,
+  CommonFailedResponse,
+  EmptyObject,
+} from "../typings.js";
 import { CookieStore } from "../utils/index.js";
 import type { VPNLoginFailedResult } from "../vpn/login.js";
 import { vpnCASLogin } from "../vpn/login.js";
@@ -16,7 +21,7 @@ export interface ActionLoginSuccessResult {
 
 export type ActionLoginResult =
   | ActionLoginSuccessResult
-  | AuthLoginFailedResult
+  | AuthLoginFailedResponse
   | VPNLoginFailedResult;
 
 export const actionLogin = async (
@@ -37,11 +42,7 @@ export const actionLogin = async (
   if (!result.success) {
     console.error(result.msg);
 
-    return {
-      success: false,
-      type: result.type,
-      msg: result.msg,
-    } as AuthLoginFailedResult;
+    return result;
   }
 
   const ticketResponse = await fetch(result.location, {
@@ -57,9 +58,9 @@ export const actionLogin = async (
   if (ticketResponse.status !== 302)
     return {
       success: false,
-      type: "unknown",
+      type: ActionFailType.Unknown,
       msg: "登录失败",
-    } as AuthLoginFailedResult;
+    };
 
   const finalLocation = ticketResponse.headers.get("Location");
 
@@ -71,9 +72,9 @@ export const actionLogin = async (
 
   return {
     success: false,
-    type: "unknown",
+    type: ActionFailType.Unknown,
     msg: "登录失败",
-  } as AuthLoginFailedResult;
+  };
 };
 
 export interface ActionLoginSuccessResponse {
@@ -84,7 +85,7 @@ export interface ActionLoginSuccessResponse {
 
 export type ActionLoginResponse =
   | ActionLoginSuccessResponse
-  | AuthLoginFailedResult
+  | AuthLoginFailedResponse
   | VPNLoginFailedResult;
 
 export const actionLoginHandler: RequestHandler<
@@ -118,7 +119,8 @@ export const actionLoginHandler: RequestHandler<
 
     return res.json({
       success: false,
+      type: ActionFailType.Unknown,
       msg: message,
-    } as AuthLoginFailedResult);
+    } as CommonFailedResponse);
   }
 };

@@ -4,7 +4,7 @@ import { UNDER_STUDY_SERVER } from "./utils.js";
 import type {
   CommonFailedResponse,
   CookieOptions,
-  CookieVerifySuccessResponse,
+  CookieVerifyResponse,
   EmptyObject,
 } from "../typings.js";
 import { EDGE_USER_AGENT_HEADERS, cookies2Header } from "../utils/index.js";
@@ -30,13 +30,13 @@ export const underStudyCheckHandler: RequestHandler<
         return res.json({
           success: true,
           valid: true,
-        } as CookieVerifySuccessResponse);
+        } as CookieVerifyResponse);
     }
 
     return res.json({
       success: true,
       valid: false,
-    } as CookieVerifySuccessResponse);
+    } as CookieVerifyResponse);
   } catch (err) {
     const { message } = err as Error;
 

@@ -2,8 +2,8 @@ import type { RequestHandler } from "express";
 
 import { underSystemLogin } from "./login.js";
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
-import type { AuthLoginFailedResult } from "../auth/index.js";
-import { LoginFailType } from "../config/loginFailTypes.js";
+import type { AuthLoginFailedResponse } from "../auth/index.js";
+import { ActionFailType } from "../config/actionFailType.js";
 import { semesterStartTime } from "../config/semester-start-time.js";
 import type {
   AccountInfo,
@@ -70,7 +70,7 @@ export interface UnderCourseTableSuccessResponse {
 }
 
 export type UnderCourseTableFailedResponse =
-  | AuthLoginFailedResult
+  | AuthLoginFailedResponse
   | VPNLoginFailedResult
   | CommonFailedResponse;
 
@@ -120,7 +120,7 @@ export const underCourseTableHandler: RequestHandler<
     if (response.status === 302)
       return res.json({
         success: false,
-        type: LoginFailType.Expired,
+        type: ActionFailType.Expired,
         msg: "登录已过期，请重试",
       } as CommonFailedResponse);
 
@@ -147,6 +147,6 @@ export const underCourseTableHandler: RequestHandler<
     return res.json({
       success: false,
       msg: message,
-    } as AuthLoginFailedResult);
+    } as AuthLoginFailedResponse);
   }
 };

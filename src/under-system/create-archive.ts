@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 
 import { underSystemLogin } from "./login.js";
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
-import type { AuthLoginFailedResult } from "../auth/index.js";
+import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -88,7 +88,7 @@ export interface GetUnderCreateStudentArchiveInfoSuccessResponse {
 
 export type GetUnderCreateStudentArchiveInfoResponse =
   | GetUnderCreateStudentArchiveInfoSuccessResponse
-  | AuthLoginFailedResult
+  | AuthLoginFailedResponse
   | (CommonFailedResponse & { type?: "created" });
 
 export const getUnderStudentArchiveInfo = async (
@@ -260,7 +260,7 @@ export interface UnderCreateStudentArchiveSubmitInfoSuccessResponse {
 
 export type UnderCreateStudentArchiveSubmitInfoResponse =
   | UnderCreateStudentArchiveSubmitInfoSuccessResponse
-  | AuthLoginFailedResult
+  | AuthLoginFailedResponse
   | CommonFailedResponse;
 
 export const submitUnderStudentArchiveInfo = async (
@@ -326,7 +326,7 @@ export interface UnderCreateStudentArchiveSubmitAddressSuccessResponse {
 
 export type UnderCreateStudentArchiveSubmitAddressResponse =
   | UnderCreateStudentArchiveSubmitAddressSuccessResponse
-  | AuthLoginFailedResult
+  | AuthLoginFailedResponse
   | CommonFailedResponse;
 
 export const submitUnderStudentArchiveAddress = async (
@@ -418,7 +418,7 @@ export interface UnderCreateStudentArchiveSubmitStudySuccessResponse {
 
 export type UnderCreateStudentArchiveSubmitStudyResponse =
   | UnderCreateStudentArchiveSubmitStudySuccessResponse
-  | AuthLoginFailedResult
+  | AuthLoginFailedResponse
   | CommonFailedResponse;
 
 export const submitUnderStudentArchiveStudy = async (
@@ -533,7 +533,7 @@ export interface UnderCreateStudentArchiveSubmitFamilySuccessResponse {
 
 export type UnderCreateStudentArchiveSubmitFamilyResponse =
   | UnderCreateStudentArchiveSubmitFamilySuccessResponse
-  | AuthLoginFailedResult
+  | AuthLoginFailedResponse
   | CommonFailedResponse;
 
 export const submitUnderStudentArchiveFamily = async (
@@ -638,6 +638,6 @@ export const underCreateStudentArchiveHandler: RequestHandler<
     return res.json({
       success: false,
       msg: message,
-    } as AuthLoginFailedResult);
+    } as AuthLoginFailedResponse);
   }
 };

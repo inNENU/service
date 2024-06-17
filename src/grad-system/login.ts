@@ -2,9 +2,9 @@ import type { CookieType } from "@mptool/net";
 import type { RequestHandler } from "express";
 
 import { SERVER } from "./utils.js";
-import type { AuthLoginFailedResult } from "../auth/login.js";
+import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
-import { LoginFailType } from "../config/loginFailTypes.js";
+import { ActionFailType } from "../config/actionFailType.js";
 import type { AccountInfo, EmptyObject } from "../typings.js";
 import { CookieStore } from "../utils/index.js";
 
@@ -15,7 +15,7 @@ export interface GradSystemLoginSuccessResult {
 
 export type GradSystemLoginResult =
   | GradSystemLoginSuccessResult
-  | AuthLoginFailedResult;
+  | AuthLoginFailedResponse;
 
 export const gradSystemLogin = async (
   options: AccountInfo,
@@ -34,7 +34,7 @@ export const gradSystemLogin = async (
       success: false,
       type: result.type,
       msg: result.msg,
-    } as AuthLoginFailedResult;
+    } as AuthLoginFailedResponse;
   }
 
   const ticketResponse = await fetch(result.location, {
@@ -57,7 +57,7 @@ export const gradSystemLogin = async (
 
     return {
       success: false,
-      type: LoginFailType.Unknown,
+      type: ActionFailType.Unknown,
       msg: "登录失败",
     };
   }
@@ -67,7 +67,7 @@ export const gradSystemLogin = async (
   if (finalLocation?.includes("http://wafnenu.nenu.edu.cn/offCampus.html"))
     return {
       success: false,
-      type: LoginFailType.Forbidden,
+      type: ActionFailType.Forbidden,
       msg: "此账户无法登录研究生教学服务系统",
     };
 
@@ -88,7 +88,7 @@ export const gradSystemLogin = async (
 
   return {
     success: false,
-    type: LoginFailType.Unknown,
+    type: ActionFailType.Unknown,
     msg: "登录失败",
   };
 };
@@ -101,7 +101,7 @@ export interface GradSystemLoginSuccessResponse {
 
 export type GradSystemLoginResponse =
   | GradSystemLoginSuccessResponse
-  | AuthLoginFailedResult;
+  | AuthLoginFailedResponse;
 
 export const gradSystemLoginHandler: RequestHandler<
   EmptyObject,
@@ -135,6 +135,6 @@ export const gradSystemLoginHandler: RequestHandler<
     return res.json({
       success: false,
       msg: message,
-    } as AuthLoginFailedResult);
+    } as AuthLoginFailedResponse);
   }
 };

@@ -2,8 +2,8 @@ import type { RequestHandler } from "express";
 
 import { gradOldSystemLogin } from "./login.js";
 import { GRAD_OLD_SYSTEM_HTTPS_SERVER } from "./utils.js";
-import type { AuthLoginFailedResult } from "../auth/index.js";
-import { LoginFailType } from "../config/loginFailTypes.js";
+import type { AuthLoginFailedResponse } from "../auth/index.js";
+import { ActionFailType } from "../config/actionFailType.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -46,7 +46,7 @@ export interface GradGradeListSuccessResponse {
 
 export type GradGradeListResponse =
   | GradGradeListSuccessResponse
-  | AuthLoginFailedResult
+  | AuthLoginFailedResponse
   | CommonFailedResponse;
 
 const gradeItemRegExp = /<tr.+?class="smartTr"[^>]*?>([^]*?)<\/tr>/g;
@@ -243,8 +243,8 @@ export const gradOldGradeListHandler: RequestHandler<
       return res.json({
         success: false,
         msg: "登录已过期，请重新登录",
-        type: LoginFailType.Expired,
-      } as AuthLoginFailedResult);
+        type: ActionFailType.Expired,
+      } as AuthLoginFailedResponse);
 
     const gradeList = await getGradeLists(cookieHeader, content);
 

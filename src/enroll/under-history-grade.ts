@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 
+import { ActionFailType } from "../config/actionFailType.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 
 export interface UnderHistoryGradeInfoOptions {
@@ -307,6 +308,7 @@ export const underHistoryGradeHandler: RequestHandler<
     return res.json({
       success: false,
       msg: message,
+      type: ActionFailType.Unknown,
     } as CommonFailedResponse);
   }
 };

@@ -6,9 +6,9 @@ import { actionLogin } from "./login.js";
 import { ACTION_SERVER } from "./utils.js";
 import type {
   AuthLoginFailedResponse,
-  AuthLoginFailedResult,
+  AuthLoginFailedResponse,
 } from "../auth/index.js";
-import { LoginFailType } from "../config/loginFailTypes.js";
+import { ActionFailType } from "../config/actionFailType.js";
 import { MY_SERVER } from "../my/utils.js";
 import type {
   AccountInfo,
@@ -78,7 +78,7 @@ export const noticeHandler: RequestHandler<
     if (response.status === 302)
       return res.json({
         success: false,
-        type: LoginFailType.Expired,
+        type: ActionFailType.Expired,
         msg: "登录信息已过期，请重新登录",
       } as AuthLoginFailedResponse);
 
@@ -129,6 +129,6 @@ export const noticeHandler: RequestHandler<
     return res.json({
       success: false,
       msg: message,
-    } as AuthLoginFailedResult);
+    } as AuthLoginFailedResponse);
   }
 };

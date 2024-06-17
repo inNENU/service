@@ -2,10 +2,10 @@ import type { CookieType } from "@mptool/net";
 import type { RequestHandler } from "express";
 
 import { MY_MAIN_PAGE } from "./utils.js";
-import type { AuthLoginFailedResult } from "../auth/login.js";
+import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
-import { LoginFailType } from "../config/loginFailTypes.js";
+import { ActionFailType } from "../config/actionFailType.js";
 import type { AccountInfo, EmptyObject } from "../typings.js";
 import { CookieStore } from "../utils/index.js";
 import type { VPNLoginFailedResult } from "../vpn/login.js";
@@ -16,7 +16,9 @@ export interface MyLoginSuccessResult {
   cookieStore: CookieStore;
 }
 
-export type MyLoginFailedResult = AuthLoginFailedResult | VPNLoginFailedResult;
+export type MyLoginFailedResult =
+  | AuthLoginFailedResponse
+  | VPNLoginFailedResult;
 
 export type MyLoginResult = MyLoginSuccessResult | MyLoginFailedResult;
 
@@ -42,7 +44,7 @@ export const myLogin = async (
       success: false,
       type: result.type,
       msg: result.msg,
-    } as AuthLoginFailedResult;
+    } as AuthLoginFailedResponse;
   }
 
   const ticketUrl = result.location;
@@ -65,9 +67,9 @@ export const myLogin = async (
   if (ticketResponse.status !== 302)
     return {
       success: false,
-      type: LoginFailType.Unknown,
+      type: ActionFailType.Unknown,
       msg: "登录失败",
-    } as AuthLoginFailedResult;
+    } as AuthLoginFailedResponse;
 
   const sessionLocation = ticketResponse.headers.get("Location");
 
@@ -93,9 +95,9 @@ export const myLogin = async (
 
   return {
     success: false,
-    type: LoginFailType.Unknown,
+    type: ActionFailType.Unknown,
     msg: "登录失败",
-  } as AuthLoginFailedResult;
+  } as AuthLoginFailedResponse;
 };
 
 export interface MyLoginSuccessResponse {

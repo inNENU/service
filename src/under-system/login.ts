@@ -2,10 +2,10 @@ import type { CookieType } from "@mptool/net";
 import type { RequestHandler } from "express";
 
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
-import type { AuthLoginFailedResult } from "../auth/login.js";
+import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
-import { LoginFailType } from "../config/loginFailTypes.js";
+import { ActionFailType } from "../config/actionFailType.js";
 import type { AccountInfo, EmptyObject } from "../typings.js";
 import { CookieStore, IE_8_USER_AGENT } from "../utils/index.js";
 import type { VPNLoginFailedResult } from "../vpn/login.js";
@@ -18,7 +18,7 @@ export interface UnderSystemLoginSuccessResult {
 
 export type UnderSystemLoginResult =
   | UnderSystemLoginSuccessResult
-  | AuthLoginFailedResult
+  | AuthLoginFailedResponse
   | VPNLoginFailedResult;
 
 const COMMON_HEADERS = {
@@ -48,7 +48,7 @@ export const underSystemLogin = async (
       success: false,
       type: result.type,
       msg: result.msg,
-    } as AuthLoginFailedResult;
+    } as AuthLoginFailedResponse;
   }
 
   console.log("Login location", result.location);
@@ -69,7 +69,7 @@ export const underSystemLogin = async (
 
     return {
       success: false,
-      type: LoginFailType.Unknown,
+      type: ActionFailType.Unknown,
       msg: "登录失败",
     };
   }
@@ -81,7 +81,7 @@ export const underSystemLogin = async (
   if (finalLocation?.includes("http://wafnenu.nenu.edu.cn/offCampus.html"))
     return {
       success: false,
-      type: LoginFailType.Forbidden,
+      type: ActionFailType.Forbidden,
       msg: "此账户无法登录本科教学服务系统",
     };
 
@@ -106,7 +106,7 @@ export const underSystemLogin = async (
 
   return {
     success: false,
-    type: LoginFailType.Unknown,
+    type: ActionFailType.Unknown,
     msg: "登录失败",
   };
 };
@@ -119,7 +119,7 @@ export interface UnderSystemLoginSuccessResponse {
 
 export type UnderSystemLoginResponse =
   | UnderSystemLoginSuccessResponse
-  | AuthLoginFailedResult
+  | AuthLoginFailedResponse
   | VPNLoginFailedResult;
 
 export const underSystemLoginHandler: RequestHandler<
@@ -154,6 +154,6 @@ export const underSystemLoginHandler: RequestHandler<
     return res.json({
       success: false,
       msg: message,
-    } as AuthLoginFailedResult);
+    } as AuthLoginFailedResponse);
   }
 };

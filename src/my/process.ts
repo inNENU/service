@@ -1,6 +1,6 @@
 import { MY_MAIN_PAGE, MY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { LoginFailType } from "../config/loginFailTypes.js";
+import { ActionFailType } from "../config/actionFailType.js";
 import type { CommonFailedResponse } from "../typings.js";
 
 interface RawProcessResult {
@@ -49,7 +49,7 @@ export const getProcess = async (
   if (response.status === 302)
     return {
       success: false,
-      type: LoginFailType.Expired,
+      type: ActionFailType.Expired,
       msg: "登录信息已过期，请重新登录",
     } as AuthLoginFailedResponse;
 

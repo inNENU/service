@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 
 import { underSystemLogin } from "./login.js";
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
-import type { AuthLoginFailedResult } from "../auth/index.js";
+import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -40,7 +40,7 @@ export interface UnderTestQueySuccessResponse {
 }
 
 export type UnderTestQueyFailedResponse =
-  | AuthLoginFailedResult
+  | AuthLoginFailedResponse
   | VPNLoginFailedResult;
 
 export type UnderTestQueyResponse =
@@ -136,6 +136,6 @@ export const underTestQueryHandler: RequestHandler<
     return res.json({
       success: false,
       msg: message,
-    } as AuthLoginFailedResult);
+    } as AuthLoginFailedResponse);
   }
 };

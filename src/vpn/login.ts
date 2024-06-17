@@ -2,9 +2,9 @@ import type { CookieType } from "@mptool/net";
 import type { RequestHandler } from "express";
 
 import { VPN_DOMAIN, VPN_SERVER } from "./utils.js";
-import type { AuthLoginFailedResult } from "../auth/login.js";
+import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
-import { LoginFailType } from "../config/loginFailTypes.js";
+import { ActionFailType } from "../config/actionFailType.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -24,17 +24,16 @@ export interface VPNLoginSuccessResult {
   cookieStore: CookieStore;
 }
 
-export interface VPNLoginFailedResult extends CommonFailedResponse {
-  type:
-    | LoginFailType.AccountLocked
-    | LoginFailType.WrongPassword
-    | LoginFailType.Unknown;
-}
+export type VPNLoginFailedResult = CommonFailedResponse<
+  | ActionFailType.AccountLocked
+  | ActionFailType.WrongPassword
+  | ActionFailType.Unknown
+>;
 
 export type VPNLoginResult =
   | VPNLoginSuccessResult
   | VPNLoginFailedResult
-  | AuthLoginFailedResult;
+  | AuthLoginFailedResponse;
 
 export const vpnCASLogin = async (
   { id, password }: AccountInfo,
@@ -68,7 +67,7 @@ export const vpnCASLogin = async (
     if (callbackResponse.status === 500)
       return {
         success: false,
-        type: LoginFailType.Unknown,
+        type: ActionFailType.Unknown,
         msg: "学校 WebVPN 服务崩溃，请稍后重试。",
       };
 
@@ -80,7 +79,7 @@ export const vpnCASLogin = async (
       if (location === LOGIN_URL)
         return {
           success: false,
-          type: LoginFailType.AccountLocked,
+          type: ActionFailType.AccountLocked,
           msg: "短时间内登录失败过多，账户已锁定。请 10 分钟后重试",
         };
 
@@ -104,13 +103,13 @@ export const vpnCASLogin = async (
   if (casResponse.status === 500)
     return {
       success: false,
-      type: LoginFailType.Unknown,
+      type: ActionFailType.Unknown,
       msg: "学校 WebVPN 服务崩溃，请稍后重试。",
     };
 
   return {
     success: false,
-    type: LoginFailType.Unknown,
+    type: ActionFailType.Unknown,
     msg: "未知错误",
   };
 };
@@ -159,7 +158,7 @@ export const vpnLogin = async (
     if (location === LOGIN_URL)
       return {
         success: false,
-        type: LoginFailType.AccountLocked,
+        type: ActionFailType.AccountLocked,
         msg: "短时间内登录过多，小程序服务器已被屏蔽。请稍后重试",
       };
 
@@ -185,14 +184,14 @@ export const vpnLogin = async (
     if (response.includes("用户名或密码错误, 超过五次将被锁定。"))
       return {
         success: false,
-        type: LoginFailType.WrongPassword,
+        type: ActionFailType.WrongPassword,
         msg: "用户名或密码错误, 超过五次将被锁定。",
       };
 
     if (response.includes("您的帐号已被锁定, 请在十分钟后再尝试。"))
       return {
         success: false,
-        type: LoginFailType.AccountLocked,
+        type: ActionFailType.AccountLocked,
         msg: "您的帐号已被锁定, 请在十分钟后再尝试。",
       };
   }
@@ -201,7 +200,7 @@ export const vpnLogin = async (
 
   return {
     success: false,
-    type: LoginFailType.Unknown,
+    type: ActionFailType.Unknown,
     msg: "未知错误",
   };
 };
@@ -252,7 +251,7 @@ export interface VPNLoginSuccessResponse {
 
 export type VPNLoginResponse =
   | VPNLoginSuccessResponse
-  | AuthLoginFailedResult
+  | AuthLoginFailedResponse
   | VPNLoginFailedResult;
 
 export const vpnLoginHandler: RequestHandler<

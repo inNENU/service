@@ -5,7 +5,7 @@ import type {
   UnderSelectClassInfo,
 } from "./typings.js";
 import { getClasses } from "./utils.js";
-import type { AuthLoginFailedResult } from "../../auth/index.js";
+import type { AuthLoginFailedResponse } from "../../auth/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -30,7 +30,7 @@ export interface UnderSelectClassSuccessResponse {
 
 export type UnderSelectClassResponse =
   | UnderSelectClassSuccessResponse
-  | AuthLoginFailedResult
+  | AuthLoginFailedResponse
   | (CommonFailedResponse & { type: "not-initialized" });
 
 export const underStudySearchClassHandler: RequestHandler<
@@ -89,6 +89,6 @@ export const underStudySearchClassHandler: RequestHandler<
     return res.json({
       success: false,
       msg: message,
-    } as AuthLoginFailedResult);
+    } as AuthLoginFailedResponse);
   }
 };

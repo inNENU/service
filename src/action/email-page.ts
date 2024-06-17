@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 
 import { actionLogin } from "./login.js";
 import { ACTION_MAIN_PAGE, ACTION_SERVER } from "./utils.js";
+import { ActionFailType } from "../config/actionFailType.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -49,7 +50,7 @@ export const actionEmailPageHandler: RequestHandler<
 
     const { mid } = req.body;
 
-    const emailPageResponse = await fetch(mid ? EMAIL_PAGE_URL : EMAIL_URL, {
+    const response = await fetch(mid ? EMAIL_PAGE_URL : EMAIL_URL, {
       method: "POST",
       headers: {
         Accept: "application/json, text/javascript, */*; q=0.01",
@@ -63,13 +64,12 @@ export const actionEmailPageHandler: RequestHandler<
       }),
     });
 
-    const emailPageResult =
-      (await emailPageResponse.json()) as RawEmailPageResponse;
+    const result = (await response.json()) as RawEmailPageResponse;
 
-    if (emailPageResult.success)
+    if (result.success)
       return res.json({
         success: true,
-        data: emailPageResult.url,
+        data: result.url,
       } as ActionEmailPageSuccessResponse);
 
     throw new Error("获取邮件页面失败");
@@ -80,6 +80,7 @@ export const actionEmailPageHandler: RequestHandler<
 
     return res.json({
       success: false,
+      type: ActionFailType.Unknown,
       msg: message,
     } as CommonFailedResponse);
   }

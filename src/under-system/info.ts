@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 
 import { underSystemLogin } from "./login.js";
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
-import type { AuthLoginFailedResult } from "../auth/index.js";
+import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -140,7 +140,7 @@ export interface UnderInfoSuccessResponse {
 
 export type UnderInfoResponse =
   | UnderInfoSuccessResponse
-  | AuthLoginFailedResult
+  | AuthLoginFailedResponse
   | CommonFailedResponse;
 
 export const getUnderInfo = async (
@@ -202,6 +202,6 @@ export const underInfoHandler: RequestHandler<
     return res.json({
       success: false,
       msg: message,
-    } as AuthLoginFailedResult);
+    } as AuthLoginFailedResponse);
   }
 };

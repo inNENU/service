@@ -3,7 +3,7 @@ import type { RequestHandler } from "express";
 import { getAction } from "./action.js";
 import { gradSystemLogin } from "./login.js";
 import { MAIN_URL, SERVER } from "./utils.js";
-import type { AuthLoginFailedResult } from "../auth/index.js";
+import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -96,7 +96,7 @@ export interface InfoSuccessResponse {
 
 export type InfoResponse =
   | InfoSuccessResponse
-  | AuthLoginFailedResult
+  | AuthLoginFailedResponse
   | CommonFailedResponse;
 
 export const getGradInfo = async (
@@ -170,6 +170,6 @@ export const gradInfoHandler: RequestHandler<
     return res.json({
       success: false,
       msg: message,
-    } as AuthLoginFailedResult);
+    } as AuthLoginFailedResponse);
   }
 };

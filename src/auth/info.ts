@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 
 import { authLogin } from "./login.js";
 import { AUTH_SERVER } from "./utils.js";
+import { ActionFailType } from "../config/actionFailType.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -29,44 +30,54 @@ const inputRegExp = /id="alias".*?value="(.*?)"/;
 export const getBasicInfo = async (
   cookieHeader: string,
 ): Promise<InfoResponse> => {
-  const userNameResponse = await fetch(`${AUTH_SERVER}/authserver/index.do`, {
-    method: "GET",
-    headers: {
-      Cookie: cookieHeader,
-    },
-  });
-
-  const userNameResponseText = await userNameResponse.text();
-
-  const userName = userNameRegexp.exec(userNameResponseText)?.[1];
-
-  console.log("Getting username", userName);
-
-  if (!userName) throw new Error("获取姓名失败");
-
-  const aliasResponse = await fetch(
-    `${AUTH_SERVER}/authserver/userAttributesEdit.do`,
-    {
+  try {
+    const userNameResponse = await fetch(`${AUTH_SERVER}/authserver/index.do`, {
       method: "GET",
       headers: {
         Cookie: cookieHeader,
       },
-    },
-  );
+    });
 
-  const aliasResponseText = await aliasResponse.text();
+    const userNameResponseText = await userNameResponse.text();
 
-  const alias = inputRegExp.exec(aliasResponseText)?.[1];
+    const userName = userNameRegexp.exec(userNameResponseText)?.[1];
 
-  console.log("Getting alias: ", alias);
+    console.log("Getting username", userName);
 
-  if (typeof alias !== "string") throw new Error("获取别名失败");
+    if (!userName) throw new Error("获取姓名失败");
 
-  return {
-    success: true,
-    name: userName,
-    alias: alias || "未设置别名",
-  } as InfoSuccessResponse;
+    const aliasResponse = await fetch(
+      `${AUTH_SERVER}/authserver/userAttributesEdit.do`,
+      {
+        method: "GET",
+        headers: {
+          Cookie: cookieHeader,
+        },
+      },
+    );
+
+    const aliasResponseText = await aliasResponse.text();
+
+    const alias = inputRegExp.exec(aliasResponseText)?.[1];
+
+    console.log("Getting alias: ", alias);
+
+    if (typeof alias !== "string") throw new Error("获取别名失败");
+
+    return {
+      success: true,
+      name: userName,
+      alias: alias || "未设置别名",
+    };
+  } catch (err) {
+    console.error(err);
+
+    return {
+      success: false,
+      type: ActionFailType.Unknown,
+      msg: "获取信息失败",
+    };
+  }
 };
 
 export const infoHandler: RequestHandler<
@@ -99,6 +110,7 @@ export const infoHandler: RequestHandler<
 
     return res.json({
       success: false,
+      type: ActionFailType.Unknown,
       msg: message,
     } as CommonFailedResponse);
   }

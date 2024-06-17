@@ -13,7 +13,7 @@ import {
   tableFieldsRegExp,
   totalPagesRegExp,
 } from "./utils.js";
-import type { AuthLoginFailedResult } from "../auth/index.js";
+import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -160,7 +160,7 @@ export interface UnderExamPlaceSuccessResponse {
 }
 
 export type UnderExamPlaceFailedResponse =
-  | AuthLoginFailedResult
+  | AuthLoginFailedResponse
   | VPNLoginFailedResult;
 
 export type UnderExamPlaceResponse =

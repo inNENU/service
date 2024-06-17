@@ -2,10 +2,10 @@ import type { CookieType } from "@mptool/net";
 import type { RequestHandler } from "express";
 
 import { UNDER_STUDY_SERVER } from "./utils.js";
-import type { AuthLoginFailedResult } from "../auth/login.js";
+import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { AUTH_SERVER } from "../auth/utils.js";
-import { LoginFailType } from "../config/loginFailTypes.js";
+import { ActionFailType } from "../config/actionFailType.js";
 import type { AccountInfo, EmptyObject } from "../typings.js";
 import { CookieStore, EDGE_USER_AGENT_HEADERS } from "../utils/index.js";
 
@@ -16,7 +16,7 @@ export interface UnderStudyLoginSuccessResult {
 
 export type UnderStudyLoginResult =
   | UnderStudyLoginSuccessResult
-  | AuthLoginFailedResult;
+  | AuthLoginFailedResponse;
 
 const SSO_LOGIN_URL = `${UNDER_STUDY_SERVER}/new/ssoLogin`;
 
@@ -37,7 +37,7 @@ export const underStudyLogin = async (
       success: false,
       type: result.type,
       msg: result.msg,
-    } as AuthLoginFailedResult;
+    } as AuthLoginFailedResponse;
   }
 
   console.log("Login location", result.location);
@@ -57,7 +57,7 @@ export const underStudyLogin = async (
 
     return {
       success: false,
-      type: LoginFailType.Unknown,
+      type: ActionFailType.Unknown,
       msg: "登录失败",
     };
   }
@@ -89,7 +89,7 @@ export const underStudyLogin = async (
 
   return {
     success: false,
-    type: LoginFailType.Unknown,
+    type: ActionFailType.Unknown,
     msg: "登录失败",
   };
 };
@@ -102,7 +102,7 @@ export interface UnderStudyLoginSuccessResponse {
 
 export type UnderStudyLoginResponse =
   | UnderStudyLoginSuccessResponse
-  | AuthLoginFailedResult;
+  | AuthLoginFailedResponse;
 
 export const underStudyLoginHandler: RequestHandler<
   EmptyObject,
@@ -136,6 +136,6 @@ export const underStudyLoginHandler: RequestHandler<
     return res.json({
       success: false,
       msg: message,
-    } as AuthLoginFailedResult);
+    } as AuthLoginFailedResponse);
   }
 };

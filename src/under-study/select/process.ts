@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import type { AuthLoginFailedResult } from "../../auth/index.js";
+import type { AuthLoginFailedResponse } from "../../auth/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -71,7 +71,7 @@ export interface UnderSelectProcessSuccessResponse {
 
 export type UnderSelectProcessResponse =
   | UnderSelectProcessSuccessResponse
-  | AuthLoginFailedResult
+  | AuthLoginFailedResponse
   | (CommonFailedResponse & { type: "not-initialized" | "not-opened" });
 
 export const underStudyProcessCourseHandler: RequestHandler<
