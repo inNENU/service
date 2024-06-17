@@ -15,12 +15,13 @@ export interface UnderSelectAddOptions extends LoginOptions {
   type: "add";
   /** 课程分类链接 */
   link: string;
+  /** 班级 ID */
+  classId: string;
+
   /** 课程名称 */
   name?: string;
   /** 课程 ID */
-  courseId: string;
-  /** 班级 ID */
-  classId: string;
+  courseId?: string;
   /**
    * 权重
    *
@@ -33,14 +34,15 @@ export interface UnderSelectRemoveOptions extends LoginOptions {
   type: "remove";
   /** 课程分类链接 */
   link: string;
+  /** 班级 ID */
+  classId: string;
+
   /** 课程名称 */
   name?: string;
   /** 课程 ID */
-  courseId: string;
+  courseId?: string;
   /** 班级代码 */
-  classCode: string;
-  /** 班级 ID */
-  classId: string;
+  classCode?: string;
 }
 
 export type UnderSelectProcessOptions =
@@ -50,13 +52,13 @@ export type UnderSelectProcessOptions =
 interface RawUnderSelectProcessSuccessResponse {
   data: "";
   code: 0;
-  msg: string;
+  message: string;
 }
 
 interface RawUnderSelectProcessFailResponse {
   data: "";
   code: -1;
-  msg: string;
+  message: string;
 }
 
 type RawUnderSelectProcessResponse =
@@ -92,22 +94,12 @@ export const underStudyProcessCourseHandler: RequestHandler<
 
     const { type, link } = req.body;
 
-    if (!link) {
-      return res.json({
-        success: false,
-        msg: "请提供选课信息链接",
-      } as CommonFailedResponse);
-    }
+    if (!link) throw new Error(`"link" is required`);
+    if (!req.body.classId) throw new Error(`"classId" are required`);
 
     const referer = `${UNDER_STUDY_SERVER}${link}`;
 
     if (type === "add") {
-      if (!req.body.courseId || !req.body.classId)
-        return res.json({
-          success: false,
-          msg: "请提供课程 ID 和班级 ID",
-        } as CommonFailedResponse);
-
       const response = await fetch(`${referer}/add`, {
         method: "POST",
         headers: {
@@ -128,21 +120,22 @@ export const underStudyProcessCourseHandler: RequestHandler<
       const data = (await response.json()) as RawUnderSelectProcessResponse;
 
       if (data.code !== 0) {
-        if (data.code === -1 && data.msg === "当前不是选课时间")
+        if (data.code === -1 && data.message === "当前不是选课时间")
           return res.json({
             success: false,
-            msg: data.msg,
+            msg: data.message,
             type: "not-opened",
           } as CommonFailedResponse);
 
         return res.json({
           success: false,
-          msg: data.msg,
+          msg: data.message,
         } as AuthLoginFailedResult);
       }
 
       return res.json({
         success: true,
+        msg: data.message,
       });
     }
 
@@ -165,28 +158,26 @@ export const underStudyProcessCourseHandler: RequestHandler<
       const data = (await response.json()) as RawUnderSelectProcessResponse;
 
       if (data.code !== 0) {
-        if (data.code === -1 && data.msg === "当前不是选课时间")
+        if (data.code === -1 && data.message === "当前不是选课时间")
           return res.json({
             success: false,
-            msg: data.msg,
+            msg: data.message,
             type: "not-opened",
           } as CommonFailedResponse);
 
         return res.json({
           success: false,
-          msg: data.msg,
+          msg: data.message,
         } as AuthLoginFailedResult);
       }
 
       return res.json({
         success: true,
+        msg: data.message,
       });
     }
 
-    return res.json({
-      success: false,
-      msg: "未知操作类型",
-    } as CommonFailedResponse);
+    throw new Error('Invalid "type"');
   } catch (err) {
     const { message } = err as Error;
 

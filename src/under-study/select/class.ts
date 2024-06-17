@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
 import type {
-  RawUnderSelectClassItem,
+  RawUnderSearchClassResponse,
   UnderSelectClassInfo,
 } from "./typings.js";
 import { getClasses } from "./utils.js";
@@ -16,31 +16,27 @@ import { EDGE_USER_AGENT_HEADERS } from "../../utils/index.js";
 import { underStudyLogin } from "../login.js";
 import { UNDER_STUDY_SERVER } from "../utils.js";
 
-export interface UnderSelectSelectedOptions extends LoginOptions {
-  /** 课程分类链接 */
+export interface UnderSelectClassOptions extends LoginOptions {
+  /** 选课链接 */
   link: string;
+  /** 课程 ID */
+  courseId: string;
 }
 
-interface RawUnderSelectedClassResponse {
-  data: "";
-  rows: RawUnderSelectClassItem[];
-  total: number;
-}
-
-export interface UnderSelectSelectedSuccessResponse {
+export interface UnderSelectClassSuccessResponse {
   success: true;
   data: UnderSelectClassInfo[];
 }
 
-export type UnderSelectSelectedResponse =
-  | UnderSelectSelectedSuccessResponse
+export type UnderSelectClassResponse =
+  | UnderSelectClassSuccessResponse
   | AuthLoginFailedResult
   | (CommonFailedResponse & { type: "not-initialized" });
 
-export const underStudySelectedCourseHandler: RequestHandler<
+export const underStudySearchClassHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  UnderSelectSelectedOptions
+  UnderSelectClassOptions
 > = async (req, res) => {
   try {
     let cookieHeader = req.headers.cookie;
@@ -55,16 +51,12 @@ export const underStudySelectedCourseHandler: RequestHandler<
       cookieHeader = result.cookieStore.getHeader(UNDER_STUDY_SERVER);
     }
 
-    const { link } = req.body;
+    const { courseId, link } = req.body;
 
-    if (!link) {
-      return res.json({
-        success: false,
-        msg: "请提供选课信息链接",
-      } as CommonFailedResponse);
-    }
+    if (!link) throw new Error(`"link" is required!`);
+    if (!courseId) throw new Error(`"courseId" is required!`);
 
-    const infoUrl = `${UNDER_STUDY_SERVER}${link}/yxkc`;
+    const infoUrl = `${UNDER_STUDY_SERVER}${link}/kxkc`;
 
     const response = await fetch(infoUrl, {
       method: "POST",
@@ -75,6 +67,7 @@ export const underStudySelectedCourseHandler: RequestHandler<
         ...EDGE_USER_AGENT_HEADERS,
       },
       body: new URLSearchParams({
+        kcptdm: courseId,
         page: "1",
         row: "1000",
         sort: "kcrwdm",
@@ -82,12 +75,12 @@ export const underStudySelectedCourseHandler: RequestHandler<
       }),
     });
 
-    const data = (await response.json()) as RawUnderSelectedClassResponse;
+    const data = (await response.json()) as RawUnderSearchClassResponse;
 
     return res.json({
       success: true,
       data: getClasses(data.rows),
-    } as UnderSelectSelectedSuccessResponse);
+    } as UnderSelectClassSuccessResponse);
   } catch (err) {
     const { message } = err as Error;
 

@@ -1,7 +1,7 @@
 import type {
   RawUnderSelectClassItem,
+  UnderSelectClassInfo,
   UnderSelectCourseInfo,
-  UnderSelectSearchClass,
 } from "./typings";
 
 export const getCourses = (
@@ -23,7 +23,7 @@ export const getCourses = (
 
 export const getClasses = (
   records: RawUnderSelectClassItem[],
-): UnderSelectSearchClass[] =>
+): UnderSelectClassInfo[] =>
   records.map(
     ({
       kcmc,
@@ -44,6 +44,7 @@ export const getClasses = (
 
       jxbdm,
       kcrwdm,
+      jxbrs,
     }) => ({
       name: kcmc,
       courseShortType: jc,
@@ -60,6 +61,7 @@ export const getClasses = (
       className: jxbmc,
       time: zcxqjc,
       capacity: pkrs,
+      current: Number(jxbrs),
 
       classCode: jxbdm,
       classId: kcrwdm,

@@ -77,6 +77,7 @@ import {
   underStudyGradeDetailHandler,
   underStudyGradeListHandler,
   underStudyLoginHandler,
+  underStudySearchClassHandler,
   underStudySearchCourseHandler,
   underStudySelectCategoryHandler,
   underStudySelectInfoHandler,
@@ -171,6 +172,7 @@ app.post("/under-study/grade-detail", underStudyGradeDetailHandler);
 app.post("/under-study/grade-list", underStudyGradeListHandler);
 app.post("/under-study/login", underStudyLoginHandler);
 app.post("/under-study/select/category", underStudySelectCategoryHandler);
+app.post("/under-study/select/class", underStudySearchClassHandler);
 app.post("/under-study/select/info", underStudySelectInfoHandler);
 app.post("/under-study/select/search", underStudySearchCourseHandler);
 app.post("/under-study/select/process", underStudyProcessCourseHandler);

@@ -158,6 +158,12 @@ export interface RawUnderSelectClassItem {
   sdm: "13253262";
 }
 
+export interface RawUnderSearchClassResponse {
+  data: "";
+  rows: RawUnderSelectClassItem[];
+  total: number;
+}
+
 /** 课程信息 */
 export interface UnderSelectCourseInfo {
   /** 课程名称 */
@@ -183,7 +189,7 @@ export interface UnderSelectCourseInfo {
 }
 
 /** 班级信息 */
-export interface UnderSelectSearchClass extends UnderSelectCourseInfo {
+export interface UnderSelectClassInfo extends UnderSelectCourseInfo {
   /** 班级名称 */
   className: string;
   /** 教师 */
@@ -194,6 +200,8 @@ export interface UnderSelectSearchClass extends UnderSelectCourseInfo {
   time: string;
   /** 课容量 */
   capacity: number;
+  /** 当前选课人数 */
+  current: number;
 
   /** 班级代码 */
   classCode: string;

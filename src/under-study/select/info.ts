@@ -191,9 +191,10 @@ const getSelectInfo = (content: string): UnderSelectInfo => {
 
 const checkCourseCommentary = async (
   cookieHeader: string,
+  term: string,
   categoryUrl: string,
 ): Promise<{ completed: boolean; msg: string }> => {
-  const response = await fetch(`${CHECK_URL}?xnxqdm=&_=${Date.now()}`, {
+  const response = await fetch(`${CHECK_URL}?xnxqdm=${term}&_=${Date.now()}`, {
     headers: {
       Cookie: cookieHeader,
       Referer: categoryUrl,
@@ -206,31 +207,27 @@ const checkCourseCommentary = async (
   }
 
   try {
-    const { code, message } = (await response.json()) as {
-      code: number;
-      data: "";
-      message: string;
-    };
+    const content = await response.text();
 
-    if (code === 0 && message.includes("评价已完成")) {
-      return { completed: true, msg: message };
+    if (content.includes("评价已完成")) {
+      return { completed: true, msg: "已完成评教" };
     }
 
-    if (code === -1) {
-      if (message.includes("下次可检查时间为：")) {
-        const time = /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.exec(message)?.[0];
+    if (content.includes("下次可检查时间为：")) {
+      const time = /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.exec(content)?.[0];
 
-        return { completed: false, msg: `检查过于频繁，请于 ${time} 后重试` };
-      }
-
-      if (message.includes("评价未完成")) {
-        return { completed: false, msg: message };
-      }
+      return { completed: false, msg: `检查过于频繁，请于 ${time} 后重试` };
     }
+
+    if (content.includes("评价未完成")) {
+      return { completed: false, msg: "未完成评教" };
+    }
+
+    console.log(content);
 
     return {
       completed: false,
-      msg: message,
+      msg: "请检查是否完成评教",
     };
   } catch (err) {
     console.error(err);
@@ -278,9 +275,14 @@ export const underStudySelectInfoHandler: RequestHandler<
 
     let content = await response.text();
 
+    console.log(content.match(/<title>.*?评教检查<\/title>/));
+
     if (content.match(/<title>.*?评教检查<\/title>/)) {
+      console.log("评教检查");
+
       const { completed } = await checkCourseCommentary(
         cookieHeader,
+        /xnxqdm=(\d+)'/.exec(content)![1],
         categoryUrl,
       );
 

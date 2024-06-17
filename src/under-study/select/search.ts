@@ -1,8 +1,8 @@
 import type { RequestHandler } from "express";
 
 import type {
-  RawUnderSelectClassItem,
-  UnderSelectSearchClass,
+  RawUnderSearchClassResponse,
+  UnderSelectCourseInfo,
 } from "./typings.js";
 import { getCourses } from "./utils.js";
 import type { AuthLoginFailedResult } from "../../auth/index.js";
@@ -41,15 +41,9 @@ export interface UnderSelectSearchOptions extends LoginOptions {
   courseOffice?: string;
 }
 
-interface RawUnderSearchClassResponse {
-  data: "";
-  rows: RawUnderSelectClassItem[];
-  total: number;
-}
-
 export interface UnderSelectSearchSuccessResponse {
   success: true;
-  data: UnderSelectSearchClass[];
+  data: UnderSelectCourseInfo[];
 }
 
 export type UnderSelectSearchResponse =
@@ -89,12 +83,7 @@ export const underStudySearchCourseHandler: RequestHandler<
       courseOffice = "",
     } = req.body;
 
-    if (!link) {
-      return res.json({
-        success: false,
-        msg: "请提供选课信息链接",
-      } as CommonFailedResponse);
-    }
+    if (!link) throw new Error(`"link" is required`);
 
     const infoUrl = `${UNDER_STUDY_SERVER}${link}/hzkc`;
 
