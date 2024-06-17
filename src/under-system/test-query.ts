@@ -10,7 +10,7 @@ import type {
   LoginOptions,
 } from "../typings.js";
 import { IE_8_USER_AGENT, getIETimeStamp } from "../utils/index.js";
-import type { VPNLoginFailedResult } from "../vpn/login.js";
+import type { VPNLoginFailedResponse } from "../vpn/login.js";
 
 const idCardRegExp = /\[身份证号:(.{18})\]/;
 const tableRegExp = /<table[^>]*?id=mxh[^>]*?>[^]*?<\/table>/;
@@ -41,7 +41,7 @@ export interface UnderTestQueySuccessResponse {
 
 export type UnderTestQueyFailedResponse =
   | AuthLoginFailedResponse
-  | VPNLoginFailedResult;
+  | VPNLoginFailedResponse;
 
 export type UnderTestQueyResponse =
   | UnderTestQueySuccessResponse

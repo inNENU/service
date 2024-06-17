@@ -3,7 +3,7 @@ import type { RequestHandler } from "express";
 import { underStudyLogin } from "./login.js";
 import { UNDER_STUDY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ActionFailType } from "../config/actionFailType.js";
+import { ActionFailType } from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,

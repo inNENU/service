@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 
 import { authLogin } from "./login.js";
 import { AUTH_SERVER } from "./utils.js";
-import { ActionFailType } from "../config/actionFailType.js";
+import { ActionFailType } from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,

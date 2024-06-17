@@ -4,14 +4,14 @@ import type { RequestHandler } from "express";
 import { ACTION_SERVER } from "./utils.js";
 import { WEB_VPN_AUTH_SERVER, authLogin } from "../auth/index.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
-import { ActionFailType } from "../config/actionFailType.js";
+import { ActionFailType } from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
   EmptyObject,
 } from "../typings.js";
 import { CookieStore } from "../utils/index.js";
-import type { VPNLoginFailedResult } from "../vpn/login.js";
+import type { VPNLoginFailedResponse } from "../vpn/login.js";
 import { vpnCASLogin } from "../vpn/login.js";
 
 export interface ActionLoginSuccessResult {
@@ -22,7 +22,7 @@ export interface ActionLoginSuccessResult {
 export type ActionLoginResult =
   | ActionLoginSuccessResult
   | AuthLoginFailedResponse
-  | VPNLoginFailedResult;
+  | VPNLoginFailedResponse;
 
 export const actionLogin = async (
   options: AccountInfo,
@@ -86,7 +86,7 @@ export interface ActionLoginSuccessResponse {
 export type ActionLoginResponse =
   | ActionLoginSuccessResponse
   | AuthLoginFailedResponse
-  | VPNLoginFailedResult;
+  | VPNLoginFailedResponse;
 
 export const actionLoginHandler: RequestHandler<
   EmptyObject,

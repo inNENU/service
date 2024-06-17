@@ -8,10 +8,10 @@ import {
 import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { AUTH_SERVER } from "../auth/utils.js";
-import { ActionFailType } from "../config/actionFailType.js";
+import { ActionFailType } from "../config/index.js";
 import type { AccountInfo, EmptyObject } from "../typings.js";
 import { CookieStore, IE_8_USER_AGENT } from "../utils/index.js";
-import type { VPNLoginFailedResult } from "../vpn/login.js";
+import type { VPNLoginFailedResponse } from "../vpn/login.js";
 
 export interface GradSystemLoginSuccessResult {
   success: true;
@@ -21,7 +21,7 @@ export interface GradSystemLoginSuccessResult {
 export type GradSystemLoginResult =
   | GradSystemLoginSuccessResult
   | AuthLoginFailedResponse
-  | VPNLoginFailedResult;
+  | VPNLoginFailedResponse;
 
 const COMMON_HEADERS = {
   "User-Agent":
@@ -144,7 +144,7 @@ export interface GradSystemLoginSuccessResponse {
 export type GradSystemLoginResponse =
   | GradSystemLoginSuccessResponse
   | AuthLoginFailedResponse
-  | VPNLoginFailedResult;
+  | VPNLoginFailedResponse;
 
 export const gradOldSystemLoginHandler: RequestHandler<
   EmptyObject,

@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 import { toBuffer } from "qrcode";
 
-import { appIDInfo } from "../config/appID.js";
+import { appIDInfo } from "../config/index.js";
 import type { CommonFailedResponse } from "../typings.js";
 import { getWechatAccessToken } from "../utils/wechatAccessToken.js";
 

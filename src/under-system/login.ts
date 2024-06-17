@@ -5,10 +5,10 @@ import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
-import { ActionFailType } from "../config/actionFailType.js";
+import { ActionFailType } from "../config/index.js";
 import type { AccountInfo, EmptyObject } from "../typings.js";
 import { CookieStore, IE_8_USER_AGENT } from "../utils/index.js";
-import type { VPNLoginFailedResult } from "../vpn/login.js";
+import type { VPNLoginFailedResponse } from "../vpn/login.js";
 import { vpnCASLogin } from "../vpn/login.js";
 
 export interface UnderSystemLoginSuccessResult {
@@ -19,7 +19,7 @@ export interface UnderSystemLoginSuccessResult {
 export type UnderSystemLoginResult =
   | UnderSystemLoginSuccessResult
   | AuthLoginFailedResponse
-  | VPNLoginFailedResult;
+  | VPNLoginFailedResponse;
 
 const COMMON_HEADERS = {
   "User-Agent":
@@ -120,7 +120,7 @@ export interface UnderSystemLoginSuccessResponse {
 export type UnderSystemLoginResponse =
   | UnderSystemLoginSuccessResponse
   | AuthLoginFailedResponse
-  | VPNLoginFailedResult;
+  | VPNLoginFailedResponse;
 
 export const underSystemLoginHandler: RequestHandler<
   EmptyObject,

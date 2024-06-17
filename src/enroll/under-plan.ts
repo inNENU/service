@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { ActionFailType } from "../config/actionFailType.js";
+import { ActionFailType } from "../config/index.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 
 export interface UnderEnrollInfoOptions {

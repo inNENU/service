@@ -3,7 +3,7 @@ import type { RequestHandler } from "express";
 import { gradOldSystemLogin } from "./login.js";
 import { GRAD_OLD_SYSTEM_HTTPS_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { semesterStartTime } from "../config/semester-start-time.js";
+import { semesterStartTime } from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,

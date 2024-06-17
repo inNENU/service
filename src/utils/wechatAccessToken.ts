@@ -1,4 +1,4 @@
-import { appIDInfo } from "../config/appID.js";
+import { appIDInfo } from "../config/index.js";
 
 export const getWechatAccessToken = (
   appid: keyof typeof appIDInfo,

@@ -8,7 +8,7 @@ import {
   SALT_REGEXP,
   WEB_VPN_AUTH_SERVER,
 } from "./utils.js";
-import { ActionFailType } from "../config/actionFailType.js";
+import { ActionFailType } from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,

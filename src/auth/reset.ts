@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 
 import { authEncrypt } from "./auth-encrypt.js";
 import { AUTH_SERVER } from "./utils.js";
-import { ActionFailType } from "../config/actionFailType.js";
+import { ActionFailType } from "../config/index.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 import { CookieStore } from "../utils/index.js";
 

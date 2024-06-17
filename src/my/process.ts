@@ -1,6 +1,6 @@
 import { MY_MAIN_PAGE, MY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ActionFailType } from "../config/actionFailType.js";
+import { ActionFailType } from "../config/index.js";
 import type { CommonFailedResponse } from "../typings.js";
 
 interface RawProcessResult {

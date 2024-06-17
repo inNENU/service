@@ -3,7 +3,7 @@ import type { RequestHandler } from "express";
 import { actionLogin } from "./login.js";
 import { ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ActionFailType } from "../config/actionFailType.js";
+import { ActionFailType, ExpiredResponse } from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -11,7 +11,7 @@ import type {
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import type { VPNLoginFailedResult } from "../vpn/login.js";
+import type { VPNLoginFailedResponse } from "../vpn/login.js";
 
 const CARD_BALANCE_URL = `${ACTION_SERVER}/soapBasic/postSoap`;
 const CARD_BALANCE_PARAMS =
@@ -33,8 +33,8 @@ export type CardBalanceSuccessResponse = CommonSuccessResponse<number>;
 export type CardBalanceResponse =
   | CardBalanceSuccessResponse
   | AuthLoginFailedResponse
-  | VPNLoginFailedResult
-  | CommonFailedResponse;
+  | VPNLoginFailedResponse
+  | CommonFailedResponse<ActionFailType.Expired | ActionFailType.Unknown>;
 
 export const cardBalanceHandler: RequestHandler<
   EmptyObject,
@@ -65,12 +65,7 @@ export const cardBalanceHandler: RequestHandler<
       redirect: "manual",
     });
 
-    if (response.status === 302)
-      return res.json({
-        success: false,
-        type: ActionFailType.Expired,
-        msg: "登录信息已过期，请重新登录",
-      } as CommonFailedResponse<ActionFailType.Expired>);
+    if (response.status === 302) return res.json(ExpiredResponse);
 
     const data = (await response.json()) as RawCardBalanceData;
 

@@ -3,8 +3,7 @@ import type { RequestHandler } from "express";
 import { underSystemLogin } from "./login.js";
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ActionFailType } from "../config/actionFailType.js";
-import { semesterStartTime } from "../config/semester-start-time.js";
+import { ActionFailType, semesterStartTime } from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -12,7 +11,7 @@ import type {
   LoginOptions,
 } from "../typings.js";
 import { IE_8_USER_AGENT, getIETimeStamp } from "../utils/index.js";
-import type { VPNLoginFailedResult } from "../vpn/login.js";
+import type { VPNLoginFailedResponse } from "../vpn/login.js";
 
 export interface ClassItem {
   name: string;
@@ -71,7 +70,7 @@ export interface UnderCourseTableSuccessResponse {
 
 export type UnderCourseTableFailedResponse =
   | AuthLoginFailedResponse
-  | VPNLoginFailedResult
+  | VPNLoginFailedResponse
   | CommonFailedResponse;
 
 export type UnderCourseTableResponse =

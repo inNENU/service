@@ -5,10 +5,10 @@ import { MY_MAIN_PAGE } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
-import { ActionFailType } from "../config/actionFailType.js";
+import { ActionFailType } from "../config/index.js";
 import type { AccountInfo, EmptyObject } from "../typings.js";
 import { CookieStore } from "../utils/index.js";
-import type { VPNLoginFailedResult } from "../vpn/login.js";
+import type { VPNLoginFailedResponse } from "../vpn/login.js";
 import { vpnCASLogin } from "../vpn/login.js";
 
 export interface MyLoginSuccessResult {
@@ -18,7 +18,7 @@ export interface MyLoginSuccessResult {
 
 export type MyLoginFailedResult =
   | AuthLoginFailedResponse
-  | VPNLoginFailedResult;
+  | VPNLoginFailedResponse;
 
 export type MyLoginResult = MyLoginSuccessResult | MyLoginFailedResult;
 

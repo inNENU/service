@@ -3,7 +3,7 @@ import type { RequestHandler } from "express";
 import { actionLogin } from "./login.js";
 import { ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ActionFailType } from "../config/actionFailType.js";
+import { ActionFailType, ExpiredResponse } from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -11,6 +11,7 @@ import type {
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
+import type { VPNLoginFailedResponse } from "../vpn/login.js";
 
 const NOTICE_LIST_QUERY_URL = `${ACTION_SERVER}/page/queryList`;
 
@@ -82,7 +83,9 @@ export interface NoticeListSuccessResponse
 
 export type NoticeListResponse =
   | NoticeListSuccessResponse
-  | CommonFailedResponse;
+  | AuthLoginFailedResponse
+  | VPNLoginFailedResponse
+  | CommonFailedResponse<ActionFailType.Expired | ActionFailType.Unknown>;
 
 export const noticeListHandler: RequestHandler<
   EmptyObject,
@@ -123,27 +126,22 @@ export const noticeListHandler: RequestHandler<
       redirect: "manual",
     });
 
-    if (response.status === 302)
-      return res.json({
-        success: false,
-        type: ActionFailType.Expired,
-        msg: "登录信息已过期，请重新登录",
-      } as AuthLoginFailedResponse);
+    if (response.status === 302) return res.json(ExpiredResponse);
 
     const { data, pageIndex, pageSize, totalCount, totalPage } =
       (await response.json()) as RawNoticeListData;
 
-    if (data.length)
-      return res.json({
-        success: true,
-        data: data.map(getNoticeItem),
-        count: totalCount,
-        size: pageSize,
-        current: pageIndex,
-        total: totalPage,
-      } as NoticeListSuccessResponse);
+    if (!data.length)
+      throw new Error(`获取公告列表失败: ${JSON.stringify(data, null, 2)}`);
 
-    throw new Error(`获取公告列表失败: ${JSON.stringify(data, null, 2)}`);
+    return res.json({
+      success: true,
+      data: data.map(getNoticeItem),
+      count: totalCount,
+      size: pageSize,
+      current: pageIndex,
+      total: totalPage,
+    } as NoticeListSuccessResponse);
   } catch (err) {
     const { message } = err as Error;
 
@@ -151,6 +149,7 @@ export const noticeListHandler: RequestHandler<
 
     return res.json({
       success: false,
+      type: ActionFailType.Unknown,
       msg: message,
     } as CommonFailedResponse);
   }

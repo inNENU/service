@@ -4,7 +4,7 @@ import type { RequestHandler } from "express";
 import { VPN_DOMAIN, VPN_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
-import { ActionFailType } from "../config/actionFailType.js";
+import { ActionFailType } from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -24,7 +24,7 @@ export interface VPNLoginSuccessResult {
   cookieStore: CookieStore;
 }
 
-export type VPNLoginFailedResult = CommonFailedResponse<
+export type VPNLoginFailedResponse = CommonFailedResponse<
   | ActionFailType.AccountLocked
   | ActionFailType.WrongPassword
   | ActionFailType.Unknown
@@ -32,7 +32,7 @@ export type VPNLoginFailedResult = CommonFailedResponse<
 
 export type VPNLoginResult =
   | VPNLoginSuccessResult
-  | VPNLoginFailedResult
+  | VPNLoginFailedResponse
   | AuthLoginFailedResponse;
 
 export const vpnCASLogin = async (
@@ -239,7 +239,7 @@ export const vpnCASLoginHandler: RequestHandler<
     return res.json({
       success: false,
       msg: message,
-    } as VPNLoginFailedResult);
+    } as VPNLoginFailedResponse);
   }
 };
 
@@ -252,7 +252,7 @@ export interface VPNLoginSuccessResponse {
 export type VPNLoginResponse =
   | VPNLoginSuccessResponse
   | AuthLoginFailedResponse
-  | VPNLoginFailedResult;
+  | VPNLoginFailedResponse;
 
 export const vpnLoginHandler: RequestHandler<
   EmptyObject,
@@ -286,6 +286,6 @@ export const vpnLoginHandler: RequestHandler<
     return res.json({
       success: false,
       msg: "参数错误",
-    } as VPNLoginFailedResult);
+    } as VPNLoginFailedResponse);
   }
 };

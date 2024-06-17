@@ -21,7 +21,7 @@ import type {
   LoginOptions,
 } from "../typings.js";
 import { IE_8_USER_AGENT } from "../utils/index.js";
-import type { VPNLoginFailedResult } from "../vpn/login.js";
+import type { VPNLoginFailedResponse } from "../vpn/login.js";
 
 const selectRegExp =
   /<select\s+name="kskzid"\s+id="kskzid"[^>]*><option value="">---请选择---<\/option>([^]*?)<\/select>/;
@@ -161,7 +161,7 @@ export interface UnderExamPlaceSuccessResponse {
 
 export type UnderExamPlaceFailedResponse =
   | AuthLoginFailedResponse
-  | VPNLoginFailedResult;
+  | VPNLoginFailedResponse;
 
 export type UnderExamPlaceResponse =
   | UnderExamPlaceSuccessResponse

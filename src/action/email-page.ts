@@ -2,7 +2,8 @@ import type { RequestHandler } from "express";
 
 import { actionLogin } from "./login.js";
 import { ACTION_MAIN_PAGE, ACTION_SERVER } from "./utils.js";
-import { ActionFailType } from "../config/actionFailType.js";
+import type { AuthLoginFailedResponse } from "../auth/login.js";
+import { ActionFailType, ExpiredResponse } from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -10,6 +11,7 @@ import type {
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
+import type { VPNLoginFailedResponse } from "../vpn/login.js";
 
 const EMAIL_PAGE_URL = `${ACTION_SERVER}/extract/sendRedirect2Email`;
 const EMAIL_URL = `${ACTION_SERVER}/extract/sendRedirect2EmailPage`;
@@ -28,7 +30,9 @@ export type ActionEmailPageSuccessResponse = CommonSuccessResponse<string>;
 
 export type ActionEmailPageResponse =
   | ActionEmailPageSuccessResponse
-  | CommonFailedResponse;
+  | AuthLoginFailedResponse
+  | VPNLoginFailedResponse
+  | CommonFailedResponse<ActionFailType.Expired | ActionFailType.Unknown>;
 
 export const actionEmailPageHandler: RequestHandler<
   EmptyObject,
@@ -62,7 +66,12 @@ export const actionEmailPageHandler: RequestHandler<
         ...(mid ? { domain: "nenu.edu.cn", mid } : {}),
         account_name: "",
       }),
+      redirect: "manual",
     });
+
+    if (response.status === 302) {
+      return res.json(ExpiredResponse);
+    }
 
     const result = (await response.json()) as RawEmailPageResponse;
 

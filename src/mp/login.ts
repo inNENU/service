@@ -1,7 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { appIDInfo } from "../config/appID.js";
-import { OPENID_BLACK_LIST } from "../config/blacklist.js";
+import { OPENID_BLACK_LIST, appIDInfo } from "../config/index.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 
 export type AppID = "wx33acb831ee1831a5" | "wx2550e3fd373b79a8" | 1109559721;

@@ -1,7 +1,7 @@
 import fs from "node:fs";
 
-import type { ConditionBlackList } from "../config/blacklist.js";
-import { CONDITION_BLACK_LIST, ID_BLACK_LIST } from "../config/blacklist.js";
+import type { ConditionBlackList } from "../config/index.js";
+import { CONDITION_BLACK_LIST, ID_BLACK_LIST } from "../config/index.js";
 import type { MyInfo } from "../my/index.js";
 
 export const BLACKLIST_HINT = [

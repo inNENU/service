@@ -3,7 +3,7 @@ import type { RequestHandler } from "express";
 import { actionLogin } from "./login.js";
 import { ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ActionFailType } from "../config/actionFailType.js";
+import { ActionFailType, ExpiredResponse } from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -11,7 +11,7 @@ import type {
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import type { VPNLoginFailedResult } from "../vpn/login.js";
+import type { VPNLoginFailedResponse } from "../vpn/login.js";
 
 const BORROW_BOOKS_URL = `${ACTION_SERVER}/basicInfo/getBookBorrow`;
 
@@ -108,8 +108,8 @@ export type BorrowBooksSuccessResponse = CommonSuccessResponse<
 export type BorrowBooksResponse =
   | BorrowBooksSuccessResponse
   | AuthLoginFailedResponse
-  | VPNLoginFailedResult
-  | CommonFailedResponse;
+  | VPNLoginFailedResponse
+  | CommonFailedResponse<ActionFailType.Expired | ActionFailType.Unknown>;
 
 export const borrowBooksHandler: RequestHandler<
   EmptyObject,
@@ -137,24 +137,13 @@ export const borrowBooksHandler: RequestHandler<
       redirect: "manual",
     });
 
-    if (response.status === 302)
-      return res.json({
-        success: false,
-        type: ActionFailType.Expired,
-        msg: "登录信息已过期，请重新登录",
-      } as CommonFailedResponse<ActionFailType.Expired>);
+    if (response.status === 302) return res.json(ExpiredResponse);
 
     const data = (await response.json()) as RawBorrowBooksData;
 
-    if (data.success)
-      return res.json({
-        success: true,
-        data: data.data.map(getBookData),
-      } as BorrowBooksSuccessResponse);
-
     return res.json({
       success: true,
-      data: [],
+      data: data.success ? data.data.map(getBookData) : [],
     } as BorrowBooksSuccessResponse);
   } catch (err) {
     const { message } = err as Error;
