@@ -3,6 +3,7 @@ import type { RequestHandler } from "express";
 import type { MyLoginFailedResult } from "./login.js";
 import { myLogin } from "./login.js";
 import { MY_SERVER } from "./utils.js";
+import { ActionFailType } from "../config/actionFailType.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -50,6 +51,7 @@ export const getMyIdentity = async (
 
     return {
       success: false,
+      type: ActionFailType.Unknown,
       msg: "获取人员身份失败",
     };
   } catch (err) {
@@ -57,6 +59,7 @@ export const getMyIdentity = async (
 
     return {
       success: false,
+      type: ActionFailType.Unknown,
       msg: "获取人员身份失败",
     };
   }

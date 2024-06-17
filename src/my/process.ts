@@ -27,7 +27,7 @@ export interface MyProcessSuccessResult {
 export type MyProcessResult =
   | MyProcessSuccessResult
   | AuthLoginFailedResponse
-  | CommonFailedResponse;
+  | CommonFailedResponse<ActionFailType.Expired>;
 
 export const getProcess = async (
   processId: string,
@@ -51,7 +51,7 @@ export const getProcess = async (
       success: false,
       type: ActionFailType.Expired,
       msg: "登录信息已过期，请重新登录",
-    } as AuthLoginFailedResponse;
+    };
 
   if (response.status === 200) {
     const content = (await response.json()) as RawProcessResult;
@@ -69,6 +69,7 @@ export const getProcess = async (
 
   return {
     success: false,
+    type: ActionFailType.Unknown,
     msg: "获取流程信息失败",
   };
 };

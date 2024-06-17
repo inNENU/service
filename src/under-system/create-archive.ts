@@ -3,6 +3,7 @@ import type { RequestHandler } from "express";
 import { underSystemLogin } from "./login.js";
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
+import { ActionFailType } from "../config/actionFailType.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -119,6 +120,7 @@ export const getUnderStudentArchiveInfo = async (
   if (!link)
     return {
       success: false,
+      type: ActionFailType.Unknown,
       msg: "未找到注册学籍链接",
     };
 
@@ -584,6 +586,7 @@ export const submitUnderStudentArchiveFamily = async (
 
   return {
     success: false,
+    type: ActionFailType.Unknown,
     msg: "未知错误",
   };
 };

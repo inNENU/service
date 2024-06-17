@@ -3,6 +3,7 @@ import type { RequestHandler } from "express";
 import { underSystemLogin } from "./login.js";
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
+import { ActionFailType } from "../config/actionFailType.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -170,6 +171,7 @@ export const getUnderInfo = async (
 
   return {
     success: false,
+    type: ActionFailType.Unknown,
     msg: "获取学籍信息失败",
   };
 };

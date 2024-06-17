@@ -347,7 +347,7 @@ export const underStudyCourseCommentaryHandler: RequestHandler<
           success: false,
           type: ActionFailType.Expired,
           msg: "登录过期，请重新登录",
-        } as CommonFailedResponse);
+        });
 
       const data =
         (await response.json()) as RawUnderCourseCommentaryListResult;
@@ -470,7 +470,7 @@ export const underStudyCourseCommentaryHandler: RequestHandler<
           success: false,
           type: ActionFailType.Expired,
           msg: "登录过期，请重新登录",
-        } as CommonFailedResponse);
+        });
 
       const data =
         (await response.json()) as RawUnderCourseCommentarySubmitResult;

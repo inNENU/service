@@ -3,7 +3,7 @@ import type { RequestHandler } from "express";
 import { gradOldSystemLogin } from "./login.js";
 import { GRAD_OLD_SYSTEM_HTTPS_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ActionFailType } from "../config/index.js";
+import { ExpiredResponse } from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -239,12 +239,7 @@ export const gradOldGradeListHandler: RequestHandler<
 
     const content = await response.text();
 
-    if (content.startsWith("<script"))
-      return res.json({
-        success: false,
-        msg: "登录已过期，请重新登录",
-        type: ActionFailType.Expired,
-      } as AuthLoginFailedResponse);
+    if (content.startsWith("<script")) return res.json(ExpiredResponse);
 
     const gradeList = await getGradeLists(cookieHeader, content);
 

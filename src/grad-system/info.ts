@@ -4,6 +4,7 @@ import { getAction } from "./action.js";
 import { gradSystemLogin } from "./login.js";
 import { MAIN_URL, SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
+import { ActionFailType } from "../config/actionFailType.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -125,6 +126,7 @@ export const getGradInfo = async (
     if (content.includes("错误:当前时间不在本功能有效时间范围内!"))
       return {
         success: false,
+        type: ActionFailType.Forbidden,
         msg: "功能当前暂未开放",
       };
 
@@ -138,6 +140,7 @@ export const getGradInfo = async (
 
   return {
     success: false,
+    type: ActionFailType.Unknown,
     msg: "获取学籍信息失败",
   };
 };

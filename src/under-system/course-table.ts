@@ -121,7 +121,7 @@ export const underCourseTableHandler: RequestHandler<
         success: false,
         type: ActionFailType.Expired,
         msg: "登录已过期，请重试",
-      } as CommonFailedResponse);
+      });
 
     const content = await response.text();
 

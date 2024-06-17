@@ -89,7 +89,7 @@ export const underStudySelectCategoryHandler: RequestHandler<
         success: false,
         msg: "选课正在初始化，请稍后再试",
         type: "not-initialized",
-      } as CommonFailedResponse);
+      });
     }
 
     return res.json({

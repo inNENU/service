@@ -7,6 +7,7 @@ import type { MyLoginFailedResult } from "./login.js";
 import { myLogin } from "./login.js";
 import { getProcess } from "./process.js";
 import { MY_SERVER } from "./utils.js";
+import { ActionFailType } from "../config/actionFailType.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -57,6 +58,7 @@ const getMailInitInfo = async (
 
   return {
     success: false,
+    type: ActionFailType.Unknown,
     msg: "邮箱创建失败，请联系信息化办",
   };
 };
@@ -116,6 +118,7 @@ export const getEmailInfo = async (
     if (!results[0]?.PROC_INST_ID_)
       return {
         success: false,
+        type: ActionFailType.Unknown,
         msg: "邮箱已创建，但未找到到申请记录",
       };
 
@@ -171,6 +174,7 @@ export const getEmailInfo = async (
 
   return {
     success: false,
+    type: ActionFailType.Unknown,
     msg: "获取可用邮箱失败",
   };
 };
@@ -221,6 +225,7 @@ const activateEmail = async (
   if (checkResult.suc || !checkResult.error_code.startsWith("ACCOUNT.NOTEXIST"))
     return {
       success: false,
+      type: ActionFailType.Unknown,
       msg: "邮箱账户已存在",
     };
 
@@ -263,6 +268,7 @@ const activateEmail = async (
   if (setMailResult.success === false)
     return {
       success: false,
+      type: ActionFailType.Unknown,
       msg: "申请失败",
     };
 

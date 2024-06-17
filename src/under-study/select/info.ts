@@ -289,7 +289,7 @@ export const underStudySelectInfoHandler: RequestHandler<
           success: false,
           msg: "未完成评教",
           type: "missing-commentary",
-        } as CommonFailedResponse);
+        });
       }
 
       // 重新请求选课信息
@@ -307,7 +307,7 @@ export const underStudySelectInfoHandler: RequestHandler<
         success: false,
         msg: "选课正在初始化，请稍后再试",
         type: "not-initialized",
-      } as CommonFailedResponse);
+      });
     }
 
     return res.json({

@@ -1,4 +1,5 @@
 import { MAIN_ACTIONS_URL, MAIN_URL } from "./utils.js";
+import { ActionFailType } from "../config/actionFailType.js";
 import type { CommonFailedResponse } from "../typings.js";
 
 export interface GradAction {
@@ -46,6 +47,7 @@ export const getAction = async (
 
     return {
       success: false,
+      type: ActionFailType.Unknown,
       msg,
     };
   }
