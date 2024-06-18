@@ -1,6 +1,7 @@
 import { MY_MAIN_PAGE, MY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ActionFailType } from "../config/index.js";
+import type { ActionFailType } from "../config/index.js";
+import { ExpiredResponse, UnknownResponse } from "../config/index.js";
 import type { CommonFailedResponse } from "../typings.js";
 
 interface RawProcessResult {
@@ -46,12 +47,7 @@ export const getProcess = async (
     body: "isFormPathDetail=false",
   });
 
-  if (response.status === 302)
-    return {
-      success: false,
-      type: ActionFailType.Expired,
-      msg: "登录信息已过期，请重新登录",
-    };
+  if (response.status === 302) return ExpiredResponse;
 
   if (response.status === 200) {
     const content = (await response.json()) as RawProcessResult;
@@ -67,9 +63,5 @@ export const getProcess = async (
     };
   }
 
-  return {
-    success: false,
-    type: ActionFailType.Unknown,
-    msg: "获取流程信息失败",
-  };
+  return UnknownResponse("获取流程信息失败");
 };

@@ -37,9 +37,10 @@ export const enum ActionFailType {
   /** 已存在 */
   Existed = "existed",
 
-  /** 未知错误 */
-  Unknown = "unknown",
-
+  /** 系统错误 */
+  Error = "error",
   /** 系统关闭 */
   Closed = "closed",
+  /** 未知错误 */
+  Unknown = "unknown",
 }

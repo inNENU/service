@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 
+import { UnknownResponse } from "../config/index.js";
 import type { EmptyObject } from "../typings.js";
 import { splitWords } from "../utils/index.js";
 
@@ -426,9 +427,6 @@ export const mpSearchHandler: RequestHandler<
   } catch (err) {
     console.error(err);
 
-    res.status(500).json({
-      success: false,
-      msg: "获取失败",
-    });
+    res.status(500).json(UnknownResponse("搜索失败"));
   }
 };

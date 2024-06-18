@@ -5,7 +5,7 @@ import { MY_MAIN_PAGE } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
-import { ActionFailType } from "../config/index.js";
+import { UnknownResponse } from "../config/index.js";
 import type { AccountInfo, EmptyObject } from "../typings.js";
 import { CookieStore } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/login.js";
@@ -16,11 +16,11 @@ export interface MyLoginSuccessResult {
   cookieStore: CookieStore;
 }
 
-export type MyLoginFailedResult =
+export type MyLoginFailedResponse =
   | AuthLoginFailedResponse
   | VPNLoginFailedResponse;
 
-export type MyLoginResult = MyLoginSuccessResult | MyLoginFailedResult;
+export type MyLoginResult = MyLoginSuccessResult | MyLoginFailedResponse;
 
 export const myLogin = async (
   options: AccountInfo,
@@ -40,11 +40,7 @@ export const myLogin = async (
   if (!result.success) {
     console.error(result.msg);
 
-    return {
-      success: false,
-      type: result.type,
-      msg: result.msg,
-    } as AuthLoginFailedResponse;
+    return result;
   }
 
   const ticketUrl = result.location;
@@ -64,12 +60,7 @@ export const myLogin = async (
     await ticketResponse.text(),
   );
 
-  if (ticketResponse.status !== 302)
-    return {
-      success: false,
-      type: ActionFailType.Unknown,
-      msg: "登录失败",
-    } as AuthLoginFailedResponse;
+  if (ticketResponse.status !== 302) return UnknownResponse("登录失败");
 
   const sessionLocation = ticketResponse.headers.get("Location");
 
@@ -93,11 +84,7 @@ export const myLogin = async (
       } as MyLoginResult;
   }
 
-  return {
-    success: false,
-    type: ActionFailType.Unknown,
-    msg: "登录失败",
-  } as AuthLoginFailedResponse;
+  return UnknownResponse("登录失败");
 };
 
 export interface MyLoginSuccessResponse {
@@ -106,7 +93,7 @@ export interface MyLoginSuccessResponse {
   cookies: CookieType[];
 }
 
-export type MyLoginResponse = MyLoginSuccessResponse | MyLoginFailedResult;
+export type MyLoginResponse = MyLoginSuccessResponse | MyLoginFailedResponse;
 
 export const myLoginHandler: RequestHandler<
   EmptyObject,
@@ -137,9 +124,6 @@ export const myLoginHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as MyLoginFailedResult);
+    return res.json(UnknownResponse(message));
   }
 };

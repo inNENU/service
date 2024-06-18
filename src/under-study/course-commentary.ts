@@ -3,6 +3,7 @@ import type { RequestHandler } from "express";
 import { underStudyLogin } from "./login.js";
 import { UNDER_STUDY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
+import type { ActionFailType } from "../config/index.js";
 import {
   ExpiredResponse,
   InvalidArgResponse,
@@ -11,6 +12,7 @@ import {
 } from "../config/index.js";
 import type {
   CommonFailedResponse,
+  CommonSuccessResponse,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
@@ -104,15 +106,13 @@ export interface UnderCourseCommentaryItem {
   commentaryCode: string;
 }
 
-export interface UnderCourseCommentaryListListSuccessResponse {
-  success: true;
-  data: UnderCourseCommentaryItem[];
-}
+export type UnderCourseCommentaryListListSuccessResponse =
+  CommonSuccessResponse<UnderCourseCommentaryItem[]>;
 
 export type UnderCourseCommentaryListListResponse =
   | UnderCourseCommentaryListListSuccessResponse
   | AuthLoginFailedResponse
-  | CommonFailedResponse;
+  | CommonFailedResponse<ActionFailType.Expired | ActionFailType.Unknown>;
 
 export interface UnderCourseCommentaryInfo {
   /** 参数 */

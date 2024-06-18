@@ -4,7 +4,7 @@ import type { RequestHandler } from "express";
 import { VPN_DOMAIN, VPN_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
-import { ActionFailType } from "../config/index.js";
+import { ActionFailType, UnknownResponse } from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -27,13 +27,14 @@ export interface VPNLoginSuccessResult {
 export type VPNLoginFailedResponse = CommonFailedResponse<
   | ActionFailType.AccountLocked
   | ActionFailType.WrongPassword
+  | ActionFailType.Error
   | ActionFailType.Unknown
 >;
 
 export type VPNLoginResult =
   | VPNLoginSuccessResult
-  | VPNLoginFailedResponse
-  | AuthLoginFailedResponse;
+  | AuthLoginFailedResponse
+  | VPNLoginFailedResponse;
 
 export const vpnCASLogin = async (
   { id, password }: AccountInfo,
@@ -67,7 +68,7 @@ export const vpnCASLogin = async (
     if (callbackResponse.status === 500)
       return {
         success: false,
-        type: ActionFailType.Unknown,
+        type: ActionFailType.Error,
         msg: "学校 WebVPN 服务崩溃，请稍后重试。",
       };
 
@@ -103,7 +104,7 @@ export const vpnCASLogin = async (
   if (casResponse.status === 500)
     return {
       success: false,
-      type: ActionFailType.Unknown,
+      type: ActionFailType.Error,
       msg: "学校 WebVPN 服务崩溃，请稍后重试。",
     };
 
@@ -236,10 +237,7 @@ export const vpnCASLoginHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as VPNLoginFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };
 
@@ -281,11 +279,10 @@ export const vpnLoginHandler: RequestHandler<
 
     return res.json(result);
   } catch (err) {
+    const { message } = err as Error;
+
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: "参数错误",
-    } as VPNLoginFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

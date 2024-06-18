@@ -1,6 +1,7 @@
 import type { RequestHandler } from "express";
 
 import { OFFICIAL_URL, getOfficialPageView } from "./utils.js";
+import { InvalidArgResponse, UnknownResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonListSuccessResponse,
@@ -63,7 +64,7 @@ export const officialInfoListHandler: RequestHandler<
     const { type, current = 1, total = totalPageState[type] || 0 } = req.body;
 
     if (!["social", "science", "news", "media"].includes(type))
-      throw new Error("type 参数错误");
+      return res.json(InvalidArgResponse("type"));
 
     const response = await fetch(
       total && current !== 1
@@ -109,9 +110,6 @@ export const officialInfoListHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as CommonFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

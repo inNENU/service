@@ -4,7 +4,7 @@ import type { RequestHandler } from "express";
 import { SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
-import { ActionFailType } from "../config/index.js";
+import { ActionFailType, UnknownResponse } from "../config/index.js";
 import type { AccountInfo, EmptyObject } from "../typings.js";
 import { CookieStore } from "../utils/index.js";
 
@@ -30,11 +30,7 @@ export const gradSystemLogin = async (
   if (!result.success) {
     console.error(result.msg);
 
-    return {
-      success: false,
-      type: result.type,
-      msg: result.msg,
-    } as AuthLoginFailedResponse;
+    return result;
   }
 
   const ticketResponse = await fetch(result.location, {
@@ -55,11 +51,7 @@ export const gradSystemLogin = async (
   if (ticketResponse.status !== 302) {
     console.log("ticket response", await ticketResponse.text());
 
-    return {
-      success: false,
-      type: ActionFailType.Unknown,
-      msg: "登录失败",
-    };
+    return UnknownResponse("登录失败");
   }
 
   const finalLocation = ticketResponse.headers.get("Location");
@@ -86,11 +78,7 @@ export const gradSystemLogin = async (
     } as GradSystemLoginSuccessResult;
   }
 
-  return {
-    success: false,
-    type: ActionFailType.Unknown,
-    msg: "登录失败",
-  };
+  return UnknownResponse("登录失败");
 };
 
 export interface GradSystemLoginSuccessResponse {
@@ -132,9 +120,6 @@ export const gradSystemLoginHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as AuthLoginFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

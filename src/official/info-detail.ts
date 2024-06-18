@@ -3,6 +3,7 @@ import { getRichTextNodes } from "@mptool/parser";
 import type { RequestHandler } from "express";
 
 import { OFFICIAL_URL, getOfficialPageView } from "./utils.js";
+import { MissingArgResponse, UnknownResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
@@ -56,6 +57,8 @@ export const officialInfoDetailHandler: RequestHandler<
 > = async (req, res) => {
   try {
     const { url } = req.query;
+
+    if (!url) return res.json(MissingArgResponse("url"));
 
     const response = await fetch(`${OFFICIAL_URL}/${url}`);
 
@@ -111,9 +114,6 @@ export const officialInfoDetailHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as CommonFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

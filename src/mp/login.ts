@@ -1,6 +1,10 @@
 import type { RequestHandler } from "express";
 
-import { OPENID_BLACK_LIST, appIDInfo } from "../config/index.js";
+import {
+  OPENID_BLACK_LIST,
+  UnknownResponse,
+  appIDInfo,
+} from "../config/index.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 
 export type AppID = "wx33acb831ee1831a5" | "wx2550e3fd373b79a8" | 1109559721;
@@ -60,13 +64,10 @@ export const mpLoginHandler: RequestHandler<
       isAdmin: false,
     } as MPloginSuccessResponse);
   } catch (err) {
-    const msg = (err as Error).message;
+    const { message } = err as Error;
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg,
-    } as CommonFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

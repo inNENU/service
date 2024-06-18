@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 
+import { UnknownResponse } from "../config";
 import type { CommonFailedResponse } from "../typings";
 
 interface LibraryPeopleRawData {
@@ -48,13 +49,10 @@ export const libraryPeopleHandler: RequestHandler = async (_, res) => {
 
     throw new Error("Failed");
   } catch (err) {
-    const msg = (err as Error).message;
+    const { message } = err as Error;
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg,
-    });
+    return res.json(UnknownResponse(message));
   }
 };

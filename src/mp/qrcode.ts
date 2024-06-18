@@ -1,7 +1,11 @@
 import type { RequestHandler } from "express";
 import { toBuffer } from "qrcode";
 
-import { appIDInfo } from "../config/index.js";
+import {
+  InvalidArgResponse,
+  UnknownResponse,
+  appIDInfo,
+} from "../config/index.js";
 import type { CommonFailedResponse } from "../typings.js";
 import { getWechatAccessToken } from "../utils/wechatAccessToken.js";
 
@@ -70,11 +74,7 @@ export const mpQrCodeHandler: RequestHandler<
 
     console.log("Requesting qrcode with", req.query);
 
-    if (!appIDInfo[appID])
-      return res.json({
-        success: false,
-        msg: "AppID 非法",
-      } as CommonFailedResponse);
+    if (!appIDInfo[appID]) return res.json(InvalidArgResponse("appID"));
 
     if (Number.isNaN(Number(appID))) {
       const wechatAccessToken = await getWechatAccessToken(appID);
@@ -94,10 +94,7 @@ export const mpQrCodeHandler: RequestHandler<
         return res.end(image);
       }
 
-      return res.json({
-        success: false,
-        msg: image.errmsg,
-      } as CommonFailedResponse);
+      return res.json(UnknownResponse(image.errmsg));
     }
 
     const image = await getQQQRCode(appID, page);
@@ -113,9 +110,6 @@ export const mpQrCodeHandler: RequestHandler<
 
     console.error(err);
 
-    res.json({
-      success: false,
-      msg: message,
-    } as CommonFailedResponse);
+    res.json(UnknownResponse(message));
   }
 };

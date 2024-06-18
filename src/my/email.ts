@@ -3,7 +3,7 @@ import type { RequestHandler } from "express";
 import { queryMyActions } from "./actions.js";
 import type { MyInfo } from "./info.js";
 import { getMyInfo } from "./info.js";
-import type { MyLoginFailedResult } from "./login.js";
+import type { MyLoginFailedResponse } from "./login.js";
 import { myLogin } from "./login.js";
 import { getProcess } from "./process.js";
 import { MY_SERVER } from "./utils.js";
@@ -92,7 +92,9 @@ export type GetEmailSuccessResponse =
   | GetEmailNameResponse
   | GetEmailInfoResponse;
 
-export type GetEmailFailedResponse = MyLoginFailedResult | CommonFailedResponse;
+export type GetEmailFailedResponse =
+  | MyLoginFailedResponse
+  | CommonFailedResponse;
 
 export type GetEmailResponse = GetEmailSuccessResponse | GetEmailFailedResponse;
 
@@ -191,7 +193,7 @@ export interface ActivateEmailOptions extends LoginOptions {
 export type ActivateMailSuccessResponse = MailInitSuccessInfo;
 
 export type ActivateMailFailedResponse =
-  | MyLoginFailedResult
+  | MyLoginFailedResponse
   | CommonFailedResponse;
 
 export type ActivateEmailResponse =

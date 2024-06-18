@@ -1,5 +1,5 @@
 import { MAIN_ACTIONS_URL, MAIN_URL } from "./utils.js";
-import { ActionFailType } from "../config/actionFailType.js";
+import { UnknownResponse } from "../config/index.js";
 import type { CommonFailedResponse } from "../typings.js";
 
 export interface GradAction {
@@ -41,14 +41,10 @@ export const getAction = async (
       })),
     };
   } catch (err) {
-    const msg = (err as Error).message;
+    const { message } = err as Error;
 
     console.error(err);
 
-    return {
-      success: false,
-      type: ActionFailType.Unknown,
-      msg,
-    };
+    return UnknownResponse(message);
   }
 };

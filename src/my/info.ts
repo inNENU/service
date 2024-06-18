@@ -2,10 +2,10 @@ import { writeFileSync } from "node:fs";
 
 import type { RequestHandler } from "express";
 
-import type { MyLoginFailedResult } from "./login.js";
+import type { MyLoginFailedResponse } from "./login.js";
 import { myLogin } from "./login.js";
 import { MY_SERVER } from "./utils.js";
-import { ActionFailType } from "../config/actionFailType.js";
+import { UnknownResponse } from "../config/index.js";
 import { code2major } from "../config/major.js";
 import { code2org } from "../config/org.js";
 import type {
@@ -232,23 +232,17 @@ export const getMyInfo = async (
       };
     }
 
-    return {
-      success: false,
-      type: ActionFailType.Unknown,
-      msg: "获取人员信息失败",
-    };
+    return UnknownResponse("获取人员信息失败");
   } catch (err) {
+    const { message } = err as Error;
+
     console.error(err);
 
-    return {
-      success: false,
-      type: ActionFailType.Unknown,
-      msg: "获取人员信息失败",
-    };
+    return UnknownResponse(message);
   }
 };
 
-export type MyInfoResponse = MyInfoSuccessResult | MyLoginFailedResult;
+export type MyInfoResponse = MyInfoSuccessResult | MyLoginFailedResponse;
 
 export const myInfoHandler: RequestHandler<
   EmptyObject,
@@ -276,6 +270,6 @@ export const myInfoHandler: RequestHandler<
     return res.json({
       success: false,
       msg: message,
-    } as MyLoginFailedResult);
+    } as MyLoginFailedResponse);
   }
 };

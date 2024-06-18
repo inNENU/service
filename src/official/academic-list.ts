@@ -1,6 +1,7 @@
 import type { RequestHandler } from "express";
 
 import { OFFICIAL_URL, getOfficialPageView } from "./utils.js";
+import { UnknownResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonListSuccessResponse,
@@ -86,9 +87,6 @@ export const officialAcademicListHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as CommonFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

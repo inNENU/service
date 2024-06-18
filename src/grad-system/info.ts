@@ -5,6 +5,7 @@ import { gradSystemLogin } from "./login.js";
 import { MAIN_URL, SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { ActionFailType } from "../config/actionFailType.js";
+import { UnknownResponse } from "../config/response.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -138,11 +139,7 @@ export const getGradInfo = async (
     } as InfoSuccessResponse;
   }
 
-  return {
-    success: false,
-    type: ActionFailType.Unknown,
-    msg: "获取学籍信息失败",
-  };
+  return UnknownResponse("获取信息失败");
 };
 
 export const gradInfoHandler: RequestHandler<
@@ -170,9 +167,6 @@ export const gradInfoHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as AuthLoginFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };
