@@ -3,9 +3,13 @@ import type { RequestHandler } from "express";
 import { actionLogin } from "./login.js";
 import { ACTION_MAIN_PAGE, ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
-import { ActionFailType, ExpiredResponse } from "../config/index.js";
+import type { ActionFailType } from "../config/index.js";
+import {
+  ExpiredResponse,
+  MissingCredentialResponse,
+  UnknownResponse,
+} from "../config/index.js";
 import type {
-  AccountInfo,
   CommonFailedResponse,
   CommonSuccessResponse,
   EmptyObject,
@@ -41,15 +45,16 @@ export const actionEmailPageHandler: RequestHandler<
   ActionEmailPageOptions
 > = async (req, res) => {
   try {
-    if (!req.headers.cookie) {
-      if (!req.body.id || !req.body.password)
-        throw new Error(`"id" and password" field is required!`);
+    const { id, password } = req.body;
 
-      const result = await actionLogin(req.body as AccountInfo);
+    if (id && password) {
+      const result = await actionLogin({ id, password });
 
       if (!result.success) return res.json(result);
 
       req.headers.cookie = result.cookieStore.getHeader(ACTION_SERVER);
+    } else if (!req.headers.cookie) {
+      return res.json(MissingCredentialResponse);
     }
 
     const { mid } = req.body;
@@ -87,10 +92,6 @@ export const actionEmailPageHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      type: ActionFailType.Unknown,
-      msg: message,
-    } as CommonFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

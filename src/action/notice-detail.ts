@@ -6,10 +6,14 @@ import { actionLogin } from "./login.js";
 import { ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type { ActionFailType } from "../config/index.js";
-import { ExpiredResponse } from "../config/index.js";
+import {
+  ExpiredResponse,
+  MissingCredentialResponse,
+  MissingRequiredResponse,
+  UnknownResponse,
+} from "../config/index.js";
 import { MY_SERVER } from "../my/utils.js";
 import type {
-  AccountInfo,
   CommonFailedResponse,
   CommonSuccessResponse,
   EmptyObject,
@@ -54,21 +58,20 @@ export const noticeHandler: RequestHandler<
   NoticeOptions
 > = async (req, res) => {
   try {
-    const { noticeID } = req.body;
+    const { id, password, noticeID } = req.body;
 
-    if (!noticeID) throw new Error("ID is required");
+    if (!noticeID) return res.json(MissingRequiredResponse("公告 ID"));
 
     const noticeUrl = `${ACTION_SERVER}/page/viewNews?ID=${noticeID}`;
 
-    if (!req.headers.cookie) {
-      if (!req.body.id || !req.body.password)
-        throw new Error(`"id" and password" field is required!`);
-
-      const result = await actionLogin(req.body as AccountInfo);
+    if (id && password) {
+      const result = await actionLogin({ id, password });
 
       if (!result.success) return res.json(result);
 
       req.headers.cookie = result.cookieStore.getHeader(noticeUrl);
+    } else if (!req.headers.cookie) {
+      return res.json(MissingCredentialResponse);
     }
 
     const response = await fetch(noticeUrl, {
@@ -124,9 +127,6 @@ export const noticeHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as AuthLoginFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

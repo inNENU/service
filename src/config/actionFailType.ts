@@ -1,7 +1,18 @@
 export const enum ActionFailType {
+  /** 缺少登录凭据 */
+  MissingCredential = "missing-credential",
+  /** 缺少必要参数 */
+  MissingRequired = "missing-required",
+  /** 未初始化 */
+  NotInitialized = "not-initialized",
+
+  /** 黑名单 */
+  BlackList = "blacklist",
+  /** 单点登录 */
+  EnabledSSO = "sso",
+
   /** 账户锁定 */
   AccountLocked = "locked",
-
   /** 验证码 */
   NeedCaptcha = "need-captcha",
 
@@ -16,20 +27,17 @@ export const enum ActionFailType {
 
   /** 登陆过期 */
   Expired = "expired",
-  /** 冲突 */
-  Conflict = "conflict",
 
   /** 无权限 */
   Forbidden = "forbidden",
-  /** 单点登录 */
-  EnabledSSO = "sso",
+  /** 冲突 */
+  Conflict = "conflict",
+  /** 已存在 */
+  Existed = "existed",
+
   /** 未知错误 */
   Unknown = "unknown",
-  /** 黑名单 */
-  BlackList = "blacklist",
+
   /** 系统关闭 */
   Closed = "closed",
-
-  /** 未初始化 */
-  NotInitialized = "not-initialized",
 }

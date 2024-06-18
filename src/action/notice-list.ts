@@ -3,9 +3,13 @@ import type { RequestHandler } from "express";
 import { actionLogin } from "./login.js";
 import { ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ActionFailType, ExpiredResponse } from "../config/index.js";
+import type { ActionFailType } from "../config/index.js";
+import {
+  ExpiredResponse,
+  MissingCredentialResponse,
+  UnknownResponse,
+} from "../config/index.js";
 import type {
-  AccountInfo,
   CommonFailedResponse,
   CommonListSuccessResponse,
   EmptyObject,
@@ -93,27 +97,24 @@ export const noticeListHandler: RequestHandler<
   NoticeListOptions
 > = async (req, res) => {
   try {
-    let cookieHeader = req.headers.cookie;
+    const { id, password, type = "notice", size = 20, current = 1 } = req.body;
 
-    if (!cookieHeader) {
-      if (!req.body.id || !req.body.password)
-        throw new Error(`"id" and password" field is required!`);
-
-      const result = await actionLogin(req.body as AccountInfo);
+    if (id && password) {
+      const result = await actionLogin({ id, password });
 
       if (!result.success) return res.json(result);
 
-      cookieHeader = result.cookieStore.getHeader(NOTICE_LIST_QUERY_URL);
+      req.headers.cookie = result.cookieStore.getHeader(NOTICE_LIST_QUERY_URL);
+    } else if (!req.headers.cookie) {
+      return res.json(MissingCredentialResponse);
     }
-
-    const { type = "notice", size = 20, current = 1 } = req.body;
 
     const response = await fetch(NOTICE_LIST_QUERY_URL, {
       method: "POST",
       headers: {
         Accept: "application/json, text/javascript, */*; q=0.01",
         "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-        Cookie: cookieHeader,
+        Cookie: req.headers.cookie,
         Referer: `${ACTION_SERVER}/basicInfo/studentPageTurn?type=lifeschool`,
       },
       body: new URLSearchParams({
@@ -147,10 +148,6 @@ export const noticeListHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      type: ActionFailType.Unknown,
-      msg: message,
-    } as CommonFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };
