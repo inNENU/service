@@ -4,8 +4,7 @@ import { getAction } from "./action.js";
 import { gradSystemLogin } from "./login.js";
 import { MAIN_URL, SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ActionFailType } from "../config/actionFailType.js";
-import { UnknownResponse } from "../config/response.js";
+import { ActionFailType, UnknownResponse } from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,

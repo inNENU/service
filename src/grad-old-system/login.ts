@@ -8,7 +8,7 @@ import {
 import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { AUTH_SERVER } from "../auth/utils.js";
-import { ActionFailType } from "../config/index.js";
+import { ActionFailType, UnknownResponse } from "../config/index.js";
 import type { AccountInfo, EmptyObject } from "../typings.js";
 import { CookieStore, IE_8_USER_AGENT } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/login.js";
@@ -41,11 +41,7 @@ export const gradOldSystemLogin = async (
   if (!result.success) {
     console.error(result.msg);
 
-    return {
-      success: false,
-      type: result.type,
-      msg: result.msg,
-    } as AuthLoginFailedResponse;
+    return result;
   }
 
   console.log("Login location", result.location);
@@ -62,7 +58,7 @@ export const gradOldSystemLogin = async (
   if (ticketResponse.status === 502)
     return {
       success: false,
-      type: ActionFailType.Unknown,
+      type: ActionFailType.Error,
       msg: "学校服务器已崩溃，请稍后重试",
     };
 
@@ -71,11 +67,7 @@ export const gradOldSystemLogin = async (
   if (ticketResponse.status !== 302) {
     console.log("ticket response", await ticketResponse.text());
 
-    return {
-      success: false,
-      type: ActionFailType.Unknown,
-      msg: "登录失败",
-    };
+    return UnknownResponse("登录失败");
   }
 
   const finalLocation = ticketResponse.headers.get("Location");
@@ -128,11 +120,7 @@ export const gradOldSystemLogin = async (
     }
   }
 
-  return {
-    success: false,
-    type: ActionFailType.Unknown,
-    msg: "登录失败",
-  };
+  return UnknownResponse("登录失败");
 };
 
 export interface GradSystemLoginSuccessResponse {
@@ -175,9 +163,6 @@ export const gradOldSystemLoginHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as AuthLoginFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

@@ -2,6 +2,7 @@ import type { RichTextNode } from "@mptool/parser";
 import { getRichTextNodes } from "@mptool/parser";
 import type { RequestHandler } from "express";
 
+import { ActionFailType, UnknownResponse } from "../config/index.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 import { CookieStore } from "../utils/index.js";
 
@@ -106,11 +107,7 @@ const checkAccount = async (
     | ActivateRawSuccessResponse
     | RawErrorResponse;
 
-  if (activateResult.code !== 0)
-    return {
-      success: false,
-      msg: activateResult.msg,
-    };
+  if (activateResult.code !== 0) return UnknownResponse(activateResult.msg);
 
   const { activationId } = activateResult.data;
 
@@ -191,7 +188,7 @@ interface PhoneRawSuccessResponse {
 
 export interface ActivateBindPhoneConflictResponse {
   success: false;
-  type: "conflict" | "wrong";
+  type: ActionFailType.Conflict | ActionFailType.WrongCaptcha;
   msg: string;
 }
 export type ActivateBindPhoneResponse =
@@ -218,14 +215,14 @@ const bindPhone = async (
   if (content.code !== 0)
     return {
       success: false,
-      type: "wrong",
+      type: ActionFailType.WrongCaptcha,
       msg: content.msg,
     };
 
   if (content.data.boundStaffNo)
     return {
       success: false,
-      type: "conflict",
+      type: ActionFailType.Conflict,
       msg: `该手机号已绑定 ${content.data.boundStaffNo} 学号。`,
     };
 

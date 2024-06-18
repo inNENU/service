@@ -3,13 +3,8 @@ import type { RequestHandler } from "express";
 import { gradOldSystemLogin } from "./login.js";
 import { GRAD_OLD_SYSTEM_HTTPS_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { semesterStartTime } from "../config/index.js";
-import type {
-  AccountInfo,
-  CommonFailedResponse,
-  EmptyObject,
-  LoginOptions,
-} from "../typings.js";
+import { UnknownResponse, semesterStartTime } from "../config/index.js";
+import type { AccountInfo, EmptyObject, LoginOptions } from "../typings.js";
 import { IE_8_USER_AGENT, getIETimeStamp } from "../utils/index.js";
 
 export interface ClassItem {
@@ -126,9 +121,6 @@ export const gradOldCourseTableHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as CommonFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

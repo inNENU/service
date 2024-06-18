@@ -10,6 +10,7 @@ import {
 } from "../config/index.js";
 import type {
   CommonFailedResponse,
+  CommonSuccessResponse,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
@@ -82,10 +83,9 @@ export interface UnderSpecialExamResult {
   gradeCode: string;
 }
 
-export interface UnderSpecialExamSuccessResponse {
-  success: true;
-  data: UnderSpecialExamResult[];
-}
+export type UnderSpecialExamSuccessResponse = CommonSuccessResponse<
+  UnderSpecialExamResult[]
+>;
 
 export type UnderSpecialExamResponse =
   | UnderSpecialExamSuccessResponse

@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { ActionFailType } from "../config/index.js";
+import { InvalidArgResponse, UnknownResponse } from "../config/index.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 
 export interface UnderEnrollInfoOptions {
@@ -277,17 +277,12 @@ export const underEnrollPlanHandler: RequestHandler<
       } as UnderEnrollPlanSuccessResponse);
     }
 
-    // @ts-expect-error: Unexpected type
-    throw new Error(`Unknown type ${req.body.type}`);
+    return res.json(InvalidArgResponse("type"));
   } catch (err) {
     const { message } = err as Error;
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      type: ActionFailType.Unknown,
-      msg: message,
-    } as CommonFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

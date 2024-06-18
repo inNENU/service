@@ -10,6 +10,7 @@ import {
 } from "../config/index.js";
 import type {
   CommonFailedResponse,
+  CommonSuccessResponse,
   EmptyObject,
   LoginOptions,
 } from "../typings.js";
@@ -106,10 +107,8 @@ export interface ActionRecentMailData {
   emails: EmailData[];
 }
 
-export interface ActionRecentMailSuccessResponse {
-  success: true;
-  data: ActionRecentMailData;
-}
+export type ActionRecentMailSuccessResponse =
+  CommonSuccessResponse<ActionRecentMailData>;
 
 export type ActionRecentMailFailedResponse = CommonFailedResponse<
   ActionFailType.NotInitialized | ActionFailType.Unknown

@@ -3,7 +3,7 @@ import type { RequestHandler } from "express";
 import { underSystemLogin } from "./login.js";
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ActionFailType } from "../config/actionFailType.js";
+import { ActionFailType, UnknownResponse } from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -250,11 +250,7 @@ export const registerStudentArchive = async (
 
   if (alert === "注册成功。") return { success: true };
 
-  return {
-    success: false,
-    type: ActionFailType.Unknown,
-    msg: alert,
-  };
+  return UnknownResponse(alert);
 };
 
 export const underStudentArchiveHandler: RequestHandler<
@@ -289,9 +285,6 @@ export const underStudentArchiveHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as AuthLoginFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

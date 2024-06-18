@@ -3,12 +3,8 @@ import type { RequestHandler } from "express";
 import { underSystemLogin } from "./login.js";
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import type {
-  AccountInfo,
-  CommonFailedResponse,
-  EmptyObject,
-  LoginOptions,
-} from "../typings.js";
+import { UnknownResponse } from "../config/response.js";
+import type { AccountInfo, EmptyObject, LoginOptions } from "../typings.js";
 import { IE_8_USER_AGENT, getIETimeStamp } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/login.js";
 
@@ -79,11 +75,7 @@ export const underTestQueryHandler: RequestHandler<
 
     const idCard = idCardRegExp.exec(queryContent)?.[1];
 
-    if (!idCard)
-      return res.json({
-        success: false,
-        msg: "获取失败",
-      } as CommonFailedResponse);
+    if (!idCard) return res.json(UnknownResponse("未获取到身份证号"));
 
     const applyListResponse = await fetch(
       `${UNDER_SYSTEM_SERVER}/kjlbgl.do?method=goStudentSKXx&xs0101id=${idCard}`,
@@ -133,9 +125,6 @@ export const underTestQueryHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as AuthLoginFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

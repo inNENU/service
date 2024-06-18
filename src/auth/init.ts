@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 
 import { authEncrypt } from "./auth-encrypt.js";
 import { AUTH_DOMAIN, AUTH_SERVER, SALT_REGEXP } from "./utils.js";
-import { ActionFailType } from "../config/index.js";
+import { ActionFailType, UnknownResponse } from "../config/index.js";
 import type { MyInfo } from "../my/index.js";
 import { getMyInfo, myLogin } from "../my/index.js";
 import { MY_SERVER } from "../my/utils.js";
@@ -313,10 +313,6 @@ export const authInitHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      type: ActionFailType.Unknown,
-      msg: message,
-    } as CommonFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

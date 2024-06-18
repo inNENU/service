@@ -5,7 +5,7 @@ import { UNDER_STUDY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { AUTH_SERVER } from "../auth/utils.js";
-import { ActionFailType, UnknownResponse } from "../config/index.js";
+import { UnknownResponse } from "../config/index.js";
 import type { AccountInfo, EmptyObject } from "../typings.js";
 import { CookieStore, EDGE_USER_AGENT_HEADERS } from "../utils/index.js";
 
@@ -33,11 +33,7 @@ export const underStudyLogin = async (
   if (!result.success) {
     console.error(result.msg);
 
-    return {
-      success: false,
-      type: result.type,
-      msg: result.msg,
-    } as AuthLoginFailedResponse;
+    return result;
   }
 
   console.log("Login location", result.location);
@@ -55,11 +51,7 @@ export const underStudyLogin = async (
   if (ticketResponse.status !== 302) {
     console.log("ticket response", await ticketResponse.text());
 
-    return {
-      success: false,
-      type: ActionFailType.Unknown,
-      msg: "登录失败",
-    };
+    return UnknownResponse("登录失败");
   }
 
   const finalLocation = ticketResponse.headers.get("Location");
@@ -87,11 +79,7 @@ export const underStudyLogin = async (
       } as UnderStudyLoginSuccessResult;
   }
 
-  return {
-    success: false,
-    type: ActionFailType.Unknown,
-    msg: "登录失败",
-  };
+  return UnknownResponse("登录失败");
 };
 
 export interface UnderStudyLoginSuccessResponse {

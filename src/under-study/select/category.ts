@@ -1,9 +1,14 @@
 import type { RequestHandler } from "express";
 
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
+import {
+  ActionFailType,
+  MissingCredentialResponse,
+  UnknownResponse,
+} from "../../config/index.js";
 import type {
-  AccountInfo,
   CommonFailedResponse,
+  CommonSuccessResponse,
   EmptyObject,
   LoginOptions,
 } from "../../typings.js";
@@ -28,15 +33,18 @@ export interface UnderSelectCategoryItem {
   endTime: string;
 }
 
-export interface UnderSelectCategorySuccessResponse {
-  success: true;
-  data: UnderSelectCategoryItem[];
-}
+export type UnderSelectCategorySuccessResponse = CommonSuccessResponse<
+  UnderSelectCategoryItem[]
+>;
 
 export type UnderSelectCategoryResponse =
   | UnderSelectCategorySuccessResponse
   | AuthLoginFailedResponse
-  | (CommonFailedResponse & { type: "not-initialized" });
+  | CommonFailedResponse<
+      | ActionFailType.NotInitialized
+      | ActionFailType.MissingCredential
+      | ActionFailType.Unknown
+    >;
 
 const CATEGORY_PAGE = `${UNDER_STUDY_SERVER}/new/student/xsxk/`;
 
@@ -62,21 +70,21 @@ export const underStudySelectCategoryHandler: RequestHandler<
   LoginOptions
 > = async (req, res) => {
   try {
-    let cookieHeader = req.headers.cookie;
+    const { id, password } = req.body;
 
-    if (!cookieHeader) {
-      if (!req.body.id || !req.body.password)
-        throw new Error(`"id" and password" field is required!`);
-
-      const result = await underStudyLogin(req.body as AccountInfo);
+    if (id && password) {
+      const result = await underStudyLogin({ id, password });
 
       if (!result.success) return res.json(result);
-      cookieHeader = result.cookieStore.getHeader(CATEGORY_PAGE);
+
+      req.headers.cookie = result.cookieStore.getHeader(CATEGORY_PAGE);
+    } else if (!req.headers.cookie) {
+      return res.json(MissingCredentialResponse);
     }
 
     const response = await fetch(CATEGORY_PAGE, {
       headers: {
-        Cookie: cookieHeader,
+        Cookie: req.headers.cookie,
         Referer: `${UNDER_STUDY_SERVER}/new/welcome.page?ui=new`,
         ...EDGE_USER_AGENT_HEADERS,
       },
@@ -87,8 +95,8 @@ export const underStudySelectCategoryHandler: RequestHandler<
     if (content.includes("选课正在初始化")) {
       return res.json({
         success: false,
+        type: ActionFailType.NotInitialized,
         msg: "选课正在初始化，请稍后再试",
-        type: "not-initialized",
       });
     }
 
@@ -101,9 +109,6 @@ export const underStudySelectCategoryHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as AuthLoginFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

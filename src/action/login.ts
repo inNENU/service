@@ -2,17 +2,13 @@ import type { CookieType } from "@mptool/net";
 import type { RequestHandler } from "express";
 
 import { ACTION_SERVER } from "./utils.js";
+import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { WEB_VPN_AUTH_SERVER, authLogin } from "../auth/index.js";
-import type { AuthLoginFailedResponse } from "../auth/login.js";
-import { ActionFailType } from "../config/index.js";
-import type {
-  AccountInfo,
-  CommonFailedResponse,
-  EmptyObject,
-} from "../typings.js";
+import { UnknownResponse } from "../config/index.js";
+import type { AccountInfo, EmptyObject } from "../typings.js";
 import { CookieStore } from "../utils/index.js";
-import type { VPNLoginFailedResponse } from "../vpn/login.js";
-import { vpnCASLogin } from "../vpn/login.js";
+import type { VPNLoginFailedResponse } from "../vpn/index.js";
+import { vpnCASLogin } from "../vpn/index.js";
 
 export interface ActionLoginSuccessResult {
   success: true;
@@ -55,12 +51,7 @@ export const actionLogin = async (
 
   cookieStore.applyResponse(ticketResponse, result.location);
 
-  if (ticketResponse.status !== 302)
-    return {
-      success: false,
-      type: ActionFailType.Unknown,
-      msg: "登录失败",
-    };
+  if (ticketResponse.status !== 302) return UnknownResponse("登录失败");
 
   const finalLocation = ticketResponse.headers.get("Location");
 
@@ -70,11 +61,7 @@ export const actionLogin = async (
       cookieStore,
     } as ActionLoginResult;
 
-  return {
-    success: false,
-    type: ActionFailType.Unknown,
-    msg: "登录失败",
-  };
+  return UnknownResponse("登录失败");
 };
 
 export interface ActionLoginSuccessResponse {
@@ -117,10 +104,6 @@ export const actionLoginHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      type: ActionFailType.Unknown,
-      msg: message,
-    } as CommonFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

@@ -199,11 +199,7 @@ export const vpnLogin = async (
 
   console.error("Unknown VPN login response:", await loginResponse.text());
 
-  return {
-    success: false,
-    type: ActionFailType.Unknown,
-    msg: "未知错误",
-  };
+  return UnknownResponse("未知错误");
 };
 
 export const vpnCASLoginHandler: RequestHandler<

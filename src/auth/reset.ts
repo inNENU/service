@@ -2,7 +2,11 @@ import type { RequestHandler } from "express";
 
 import { authEncrypt } from "./auth-encrypt.js";
 import { AUTH_SERVER } from "./utils.js";
-import { ActionFailType } from "../config/index.js";
+import {
+  ActionFailType,
+  InvalidArgResponse,
+  UnknownResponse,
+} from "../config/index.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 import { CookieStore } from "../utils/index.js";
 
@@ -184,11 +188,7 @@ const sendSMS = async (
       sign: data.data.sign,
     };
 
-  return {
-    success: false,
-    type: ActionFailType.Unknown,
-    msg: data.message,
-  };
+  return UnknownResponse(data.message);
 };
 
 export interface ResetPasswordVerifySMSOptions {
@@ -260,11 +260,7 @@ const verifySMS = async (
       salt: data.data.pwdDefaultEncryptSalt,
     };
 
-  return {
-    success: false,
-    type: ActionFailType.Unknown,
-    msg: data.message,
-  };
+  return UnknownResponse(data.message);
 };
 
 export interface ResetPasswordSetNewOptions {
@@ -478,18 +474,12 @@ export const resetPasswordHandler: RequestHandler<
       return res.json(result);
     }
 
-    return res.json({
-      success: false,
-      msg: "Invalid options",
-    });
+    return res.json(InvalidArgResponse("options"));
   } catch (err) {
     const { message } = err as Error;
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as CommonFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

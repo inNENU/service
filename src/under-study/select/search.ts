@@ -6,9 +6,15 @@ import type {
 } from "./typings.js";
 import { getCourses } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
+import type { ActionFailType } from "../../config/index.js";
+import {
+  MissingArgResponse,
+  MissingCredentialResponse,
+  UnknownResponse,
+} from "../../config/index.js";
 import type {
-  AccountInfo,
   CommonFailedResponse,
+  CommonSuccessResponse,
   EmptyObject,
   LoginOptions,
 } from "../../typings.js";
@@ -41,15 +47,14 @@ export interface UnderSelectSearchOptions extends LoginOptions {
   courseOffice?: string;
 }
 
-export interface UnderSelectSearchSuccessResponse {
-  success: true;
-  data: UnderSelectCourseInfo[];
-}
+export type UnderSelectSearchSuccessResponse = CommonSuccessResponse<
+  UnderSelectCourseInfo[]
+>;
 
 export type UnderSelectSearchResponse =
   | UnderSelectSearchSuccessResponse
   | AuthLoginFailedResponse
-  | (CommonFailedResponse & { type: "not-initialized" });
+  | CommonFailedResponse<ActionFailType.Unknown>;
 
 export const underStudySearchCourseHandler: RequestHandler<
   EmptyObject,
@@ -57,20 +62,10 @@ export const underStudySearchCourseHandler: RequestHandler<
   UnderSelectSearchOptions
 > = async (req, res) => {
   try {
-    let cookieHeader = req.headers.cookie;
-
-    if (!cookieHeader) {
-      if (!req.body.id || !req.body.password)
-        throw new Error(`"id" and password" field is required!`);
-
-      const result = await underStudyLogin(req.body as AccountInfo);
-
-      if (!result.success) return res.json(result);
-      cookieHeader = result.cookieStore.getHeader(UNDER_STUDY_SERVER);
-    }
-
     const {
-      link = "",
+      id,
+      password,
+      link,
       name = "",
       area = "",
       grade = "",
@@ -83,7 +78,17 @@ export const underStudySearchCourseHandler: RequestHandler<
       courseOffice = "",
     } = req.body;
 
-    if (!link) throw new Error(`"link" is required`);
+    if (id && password) {
+      const result = await underStudyLogin({ id, password });
+
+      if (!result.success) return res.json(result);
+
+      req.headers.cookie = result.cookieStore.getHeader(UNDER_STUDY_SERVER);
+    } else if (!req.headers.cookie) {
+      return res.json(MissingCredentialResponse);
+    }
+
+    if (!link) return res.json(MissingArgResponse("link"));
 
     const infoUrl = `${UNDER_STUDY_SERVER}${link}/hzkc`;
 
@@ -91,7 +96,7 @@ export const underStudySearchCourseHandler: RequestHandler<
       method: "POST",
       headers: {
         Accept: "application/json, text/javascript, */*; q=0.01",
-        Cookie: cookieHeader,
+        Cookie: req.headers.cookie,
         Referer: `${UNDER_STUDY_SERVER}${link}`,
         ...EDGE_USER_AGENT_HEADERS,
       },
@@ -125,9 +130,6 @@ export const underStudySearchCourseHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as AuthLoginFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

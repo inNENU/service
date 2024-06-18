@@ -4,7 +4,8 @@ import type { RichTextNode } from "@mptool/parser";
 import { getRichTextNodes } from "@mptool/parser";
 import type { RequestHandler } from "express";
 
-import type { CommonFailedResponse, EmptyObject } from "../typings.js";
+import { UnknownResponse } from "../config/response.js";
+import type { EmptyObject } from "../typings.js";
 
 const POST_RECOMMEND_PLAN_URL =
   "https://math127.nenu.edu.cn/yjsy/HData/ZSB/ZSJZ2024-TM-1.html";
@@ -135,9 +136,6 @@ export const gradRecommendPlanHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as CommonFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

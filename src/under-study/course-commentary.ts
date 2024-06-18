@@ -485,6 +485,6 @@ export const underStudyCourseCommentaryHandler: RequestHandler<
 
     console.error(err);
 
-    return UnknownResponse(message);
+    return res.json(UnknownResponse(message));
   }
 };

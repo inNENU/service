@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { ActionFailType } from "../config/index.js";
+import { ActionFailType, UnknownResponse } from "../config/index.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 
 export interface UnderAdmissionOptions {
@@ -31,7 +31,7 @@ export interface UnderAdmissionSuccessResponse {
 
 export type UnderAdmissionResponse =
   | UnderAdmissionSuccessResponse
-  | CommonFailedResponse;
+  | CommonFailedResponse<ActionFailType.Closed | ActionFailType.Unknown>;
 
 export const underAdmissionHandler: RequestHandler<
   EmptyObject,
@@ -60,17 +60,13 @@ export const underAdmissionHandler: RequestHandler<
     if (response.status !== 200)
       return res.json({
         success: false,
-        type: ActionFailType.Forbidden,
+        type: ActionFailType.Closed,
         msg: "查询通道已关闭",
       });
 
     const result = (await response.json()) as RawEnrollResult;
 
-    if ("code" in result)
-      return res.json({
-        success: false,
-        msg: "查询失败",
-      });
+    if ("code" in result) return res.json(UnknownResponse("查询失败"));
 
     const { institute, major, mailCode, hasMailed, admissionMethod } = result;
 
@@ -114,9 +110,6 @@ export const underAdmissionHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as CommonFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

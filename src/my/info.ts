@@ -5,9 +5,7 @@ import type { RequestHandler } from "express";
 import type { MyLoginFailedResponse } from "./login.js";
 import { myLogin } from "./login.js";
 import { MY_SERVER } from "./utils.js";
-import { UnknownResponse } from "../config/index.js";
-import { code2major } from "../config/major.js";
-import { code2org } from "../config/org.js";
+import { UnknownResponse, code2major, code2org } from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -267,9 +265,6 @@ export const myInfoHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as MyLoginFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

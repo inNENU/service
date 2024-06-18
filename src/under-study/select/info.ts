@@ -8,9 +8,15 @@ import {
   majorsStore,
 } from "./store.js";
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
+import {
+  ActionFailType,
+  MissingArgResponse,
+  MissingCredentialResponse,
+  UnknownResponse,
+} from "../../config/index.js";
 import type {
-  AccountInfo,
   CommonFailedResponse,
+  CommonSuccessResponse,
   EmptyObject,
   LoginOptions,
 } from "../../typings.js";
@@ -57,17 +63,19 @@ export interface UnderSelectInfo {
   currentGrade: number;
 }
 
-export interface UnderSelectInfoSuccessResponse {
-  success: true;
-  data: UnderSelectInfo;
-}
+export type UnderSelectInfoSuccessResponse =
+  CommonSuccessResponse<UnderSelectInfo>;
 
 export type UnderSelectInfoResponse =
   | UnderSelectInfoSuccessResponse
   | AuthLoginFailedResponse
-  | (CommonFailedResponse & {
-      type: "not-initialized" | "missing-commentary";
-    });
+  | CommonFailedResponse<
+      | ActionFailType.NotInitialized
+      | ActionFailType.MissingCredential
+      | ActionFailType.MissingCommentary
+      | ActionFailType.MissingArg
+      | ActionFailType.Unknown
+    >;
 
 const COURSE_OFFICES_REGEXP =
   /<select id='kkyxdm' name='kkyxdm'.*?><option value=''>\(请选择\)<\/option>(.*?)<\/select>/;
@@ -202,7 +210,7 @@ const checkCourseCommentary = async (
     },
   });
 
-  if (response.status !== 200) throw new Error("评教检查失败");
+  if (response.status !== 200) throw `status: ${response.status}`;
 
   try {
     const content = await response.text();
@@ -240,26 +248,21 @@ export const underStudySelectInfoHandler: RequestHandler<
   UnderSelectInfoOptions
 > = async (req, res) => {
   try {
-    let cookieHeader = req.headers.cookie;
+    const { id, password, link } = req.body;
 
-    if (!cookieHeader) {
-      if (!req.body.id || !req.body.password)
-        throw new Error(`"id" and password" field is required!`);
-
-      const result = await underStudyLogin(req.body as AccountInfo);
+    if (id && password) {
+      const result = await underStudyLogin({ id, password });
 
       if (!result.success) return res.json(result);
-      cookieHeader = result.cookieStore.getHeader(UNDER_STUDY_SERVER);
+
+      req.headers.cookie = result.cookieStore.getHeader(UNDER_STUDY_SERVER);
+    } else if (!req.headers.cookie) {
+      return res.json(MissingCredentialResponse);
     }
 
-    const { link } = req.body;
+    const cookieHeader = req.headers.cookie;
 
-    if (!link) {
-      return res.json({
-        success: false,
-        msg: "请提供选课信息链接",
-      } as CommonFailedResponse);
-    }
+    if (!link) return res.json(MissingArgResponse("link"));
 
     const categoryUrl = `${UNDER_STUDY_SERVER}${link}`;
 
@@ -272,8 +275,6 @@ export const underStudySelectInfoHandler: RequestHandler<
     });
 
     let content = await response.text();
-
-    console.log(content.match(/<title>.*?评教检查<\/title>/));
 
     if (content.match(/<title>.*?评教检查<\/title>/)) {
       console.log("评教检查");
@@ -288,7 +289,7 @@ export const underStudySelectInfoHandler: RequestHandler<
         return res.json({
           success: false,
           msg: "未完成评教",
-          type: "missing-commentary",
+          type: ActionFailType.MissingCommentary,
         });
       }
 
@@ -306,7 +307,7 @@ export const underStudySelectInfoHandler: RequestHandler<
       return res.json({
         success: false,
         msg: "选课正在初始化，请稍后再试",
-        type: "not-initialized",
+        type: ActionFailType.NotInitialized,
       });
     }
 
@@ -319,9 +320,6 @@ export const underStudySelectInfoHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as AuthLoginFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

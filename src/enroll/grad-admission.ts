@@ -1,22 +1,25 @@
 import { CookieStore } from "@mptool/net";
 import type { RequestHandler } from "express";
 
-import { ActionFailType } from "../config/index.js";
-import type { CommonFailedResponse, EmptyObject } from "../typings.js";
+import { ActionFailType, UnknownResponse } from "../config/index.js";
+import type {
+  CommonFailedResponse,
+  CommonSuccessResponse,
+  EmptyObject,
+} from "../typings.js";
 
 export interface GradAdmissionOptions {
   name: string;
   id: string;
 }
 
-export interface GradAdmissionSuccessResponse {
-  success: true;
-  info: { text: string; value: string }[];
-}
+export type GradAdmissionSuccessResponse = CommonSuccessResponse<
+  { text: string; value: string }[]
+>;
 
 export type GradAdmissionResponse =
   | GradAdmissionSuccessResponse
-  | CommonFailedResponse<ActionFailType.Unknown | ActionFailType.Forbidden>;
+  | CommonFailedResponse<ActionFailType.Closed | ActionFailType.Unknown>;
 
 const getInfo = async ({
   id,
@@ -58,7 +61,7 @@ const getInfo = async ({
   if (response.status !== 200)
     return {
       success: false,
-      type: ActionFailType.Forbidden,
+      type: ActionFailType.Closed,
       msg: "查询已关闭",
     };
 
@@ -106,7 +109,7 @@ const getInfo = async ({
       content,
     )![1];
 
-  const info = [
+  const data = [
     {
       text: "考生姓名",
       value: name,
@@ -143,7 +146,7 @@ const getInfo = async ({
 
   return {
     success: true,
-    info,
+    data,
   };
 };
 
@@ -159,9 +162,6 @@ export const gradAdmissionHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as CommonFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

@@ -1,6 +1,6 @@
 import type { CookieType } from "@mptool/net";
 
-import type { ActionFailType } from "./config/actionFailType";
+import type { ActionFailType } from "./config/index.js";
 
 export type EmptyObject = Record<never, never>;
 

@@ -7,7 +7,7 @@ import type { MyLoginFailedResponse } from "./login.js";
 import { myLogin } from "./login.js";
 import { getProcess } from "./process.js";
 import { MY_SERVER } from "./utils.js";
-import { ActionFailType } from "../config/actionFailType.js";
+import { ActionFailType, UnknownResponse } from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -56,11 +56,7 @@ const getMailInitInfo = async (
       password: PASSWORD,
     };
 
-  return {
-    success: false,
-    type: ActionFailType.Unknown,
-    msg: "邮箱创建失败，请联系信息化办",
-  };
+  return UnknownResponse("邮箱创建失败，请联系信息化办");
 };
 
 export interface GetEmailInfoOptions extends LoginOptions {
@@ -94,7 +90,7 @@ export type GetEmailSuccessResponse =
 
 export type GetEmailFailedResponse =
   | MyLoginFailedResponse
-  | CommonFailedResponse;
+  | CommonFailedResponse<ActionFailType.Expired>;
 
 export type GetEmailResponse = GetEmailSuccessResponse | GetEmailFailedResponse;
 
@@ -194,7 +190,7 @@ export type ActivateMailSuccessResponse = MailInitSuccessInfo;
 
 export type ActivateMailFailedResponse =
   | MyLoginFailedResponse
-  | CommonFailedResponse;
+  | CommonFailedResponse<ActionFailType.Existed | ActionFailType.Unknown>;
 
 export type ActivateEmailResponse =
   | ActivateMailSuccessResponse
@@ -227,7 +223,7 @@ const activateEmail = async (
   if (checkResult.suc || !checkResult.error_code.startsWith("ACCOUNT.NOTEXIST"))
     return {
       success: false,
-      type: ActionFailType.Unknown,
+      type: ActionFailType.Existed,
       msg: "邮箱账户已存在",
     };
 
@@ -267,12 +263,7 @@ const activateEmail = async (
 
   const setMailResult = (await setMailResponse.json()) as { success: boolean };
 
-  if (setMailResult.success === false)
-    return {
-      success: false,
-      type: ActionFailType.Unknown,
-      msg: "申请失败",
-    };
+  if (setMailResult.success === false) return UnknownResponse("申请失败");
 
   const initInfo = await getMailInitInfo(cookieHeader, instanceId);
 
@@ -311,9 +302,6 @@ export const emailHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as CommonFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

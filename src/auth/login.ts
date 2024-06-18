@@ -8,7 +8,7 @@ import {
   SALT_REGEXP,
   WEB_VPN_AUTH_SERVER,
 } from "./utils.js";
-import { ActionFailType } from "../config/index.js";
+import { ActionFailType, UnknownResponse } from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -194,8 +194,7 @@ export const authLogin = async ({
         return {
           success: false,
           type: ActionFailType.NeedCaptcha,
-          // TODO: Update
-          msg: "登录需要验证码，请重新登陆。",
+          msg: "需要验证码，请重新登录。",
         };
 
       if (resultContent.includes("不允许使用认证服务来认证您访问的目标应用。"))
@@ -232,11 +231,7 @@ export const authLogin = async ({
 
   console.error("Unknown login response: ", loginPageResponse.status);
 
-  return {
-    success: false,
-    type: ActionFailType.Unknown,
-    msg: "未知错误",
-  };
+  return UnknownResponse("未知错误");
 };
 
 export interface AuthLoginSuccessResponse {
@@ -284,9 +279,6 @@ export const authLoginHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as CommonFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

@@ -3,7 +3,12 @@ import type { RequestHandler } from "express";
 import { underSystemLogin } from "./login.js";
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ActionFailType, semesterStartTime } from "../config/index.js";
+import {
+  ActionFailType,
+  ExpiredResponse,
+  UnknownResponse,
+  semesterStartTime,
+} from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -116,20 +121,16 @@ export const underCourseTableHandler: RequestHandler<
       redirect: "manual",
     });
 
-    if (response.status === 302)
-      return res.json({
-        success: false,
-        type: ActionFailType.Expired,
-        msg: "登录已过期，请重试",
-      });
+    if (response.status === 302) return res.json(ExpiredResponse);
 
     const content = await response.text();
 
     if (content.includes("评教未完成，不能查看课表！"))
       return res.json({
         success: false,
+        type: ActionFailType.MissingCommentary,
         msg: "上学期评教未完成，不能查看本学期课表",
-      } as CommonFailedResponse);
+      });
 
     const tableData = getCourses(content);
 
@@ -143,9 +144,6 @@ export const underCourseTableHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as AuthLoginFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

@@ -3,7 +3,7 @@ import type { RequestHandler } from "express";
 import { gradOldSystemLogin } from "./login.js";
 import { GRAD_OLD_SYSTEM_HTTPS_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ExpiredResponse } from "../config/index.js";
+import { ExpiredResponse, UnknownResponse } from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -252,9 +252,6 @@ export const gradOldGradeListHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as CommonFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

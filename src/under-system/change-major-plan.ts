@@ -14,12 +14,8 @@ import {
   totalPagesRegExp,
 } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import type {
-  AccountInfo,
-  CommonFailedResponse,
-  EmptyObject,
-  LoginOptions,
-} from "../typings.js";
+import { UnknownResponse } from "../config/response.js";
+import type { AccountInfo, EmptyObject, LoginOptions } from "../typings.js";
 import { IE_8_USER_AGENT, getIETimeStamp } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/login.js";
 
@@ -219,9 +215,6 @@ export const underChangeMajorPlanHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as CommonFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

@@ -4,7 +4,8 @@ import type { RichTextNode } from "@mptool/parser";
 import { getRichTextNodes } from "@mptool/parser";
 import type { RequestHandler } from "express";
 
-import type { CommonFailedResponse, EmptyObject } from "../typings.js";
+import { UnknownResponse } from "../config/index.js";
+import type { CommonSuccessResponse, EmptyObject } from "../typings.js";
 
 const GRAD_ENROLL_PLAN_URL = "https://yz.nenu.edu.cn/source/ssml/2024zsml.html";
 const schoolInfoRegExp =
@@ -29,10 +30,9 @@ export interface GradEnrollSchoolPlan {
   majors: GradEnrollPlanInfo[];
 }
 
-export interface GradEnrollSuccessResponse {
-  success: true;
-  data: GradEnrollSchoolPlan[];
-}
+export type GradEnrollSuccessResponse = CommonSuccessResponse<
+  GradEnrollSchoolPlan[]
+>;
 
 if (!existsSync("./cache")) mkdirSync("./cache");
 
@@ -140,9 +140,6 @@ export const gradEnrollPlanHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as CommonFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

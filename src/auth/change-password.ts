@@ -3,6 +3,7 @@ import type { RequestHandler } from "express";
 import { authEncrypt } from "./auth-encrypt.js";
 import { authLogin } from "./login.js";
 import { AUTH_SERVER, SALT_REGEXP } from "./utils.js";
+import { UnknownResponse } from "../config/response.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -122,9 +123,6 @@ export const changePasswordHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as CommonFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

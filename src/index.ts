@@ -24,6 +24,7 @@ import {
   infoHandler,
   resetPasswordHandler,
 } from "./auth/index.js";
+import { UnknownResponse } from "./config/index.js";
 import {
   gradAdmissionHandler,
   gradEnrollPlanHandler,
@@ -70,7 +71,6 @@ import {
   testGetHandler,
   testPostHandler,
 } from "./test/index.js";
-import type { CommonFailedResponse } from "./typings.js";
 import {
   underStudyCheckHandler,
   underStudyCourseCommentaryHandler,
@@ -238,10 +238,7 @@ app.post("/test/302", test302Handler);
 app.use((err: Error, _req: Request, res: Response, _next: () => void) => {
   console.error(err.stack);
 
-  res.status(500).json({
-    success: false,
-    msg: "我们出了问题! 请联系 Mr.Hope",
-  } as CommonFailedResponse);
+  res.status(500).json(UnknownResponse("未知错误"));
 });
 
 app.listen(port, () => {

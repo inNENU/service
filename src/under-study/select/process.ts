@@ -1,8 +1,14 @@
 import type { RequestHandler } from "express";
 
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
+import { ActionFailType } from "../../config/actionFailType.js";
+import {
+  InvalidArgResponse,
+  MissingArgResponse,
+  MissingCredentialResponse,
+  UnknownResponse,
+} from "../../config/response.js";
 import type {
-  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
@@ -72,7 +78,9 @@ export interface UnderSelectProcessSuccessResponse {
 export type UnderSelectProcessResponse =
   | UnderSelectProcessSuccessResponse
   | AuthLoginFailedResponse
-  | (CommonFailedResponse & { type: "not-initialized" | "not-opened" });
+  | CommonFailedResponse<
+      ActionFailType.MissingCredential | ActionFailType.Closed
+    >;
 
 export const underStudyProcessCourseHandler: RequestHandler<
   EmptyObject,
@@ -80,22 +88,23 @@ export const underStudyProcessCourseHandler: RequestHandler<
   UnderSelectProcessOptions
 > = async (req, res) => {
   try {
-    let cookieHeader = req.headers.cookie;
+    const { id, password, link, type } = req.body;
 
-    if (!cookieHeader) {
-      if (!req.body.id || !req.body.password)
-        throw new Error(`"id" and password" field is required!`);
-
-      const result = await underStudyLogin(req.body as AccountInfo);
+    if (id && password) {
+      const result = await underStudyLogin({ id, password });
 
       if (!result.success) return res.json(result);
-      cookieHeader = result.cookieStore.getHeader(UNDER_STUDY_SERVER);
+
+      req.headers.cookie = result.cookieStore.getHeader(UNDER_STUDY_SERVER);
+    } else if (!req.headers.cookie) {
+      return res.json(MissingCredentialResponse);
     }
 
-    const { type, link } = req.body;
+    const cookieHeader = req.headers.cookie;
 
-    if (!link) throw new Error(`"link" is required`);
-    if (!req.body.classId) throw new Error(`"classId" are required`);
+    if (!link) return res.json(MissingArgResponse("link"));
+
+    if (!req.body.classId) return res.json(MissingArgResponse("classId"));
 
     const referer = `${UNDER_STUDY_SERVER}${link}`;
 
@@ -124,18 +133,13 @@ export const underStudyProcessCourseHandler: RequestHandler<
           return res.json({
             success: false,
             msg: data.message,
-            type: "not-opened",
+            type: ActionFailType.Closed,
           });
 
-        return res.json({
-          success: false,
-          msg: data.message,
-        });
+        throw new Error(data.message);
       }
 
-      return res.json({
-        success: true,
-      });
+      return res.json({ success: true });
     }
 
     if (type === "remove") {
@@ -161,29 +165,21 @@ export const underStudyProcessCourseHandler: RequestHandler<
           return res.json({
             success: false,
             msg: data.message,
-            type: "not-opened",
+            type: ActionFailType.Closed,
           });
 
-        return res.json({
-          success: false,
-          msg: data.message,
-        });
+        throw new Error(data.message);
       }
 
-      return res.json({
-        success: true,
-      });
+      return res.json({ success: true });
     }
 
-    throw new Error('Invalid "type"');
+    return res.json(InvalidArgResponse("type"));
   } catch (err) {
     const { message } = err as Error;
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    });
+    return res.json(UnknownResponse(message));
   }
 };

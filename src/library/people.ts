@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
-import { UnknownResponse } from "../config";
-import type { CommonFailedResponse } from "../typings";
+import { UnknownResponse } from "../config/index.js";
+import type { CommonFailedResponse } from "../typings.js";
 
 interface LibraryPeopleRawData {
   code: number;

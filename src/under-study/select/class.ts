@@ -6,9 +6,14 @@ import type {
 } from "./typings.js";
 import { getClasses } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
+import {
+  MissingArgResponse,
+  MissingCredentialResponse,
+  UnknownResponse,
+} from "../../config/index.js";
 import type {
-  AccountInfo,
   CommonFailedResponse,
+  CommonSuccessResponse,
   EmptyObject,
   LoginOptions,
 } from "../../typings.js";
@@ -23,15 +28,14 @@ export interface UnderSelectClassOptions extends LoginOptions {
   courseId: string;
 }
 
-export interface UnderSelectClassSuccessResponse {
-  success: true;
-  data: UnderSelectClassInfo[];
-}
+export type UnderSelectClassSuccessResponse = CommonSuccessResponse<
+  UnderSelectClassInfo[]
+>;
 
 export type UnderSelectClassResponse =
   | UnderSelectClassSuccessResponse
   | AuthLoginFailedResponse
-  | (CommonFailedResponse & { type: "not-initialized" });
+  | CommonFailedResponse;
 
 export const underStudySearchClassHandler: RequestHandler<
   EmptyObject,
@@ -39,22 +43,22 @@ export const underStudySearchClassHandler: RequestHandler<
   UnderSelectClassOptions
 > = async (req, res) => {
   try {
-    let cookieHeader = req.headers.cookie;
+    const { id, password, link, courseId } = req.body;
 
-    if (!cookieHeader) {
-      if (!req.body.id || !req.body.password)
-        throw new Error(`"id" and password" field is required!`);
-
-      const result = await underStudyLogin(req.body as AccountInfo);
+    if (id && password) {
+      const result = await underStudyLogin({ id, password });
 
       if (!result.success) return res.json(result);
-      cookieHeader = result.cookieStore.getHeader(UNDER_STUDY_SERVER);
+
+      req.headers.cookie = result.cookieStore.getHeader(UNDER_STUDY_SERVER);
+    } else if (!req.headers.cookie) {
+      return res.json(MissingCredentialResponse);
     }
 
-    const { courseId, link } = req.body;
+    const cookieHeader = req.headers.cookie;
 
-    if (!link) throw new Error(`"link" is required!`);
-    if (!courseId) throw new Error(`"courseId" is required!`);
+    if (!link) return res.json(MissingArgResponse("link"));
+    if (!courseId) return res.json(MissingArgResponse("courseId"));
 
     const infoUrl = `${UNDER_STUDY_SERVER}${link}/kxkc`;
 
@@ -86,9 +90,6 @@ export const underStudySearchClassHandler: RequestHandler<
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as AuthLoginFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

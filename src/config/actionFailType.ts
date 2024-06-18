@@ -41,6 +41,10 @@ export const enum ActionFailType {
   Error = "error",
   /** 系统关闭 */
   Closed = "closed",
+
+  /** 未完成评教 */
+  MissingCommentary = "missing-commentary",
+
   /** 未知错误 */
   Unknown = "unknown",
 }
