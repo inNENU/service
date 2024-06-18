@@ -2,7 +2,6 @@ import type { RequestHandler } from "express";
 
 import { UNDER_STUDY_SERVER } from "./utils.js";
 import type {
-  CommonFailedResponse,
   CookieOptions,
   CookieVerifyResponse,
   EmptyObject,
@@ -33,18 +32,11 @@ export const underStudyCheckHandler: RequestHandler<
         } as CookieVerifyResponse);
     }
 
+    throw -1;
+  } catch (err) {
     return res.json({
       success: true,
       valid: false,
     } as CookieVerifyResponse);
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json({
-      success: false,
-      msg: message,
-    } as CommonFailedResponse);
   }
 };

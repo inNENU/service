@@ -3,9 +3,13 @@ import type { RequestHandler } from "express";
 import { underStudyLogin } from "./login.js";
 import { UNDER_STUDY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ActionFailType } from "../config/index.js";
+import {
+  ExpiredResponse,
+  InvalidArgResponse,
+  MissingCredentialResponse,
+  UnknownResponse,
+} from "../config/index.js";
 import type {
-  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
@@ -308,17 +312,19 @@ export const underStudyCourseCommentaryHandler: RequestHandler<
   UnderCourseCommentaryOptions
 > = async (req, res) => {
   try {
-    let cookieHeader = req.headers.cookie;
+    const { id, password } = req.body;
 
-    if (!cookieHeader) {
-      if (!req.body.id || !req.body.password)
-        throw new Error(`"id" and password" field is required!`);
-
-      const result = await underStudyLogin(req.body as AccountInfo);
+    if (id && password) {
+      const result = await underStudyLogin({ id, password });
 
       if (!result.success) return res.json(result);
-      cookieHeader = result.cookieStore.getHeader(LIST_URL);
+
+      req.headers.cookie = result.cookieStore.getHeader(LIST_URL);
+    } else if (!req.headers.cookie) {
+      return res.json(MissingCredentialResponse);
     }
+
+    const cookieHeader = req.headers.cookie;
 
     if (req.body.type === "list") {
       const time = req.body.time ?? (await getCurrentTime(cookieHeader)).value;
@@ -343,27 +349,16 @@ export const underStudyCourseCommentaryHandler: RequestHandler<
       });
 
       if (response.headers.get("content-type")?.includes("text/html"))
-        return res.json({
-          success: false,
-          type: ActionFailType.Expired,
-          msg: "登录过期，请重新登录",
-        });
+        return res.json(ExpiredResponse);
 
       const data =
         (await response.json()) as RawUnderCourseCommentaryListResult;
 
       if ("code" in data) {
         if (data.message === "尚未登录，请先登录")
-          return {
-            success: false,
-            type: ActionFailType.Expired,
-            msg: "登录过期，请重新登录",
-          };
+          return res.json(ExpiredResponse);
 
-        return {
-          success: false,
-          msg: data.message,
-        };
+        throw new Error(data.message);
       }
 
       return res.json({
@@ -466,11 +461,7 @@ export const underStudyCourseCommentaryHandler: RequestHandler<
       );
 
       if (response.headers.get("content-type")?.includes("text/html"))
-        return res.json({
-          success: false,
-          type: ActionFailType.Expired,
-          msg: "登录过期，请重新登录",
-        });
+        return res.json(ExpiredResponse);
 
       const data =
         (await response.json()) as RawUnderCourseCommentarySubmitResult;
@@ -483,27 +474,17 @@ export const underStudyCourseCommentaryHandler: RequestHandler<
       }
 
       if (data.message === "尚未登录，请先登录")
-        return res.json({
-          success: false,
-          type: ActionFailType.Expired,
-          msg: "登录过期，请重新登录",
-        });
+        return res.json(ExpiredResponse);
 
-      return res.json({
-        success: false,
-        msg: data.message,
-      });
+      return res.json(UnknownResponse(data.message));
     }
 
-    throw new Error("unknown type");
+    return res.json(InvalidArgResponse("type"));
   } catch (err) {
     const { message } = err as Error;
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as AuthLoginFailedResponse);
+    return UnknownResponse(message);
   }
 };

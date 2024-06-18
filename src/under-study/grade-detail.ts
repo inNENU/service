@@ -3,9 +3,13 @@ import type { RequestHandler } from "express";
 import { underStudyLogin } from "./login.js";
 import { UNDER_STUDY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ActionFailType } from "../config/index.js";
+import {
+  ExpiredResponse,
+  MissingArgResponse,
+  MissingCredentialResponse,
+  UnknownResponse,
+} from "../config/index.js";
 import type {
-  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
@@ -130,42 +134,33 @@ export const underStudyGradeDetailHandler: RequestHandler<
   UnderGradeDetailOptions
 > = async (req, res) => {
   try {
-    const { gradeCode } = req.body;
-    let cookieHeader = req.headers.cookie;
+    const { gradeCode, id, password } = req.body;
 
-    if (!gradeCode)
-      return res.json({
-        success: false,
-        msg: "请提供课程代码",
-      } as CommonFailedResponse);
+    if (!gradeCode) return res.json(MissingArgResponse("课程代码"));
 
     const queryUrl = `${UNDER_STUDY_SERVER}/new/student/xskccj/getDetail?cjdm=${gradeCode}`;
 
-    if (!cookieHeader) {
-      if (!req.body.id || !req.body.password)
-        throw new Error(`"id" and password" field is required!`);
-
-      const result = await underStudyLogin(req.body as AccountInfo);
+    if (id && password) {
+      const result = await underStudyLogin({ id, password });
 
       if (!result.success) return res.json(result);
-      cookieHeader = result.cookieStore.getHeader(queryUrl);
+
+      req.headers.cookie = result.cookieStore.getHeader(queryUrl);
+    } else if (!req.headers.cookie) {
+      return res.json(MissingCredentialResponse);
     }
 
     const response = await fetch(queryUrl, {
       headers: {
         Accept: "application/json, text/javascript, */*; q=0.01",
-        Cookie: cookieHeader,
+        Cookie: req.headers.cookie,
         Referer: `${UNDER_STUDY_SERVER}/new/student/xskccj/kccjList.page`,
         ...EDGE_USER_AGENT_HEADERS,
       },
     });
 
     if (response.headers.get("content-type")?.includes("text/html"))
-      return res.json({
-        success: false,
-        type: ActionFailType.Expired,
-        msg: "登录过期，请重新登录",
-      });
+      return res.json(ExpiredResponse);
 
     const data = (await response.json()) as RawUnderGradeResult;
 
@@ -180,25 +175,14 @@ export const underStudyGradeDetailHandler: RequestHandler<
       } as UnderGradeDetailSuccessResponse);
     }
 
-    if (data.message === "尚未登录，请先登录")
-      return {
-        success: false,
-        type: ActionFailType.Expired,
-        msg: "登录过期，请重新登录",
-      };
+    if (data.message === "尚未登录，请先登录") return res.json(ExpiredResponse);
 
-    return {
-      success: false,
-      msg: data.message,
-    };
+    throw new Error(data.message);
   } catch (err) {
     const { message } = err as Error;
 
     console.error(err);
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as AuthLoginFailedResponse);
+    return res.json(UnknownResponse(message));
   }
 };

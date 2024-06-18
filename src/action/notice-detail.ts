@@ -8,8 +8,8 @@ import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type { ActionFailType } from "../config/index.js";
 import {
   ExpiredResponse,
+  MissingArgResponse,
   MissingCredentialResponse,
-  MissingRequiredResponse,
   UnknownResponse,
 } from "../config/index.js";
 import { MY_SERVER } from "../my/utils.js";
@@ -60,7 +60,7 @@ export const noticeHandler: RequestHandler<
   try {
     const { id, password, noticeID } = req.body;
 
-    if (!noticeID) return res.json(MissingRequiredResponse("公告 ID"));
+    if (!noticeID) return res.json(MissingArgResponse("公告 ID"));
 
     const noticeUrl = `${ACTION_SERVER}/page/viewNews?ID=${noticeID}`;
 
