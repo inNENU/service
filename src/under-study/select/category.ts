@@ -124,13 +124,17 @@ export const underStudySelectCategoryHandler: RequestHandler<
 
     const content = await response.text();
 
-    if (content.includes("选课正在初始化")) {
+    if (
+      ["选课正在初始化", "选课未初始化"].some((item) => content.includes(item))
+    ) {
       return res.json({
         success: false,
         type: ActionFailType.NotInitialized,
-        msg: "选课正在初始化，请稍后再试",
+        msg: "选课未初始化完成，请稍后再试",
       });
     }
+
+    console.log(content);
 
     return res.json({
       success: true,
