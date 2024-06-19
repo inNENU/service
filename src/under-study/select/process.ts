@@ -129,12 +129,22 @@ export const underStudyProcessCourseHandler: RequestHandler<
       const data = (await response.json()) as RawUnderSelectProcessResponse;
 
       if (data.code !== 0) {
-        if (data.code === -1 && data.message === "当前不是选课时间")
-          return res.json({
-            success: false,
-            msg: data.message,
-            type: ActionFailType.Closed,
-          });
+        if (data.code === -1) {
+          if (data.message === "当前不是选课时间")
+            return res.json({
+              success: false,
+              msg: data.message,
+              type: ActionFailType.Closed,
+            });
+
+          if (data.message === "选课人数超出，请选其他课程") {
+            return res.json({
+              success: false,
+              msg: data.message,
+              type: ActionFailType.Full,
+            });
+          }
+        }
 
         throw new Error(data.message);
       }
