@@ -16,7 +16,7 @@ export const getCourses = (
       courseOffice: kkyxmc,
       point: xf,
       hours: zxs,
-      courseNumber: kcbh,
+      courseCode: kcbh,
       courseId: kcptdm,
     }),
   );
@@ -53,7 +53,7 @@ export const getClasses = (
       courseOffice: kkyxmc,
       point: xf,
       hours: zxs,
-      courseNumber: kcbh,
+      courseCode: kcbh,
       courseId: kcptdm,
 
       teacher: teaxms,

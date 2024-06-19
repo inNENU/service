@@ -185,7 +185,7 @@ export interface UnderSelectCourseInfo {
   /** 课程 ID  */
   courseId: string;
   /** 课程号 */
-  courseNumber: string;
+  courseCode: string;
 }
 
 /** 班级信息 */

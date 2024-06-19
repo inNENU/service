@@ -67,7 +67,7 @@ const CATEGORY_PAGE = `${UNDER_STUDY_SERVER}/new/student/xsxk/`;
 
 const ALLOWED_CATEGORY_ITEM_REGEXP =
   /<div id="bb2"[^]+?lay-tips="选课学期:(.*?)\s*<br>现在是(.*?)阶段\s*<br>(.*?)\s*"\s+lay-iframe="(.*?)"\s+data-href="(.*?)">[^]+?<div class="description">([^]+?)<br>([^]+?)<br><\/div>/g;
-const DISALLWOED_CATEGORY_ITEM_REGEXP =
+const DISALLOWED_CATEGORY_ITEM_REGEXP =
   /<div id="bb1"[^]+?lay-tips="选课学期:(.*?)\s*<br>\s*([^"]+?)\s*"\s+lay-iframe="(.*?)"/g;
 
 const getSelectCategories = (content: string): UnderSelectCategoryInfo => ({
@@ -82,7 +82,7 @@ const getSelectCategories = (content: string): UnderSelectCategoryInfo => ({
       endTime,
     }),
   ),
-  disallowed: Array.from(content.matchAll(DISALLWOED_CATEGORY_ITEM_REGEXP)).map(
+  disallowed: Array.from(content.matchAll(DISALLOWED_CATEGORY_ITEM_REGEXP)).map(
     ([, term, description, name, link]) => ({
       term,
       description: description
