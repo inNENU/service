@@ -3,6 +3,7 @@ import type { RequestHandler } from "express";
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
 import {
   ActionFailType,
+  ExpiredResponse,
   MissingCredentialResponse,
   UnknownResponse,
 } from "../../config/index.js";
@@ -120,7 +121,14 @@ export const underStudySelectCategoryHandler: RequestHandler<
         Referer: `${UNDER_STUDY_SERVER}/new/welcome.page?ui=new`,
         ...EDGE_USER_AGENT_HEADERS,
       },
+      redirect: "manual",
     });
+
+    if (response.status === 302) {
+      console.log(response.headers, req.headers.cookie);
+
+      return res.json(ExpiredResponse);
+    }
 
     const content = await response.text();
 
