@@ -124,11 +124,7 @@ export const underStudySelectCategoryHandler: RequestHandler<
       redirect: "manual",
     });
 
-    if (response.status === 302) {
-      console.log(response.headers, req.headers.cookie);
-
-      return res.json(ExpiredResponse);
-    }
+    if (response.status === 302) return res.json(ExpiredResponse);
 
     const content = await response.text();
 
@@ -141,8 +137,6 @@ export const underStudySelectCategoryHandler: RequestHandler<
         msg: "选课未初始化完成，请稍后再试",
       });
     }
-
-    console.log(content);
 
     return res.json({
       success: true,

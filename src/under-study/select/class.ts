@@ -7,6 +7,7 @@ import type {
 import { getClasses } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
 import {
+  ExpiredResponse,
   MissingArgResponse,
   MissingCredentialResponse,
   UnknownResponse,
@@ -77,7 +78,10 @@ export const underStudySearchClassHandler: RequestHandler<
         sort: "kcrwdm",
         order: "asc",
       }),
+      redirect: "manual",
     });
+
+    if (response.status !== 200) return res.json(ExpiredResponse);
 
     const data = (await response.json()) as RawUnderSearchClassResponse;
 

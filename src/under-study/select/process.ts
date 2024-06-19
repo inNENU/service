@@ -3,6 +3,7 @@ import type { RequestHandler } from "express";
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
 import { ActionFailType } from "../../config/actionFailType.js";
 import {
+  ExpiredResponse,
   InvalidArgResponse,
   MissingArgResponse,
   MissingCredentialResponse,
@@ -124,7 +125,10 @@ export const underStudyProcessCourseHandler: RequestHandler<
           // NOTE: This is an unknown field, and currently can be omitted
           hlct: "0",
         }),
+        redirect: "manual",
       });
+
+      if (response.status !== 200) return res.json(ExpiredResponse);
 
       const data = (await response.json()) as RawUnderSelectProcessResponse;
 
@@ -166,7 +170,10 @@ export const underStudyProcessCourseHandler: RequestHandler<
           kcrwdm: req.body.classId,
           kcmc: req.body.name ?? "",
         }),
+        redirect: "manual",
       });
+
+      if (response.status !== 200) return res.json(ExpiredResponse);
 
       const data = (await response.json()) as RawUnderSelectProcessResponse;
 

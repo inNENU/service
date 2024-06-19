@@ -21,9 +21,9 @@ export const createStore = <T = unknown>(initialState: T): Store<T> => {
 
 export const areasStore = createStore<SelectOptionConfig[]>([]);
 
-export const courseOfficesStore = createStore<SelectOptionConfig[]>([]);
+export const officesStore = createStore<SelectOptionConfig[]>([]);
 
-export const courseTypesStore = createStore<SelectOptionConfig[]>([]);
+export const typesStore = createStore<SelectOptionConfig[]>([]);
 
 export const majorsStore = createStore<SelectOptionConfig[]>([]);
 

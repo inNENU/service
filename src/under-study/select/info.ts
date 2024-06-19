@@ -1,15 +1,11 @@
 import type { RequestHandler } from "express";
 
 import type { SelectOptionConfig } from "./store.js";
-import {
-  areasStore,
-  courseOfficesStore,
-  courseTypesStore,
-  majorsStore,
-} from "./store.js";
+import { areasStore, majorsStore, officesStore, typesStore } from "./store.js";
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
 import {
   ActionFailType,
+  ExpiredResponse,
   MissingArgResponse,
   MissingCredentialResponse,
   UnknownResponse,
@@ -51,9 +47,9 @@ export interface UnderSelectInfo {
   /** 可用专业 */
   majors: SelectOptionConfig[];
   /** 可用开课单位 */
-  courseOffices: SelectOptionConfig[];
+  offices: SelectOptionConfig[];
   /** 可用课程类别 */
-  courseTypes: SelectOptionConfig[];
+  types: SelectOptionConfig[];
 
   /** 当前校区 */
   currentArea: string;
@@ -112,32 +108,32 @@ const setMajors = (content: string): void => {
 };
 
 const setCourseOffices = (content: string): void => {
-  if (!courseOfficesStore.state.length) {
+  if (!officesStore.state.length) {
     const courseOfficeText = content.match(COURSE_OFFICES_REGEXP)![1];
 
-    const courseOffices = Array.from(
+    const offices = Array.from(
       courseOfficeText.matchAll(COURSE_OFFICE_ITEM_REGEXP),
     ).map(([, value, name]) => ({
       value,
       name,
     }));
 
-    courseOfficesStore.setState(courseOffices);
+    officesStore.setState(offices);
   }
 };
 
 const setCourseTypes = (content: string): void => {
-  if (!courseTypesStore.state.length) {
+  if (!typesStore.state.length) {
     const courseTypeText = content.match(COURSE_TYPES_REGEXP)![1];
 
-    const courseTypes = Array.from(
+    const types = Array.from(
       courseTypeText.matchAll(COURSE_TYPE_ITEM_REGEXP),
     ).map(([, value, name]) => ({
       value,
       name,
     }));
 
-    courseTypesStore.setState(courseTypes);
+    typesStore.setState(types);
   }
 };
 
@@ -184,8 +180,8 @@ const getSelectInfo = (content: string): UnderSelectInfo => {
     grades,
     majors: majorsStore.state,
     areas: areasStore.state,
-    courseOffices: courseOfficesStore.state,
-    courseTypes: courseTypesStore.state,
+    offices: officesStore.state,
+    types: typesStore.state,
 
     currentArea: name.includes("本部")
       ? "本部"
@@ -272,7 +268,10 @@ export const underStudySelectInfoHandler: RequestHandler<
         Referer: categoryUrl,
         ...EDGE_USER_AGENT_HEADERS,
       },
+      redirect: "manual",
     });
+
+    if (response.status !== 200) return res.json(ExpiredResponse);
 
     let content = await response.text();
 

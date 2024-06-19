@@ -8,6 +8,7 @@ import { getCourses } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
 import type { ActionFailType } from "../../config/index.js";
 import {
+  ExpiredResponse,
   MissingArgResponse,
   MissingCredentialResponse,
   UnknownResponse,
@@ -33,8 +34,10 @@ export interface UnderSelectSearchOptions extends LoginOptions {
   grade?: number;
   /** 专业 */
   major?: string;
+  /** 课程类别 */
+  type?: string;
   /** 课程分类 */
-  courseCategory?: string;
+  category?: string;
   /** 周次 */
   week?: string;
   /** 节次 */
@@ -42,9 +45,9 @@ export interface UnderSelectSearchOptions extends LoginOptions {
   /** 教师 */
   teacher?: string;
   /** 地点 */
-  location?: string;
+  place?: string;
   /** 开课单位 */
-  courseOffice?: string;
+  office?: string;
 }
 
 export type UnderSelectSearchSuccessResponse = CommonSuccessResponse<
@@ -68,14 +71,15 @@ export const underStudySearchCourseHandler: RequestHandler<
       link,
       name = "",
       area = "",
-      grade = "",
+      grade,
       major = "",
-      courseCategory = "",
+      type = "",
+      category = "",
       week = "",
       classIndex = "",
       teacher = "",
-      location = "",
-      courseOffice = "",
+      place = "",
+      office = "",
     } = req.body;
 
     if (id && password) {
@@ -101,23 +105,26 @@ export const underStudySearchCourseHandler: RequestHandler<
         ...EDGE_USER_AGENT_HEADERS,
       },
       body: new URLSearchParams({
-        kkyxdm: courseOffice,
+        kkyxdm: office,
         xqdm: area,
-        nd: grade.toString(),
+        nd: (grade ?? "").toString(),
         zydm: major,
-        kcdldm: "",
+        kcdldm: type,
         xq: week,
         jc: classIndex,
         kcxx: name,
-        kcfl: courseCategory,
-        jxcdmc: location,
+        kcfl: category,
+        jxcdmc: place,
         teaxm: teacher,
         page: "1",
         row: "1000",
         sort: "kcrwdm",
         order: "asc",
       }),
+      redirect: "manual",
     });
+
+    if (response.status !== 200) return res.json(ExpiredResponse);
 
     const data = (await response.json()) as RawUnderSearchClassResponse;
 

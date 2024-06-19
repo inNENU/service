@@ -169,13 +169,13 @@ export interface UnderSelectCourseInfo {
   /** 课程名称 */
   name: string;
   /** 开课单位 */
-  courseOffice: string;
+  office: string;
   /** 课程类别简称  */
-  courseShortType: string;
+  shortType: string;
   /** 课程类别 */
-  courseType: string;
+  type: string;
   /** 课程分类 */
-  courseCategory: string;
+  category: string;
 
   /** 学分 */
   point: number;
@@ -183,9 +183,9 @@ export interface UnderSelectCourseInfo {
   hours: number;
 
   /** 课程 ID  */
-  courseId: string;
+  id: string;
   /** 课程号 */
-  courseCode: string;
+  code: string;
 }
 
 /** 班级信息 */
@@ -195,7 +195,7 @@ export interface UnderSelectClassInfo extends UnderSelectCourseInfo {
   /** 教师 */
   teacher: string;
   /** 地点 */
-  location: string;
+  place: string;
   /** 上课时间 */
   time: string;
   /** 课容量 */
