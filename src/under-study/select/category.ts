@@ -16,26 +16,43 @@ import { EDGE_USER_AGENT_HEADERS } from "../../utils/index.js";
 import { underStudyLogin } from "../login.js";
 import { UNDER_STUDY_SERVER } from "../utils.js";
 
-export interface UnderSelectCategoryItem {
-  /** 学期 */
-  term: string;
-  /** 选课阶段 */
-  stage: string;
-  /** 是否可退选 */
-  canRemove: boolean;
+export interface UnderSelectAllowedCategoryItem {
   /** 分类名称 */
   name: string;
   /** 分类链接 */
   link: string;
+  /** 学期 */
+  term: string;
+
+  /** 选课阶段 */
+  stage: string;
+  /** 是否可退选 */
+  canRemove: boolean;
   /** 分类开始时间 */
   startTime: string;
   /** 分类结束时间 */
   endTime: string;
 }
 
-export type UnderSelectCategorySuccessResponse = CommonSuccessResponse<
-  UnderSelectCategoryItem[]
->;
+export interface UnderSelectDisallowedCategoryItem {
+  /** 分类名称 */
+  name: string;
+  /** 分类链接 */
+  link: string;
+  /** 学期 */
+  term: string;
+
+  /** 提示 */
+  tip: string;
+}
+
+export interface UnderSelectCategoryInfo {
+  allowed: UnderSelectAllowedCategoryItem[];
+  disallowed: UnderSelectDisallowedCategoryItem[];
+}
+
+export type UnderSelectCategorySuccessResponse =
+  CommonSuccessResponse<UnderSelectCategoryInfo>;
 
 export type UnderSelectCategoryResponse =
   | UnderSelectCategorySuccessResponse
@@ -48,11 +65,13 @@ export type UnderSelectCategoryResponse =
 
 const CATEGORY_PAGE = `${UNDER_STUDY_SERVER}/new/student/xsxk/`;
 
-const CATEGORY_ITEM_REGEXP =
-  /<div id="bb2"[^]+?lay-tips="选课学期:([^]*?)\s+<br>现在是([^]*?)阶段\s+<br>([^]*?)\s+"\s+lay-iframe="(.*?)"\s+data-href="(.*?)">[^]+?<div class="description">([^]+?)<br>([^]+?)<br><\/div>/g;
+const ALLOWED_CATEGORY_ITEM_REGEXP =
+  /<div id="bb2"[^]+?lay-tips="选课学期:(.*?)\s*<br>现在是(.*?)阶段\s*<br>(.*?)\s*"\s+lay-iframe="(.*?)"\s+data-href="(.*?)">[^]+?<div class="description">([^]+?)<br>([^]+?)<br><\/div>/g;
+const DISALLWOED_CATEGORY_ITEM_REGEXP =
+  /<div id="bb1"[^]+?lay-tips="选课学期:(.*?)\s*<br>\s*([^"]+?)\s*"\s+lay-iframe="(.*?)"\s+data-href="(.*?)">[^]+?<div class="description">([^]+?)<br>([^]+?)<br><\/div>/g;
 
-const getSelectCategories = (content: string): UnderSelectCategoryItem[] =>
-  Array.from(content.matchAll(CATEGORY_ITEM_REGEXP)).map(
+const getSelectCategories = (content: string): UnderSelectCategoryInfo => ({
+  allowed: Array.from(content.matchAll(ALLOWED_CATEGORY_ITEM_REGEXP)).map(
     ([, term, stage, canRemoveText, name, link, startTime, endTime]) => ({
       term,
       stage,
@@ -62,7 +81,22 @@ const getSelectCategories = (content: string): UnderSelectCategoryItem[] =>
       startTime,
       endTime,
     }),
-  );
+  ),
+  disallowed: Array.from(content.matchAll(DISALLWOED_CATEGORY_ITEM_REGEXP)).map(
+    ([, term, tip, name, link, startTime, endTime]) => ({
+      term,
+      tip: tip
+        .split("<hr>")
+        .map((line) => line.trim())
+        .filter((line) => line.length)
+        .join("\n"),
+      name,
+      link,
+      startTime,
+      endTime,
+    }),
+  ),
+});
 
 export const underStudySelectCategoryHandler: RequestHandler<
   EmptyObject,
