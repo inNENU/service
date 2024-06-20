@@ -293,13 +293,19 @@ export const underStudySelectInfoHandler: RequestHandler<
       }
 
       // 重新请求选课信息
-      content = await fetch(categoryUrl, {
+      const recheckResponse = await fetch(categoryUrl, {
         headers: {
+          "Cache-Control": "max-age=0",
           Cookie: cookieHeader,
           Referer: categoryUrl,
           ...EDGE_USER_AGENT_HEADERS,
         },
-      }).then((res) => res.text());
+        redirect: "manual",
+      });
+
+      if (recheckResponse.status !== 200) return res.json(ExpiredResponse);
+
+      content = await recheckResponse.text();
     }
 
     if (content.includes("选课正在初始化")) {
