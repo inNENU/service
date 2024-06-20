@@ -200,8 +200,11 @@ const checkCourseCommentary = async (
 ): Promise<{ completed: boolean; msg: string }> => {
   const response = await fetch(`${CHECK_URL}?xnxqdm=${term}&_=${Date.now()}`, {
     headers: {
+      // Accept: "application/json; q=0.01",
       Cookie: cookieHeader,
+      DNT: "1",
       Referer: categoryUrl,
+      "X-Requested-With": "XMLHttpRequest",
       ...EDGE_USER_AGENT_HEADERS,
     },
   });
@@ -210,6 +213,8 @@ const checkCourseCommentary = async (
 
   try {
     const content = await response.text();
+
+    console.log(content);
 
     if (content.includes("评价已完成")) {
       return { completed: true, msg: "已完成评教" };
@@ -264,8 +269,9 @@ export const underStudySelectInfoHandler: RequestHandler<
 
     const response = await fetch(categoryUrl, {
       headers: {
+        "Cache-Control": "max-age=0",
         Cookie: cookieHeader,
-        Referer: categoryUrl,
+        Referer: `${UNDER_STUDY_SERVER}/new/student/xsxk/xklx`,
         ...EDGE_USER_AGENT_HEADERS,
       },
       redirect: "manual",
@@ -297,7 +303,7 @@ export const underStudySelectInfoHandler: RequestHandler<
         headers: {
           "Cache-Control": "max-age=0",
           Cookie: cookieHeader,
-          Referer: categoryUrl,
+          Referer: `${UNDER_STUDY_SERVER}/new/student/xsxk/xklx`,
           ...EDGE_USER_AGENT_HEADERS,
         },
         redirect: "manual",
