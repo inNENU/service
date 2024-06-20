@@ -24,7 +24,10 @@ export interface UnderSelectAllowedCategoryItem {
   link: string;
   /** 学期 */
   term: string;
-
+  /** 是否可选课 */
+  canSelect: true;
+  /** 是否是公共课程 */
+  isPublic: boolean;
   /** 选课阶段 */
   stage: string;
   /** 是否可退选 */
@@ -42,7 +45,8 @@ export interface UnderSelectDisallowedCategoryItem {
   link: string;
   /** 学期 */
   term: string;
-
+  /** 是否可选课 */
+  canSelect: false;
   /** 说明 */
   description: string;
 }
@@ -69,7 +73,7 @@ const CATEGORY_PAGE = `${UNDER_STUDY_SERVER}/new/student/xsxk/`;
 const ALLOWED_CATEGORY_ITEM_REGEXP =
   /<div id="bb2"[^]+?lay-tips="选课学期:(.*?)\s*<br>现在是(.*?)阶段\s*<br>(.*?)\s*"\s+lay-iframe="(.*?)"\s+data-href="(.*?)">[^]+?<div class="description">([^]+?)<br>([^]+?)<br><\/div>/g;
 const DISALLOWED_CATEGORY_ITEM_REGEXP =
-  /<div id="bb1"[^]+?lay-tips="选课学期:(.*?)\s*<br>\s*([^"]+?)\s*"\s+lay-iframe="(.*?)"/g;
+  /<div id="bb1"[^]+?lay-tips="选课学期:(.*?)\s*<br>\s*([^"]+?)\s*"\s+lay-iframe="(.*?)"\s+data-href="(.*?)"/g;
 
 const getSelectCategories = (content: string): UnderSelectCategoryInfo => ({
   allowed: Array.from(content.matchAll(ALLOWED_CATEGORY_ITEM_REGEXP)).map(
@@ -81,6 +85,8 @@ const getSelectCategories = (content: string): UnderSelectCategoryInfo => ({
       link,
       startTime,
       endTime,
+      canSelect: true,
+      isPublic: name.includes("公共课程"),
     }),
   ),
   disallowed: Array.from(content.matchAll(DISALLOWED_CATEGORY_ITEM_REGEXP)).map(
@@ -93,6 +99,7 @@ const getSelectCategories = (content: string): UnderSelectCategoryInfo => ({
         .join("\n"),
       name,
       link,
+      canSelect: false,
     }),
   ),
 });
