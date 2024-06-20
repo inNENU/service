@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 
 import type { SelectOptionConfig } from "./store.js";
 import { areasStore, majorsStore, officesStore, typesStore } from "./store.js";
+import { COURSE_CATEGORIES } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
 import {
   ActionFailType,
@@ -44,6 +45,8 @@ export interface UnderSelectBaseInfo {
   offices: SelectOptionConfig[];
   /** 可用课程类别 */
   types: SelectOptionConfig[];
+  /** 可用课程分类 */
+  categories: SelectOptionConfig[];
 
   /** 当前校区 */
   currentArea: string;
@@ -192,15 +195,20 @@ const getSelectInfo = (content: string): UnderSelectInfo => {
   setCourseTypes(content);
   setMajors(content);
 
+  const currentMajorConfig = majorsStore.state.find(
+    (major) => major.name === currentMajor,
+  )!;
+
   const state = {
     term,
     name,
     canSelect,
     grades,
-    majors: majorsStore.state,
+    majors: [currentMajorConfig, ...majorsStore.state],
     areas: areasStore.state,
     offices: officesStore.state,
     types: typesStore.state,
+    categories: COURSE_CATEGORIES,
 
     currentArea,
     currentGrade,
