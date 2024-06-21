@@ -50,44 +50,58 @@ export const getClasses = (
 ): UnderSelectClassInfo[] =>
   records.map(
     ({
-      kcmc,
-      jc,
-      kcdlmc,
-      kcflmc,
-      kkyxmc,
-      xf,
-      zxs,
-      kcbh,
-      kcptdm,
+      kcmc: name,
+      jc: shortType,
+      kcdlmc: type,
+      kcflmc: category,
+      kkyxmc: office,
+      xf: point,
+      zxs: hours,
+      kcbh: code,
+      kcptdm: id,
 
-      teaxms,
-      jxcdmcs,
-      jxbmc,
-      zcxqjc,
-      pkrs,
+      teaxms: teacher,
+      jxcdmcs: place,
+      jxbmc: rawClassInfo,
+      zcxqjc: time,
+      pkrs: capacity,
+      jxbrs: rawCurrent,
 
-      jxbdm,
-      kcrwdm,
-      jxbrs,
-    }) => ({
-      name: kcmc,
-      shortType: jc,
-      type: kcdlmc,
-      category: kcflmc,
-      office: kkyxmc,
-      point: xf,
-      hours: zxs,
-      code: kcbh,
-      id: kcptdm,
+      jxbdm: classCode,
+      kcrwdm: classId,
+    }) => {
+      const classInfos = (
+        /^复制(.*)-1$/.exec(rawClassInfo)?.[1] ?? rawClassInfo
+      ).split(",");
 
-      teacher: teaxms,
-      place: jxcdmcs,
-      className: jxbmc.split(",").join(" "),
-      time: zcxqjc,
-      capacity: pkrs,
-      current: Number(jxbrs),
+      const isTarget = classInfos.every((info) => info.match(/^\d{4}.+$/));
 
-      classCode: jxbdm,
-      classId: kcrwdm,
-    }),
+      return {
+        name,
+        shortType,
+        type,
+        category,
+        office,
+        point,
+        hours,
+        code,
+        id,
+
+        ...(isTarget
+          ? {
+              target: classInfos.join(" "),
+            }
+          : {
+              className: classInfos.join(" "),
+            }),
+        teacher,
+        place,
+        time,
+        capacity,
+        current: Number(rawCurrent),
+
+        classCode,
+        classId,
+      };
+    },
   );

@@ -191,7 +191,9 @@ export interface UnderSelectCourseInfo {
 /** 班级信息 */
 export interface UnderSelectClassInfo extends UnderSelectCourseInfo {
   /** 班级名称 */
-  className: string;
+  className?: string;
+  /** 授课对象 */
+  target?: string;
   /** 教师 */
   teacher: string;
   /** 地点 */
