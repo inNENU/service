@@ -106,11 +106,11 @@ const MAJORS_REGEXP =
 const MAJOR_ITEM_REGEXP =
   /<option value='(\d+?)' (?:selected)?>\d+-(.*?)<\/option>/g;
 const CURRENT_MAJOR_REGEXP =
-  /<option value='(\d{6,7})' selected>\d+-(.*?)<\/option>/g;
+  /<option value='(\d{6,7})' selected>\d+-(.*?)<\/option>/;
 const INFO_TITLE_REGEXP =
   /<span id="title">(.*?)学期&nbsp;&nbsp;(.*?)&nbsp;&nbsp;(?:<span.*?>(.*?)<\/span>)?<\/span>/;
 const ALLOWED_INFO_REGEXP =
-  /<span id="sub-title">\s+?<div id="text">现在是(.*?)时间\s+（(\d\d:\d\d:\d\d)--(\d\d:\d\d:\d\d)）<\/span>/;
+  /<span id="sub-title">\s+?<div id="text">现在是(.*?)时间\s+（(\d\d:\d\d:\d\d)--(\d\d:\d\d:\d\d)）/;
 
 const setMajors = (content: string): void => {
   if (!majorsStore.state.length) {
@@ -182,8 +182,8 @@ const getSelectInfo = (content: string): UnderSelectInfo => {
     : name.includes("净月")
       ? "净月"
       : "";
-  const currentGrade = Number(content.match(CURRENT_GRADE_REGEXP)![1]);
-  const currentMajor = content.match(CURRENT_MAJOR_REGEXP)![1];
+  const currentGrade = Number(CURRENT_GRADE_REGEXP.exec(content)![1]);
+  const currentMajor = CURRENT_MAJOR_REGEXP.exec(content)![2];
 
   const currentYear = new Date().getFullYear();
   const grades = Array(6)
