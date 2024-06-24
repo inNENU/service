@@ -7,7 +7,7 @@ import {
   appIDInfo,
 } from "../config/index.js";
 import type { CommonFailedResponse } from "../typings.js";
-import { getWechatAccessToken } from "../utils/wechatAccessToken.js";
+import { getWechatAccessToken } from "../utils/index.js";
 
 export interface WechatQRCodeOptions {
   appID: "wx33acb831ee1831a5" | "wx2550e3fd373b79a8";
@@ -77,7 +77,9 @@ export const mpQrCodeHandler: RequestHandler<
     if (!appIDInfo[appID]) return res.json(InvalidArgResponse("appID"));
 
     if (Number.isNaN(Number(appID))) {
-      const wechatAccessToken = await getWechatAccessToken(appID);
+      const wechatAccessToken = await getWechatAccessToken(
+        appID as "wx33acb831ee1831a5" | "wx2550e3fd373b79a8",
+      );
 
       const image = await getWechatQRCode(
         wechatAccessToken,
@@ -97,7 +99,7 @@ export const mpQrCodeHandler: RequestHandler<
       return res.json(UnknownResponse(image.errmsg));
     }
 
-    const image = await getQQQRCode(appID, page);
+    const image = await getQQQRCode(Number(appID), page);
 
     res.set({
       "Content-Disposition": `qrcode.png`,
