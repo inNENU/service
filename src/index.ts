@@ -32,6 +32,7 @@ import {
   underAdmissionHandler,
   underEnrollPlanHandler,
   underHistoryGradeHandler,
+  underHistoryScoreHandler,
 } from "./enroll/index.js";
 import {
   gradOldCourseTableHandler,
@@ -210,7 +211,9 @@ app.post("/official/notice-list", officialNoticeListHandler);
 
 app.get("/enroll/under-admission", underAdmissionHandler);
 app.post("/enroll/under-admission", underAdmissionHandler);
+/** @deprecated replaced by /enroll/under-history-score */
 app.post("/enroll/under-history-grade", underHistoryGradeHandler);
+app.post("/enroll/under-history-score", underHistoryScoreHandler);
 app.post("/enroll/under-plan", underEnrollPlanHandler);
 app.post("/enroll/grad-admission", gradAdmissionHandler);
 app.post("/enroll/grad-recommend-plan", gradRecommendPlanHandler);

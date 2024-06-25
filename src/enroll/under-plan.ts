@@ -45,7 +45,7 @@ type RawUnderEnrollPlanOptionInfo = Record<
   RawUnderEnrollPlanOptionConfig[]
 >;
 
-type UnderEnrollOptionInfo = Record<
+type UnderEnrollPlanOptionInfo = Record<
   /* province */ string,
   Record<
     /* year */ string,
@@ -54,7 +54,7 @@ type UnderEnrollOptionInfo = Record<
 >;
 
 export type UnderEnrollPlanInfoSuccessResponse =
-  CommonSuccessResponse<UnderEnrollOptionInfo>;
+  CommonSuccessResponse<UnderEnrollPlanOptionInfo>;
 
 export type UnderEnrollPlanInfoResponse =
   | UnderEnrollPlanInfoSuccessResponse
