@@ -1,7 +1,8 @@
 import type { MyInfo } from "../my/index.js";
 
 export const OPENID_BLACK_LIST: string[] = [
-  "oPPTV5eTpBIR3ruGw8VecNZ1mDQk",
+  "oPPTV5XIq6LcgfO2pbpZVU4tjZKs",
+  "oPPTV5YV7Fijf_7CiDgiKNpenVmw",
   // 辱骂
   "oPPTV5V7kt9qnn3EP9bsbTysjJig",
 ];
