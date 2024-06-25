@@ -23,7 +23,7 @@ export interface MPLoginOpenidOptions {
 export interface MPloginSuccessResponse {
   success: true;
   openid: string;
-  inBLACKLIST: boolean;
+  inBlacklist: boolean;
   isAdmin: boolean;
 }
 
@@ -42,7 +42,7 @@ export const mpLoginHandler: RequestHandler<
 
       return res.json({
         openid,
-        inBLACKLIST: OPENID_BLACK_LIST.includes(openid),
+        inBlacklist: OPENID_BLACK_LIST.includes(openid),
         isAdmin: false,
       } as MPloginSuccessResponse);
     }
@@ -60,7 +60,7 @@ export const mpLoginHandler: RequestHandler<
 
     return res.json({
       openid,
-      inBLACKLIST: OPENID_BLACK_LIST.includes(openid),
+      inBlacklist: OPENID_BLACK_LIST.includes(openid),
       isAdmin: false,
     } as MPloginSuccessResponse);
   } catch (err) {
