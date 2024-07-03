@@ -31,7 +31,6 @@ import {
   gradRecommendPlanHandler,
   underAdmissionHandler,
   underEnrollPlanHandler,
-  underHistoryGradeHandler,
   underHistoryScoreHandler,
 } from "./enroll/index.js";
 import {
@@ -65,6 +64,7 @@ import {
   officialInfoListHandler,
   officialNoticeDetailHandler,
   officialNoticeListHandler,
+  underMajorPlanHandler,
 } from "./official/index.js";
 import {
   test301Handler,
@@ -206,13 +206,12 @@ app.get("/official/info-detail", officialInfoDetailHandler);
 app.post("/official/info-list", officialInfoListHandler);
 app.get("/official/notice-detail", officialNoticeDetailHandler);
 app.post("/official/notice-list", officialNoticeListHandler);
+app.post("/official/under-major-plan", underMajorPlanHandler);
 
 /*  ------------ 招生相关 ------------ */
 
 app.get("/enroll/under-admission", underAdmissionHandler);
 app.post("/enroll/under-admission", underAdmissionHandler);
-/** @deprecated replaced by /enroll/under-history-score */
-app.post("/enroll/under-history-grade", underHistoryGradeHandler);
 app.post("/enroll/under-history-score", underHistoryScoreHandler);
 app.post("/enroll/under-plan", underEnrollPlanHandler);
 app.post("/enroll/grad-admission", gradAdmissionHandler);
@@ -228,7 +227,7 @@ app.post("/mp/search", mpSearchHandler);
 app.get("/mp/qrcode", mpQrCodeHandler);
 
 app.get("/library/people", libraryPeopleHandler);
-app.get("/qrcode", mpQrCodeHandler);
+
 app.get("/weather", weatherHandler);
 
 app.get("/test/get", testGetHandler);
