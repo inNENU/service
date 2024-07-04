@@ -14,7 +14,7 @@ const schoolInfoRegExp =
 const TABLE_HEADER = `<tr><th>专业代码</th><th>人数</th><th>考试科目</th><th>备注</th></tr>`;
 
 export interface GradEnrollPlanInfo {
-  major: string;
+  name: string;
   code: string;
   type: string;
   content: RichTextNode[];
@@ -112,7 +112,7 @@ export const gradEnrollPlanHandler: RequestHandler<
               ).map(([, line]) => line.replace(/<\/?center>/g, ""));
 
               return {
-                major: majorName,
+                name: majorName,
                 code,
                 type: majorTypeRegExp.exec(content)?.[2] ?? "",
                 content: await getRichTextNodes(
