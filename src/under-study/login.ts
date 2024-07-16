@@ -1,10 +1,10 @@
 import type { CookieType } from "@mptool/net";
 import type { RequestHandler } from "express";
 
-import { UNDER_STUDY_SERVER } from "./utils.js";
+import { UNDER_STUDY_SERVER, UNDER_STUDY_VPN_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
-import { AUTH_SERVER } from "../auth/utils.js";
+import { AUTH_SERVER, WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
 import { UnknownResponse } from "../config/index.js";
 import type { AccountInfo, EmptyObject } from "../typings.js";
 import { CookieStore, EDGE_USER_AGENT_HEADERS } from "../utils/index.js";
@@ -18,14 +18,23 @@ export type UnderStudyLoginResult =
   | UnderStudyLoginSuccessResult
   | AuthLoginFailedResponse;
 
-const SSO_LOGIN_URL = `${UNDER_STUDY_SERVER}/new/ssoLogin`;
+export interface UnderStudyLoginOptions extends AccountInfo {
+  webVPN?: boolean;
+}
 
+// FIXME: Add webVPN issue hints
 export const underStudyLogin = async (
-  options: AccountInfo,
+  { id, password, webVPN = false }: UnderStudyLoginOptions,
   cookieStore = new CookieStore(),
 ): Promise<UnderStudyLoginResult> => {
+  const server = webVPN ? UNDER_STUDY_VPN_SERVER : UNDER_STUDY_SERVER;
+  const SSO_LOGIN_URL = `${server}/new/ssoLogin`;
+  const MAIN_URL = `${server}/new/welcome.page`;
+
   const result = await authLogin({
-    ...options,
+    id,
+    password,
+    webVPN,
     service: SSO_LOGIN_URL,
     cookieStore,
   });
@@ -38,13 +47,18 @@ export const underStudyLogin = async (
 
   console.log("Login location", result.location);
 
-  const ticketResponse = await fetch(result.location, {
-    headers: {
-      Cookie: cookieStore.getHeader(result.location),
-      Referer: AUTH_SERVER,
+  const ticketResponse = await fetch(
+    webVPN
+      ? result.location.replace(UNDER_STUDY_SERVER, UNDER_STUDY_VPN_SERVER)
+      : result.location,
+    {
+      headers: {
+        Cookie: cookieStore.getHeader(result.location),
+        Referer: webVPN ? WEB_VPN_AUTH_SERVER : AUTH_SERVER,
+      },
+      redirect: "manual",
     },
-    redirect: "manual",
-  });
+  );
 
   cookieStore.applyResponse(ticketResponse, result.location);
 
@@ -62,7 +76,7 @@ export const underStudyLogin = async (
     const ssoResponse = await fetch(SSO_LOGIN_URL, {
       headers: {
         Cookie: cookieStore.getHeader(SSO_LOGIN_URL),
-        Referer: UNDER_STUDY_SERVER,
+        Referer: server,
         ...EDGE_USER_AGENT_HEADERS,
       },
       redirect: "manual",
@@ -70,8 +84,7 @@ export const underStudyLogin = async (
 
     if (
       ssoResponse.status === 302 &&
-      ssoResponse.headers.get("Location") ===
-        `${UNDER_STUDY_SERVER}/new/welcome.page`
+      ssoResponse.headers.get("Location")?.startsWith(MAIN_URL)
     )
       return {
         success: true,
@@ -95,7 +108,7 @@ export type UnderStudyLoginResponse =
 export const underStudyLoginHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  AccountInfo
+  UnderStudyLoginOptions
 > = async (req, res) => {
   try {
     const result = await underStudyLogin(req.body);
