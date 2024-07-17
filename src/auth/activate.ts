@@ -2,7 +2,11 @@ import type { RichTextNode } from "@mptool/parser";
 import { getRichTextNodes } from "@mptool/parser";
 import type { RequestHandler } from "express";
 
-import { ActionFailType, UnknownResponse } from "../config/index.js";
+import {
+  ActionFailType,
+  RestrictedResponse,
+  UnknownResponse,
+} from "../config/index.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 import { CookieStore } from "../utils/index.js";
 
@@ -14,24 +18,32 @@ const LICENSE_TEXT = `
 export interface ActivateSuccessResponse {
   success: true;
 }
-export interface ActivateFailedResponse {
-  success: false;
-  msg: string;
-}
 
-export interface ActivateImageResponse {
+export interface ActivateInfoSuccessResponse {
   success: true;
   license: RichTextNode[];
   image: string;
 }
 
+export type ActivateInfoResponse =
+  | ActivateInfoSuccessResponse
+  | CommonFailedResponse<ActionFailType.Restricted | ActionFailType.Unknown>;
+
 const LICENSE_NODES = await getRichTextNodes(LICENSE_TEXT);
 
-const getImage = async (
+const getInfo = async (
   cookieStore: CookieStore,
-): Promise<ActivateImageResponse> => {
+): Promise<ActivateInfoResponse> => {
   const imageUrl = `${ACTIVATE_SERVER}/api/staff/activate/imageCode`;
   const imageResponse = await fetch(imageUrl);
+
+  if (imageResponse.headers.get("content-type") === "text/html")
+    return RestrictedResponse;
+
+  // FIXME: Check this
+  if (imageResponse.headers.get("content-type") !== "image/jpeg") {
+    return UnknownResponse("获取验证码失败");
+  }
 
   cookieStore.applyResponse(imageResponse, imageUrl);
 
@@ -46,8 +58,8 @@ const getImage = async (
   };
 };
 
-export interface ActivateInfoOptions {
-  type: "info";
+export interface ActivateValidOptions {
+  type: "valid";
   name: string;
   schoolID: string;
   idType:
@@ -75,19 +87,19 @@ interface RawErrorResponse {
   data: Record<never, never>;
 }
 
-export interface ActivateInfoSuccessResponse {
+export interface ActivateValidSuccessResponse {
   success: true;
   activationId: string;
 }
 
-export type ActivateInfoResponse =
-  | ActivateInfoSuccessResponse
-  | ActivateFailedResponse;
+export type ActivateValidResponse =
+  | ActivateValidSuccessResponse
+  | CommonFailedResponse;
 
-const checkAccount = async (
-  { schoolID, name, id, idType, captcha }: ActivateInfoOptions,
+const validAccount = async (
+  { schoolID, name, id, idType, captcha }: ActivateValidOptions,
   cookieHeader: string,
-): Promise<ActivateInfoResponse> => {
+): Promise<ActivateValidResponse> => {
   const response = await fetch(`${ACTIVATE_SERVER}/api/staff/activate/id`, {
     method: "POST",
     headers: {
@@ -139,7 +151,7 @@ export interface ActivatePhoneSmsOptions {
 
 export type ActivatePhoneSmsResponse =
   | ActivateSuccessResponse
-  | ActivateFailedResponse;
+  | CommonFailedResponse;
 
 const sendSms = async (
   { activationId, mobile }: ActivatePhoneSmsOptions,
@@ -153,10 +165,7 @@ const sendSms = async (
         Cookie: cookieHeader,
         "Content-Type": "application/json;charset=UTF-8",
       },
-      body: JSON.stringify({
-        activationId,
-        mobile,
-      }),
+      body: JSON.stringify({ activationId, mobile }),
     },
   );
 
@@ -164,11 +173,7 @@ const sendSms = async (
     | CodeRawSuccessResponse
     | CodeRawFailedResponse;
 
-  if (sendCodeResult.code !== 0)
-    return {
-      success: false,
-      msg: sendCodeResult.msg,
-    };
+  if (sendCodeResult.code !== 0) return UnknownResponse(sendCodeResult.msg);
 
   return { success: true };
 };
@@ -180,7 +185,7 @@ export interface ActivateBindPhoneOptions {
   code: string;
 }
 
-interface PhoneRawSuccessResponse {
+interface RawPhoneSuccessResponse {
   code: 0;
   msg: "成功";
   data: { boundStaffNo: string } | Record<string, string>;
@@ -209,7 +214,7 @@ const bindPhone = async (
   });
 
   const content = (await response.json()) as
-    | PhoneRawSuccessResponse
+    | RawPhoneSuccessResponse
     | RawErrorResponse;
 
   if (content.code !== 0)
@@ -240,7 +245,7 @@ export interface ActivateReplacePhoneOptions {
 
 export type ActivateReplacePhoneResponse =
   | ActivateSuccessResponse
-  | ActivateFailedResponse;
+  | CommonFailedResponse;
 
 const replacePhone = async (
   { activationId, code, mobile }: ActivateReplacePhoneOptions,
@@ -259,14 +264,10 @@ const replacePhone = async (
   );
 
   const content = (await response.json()) as
-    | PhoneRawSuccessResponse
+    | RawPhoneSuccessResponse
     | RawErrorResponse;
 
-  if (content.code !== 0)
-    return {
-      success: false,
-      msg: content.msg,
-    };
+  if (content.code !== 0) return UnknownResponse(content.msg);
 
   return {
     success: true,
@@ -281,7 +282,7 @@ export interface ActivatePasswordOptions {
 
 export type ActivatePasswordResponse =
   | ActivateSuccessResponse
-  | ActivateFailedResponse;
+  | CommonFailedResponse;
 
 const setPassword = async (
   { activationId, password }: ActivatePasswordOptions,
@@ -303,11 +304,7 @@ const setPassword = async (
     | ActivateRawSuccessResponse
     | RawErrorResponse;
 
-  if (content.code !== 0)
-    return {
-      success: false,
-      msg: content.msg,
-    };
+  if (content.code !== 0) return UnknownResponse(content.msg);
 
   return {
     success: true,
@@ -315,7 +312,7 @@ const setPassword = async (
 };
 
 export type ActivateOptions =
-  | ActivateInfoOptions
+  | ActivateValidOptions
   | ActivatePhoneSmsOptions
   | ActivateBindPhoneOptions
   | ActivateReplacePhoneOptions
@@ -324,7 +321,7 @@ export type ActivateOptions =
 export const activateHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  | ActivateInfoOptions
+  | ActivateValidOptions
   | ActivatePhoneSmsOptions
   | ActivateBindPhoneOptions
   | ActivateReplacePhoneOptions
@@ -333,7 +330,7 @@ export const activateHandler: RequestHandler<
   if (req.method === "GET") {
     const cookieStore = new CookieStore();
 
-    const response = await getImage(cookieStore);
+    const response = await getInfo(cookieStore);
     const cookies = cookieStore.getAllCookies().map((item) => item.toJSON());
 
     cookies.forEach(({ name, value, ...rest }) => {
@@ -349,8 +346,13 @@ export const activateHandler: RequestHandler<
 
       const cookieHeader = req.headers.cookie;
 
-      if (options.type === "info")
-        return res.json(checkAccount(options, cookieHeader));
+      if (
+        options.type === "valid" ||
+        // FIXME: Remove this when new version lands
+        // @ts-expect-error: Deprecated type
+        options.type === "info"
+      )
+        return res.json(validAccount(options, cookieHeader));
 
       if (options.type === "sms")
         return res.json(sendSms(options, cookieHeader));
