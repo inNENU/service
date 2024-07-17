@@ -4,7 +4,7 @@ import { OFFICIAL_URL } from "./utils.js";
 import { UnknownResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
-  CommonListSuccessResponse,
+  CommonSuccessResponse,
   EmptyObject,
 } from "../typings.js";
 
@@ -13,7 +13,7 @@ const UNDER_MAJOR_PLAN_URL = `${OFFICIAL_URL}/jyjx/bksjy/rcpyfa.htm`;
 const MAJOR_PLAN_LIST_REGEXP = /<ul class="table2[^>]*?>([^]*?)<\/ul>/;
 const MAJOR_PLAN_ITEM_REGEXP = /<li><p><a href="(.*?)">(.*?)<\/a><\/p><\/li>/g;
 
-export type UnderMajorPlanSuccessResponse = CommonListSuccessResponse<
+export type UnderMajorPlanSuccessResponse = CommonSuccessResponse<
   { name: string; url: string }[]
 >;
 
