@@ -5,8 +5,13 @@ import { UNDER_STUDY_SERVER, UNDER_STUDY_VPN_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { AUTH_SERVER, WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
-import { UnknownResponse } from "../config/index.js";
-import type { AccountInfo, EmptyObject } from "../typings.js";
+import type { ActionFailType } from "../config/index.js";
+import { RestrictedResponse, UnknownResponse } from "../config/index.js";
+import type {
+  AccountInfo,
+  CommonFailedResponse,
+  EmptyObject,
+} from "../typings.js";
 import { CookieStore, EDGE_USER_AGENT_HEADERS } from "../utils/index.js";
 
 export interface UnderStudyLoginSuccessResult {
@@ -16,7 +21,8 @@ export interface UnderStudyLoginSuccessResult {
 
 export type UnderStudyLoginResult =
   | UnderStudyLoginSuccessResult
-  | AuthLoginFailedResponse;
+  | AuthLoginFailedResponse
+  | CommonFailedResponse<ActionFailType.Restricted>;
 
 export interface UnderStudyLoginOptions extends AccountInfo {
   webVPN?: boolean;
@@ -61,6 +67,10 @@ export const underStudyLogin = async (
   );
 
   cookieStore.applyResponse(ticketResponse, result.location);
+
+  if (ticketResponse.status === 405) {
+    return RestrictedResponse;
+  }
 
   if (ticketResponse.status !== 302) {
     console.log("ticket response", await ticketResponse.text());

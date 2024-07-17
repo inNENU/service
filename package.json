@@ -1,6 +1,6 @@
 {
   "name": "service",
-  "version": "2024.7.9",
+  "version": "2024.7.18",
   "private": true,
   "type": "module",
   "scripts": {
