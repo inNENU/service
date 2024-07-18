@@ -348,7 +348,7 @@ export const underStudyCourseCommentaryHandler: RequestHandler<
         }),
       });
 
-      if (response.headers.get("content-type")?.includes("text/html"))
+      if (response.headers.get("Content-Type")?.includes("text/html"))
         return res.json(ExpiredResponse);
 
       const data =
@@ -460,7 +460,7 @@ export const underStudyCourseCommentaryHandler: RequestHandler<
         },
       );
 
-      if (response.headers.get("content-type")?.includes("text/html"))
+      if (response.headers.get("Content-Type")?.includes("text/html"))
         return res.json(ExpiredResponse);
 
       const data =

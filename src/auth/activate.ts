@@ -37,11 +37,10 @@ const getInfo = async (
   const imageUrl = `${ACTIVATE_SERVER}/api/staff/activate/imageCode`;
   const imageResponse = await fetch(imageUrl);
 
-  if (imageResponse.headers.get("content-type") === "text/html")
+  if (imageResponse.headers.get("Content-Type") === "text/html")
     return RestrictedResponse;
 
-  // FIXME: Check this
-  if (imageResponse.headers.get("content-type") !== "image/jpeg") {
+  if (!imageResponse.headers.get("Content-Type")?.startsWith("image/jpeg")) {
     return UnknownResponse("获取验证码失败");
   }
 
