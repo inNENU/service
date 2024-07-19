@@ -44,7 +44,20 @@ export const gradEnrollPlanHandler: RequestHandler<
   try {
     const response = await fetch(GRAD_ENROLL_PLAN_URL);
 
-    if (response.status !== 200) throw new Error("获取招生计划失败");
+    if (response.status !== 200) {
+      // FIXME: Should update to the new one when the website is updated
+      if (existsSync("./cache/enroll-grad-plan.json"))
+        return res.json({
+          success: true,
+          data: JSON.parse(
+            readFileSync("./cache/enroll-grad-plan.json", {
+              encoding: "utf-8",
+            }),
+          ) as GradEnrollSchoolPlan[],
+        });
+
+      throw new Error("招生计划查询已下线");
+    }
 
     const content = await response.text();
 

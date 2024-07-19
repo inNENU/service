@@ -45,7 +45,20 @@ export const gradRecommendPlanHandler: RequestHandler<
   try {
     const response = await fetch(POST_RECOMMEND_PLAN_URL);
 
-    if (response.status !== 200) throw new Error("获取推免计划失败");
+    if (response.status !== 200) {
+      // FIXME: Should update to the new one when the website is updated
+      if (existsSync("./cache/enroll-grad-recommend-plan.json"))
+        return res.json({
+          success: true,
+          data: JSON.parse(
+            readFileSync("./cache/enroll-grad-recommend-plan.json", {
+              encoding: "utf-8",
+            }),
+          ) as GradRecommendSchoolPlan[],
+        });
+
+      throw new Error("推免计划查询已下线");
+    }
 
     const content = await response.text();
 
