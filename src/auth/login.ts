@@ -5,6 +5,7 @@ import { authEncrypt } from "./auth-encrypt.js";
 import {
   AUTH_DOMAIN,
   AUTH_SERVER,
+  LOGIN_URL,
   SALT_REGEXP,
   WEB_VPN_AUTH_SERVER,
 } from "./utils.js";
@@ -96,11 +97,7 @@ export const authLogin = async ({
       };
 
     const salt = SALT_REGEXP.exec(content)![1];
-    const lt = content.match(/name="lt" value="(.*?)"/)![1];
-    const dllt = content.match(/name="dllt" value="(.*?)"/)![1];
     const execution = content.match(/name="execution" value="(.*?)"/)![1];
-    const _eventId = content.match(/name="_eventId" value="(.*?)"/)![1];
-    const rmShown = content.match(/name="rmShown" value="(.*?)"/)![1];
 
     cookieStore.set({
       name: "org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE",
@@ -108,20 +105,22 @@ export const authLogin = async ({
       domain: AUTH_DOMAIN,
     });
 
-    const captchaCheckResponse = await fetch(
-      `${server}/authserver/needCaptcha.html?username=${id}&pwdEncrypt2=pwdEncryptSalt&_=${Date.now()}`,
-      {
-        headers: {
-          Cookie: cookieStore.getHeader(server),
-          ...COMMON_HEADERS,
-          Referer: `${server}/authserver/login`,
-        },
+    const checkCaptchaLink = `${AUTH_SERVER}/authserver/checkNeedCaptcha.htl?username=${id}&_=${Date.now()}`;
+
+    const captchaCheckResponse = await fetch(checkCaptchaLink, {
+      headers: {
+        Cookie: cookieStore.getHeader(checkCaptchaLink),
+        ...COMMON_HEADERS,
+        Referer: LOGIN_URL,
       },
-    );
+    });
 
     cookieStore.applyResponse(captchaCheckResponse, server);
 
-    const needCaptcha = await (captchaCheckResponse.json() as Promise<boolean>);
+    const { isNeed: needCaptcha } =
+      await (captchaCheckResponse.json() as Promise<{
+        isNeed: boolean;
+      }>);
 
     if (needCaptcha)
       return {
@@ -134,7 +133,7 @@ export const authLogin = async ({
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
-        Cookie: cookieStore.getHeader(server),
+        Cookie: cookieStore.getHeader(url),
         "Sec-Fetch-Site": "same-origin",
         "Sec-Fetch-Mode": "navigate",
         "Sec-Fetch-User": "?1",
@@ -144,12 +143,12 @@ export const authLogin = async ({
       body: new URLSearchParams({
         username: id.toString(),
         password: authEncrypt(password, salt),
-        lt,
-        dllt,
+        lt: "",
+        cllt: "usernameLogin",
+        dllt: "generalLogin",
         execution,
-        _eventId,
-        rmShown,
-        rememberMe: "on",
+        _eventId: "submit",
+        rememberMe: "true",
       }),
       redirect: "manual",
     });
