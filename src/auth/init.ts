@@ -307,12 +307,6 @@ export const authInitHandler: RequestHandler<
       return res.json(result);
     }
 
-    return res.json({
-      success: false,
-      type: ActionFailType.Unknown,
-      msg: "学校21号升级了统一身份认证系统，小程序需重新适配。正在抓紧适配中，暂无法登录。",
-    });
-
     return res.json(await initAuth(req.body, req.headers.cookie!));
   } catch (err) {
     const { message } = err as Error;
