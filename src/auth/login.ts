@@ -61,6 +61,13 @@ export const authLogin = async ({
       msg: BLACKLIST_HINT[Math.floor(Math.random() * BLACKLIST_HINT.length)],
     };
 
+  // FIXME: A temp workaround to disable all login
+  return {
+    success: false,
+    type: ActionFailType.WrongPassword,
+    msg: "用户名或密码错误",
+  };
+
   const server = webVPN ? WEB_VPN_AUTH_SERVER : AUTH_SERVER;
 
   const url = `${server}/authserver/login${
