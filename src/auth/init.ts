@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
 import { authEncrypt } from "./auth-encrypt.js";
-import { AUTH_DOMAIN, AUTH_SERVER, SALT_REGEXP } from "./utils.js";
+import { AUTH_DOMAIN, AUTH_SERVER, LOGIN_URL, SALT_REGEXP } from "./utils.js";
 import { ActionFailType, UnknownResponse } from "../config/index.js";
 import type { MyInfo } from "../my/index.js";
 import { getMyInfo, myLogin } from "../my/index.js";
@@ -19,19 +19,16 @@ const COMMON_HEADERS = {
   "Upgrade-Insecure-Requests": "1",
   "User-Agent": "inNENU",
 };
-const LOGIN_URL = `${AUTH_SERVER}/authserver/login`;
 
 const getCaptcha = async (cookieStore: CookieStore): Promise<string> => {
-  const captchaResponse = await fetch(
-    `${AUTH_SERVER}/authserver/captcha.html?ts=${Date.now()}`,
-    {
-      headers: {
-        Cookie: cookieStore.getHeader(AUTH_SERVER),
-        ...COMMON_HEADERS,
-        Referer: LOGIN_URL,
-      },
+  const captchaImageLink = `${AUTH_SERVER}/authserver/captcha.html?ts=${Date.now()}`;
+  const captchaResponse = await fetch(captchaImageLink, {
+    headers: {
+      Cookie: cookieStore.getHeader(captchaImageLink),
+      ...COMMON_HEADERS,
+      Referer: LOGIN_URL,
     },
-  );
+  });
 
   const captcha = await captchaResponse.arrayBuffer();
 
@@ -66,11 +63,11 @@ export const authInitInfo = async (
   const content = await loginPageResponse.text();
 
   const salt = SALT_REGEXP.exec(content)![1];
-  const lt = content.match(/name="lt" value="(.*?)"/)![1];
-  const dllt = content.match(/name="dllt" value="(.*?)"/)![1];
+  // const lt = content.match(/name="lt" value="(.*?)"/)![1];
+  // const cllt = content.match(/name="cllt" value="(.*?)"/)![1];
+  // const dllt = content.match(/name="dllt" value="(.*?)"/)![1];
   const execution = content.match(/name="execution" value="(.*?)"/)![1];
-  const _eventId = content.match(/name="_eventId" value="(.*?)"/)![1];
-  const rmShown = content.match(/name="rmShown" value="(.*?)"/)![1];
+  // const _eventId = content.match(/name="_eventId" value="(.*?)"/)![1];
 
   cookieStore.set({
     name: "org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE",
@@ -78,20 +75,22 @@ export const authInitInfo = async (
     domain: AUTH_DOMAIN,
   });
 
-  const captchaCheckResponse = await fetch(
-    `${AUTH_SERVER}/authserver/needCaptcha.html?username=${id}&pwdEncrypt2=pwdEncryptSalt&_=${Date.now()}`,
-    {
-      headers: {
-        Cookie: cookieStore.getHeader(AUTH_SERVER),
-        ...COMMON_HEADERS,
-        Referer: LOGIN_URL,
-      },
+  const checkCaptchaLink = `${AUTH_SERVER}/authserver/checkNeedCaptcha.htl?username=${id}&_=${Date.now()}`;
+
+  const captchaCheckResponse = await fetch(checkCaptchaLink, {
+    headers: {
+      Cookie: cookieStore.getHeader(checkCaptchaLink),
+      ...COMMON_HEADERS,
+      Referer: LOGIN_URL,
     },
-  );
+  });
 
   cookieStore.applyResponse(captchaCheckResponse, AUTH_SERVER);
 
-  const needCaptcha = await (captchaCheckResponse.json() as Promise<boolean>);
+  const { isNeed: needCaptcha } =
+    await (captchaCheckResponse.json() as Promise<{
+      isNeed: boolean;
+    }>);
 
   console.log("Need captcha:", needCaptcha);
 
@@ -105,12 +104,12 @@ export const authInitInfo = async (
     salt,
     params: {
       username: id.toString(),
-      lt,
-      dllt,
+      lt: "",
+      cllt: "usernameLogin",
+      dllt: "generalLogin",
       execution,
-      _eventId,
-      rmShown,
-      rememberMe: "on",
+      _eventId: "submit",
+      rememberMe: "true",
     },
   };
 };

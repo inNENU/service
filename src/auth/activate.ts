@@ -326,6 +326,11 @@ export const activateHandler: RequestHandler<
   | ActivateReplacePhoneOptions
   | ActivatePasswordOptions
 > = async (req, res) => {
+  return res.json({
+    success: false,
+    msg: "学校已于21号上线全新激活系统，小程序当前暂未适配，请先通过网页进行激活",
+  });
+
   if (req.method === "GET") {
     const cookieStore = new CookieStore();
 
