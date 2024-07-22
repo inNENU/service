@@ -381,6 +381,11 @@ export const resetPasswordHandler: RequestHandler<
   EmptyObject,
   ResetPasswordOptions
 > = async (req, res) => {
+  return res.json({
+    success: false,
+    msg: "学校于21号更新了统一身份认证系统，小程序当前尚未适配",
+  });
+
   try {
     if (req.method === "GET") {
       const { captcha, cookieStore } = await getCaptcha();
