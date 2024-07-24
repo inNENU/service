@@ -206,6 +206,7 @@ app.get("/official/info-detail", officialInfoDetailHandler);
 app.post("/official/info-list", officialInfoListHandler);
 app.get("/official/notice-detail", officialNoticeDetailHandler);
 app.post("/official/notice-list", officialNoticeListHandler);
+app.get("/official/under-major-plan", underMajorPlanHandler);
 app.post("/official/under-major-plan", underMajorPlanHandler);
 
 /*  ------------ 招生相关 ------------ */
