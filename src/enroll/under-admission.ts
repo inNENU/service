@@ -12,14 +12,15 @@ export interface UnderAdmissionOptions {
 }
 
 interface RawEnrollSuccessResult {
-  // FIXME: Correct fields
   student: {
     name: string;
-    institute: string;
+    department: string;
     major: string;
-    mailCode: string;
-    hasMailed: string;
-    admissionMethod: string;
+    mail_code?: {
+      String: string;
+      Valid: true;
+    };
+    is_mailed: string;
   };
 }
 
@@ -75,8 +76,12 @@ export const underAdmissionHandler: RequestHandler<
     if (result.student === null)
       return res.json(UnknownResponse(result.message));
 
-    const { institute, major, mailCode, hasMailed, admissionMethod } =
-      result.student;
+    const {
+      department,
+      major,
+      mail_code: mailCode,
+      is_mailed: hasMailed,
+    } = result.student;
 
     const info = [
       {
@@ -88,20 +93,16 @@ export const underAdmissionHandler: RequestHandler<
         value: testId,
       },
       {
-        text: "招生方式",
-        value: admissionMethod,
-      },
-      {
         text: "录取专业",
         value: major,
       },
       {
         text: "所在学院",
-        value: institute,
+        value: department,
       },
       {
         text: "录取通知书单号",
-        value: mailCode,
+        value: hasMailed ? mailCode?.String ?? "暂无" : "暂无",
       },
       {
         text: "是否已寄出",
