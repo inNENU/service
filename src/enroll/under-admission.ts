@@ -3,6 +3,8 @@ import type { RequestHandler } from "express";
 import { ActionFailType, UnknownResponse } from "../config/index.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 
+const QUERY_URL = "https://gkcx.nenu.edu.cn/api/user/admissionQuery";
+
 export interface UnderAdmissionOptions {
   name: string;
   id: string;
@@ -10,16 +12,20 @@ export interface UnderAdmissionOptions {
 }
 
 interface RawEnrollSuccessResult {
-  name: string;
-  institute: string;
-  major: string;
-  mailCode: string;
-  hasMailed: string;
-  admissionMethod: string;
+  // FIXME: Correct fields
+  student: {
+    name: string;
+    institute: string;
+    major: string;
+    mailCode: string;
+    hasMailed: string;
+    admissionMethod: string;
+  };
 }
 
 interface RawEnrollFailedResult {
-  code: -1;
+  message: string;
+  student: null;
 }
 
 type RawEnrollResult = RawEnrollSuccessResult | RawEnrollFailedResult;
@@ -43,13 +49,13 @@ export const underAdmissionHandler: RequestHandler<
 
     const params = {
       name,
-      idCode: id,
-      stuCode: testId,
+      id_code: id,
+      student_code: testId,
     };
 
     console.log("Getting params", params);
 
-    const response = await fetch("https://bkzsw.nenu.edu.cn/query", {
+    const response = await fetch(QUERY_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -66,9 +72,11 @@ export const underAdmissionHandler: RequestHandler<
 
     const result = (await response.json()) as RawEnrollResult;
 
-    if ("code" in result) return res.json(UnknownResponse("查询失败"));
+    if (result.student === null)
+      return res.json(UnknownResponse(result.message));
 
-    const { institute, major, mailCode, hasMailed, admissionMethod } = result;
+    const { institute, major, mailCode, hasMailed, admissionMethod } =
+      result.student;
 
     const info = [
       {
