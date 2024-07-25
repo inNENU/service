@@ -1,14 +1,14 @@
 import type { RequestHandler } from "express";
 
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
-import { ActionFailType } from "../../config/actionFailType.js";
 import {
+  ActionFailType,
   ExpiredResponse,
   InvalidArgResponse,
   MissingArgResponse,
   MissingCredentialResponse,
   UnknownResponse,
-} from "../../config/response.js";
+} from "../../config/index.js";
 import type {
   CommonFailedResponse,
   EmptyObject,
@@ -89,10 +89,10 @@ export const underStudyProcessCourseHandler: RequestHandler<
   UnderSelectProcessOptions
 > = async (req, res) => {
   try {
-    const { id, password, link, type } = req.body;
+    const { id, password, authToken, link, type } = req.body;
 
-    if (id && password) {
-      const result = await underStudyLogin({ id, password });
+    if (id && password && authToken) {
+      const result = await underStudyLogin({ id, password, authToken });
 
       if (!result.success) return res.json(result);
 

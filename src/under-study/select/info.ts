@@ -290,10 +290,10 @@ export const underStudySelectInfoHandler: RequestHandler<
   UnderSelectInfoOptions
 > = async (req, res) => {
   try {
-    const { id, password, link } = req.body;
+    const { id, password, authToken, link } = req.body;
 
-    if (id && password) {
-      const result = await underStudyLogin({ id, password });
+    if (id && password && authToken) {
+      const result = await underStudyLogin({ id, password, authToken });
 
       if (!result.success) return res.json(result);
 

@@ -97,10 +97,17 @@ export const noticeListHandler: RequestHandler<
   NoticeListOptions
 > = async (req, res) => {
   try {
-    const { id, password, type = "notice", size = 20, current = 1 } = req.body;
+    const {
+      id,
+      password,
+      authToken,
+      type = "notice",
+      size = 20,
+      current = 1,
+    } = req.body;
 
-    if (id && password) {
-      const result = await actionLogin({ id, password });
+    if (id && password && authToken) {
+      const result = await actionLogin({ id, password, authToken });
 
       if (!result.success) return res.json(result);
 

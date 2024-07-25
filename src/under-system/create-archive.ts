@@ -3,7 +3,7 @@ import type { RequestHandler } from "express";
 import { underSystemLogin } from "./login.js";
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ActionFailType } from "../config/actionFailType.js";
+import { ActionFailType, MissingCredentialResponse } from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -600,18 +600,19 @@ export const underCreateStudentArchiveHandler: RequestHandler<
   | UnderCreateStudentArchiveSubmitFamilyOptions
 > = async (req, res) => {
   try {
-    let cookieHeader = req.headers.cookie;
+    const { id, password, authToken } = req.body;
 
-    if (!cookieHeader) {
-      if (!req.body.id || !req.body.password)
-        throw new Error(`"id" and password" field is required!`);
-
+    if (id && password && authToken) {
       const result = await underSystemLogin(req.body as AccountInfo);
 
       if (!result.success) return res.json(result);
 
-      cookieHeader = result.cookieStore.getHeader(UNDER_SYSTEM_SERVER);
+      req.headers.cookie = result.cookieStore.getHeader(UNDER_SYSTEM_SERVER);
+    } else if (!req.headers.cookie) {
+      return res.json(MissingCredentialResponse);
     }
+
+    const cookieHeader = req.headers.cookie;
 
     if (req.body.type === "get-info")
       return res.json(await getUnderStudentArchiveInfo(cookieHeader));

@@ -37,7 +37,7 @@ export type VPNLoginResult =
   | VPNLoginFailedResponse;
 
 export const vpnCASLogin = async (
-  { id, password }: AccountInfo,
+  { id, password, authToken }: AccountInfo,
   cookieStore = new CookieStore(),
 ): Promise<VPNLoginResult> => {
   const casResponse = await fetch(CAS_LOGIN_URL, {
@@ -50,6 +50,7 @@ export const vpnCASLogin = async (
     const authResult = await authLogin({
       id,
       password,
+      authToken,
       service: `${VPN_SERVER}/users/auth/cas/callback?url=${encodeURIComponent(
         `${VPN_SERVER}/users/sign_in`,
       )}`,

@@ -58,14 +58,14 @@ export const noticeHandler: RequestHandler<
   NoticeOptions
 > = async (req, res) => {
   try {
-    const { id, password, noticeID } = req.body;
+    const { id, password, noticeID, authToken } = req.body;
 
     if (!noticeID) return res.json(MissingArgResponse("公告 ID"));
 
     const noticeUrl = `${ACTION_SERVER}/page/viewNews?ID=${noticeID}`;
 
-    if (id && password) {
-      const result = await actionLogin({ id, password });
+    if (id && password && authToken) {
+      const result = await actionLogin({ id, password, authToken });
 
       if (!result.success) return res.json(result);
 

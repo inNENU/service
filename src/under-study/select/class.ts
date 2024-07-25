@@ -44,10 +44,10 @@ export const underStudySearchClassHandler: RequestHandler<
   UnderSelectClassOptions
 > = async (req, res) => {
   try {
-    const { id, password, link, courseId } = req.body;
+    const { id, password, authToken, link, courseId } = req.body;
 
-    if (id && password) {
-      const result = await underStudyLogin({ id, password });
+    if (id && password && authToken) {
+      const result = await underStudyLogin({ id, password, authToken });
 
       if (!result.success) return res.json(result);
 

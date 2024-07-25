@@ -312,10 +312,10 @@ export const underStudyCourseCommentaryHandler: RequestHandler<
   UnderCourseCommentaryOptions
 > = async (req, res) => {
   try {
-    const { id, password } = req.body;
+    const { id, password, authToken } = req.body;
 
-    if (id && password) {
-      const result = await underStudyLogin({ id, password });
+    if (id && password && authToken) {
+      const result = await underStudyLogin({ id, password, authToken });
 
       if (!result.success) return res.json(result);
 

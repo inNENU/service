@@ -3,9 +3,12 @@ import type { RequestHandler } from "express";
 import { gradOldSystemLogin } from "./login.js";
 import { GRAD_OLD_SYSTEM_HTTPS_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ExpiredResponse, UnknownResponse } from "../config/index.js";
+import {
+  ExpiredResponse,
+  MissingCredentialResponse,
+  UnknownResponse,
+} from "../config/index.js";
 import type {
-  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
@@ -215,17 +218,19 @@ export const gradOldGradeListHandler: RequestHandler<
   LoginOptions
 > = async (req, res) => {
   try {
-    let cookieHeader = req.headers.cookie;
+    const { id, password, authToken } = req.body;
 
-    if (!cookieHeader) {
-      if (!req.body.id || !req.body.password)
-        throw new Error(`"id" and password" field is required!`);
-
-      const result = await gradOldSystemLogin(req.body as AccountInfo);
+    if (id && password && authToken) {
+      const result = await gradOldSystemLogin({ id, password, authToken });
 
       if (!result.success) return res.json(result);
-      cookieHeader = result.cookieStore.getHeader(QUERY_URL);
+
+      req.headers.cookie = result.cookieStore.getHeader(QUERY_URL);
+    } else if (!req.headers.cookie) {
+      return res.json(MissingCredentialResponse);
     }
+
+    const cookieHeader = req.headers.cookie;
 
     const response = await fetch(QUERY_URL, {
       method: "POST",

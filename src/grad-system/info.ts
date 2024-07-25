@@ -4,7 +4,11 @@ import { getAction } from "./action.js";
 import { gradSystemLogin } from "./login.js";
 import { MAIN_URL, SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ActionFailType, UnknownResponse } from "../config/index.js";
+import {
+  ActionFailType,
+  MissingCredentialResponse,
+  UnknownResponse,
+} from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -147,20 +151,19 @@ export const gradInfoHandler: RequestHandler<
   LoginOptions
 > = async (req, res) => {
   try {
-    let cookieHeader = req.headers.cookie;
+    const { id, password, authToken } = req.body;
 
-    if (!cookieHeader) {
-      if (!req.body.id || !req.body.password)
-        throw new Error(`"id" and password" field is required!`);
-
+    if (id && password && authToken) {
       const result = await gradSystemLogin(req.body as AccountInfo);
 
       if (!result.success) return res.json(result);
 
-      cookieHeader = result.cookieStore.getHeader(SERVER);
+      req.headers.cookie = result.cookieStore.getHeader(SERVER);
+    } else if (!req.headers.cookie) {
+      return res.json(MissingCredentialResponse);
     }
 
-    return res.json(await getGradInfo(cookieHeader));
+    return res.json(await getGradInfo(req.headers.cookie));
   } catch (err) {
     const { message } = err as Error;
 

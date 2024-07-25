@@ -3,7 +3,7 @@ import type { RequestHandler } from "express";
 import { underSystemLogin } from "./login.js";
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { UnknownResponse } from "../config/response.js";
+import { MissingCredentialResponse, UnknownResponse } from "../config/index.js";
 import type { AccountInfo, EmptyObject, LoginOptions } from "../typings.js";
 import { IE_8_USER_AGENT, getIETimeStamp } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/login.js";
@@ -49,18 +49,19 @@ export const underTestQueryHandler: RequestHandler<
   LoginOptions
 > = async (req, res) => {
   try {
-    let cookieHeader = req.headers.cookie;
+    const { id, password, authToken } = req.body;
 
-    if (!cookieHeader) {
-      if (!req.body.id || !req.body.password)
-        throw new Error(`"id" and password" field is required!`);
-
+    if (id && password && authToken) {
       const result = await underSystemLogin(req.body as AccountInfo);
 
       if (!result.success) return res.json(result);
 
-      cookieHeader = result.cookieStore.getHeader(UNDER_SYSTEM_SERVER);
+      req.headers.cookie = result.cookieStore.getHeader(UNDER_SYSTEM_SERVER);
+    } else if (!req.headers.cookie) {
+      return res.json(MissingCredentialResponse);
     }
+
+    const cookieHeader = req.headers.cookie;
 
     const QUERY_URL = `${UNDER_SYSTEM_SERVER}/kjlbgl.do?method=goStudentSKBm&tktime=${getIETimeStamp()}`;
     const queryResponse = await fetch(QUERY_URL, {

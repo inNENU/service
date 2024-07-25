@@ -134,14 +134,14 @@ export const underStudyGradeDetailHandler: RequestHandler<
   UnderGradeDetailOptions
 > = async (req, res) => {
   try {
-    const { gradeCode, id, password } = req.body;
+    const { id, password, authToken, gradeCode } = req.body;
 
     if (!gradeCode) return res.json(MissingArgResponse("课程代码"));
 
     const queryUrl = `${UNDER_STUDY_SERVER}/new/student/xskccj/getDetail?cjdm=${gradeCode}`;
 
-    if (id && password) {
-      const result = await underStudyLogin({ id, password });
+    if (id && password && authToken) {
+      const result = await underStudyLogin({ id, password, authToken });
 
       if (!result.success) return res.json(result);
 

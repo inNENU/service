@@ -45,10 +45,10 @@ export const actionEmailPageHandler: RequestHandler<
   ActionEmailPageOptions
 > = async (req, res) => {
   try {
-    const { id, password } = req.body;
+    const { id, password, authToken } = req.body;
 
-    if (id && password) {
-      const result = await actionLogin({ id, password });
+    if (id && password && authToken) {
+      const result = await actionLogin({ id, password, authToken });
 
       if (!result.success) return res.json(result);
 

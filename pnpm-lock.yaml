@@ -15,11 +15,11 @@ importers:
         specifier: 0.4.10
         version: 0.4.10
       '@mptool/net':
-        specifier: 0.8.3
-        version: 0.8.3(miniprogram-api-typings@3.12.2)
+        specifier: 0.8.6
+        version: 0.8.6(miniprogram-api-typings@3.12.2)
       '@mptool/parser':
-        specifier: 0.8.3
-        version: 0.8.3(miniprogram-api-typings@3.12.2)
+        specifier: 0.8.6
+        version: 0.8.6(miniprogram-api-typings@3.12.2)
       body-parser:
         specifier: 1.20.2
         version: 1.20.2
@@ -560,18 +560,18 @@ packages:
   '@jridgewell/sourcemap-codec@1.4.15':
     resolution: {integrity: sha512-eF2rxCRulEKXHTRiDrDy6erMYWqNw4LPdQ8UQA4huuxaQsVeRPFl2oM8oDGxMFhJUWZf9McpLtJasDDZb/Bpeg==}
 
-  '@mptool/net@0.8.3':
-    resolution: {integrity: sha512-KbJ/883IAngXHxBaaiM2ft3WnRsxxKKTToQPNo3NuE4YFwdEVXBKC0CR75kEcz22Lg5vl4yc+dh7fH9I4KYDRQ==}
+  '@mptool/net@0.8.6':
+    resolution: {integrity: sha512-aXvQLqmEnVUl4r+h2HYrc3tDQtuJDTZZvBuE8QTPa3jroiyl3o4juZcd/g6tTJCgtjcahAoc4fNMc66S4JF2HQ==}
     peerDependencies:
       miniprogram-api-typings: ^3.12.0
 
-  '@mptool/parser@0.8.3':
-    resolution: {integrity: sha512-Zx9kpIahX7PLfWB3PzQatPyFNliwHwEjH1cEZXZQQ5MYvlx4SKT4xnpCwKkkWvL2FdbnfOr7Ns9OczPPVzhizA==}
+  '@mptool/parser@0.8.6':
+    resolution: {integrity: sha512-ohFwj1XAef5n5EJ4Kxs2V5WB60EDhMU5ANvVumKqDsMJr9KIlHublHzaNnIN9961ih9l1sA3TXqDwMOWDcEmXg==}
     peerDependencies:
       miniprogram-api-typings: ^3.12.0
 
-  '@mptool/shared@0.8.3':
-    resolution: {integrity: sha512-qJba4zc/3ms2X6EHZsHxYrGYOCCBI9Yvf4uLeOAVh4IYa7nWhfBI6qcKNH9GIMzI7oSQJqdeaWIfnqy0h7F3Yw==}
+  '@mptool/shared@0.8.6':
+    resolution: {integrity: sha512-hzll9DgeMJEbYYdU0bjBE23zebNgolEgAK5YThg+k0vn7zTa32z1uy4wV78/GkzrDqf+NbDi9iBpVDAJBvX5UQ==}
     peerDependencies:
       miniprogram-api-typings: ^3.12.0
 
@@ -2928,18 +2928,18 @@ snapshots:
 
   '@jridgewell/sourcemap-codec@1.4.15': {}
 
-  '@mptool/net@0.8.3(miniprogram-api-typings@3.12.2)':
+  '@mptool/net@0.8.6(miniprogram-api-typings@3.12.2)':
     dependencies:
-      '@mptool/shared': 0.8.3(miniprogram-api-typings@3.12.2)
+      '@mptool/shared': 0.8.6(miniprogram-api-typings@3.12.2)
       miniprogram-api-typings: 3.12.2
 
-  '@mptool/parser@0.8.3(miniprogram-api-typings@3.12.2)':
+  '@mptool/parser@0.8.6(miniprogram-api-typings@3.12.2)':
     dependencies:
-      '@mptool/shared': 0.8.3(miniprogram-api-typings@3.12.2)
+      '@mptool/shared': 0.8.6(miniprogram-api-typings@3.12.2)
       cheerio: 1.0.0-rc.12
       miniprogram-api-typings: 3.12.2
 
-  '@mptool/shared@0.8.3(miniprogram-api-typings@3.12.2)':
+  '@mptool/shared@0.8.6(miniprogram-api-typings@3.12.2)':
     dependencies:
       miniprogram-api-typings: 3.12.2
 

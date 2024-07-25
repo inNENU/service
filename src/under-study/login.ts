@@ -30,7 +30,7 @@ export interface UnderStudyLoginOptions extends AccountInfo {
 
 // FIXME: Add webVPN issue hints
 export const underStudyLogin = async (
-  { id, password, webVPN = false }: UnderStudyLoginOptions,
+  { webVPN = false, ...options }: UnderStudyLoginOptions,
   cookieStore = new CookieStore(),
 ): Promise<UnderStudyLoginResult> => {
   const server = webVPN ? UNDER_STUDY_VPN_SERVER : UNDER_STUDY_SERVER;
@@ -38,8 +38,7 @@ export const underStudyLogin = async (
   const MAIN_URL = `${server}/new/welcome.page`;
 
   const result = await authLogin({
-    id,
-    password,
+    ...options,
     webVPN,
     service: SSO_LOGIN_URL,
     cookieStore,

@@ -1,8 +1,21 @@
 import type { RequestHandler } from "express";
 
 import { authEncrypt } from "./auth-encrypt.js";
-import { AUTH_DOMAIN, AUTH_SERVER, LOGIN_URL, SALT_REGEXP } from "./utils.js";
-import { ActionFailType, UnknownResponse } from "../config/index.js";
+import type { AuthCaptchaResponse } from "./captcha.js";
+import { getAuthCaptcha } from "./captcha.js";
+import {
+  AUTH_CAPTCHA_URL,
+  AUTH_DOMAIN,
+  AUTH_LOGIN_URL,
+  AUTH_SERVER,
+  RE_AUTH_URL,
+  SALT_REGEXP,
+} from "./utils.js";
+import {
+  ActionFailType,
+  UnknownResponse,
+  WrongPasswordResponse,
+} from "../config/index.js";
 import type { MyInfo } from "../my/index.js";
 import { getMyInfo, myLogin } from "../my/index.js";
 import { MY_SERVER } from "../my/utils.js";
@@ -14,37 +27,15 @@ import type {
 import { BLACKLIST_HINT, CookieStore, isInBlackList } from "../utils/index.js";
 import { vpnLogin } from "../vpn/login.js";
 
-const COMMON_HEADERS = {
-  DNT: "1",
-  "Upgrade-Insecure-Requests": "1",
-  "User-Agent": "inNENU",
-};
-
-const getCaptcha = async (cookieStore: CookieStore): Promise<string> => {
-  const captchaImageLink = `${AUTH_SERVER}/authserver/captcha.html?ts=${Date.now()}`;
-  const captchaResponse = await fetch(captchaImageLink, {
-    headers: {
-      Cookie: cookieStore.getHeader(captchaImageLink),
-      ...COMMON_HEADERS,
-      Referer: LOGIN_URL,
-    },
-  });
-
-  const captcha = await captchaResponse.arrayBuffer();
-
-  cookieStore.applyResponse(captchaResponse, AUTH_SERVER);
-
-  return `data:image/png;base64,${Buffer.from(captcha).toString("base64")}`;
-};
-
-export interface AuthInitInfoSuccessResult {
+export type AuthInitInfoSuccessResult = {
   success: true;
-  needCaptcha: boolean;
   cookieStore: CookieStore;
-  captcha: string | null;
-  params: Record<string, string>;
   salt: string;
-}
+  params: Record<string, string>;
+} & (
+  | { needCaptcha: true; captcha: AuthCaptchaResponse }
+  | { needCaptcha: false; captcha: null }
+);
 
 export type AuthInitInfoResult =
   | AuthInitInfoSuccessResult
@@ -54,8 +45,11 @@ export const authInitInfo = async (
   id: string,
   cookieStore = new CookieStore(),
 ): Promise<AuthInitInfoResult> => {
-  const loginPageResponse = await fetch(LOGIN_URL, {
-    headers: { ...COMMON_HEADERS, Cookie: cookieStore.getHeader(AUTH_SERVER) },
+  const loginPageResponse = await fetch(AUTH_LOGIN_URL, {
+    headers: {
+      Cookie: cookieStore.getHeader(AUTH_SERVER),
+      "User-Agent": "inNENU service",
+    },
   });
 
   cookieStore.applyResponse(loginPageResponse, AUTH_SERVER);
@@ -63,11 +57,7 @@ export const authInitInfo = async (
   const content = await loginPageResponse.text();
 
   const salt = SALT_REGEXP.exec(content)![1];
-  // const lt = content.match(/name="lt" value="(.*?)"/)![1];
-  // const cllt = content.match(/name="cllt" value="(.*?)"/)![1];
-  // const dllt = content.match(/name="dllt" value="(.*?)"/)![1];
   const execution = content.match(/name="execution" value="(.*?)"/)![1];
-  // const _eventId = content.match(/name="_eventId" value="(.*?)"/)![1];
 
   cookieStore.set({
     name: "org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE",
@@ -80,8 +70,8 @@ export const authInitInfo = async (
   const captchaCheckResponse = await fetch(checkCaptchaLink, {
     headers: {
       Cookie: cookieStore.getHeader(checkCaptchaLink),
-      ...COMMON_HEADERS,
-      Referer: LOGIN_URL,
+      Referer: AUTH_LOGIN_URL,
+      "User-Agent": "inNENU service",
     },
   });
 
@@ -94,12 +84,14 @@ export const authInitInfo = async (
 
   console.log("Need captcha:", needCaptcha);
 
-  const captcha = needCaptcha ? await getCaptcha(cookieStore) : null;
+  const captchaResponse = needCaptcha
+    ? await getAuthCaptcha(cookieStore.getHeader(AUTH_CAPTCHA_URL), id)
+    : null;
 
   return {
     success: true,
     needCaptcha,
-    captcha,
+    captcha: captchaResponse,
     cookieStore,
     salt,
     params: {
@@ -111,60 +103,65 @@ export const authInitInfo = async (
       _eventId: "submit",
       rememberMe: "true",
     },
-  };
+  } as AuthInitInfoSuccessResult;
 };
 
 export interface InitAuthOptions extends AccountInfo {
   params: Record<string, string>;
   salt: string;
-  captcha: string;
   openid: string;
 }
 
 export interface InitAuthSuccessResult {
   success: true;
   info: MyInfo | null;
+  cookieStore: CookieStore;
 }
 
-export type InitAuthFailedResponse = CommonFailedResponse<
-  | ActionFailType.AccountLocked
-  | ActionFailType.BlackList
-  | ActionFailType.EnabledSSO
-  | ActionFailType.NeedCaptcha
-  | ActionFailType.Unknown
-  | ActionFailType.WrongCaptcha
-  | ActionFailType.WrongPassword
->;
+export type InitAuthFailedResponse =
+  | CommonFailedResponse<
+      | ActionFailType.AccountLocked
+      | ActionFailType.BlackList
+      | ActionFailType.EnabledSSO
+      | ActionFailType.Expired
+      | ActionFailType.NeedCaptcha
+      | ActionFailType.Unknown
+      | ActionFailType.WrongCaptcha
+      | ActionFailType.WrongPassword
+    >
+  | (CommonFailedResponse<ActionFailType.NeedReAuth> & {
+      cookieStore: CookieStore;
+    });
 
 export type InitAuthResult = InitAuthSuccessResult | InitAuthFailedResponse;
 
 export const initAuth = async (
-  { id, password, salt, captcha, params, openid }: InitAuthOptions,
+  { id, password, authToken, salt, params, openid }: InitAuthOptions,
   cookieHeader: string,
 ): Promise<InitAuthResult> => {
-  const loginResponse = await fetch(LOGIN_URL, {
+  const cookieStore = new CookieStore();
+  const loginResponse = await fetch(AUTH_LOGIN_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
       Cookie: cookieHeader,
-      "Sec-Fetch-Site": "same-origin",
-      "Sec-Fetch-Mode": "navigate",
-      "Sec-Fetch-User": "?1",
-      "Sec-Fetch-Dest": "document",
-      ...COMMON_HEADERS,
+      "User-Agent": "inNENU service",
     },
     body: new URLSearchParams({
       ...params,
       password: authEncrypt(password, salt),
-      captchaResponse: captcha,
     }),
     redirect: "manual",
   });
+
+  cookieStore.applyResponse(loginResponse, AUTH_LOGIN_URL);
 
   const location = loginResponse.headers.get("Location");
   const resultContent = await loginResponse.text();
 
   console.log(`Request location:`, location);
+
+  if (loginResponse.status === 401) return WrongPasswordResponse;
 
   if (loginResponse.status === 200) {
     if (resultContent.includes("无效的验证码"))
@@ -175,11 +172,7 @@ export const initAuth = async (
       };
 
     if (resultContent.includes("您提供的用户名或者密码有误"))
-      return {
-        success: false,
-        type: ActionFailType.WrongPassword,
-        msg: "用户名或密码错误",
-      };
+      return WrongPasswordResponse;
 
     if (
       resultContent.includes("该帐号已经被锁定，请点击&ldquo;账号激活&rdquo;")
@@ -188,6 +181,13 @@ export const initAuth = async (
         success: false,
         type: ActionFailType.AccountLocked,
         msg: "该帐号已经被锁定，请使用小程序的“账号激活”功能",
+      };
+
+    if (resultContent.includes("会话已失效，请刷新页面再登录"))
+      return {
+        success: false,
+        type: ActionFailType.Expired,
+        msg: "会话已过期，请重新登陆",
       };
 
     if (
@@ -201,7 +201,7 @@ export const initAuth = async (
         msg: "您已开启单点登录，请访问学校统一身份认证官网，在个人设置中关闭单点登录后重试。",
       };
 
-    if (resultContent.includes("请输入验证码"))
+    if (resultContent.includes("<span>请输入验证码</span>"))
       return {
         success: false,
         type: ActionFailType.NeedCaptcha,
@@ -210,33 +210,38 @@ export const initAuth = async (
   }
 
   if (loginResponse.status === 302) {
-    if (location === LOGIN_URL)
+    if (location?.startsWith(AUTH_LOGIN_URL)) return WrongPasswordResponse;
+
+    if (location?.startsWith(RE_AUTH_URL))
       return {
         success: false,
-        type: ActionFailType.WrongPassword,
-        msg: "用户名或密码错误",
+        type: ActionFailType.NeedReAuth,
+        msg: "需要二次认证",
+        cookieStore,
       };
 
     let info: MyInfo | null = null;
 
-    let loginResult = await myLogin({ id, password });
+    let loginResult = await myLogin({ id, password, authToken }, cookieStore);
 
     if (
       "type" in loginResult &&
       loginResult.type === ActionFailType.Forbidden
     ) {
       // Activate VPN by login
-      const vpnLoginResult = await vpnLogin({ id, password });
+      const vpnLoginResult = await vpnLogin(
+        { id, password, authToken },
+        cookieStore,
+      );
 
-      if (vpnLoginResult.success) loginResult = await myLogin({ id, password });
+      if (vpnLoginResult.success)
+        loginResult = await myLogin({ id, password, authToken }, cookieStore);
       else console.error("VPN login failed", vpnLoginResult);
     }
 
     // 获得信息
     if (loginResult.success) {
-      const studentInfo = await getMyInfo(
-        loginResult.cookieStore.getHeader(MY_SERVER),
-      );
+      const studentInfo = await getMyInfo(cookieStore.getHeader(MY_SERVER));
 
       if (studentInfo.success) info = studentInfo.data;
 
@@ -253,27 +258,16 @@ export const initAuth = async (
     return {
       success: true,
       info,
+      cookieStore,
     };
   }
 
   console.error("Unknown login response: ", resultContent);
 
-  return {
-    success: false,
-    type: ActionFailType.Unknown,
-    msg: "未知错误",
-  };
+  return UnknownResponse("登录失败");
 };
 
-export interface AuthInitInfoSuccessResponse {
-  success: true;
-  needCaptcha: boolean;
-  captcha: string;
-  params: Record<string, string>;
-  salt: string;
-}
-
-export type AuthInitInfoResponse = AuthInitInfoSuccessResponse | InitAuthResult;
+export type AuthInitInfoResponse = AuthInitInfoSuccessResult | InitAuthResult;
 
 export const authInitHandler: RequestHandler<
   EmptyObject,
@@ -300,19 +294,28 @@ export const authInitHandler: RequestHandler<
           captcha: result.captcha,
           params: result.params,
           salt: result.salt,
-        } as AuthInitInfoResponse);
+        } as AuthInitInfoSuccessResult);
       }
 
       return res.json(result);
     }
 
-    return res.json({
-      success: false,
-      type: ActionFailType.Unknown,
-      msg: "学校21号升级了统一身份认证系统，小程序需重新适配。正在抓紧适配中，暂无法登录。",
-    });
+    const result = await initAuth(req.body, req.headers.cookie!);
 
-    return res.json(await initAuth(req.body, req.headers.cookie!));
+    if ("cookieStore" in result) {
+      const cookies = result.cookieStore
+        .getAllCookies()
+        .map((item) => item.toJSON());
+
+      cookies.forEach(({ name, value, ...rest }) => {
+        res.cookie(name, value, rest);
+      });
+
+      // @ts-expect-error: cookieStore is not a JSON-serializable object
+      delete result.cookieStore;
+    }
+
+    return res.json(result);
   } catch (err) {
     const { message } = err as Error;
 

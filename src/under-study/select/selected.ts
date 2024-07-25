@@ -6,13 +6,13 @@ import type {
 } from "./typings.js";
 import { getClasses } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
-import type { ActionFailType } from "../../config/actionFailType.js";
+import type { ActionFailType } from "../../config/index.js";
 import {
   ExpiredResponse,
   MissingArgResponse,
   MissingCredentialResponse,
   UnknownResponse,
-} from "../../config/response.js";
+} from "../../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
@@ -55,10 +55,10 @@ export const underStudySelectedCourseHandler: RequestHandler<
   UnderSelectSelectedOptions
 > = async (req, res) => {
   try {
-    const { id, password, link } = req.body;
+    const { id, password, authToken, link } = req.body;
 
-    if (id && password) {
-      const result = await underStudyLogin({ id, password });
+    if (id && password && authToken) {
+      const result = await underStudyLogin({ id, password, authToken });
 
       if (!result.success) return res.json(result);
 

@@ -4,24 +4,23 @@ import type { RequestHandler } from "express";
 import { authEncrypt } from "./auth-encrypt.js";
 import {
   AUTH_DOMAIN,
+  AUTH_LOGIN_URL,
   AUTH_SERVER,
-  LOGIN_URL,
   SALT_REGEXP,
+  WEB_VPN_AUTH_DOMAIN,
   WEB_VPN_AUTH_SERVER,
 } from "./utils.js";
-import { ActionFailType, UnknownResponse } from "../config/index.js";
+import {
+  ActionFailType,
+  UnknownResponse,
+  WrongPasswordResponse,
+} from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
   EmptyObject,
 } from "../typings.js";
 import { BLACKLIST_HINT, CookieStore, isInBlackList } from "../utils/index.js";
-
-const COMMON_HEADERS = {
-  DNT: "1",
-  "Upgrade-Insecure-Requests": "1",
-  "User-Agent": "inNENU",
-};
 
 export interface AuthLoginOptions extends AccountInfo {
   service?: string;
@@ -39,7 +38,9 @@ export type AuthLoginFailedResponse = CommonFailedResponse<
   | ActionFailType.BlackList
   | ActionFailType.EnabledSSO
   | ActionFailType.Forbidden
+  | ActionFailType.Expired
   | ActionFailType.NeedCaptcha
+  | ActionFailType.NeedReAuth
   | ActionFailType.WrongPassword
   | ActionFailType.Unknown
 >;
@@ -49,6 +50,7 @@ export type AuthLoginResult = AuthLoginSuccessResult | AuthLoginFailedResponse;
 export const authLogin = async ({
   id,
   password,
+  authToken,
   service = "",
   webVPN = false,
   cookieStore = new CookieStore(),
@@ -62,33 +64,49 @@ export const authLogin = async ({
       msg: BLACKLIST_HINT[Math.floor(Math.random() * BLACKLIST_HINT.length)],
     };
 
-  // FIXME: A temp workaround to disable all login
-  return {
-    success: false,
-    type: ActionFailType.WrongPassword,
-    msg: "用户名或密码错误",
-  };
-
+  const domain = webVPN ? WEB_VPN_AUTH_DOMAIN : AUTH_DOMAIN;
   const server = webVPN ? WEB_VPN_AUTH_SERVER : AUTH_SERVER;
+
+  // set auth token manually to bypass the re-auth login
+  cookieStore.set({
+    name: "MULTIFACTOR_USERS",
+    value: authToken,
+    domain: domain,
+    httpOnly: true,
+    expires: new Date("2092-08-12T17:46:12.361Z"),
+  });
 
   const url = `${server}/authserver/login${
     service ? `?service=${encodeURIComponent(service)}` : ""
   }`;
 
   const loginPageResponse = await fetch(url, {
-    headers: { ...COMMON_HEADERS, Cookie: cookieStore.getHeader(server) },
+    headers: {
+      Cookie: cookieStore.getHeader(server),
+      "User-Agent": "inNENU service",
+    },
   });
 
   cookieStore.applyResponse(loginPageResponse, server);
 
   const location = loginPageResponse.headers.get("Location");
 
-  if (loginPageResponse.status === 302)
+  if (loginPageResponse.status === 302) {
+    if (
+      location?.startsWith(`${server}/authserver/reAuthCheck/reAuthSubmit.do`)
+    )
+      return {
+        success: false,
+        type: ActionFailType.NeedReAuth,
+        msg: "需要二次认证，请重新登录",
+      };
+
     return {
       success: true,
       cookieStore,
       location: location!,
     };
+  }
 
   if (loginPageResponse.status === 200) {
     const content = await loginPageResponse.text();
@@ -109,16 +127,16 @@ export const authLogin = async ({
     cookieStore.set({
       name: "org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE",
       value: "zh_CN",
-      domain: AUTH_DOMAIN,
+      domain,
     });
 
-    const checkCaptchaLink = `${AUTH_SERVER}/authserver/checkNeedCaptcha.htl?username=${id}&_=${Date.now()}`;
+    const checkCaptchaLink = `${server}/authserver/checkNeedCaptcha.htl?username=${id}&_=${Date.now()}`;
 
     const captchaCheckResponse = await fetch(checkCaptchaLink, {
       headers: {
         Cookie: cookieStore.getHeader(checkCaptchaLink),
-        ...COMMON_HEADERS,
-        Referer: LOGIN_URL,
+        Referer: AUTH_LOGIN_URL,
+        "User-Agent": "inNENU service",
       },
     });
 
@@ -141,11 +159,7 @@ export const authLogin = async ({
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
         Cookie: cookieStore.getHeader(url),
-        "Sec-Fetch-Site": "same-origin",
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-User": "?1",
-        "Sec-Fetch-Dest": "document",
-        ...COMMON_HEADERS,
+        "User-Agent": "inNENU service",
       },
       body: new URLSearchParams({
         username: id.toString(),
@@ -168,12 +182,17 @@ export const authLogin = async ({
     console.log(`Request location:`, location);
     console.log("Login cookies:", cookieStore.getCookiesMap(server));
 
+    if (response.status === 401) return WrongPasswordResponse;
+
     if (response.status === 200) {
       if (resultContent.includes("您提供的用户名或者密码有误"))
+        return WrongPasswordResponse;
+
+      if (resultContent.includes("会话已失效，请刷新页面再登录"))
         return {
           success: false,
-          type: ActionFailType.WrongPassword,
-          msg: "用户名或密码错误",
+          type: ActionFailType.Expired,
+          msg: "会话已过期，请重新登陆",
         };
 
       if (
@@ -196,7 +215,7 @@ export const authLogin = async ({
           msg: "您已开启单点登录，请访问学校统一身份认证官网，在个人设置中关闭单点登录后重试。",
         };
 
-      if (resultContent.includes("请输入验证码"))
+      if (resultContent.includes("<span>请输入验证码</span>"))
         return {
           success: false,
           type: ActionFailType.NeedCaptcha,
@@ -212,20 +231,12 @@ export const authLogin = async ({
 
       console.error("Unknown login response: ", resultContent);
 
-      return {
-        success: false,
-        type: ActionFailType.Unknown,
-        msg: "未知错误",
-      };
+      return UnknownResponse("未知错误");
     }
 
     if (response.status === 302) {
-      if (location === `${server}/authserver/login`)
-        return {
-          success: false,
-          type: ActionFailType.WrongPassword,
-          msg: "用户名或密码错误",
-        };
+      if (location?.startsWith(`${server}/authserver/login`))
+        return WrongPasswordResponse;
 
       return {
         success: true,

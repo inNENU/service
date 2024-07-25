@@ -1,6 +1,6 @@
 {
   "name": "service",
-  "version": "2024.7.18",
+  "version": "2024.7.24",
   "private": true,
   "type": "module",
   "scripts": {
@@ -24,8 +24,8 @@
   "dependencies": {
     "@alicloud/alinlp20200629": "3.1.0",
     "@alicloud/openapi-client": "0.4.10",
-    "@mptool/net": "0.8.3",
-    "@mptool/parser": "0.8.3",
+    "@mptool/net": "0.8.6",
+    "@mptool/parser": "0.8.6",
     "body-parser": "1.20.2",
     "cheerio": "1.0.0-rc.12",
     "compression": "1.7.4",

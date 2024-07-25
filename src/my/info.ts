@@ -5,7 +5,12 @@ import type { RequestHandler } from "express";
 import type { MyLoginFailedResponse } from "./login.js";
 import { myLogin } from "./login.js";
 import { MY_SERVER } from "./utils.js";
-import { UnknownResponse, code2major, code2org } from "../config/index.js";
+import {
+  MissingCredentialResponse,
+  UnknownResponse,
+  code2major,
+  code2org,
+} from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -248,18 +253,18 @@ export const myInfoHandler: RequestHandler<
   AccountInfo
 > = async (req, res) => {
   try {
-    let cookieHeader = req.headers.cookie;
+    const { id, password, authToken } = req.body;
 
-    if (!cookieHeader) {
+    if (id && password && authToken) {
       const result = await myLogin(req.body);
 
       if (!result.success) return res.json(result);
-      cookieHeader = result.cookieStore.getHeader(MY_SERVER);
+      req.headers.cookie = result.cookieStore.getHeader(MY_SERVER);
+    } else if (!req.headers.cookie) {
+      return res.json(MissingCredentialResponse);
     }
 
-    const info = await getMyInfo(cookieHeader);
-
-    return res.json(info);
+    return res.json(await getMyInfo(req.headers.cookie));
   } catch (err) {
     const { message } = err as Error;
 

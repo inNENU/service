@@ -4,7 +4,7 @@ import type { RichTextNode } from "@mptool/parser";
 import { getRichTextNodes } from "@mptool/parser";
 import type { RequestHandler } from "express";
 
-import { UnknownResponse } from "../config/response.js";
+import { UnknownResponse } from "../config/index.js";
 import type { EmptyObject } from "../typings.js";
 
 const POST_RECOMMEND_PLAN_URL =

@@ -3,8 +3,12 @@ import type { RequestHandler } from "express";
 import { gradOldSystemLogin } from "./login.js";
 import { GRAD_OLD_SYSTEM_HTTPS_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { UnknownResponse, semesterStartTime } from "../config/index.js";
-import type { AccountInfo, EmptyObject, LoginOptions } from "../typings.js";
+import {
+  MissingCredentialResponse,
+  UnknownResponse,
+  semesterStartTime,
+} from "../config/index.js";
+import type { EmptyObject, LoginOptions } from "../typings.js";
 import { IE_8_USER_AGENT, getIETimeStamp } from "../utils/index.js";
 
 export interface ClassItem {
@@ -74,7 +78,7 @@ export const gradOldCourseTableHandler: RequestHandler<
   GradCourseTableOptions
 > = async (req, res) => {
   try {
-    const { time } = req.body;
+    const { id, password, authToken, time } = req.body;
 
     const QUERY_URL = `${GRAD_OLD_SYSTEM_HTTPS_SERVER}/tkglAction.do?${new URLSearchParams(
       {
@@ -83,22 +87,19 @@ export const gradOldCourseTableHandler: RequestHandler<
       },
     ).toString()}`;
 
-    let cookieHeader = req.headers.cookie;
-
-    if (!cookieHeader) {
-      if (!req.body.id || !req.body.password)
-        throw new Error(`"id" and password" field is required!`);
-
-      const result = await gradOldSystemLogin(req.body as AccountInfo);
+    if (id && password && authToken) {
+      const result = await gradOldSystemLogin({ id, password, authToken });
 
       if (!result.success) return res.json(result);
 
-      cookieHeader = result.cookieStore.getHeader(QUERY_URL);
+      req.headers.cookie = result.cookieStore.getHeader(QUERY_URL);
+    } else if (!req.headers.cookie) {
+      return res.json(MissingCredentialResponse);
     }
 
     const response = await fetch(QUERY_URL, {
       headers: {
-        Cookie: cookieHeader,
+        Cookie: req.headers.cookie,
         Referer: `${GRAD_OLD_SYSTEM_HTTPS_SERVER}/tkglAction.do?method=kbxxXs&tktime=${getIETimeStamp()}`,
         "User-Agent": IE_8_USER_AGENT,
       },

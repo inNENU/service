@@ -17,11 +17,13 @@ import {
 } from "./action/index.js";
 import {
   activateHandler,
+  authCaptchaHandler,
   authEncryptHandler,
   authInitHandler,
   authLoginHandler,
   changePasswordHandler,
   infoHandler,
+  reAuthHandler,
   resetPasswordHandler,
 } from "./auth/index.js";
 import { UnknownResponse } from "./config/index.js";
@@ -152,12 +154,16 @@ app.post("/action/notice-list", noticeListHandler);
 app.get("/auth/activate", activateHandler);
 app.post("/auth/activate", activateHandler);
 app.post("/auth/encrypt", authEncryptHandler);
+app.get("/auth/captcha", authCaptchaHandler);
+app.post("/auth/captcha", authCaptchaHandler);
 app.post("/auth/change-password", changePasswordHandler);
 app.patch("/auth/change-password", changePasswordHandler);
 app.get("/auth/init", authInitHandler);
 app.post("/auth/init", authInitHandler);
 app.post("/auth/login", authLoginHandler);
 app.post("/auth/info", infoHandler);
+app.get("/auth/re-auth", reAuthHandler);
+app.post("/auth/re-auth", reAuthHandler);
 app.get("/auth/reset", resetPasswordHandler);
 app.post("/auth/reset", resetPasswordHandler);
 

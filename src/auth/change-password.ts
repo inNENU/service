@@ -3,7 +3,7 @@ import type { RequestHandler } from "express";
 import { authEncrypt } from "./auth-encrypt.js";
 import { authLogin } from "./login.js";
 import { AUTH_SERVER, SALT_REGEXP } from "./utils.js";
-import { UnknownResponse } from "../config/response.js";
+import { UnknownResponse } from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,

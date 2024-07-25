@@ -21,6 +21,13 @@ export const RestrictedResponse: CommonFailedResponse<ActionFailType.Restricted>
     msg: "当前时段系统已关闭，请稍后重试",
   };
 
+export const WrongPasswordResponse: CommonFailedResponse<ActionFailType.WrongPassword> =
+  {
+    success: false,
+    type: ActionFailType.WrongPassword,
+    msg: "用户名或密码错误",
+  };
+
 export const MissingArgResponse = (
   name = "必要",
 ): CommonFailedResponse<ActionFailType.MissingArg> => ({
