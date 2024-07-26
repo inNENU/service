@@ -42,7 +42,13 @@ export const sendReAuthSMS = async (
   cookieHeader: string,
   id: string,
 ): Promise<ReAuthSMSResponse> => {
-  await fetch(RE_AUTH_URL);
+  await fetch(RE_AUTH_URL, {
+    headers: {
+      Cookie: cookieHeader,
+      "User-Agent": "inNENU",
+    },
+    redirect: "manual",
+  });
 
   const response = await fetch(RE_AUTH_SMS_URL, {
     method: "POST",

@@ -332,19 +332,17 @@ export const authInitHandler: RequestHandler<
 
     const result = await initAuth(req.body, cookieHeader);
 
-    if (result.success) {
-      const { info, cookieStore } = result;
-
-      const cookies = cookieStore.getAllCookies().map((item) => item.toJSON());
+    if ("cookieStore" in result) {
+      const cookies = result.cookieStore
+        .getAllCookies()
+        .map((item) => item.toJSON());
 
       cookies.forEach(({ name, value, ...rest }) => {
         res.cookie(name, value, rest);
       });
 
-      return res.json({
-        success: true,
-        info,
-      });
+      // @ts-expect-error: cookieStore is not a JSON-serializable object
+      delete result.cookieStore;
     }
 
     return res.json(result);
