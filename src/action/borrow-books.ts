@@ -79,7 +79,7 @@ export interface BorrowBookData {
   renewTime?: string;
 }
 
-const getBookData = ({
+const getBorrowBookData = ({
   title,
   author,
   loan_date: loanDate,
@@ -115,6 +115,23 @@ export type BorrowBooksResponse =
   | VPNLoginFailedResponse
   | CommonFailedResponse<ActionFailType.Expired | ActionFailType.Unknown>;
 
+const TEST_BOOK_RESPONSE: BorrowBooksSuccessResponse = {
+  success: true,
+  data: Array<BorrowBookData>(4).fill({
+    name: "测试书籍",
+    author: "测试作者",
+    year: 2021,
+    status: "借出",
+    barcode: "000000000000",
+    loanDate: "2021-09-01",
+    dueDate: "2021-09-30",
+    location: "测试位置",
+    shelfNumber: "A1",
+    renew: true,
+    renewTime: "2021-09-15",
+  }),
+};
+
 export const borrowBooksHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
@@ -133,10 +150,14 @@ export const borrowBooksHandler: RequestHandler<
       return res.json(MissingCredentialResponse);
     }
 
+    const cookieHeader = req.headers.cookie;
+
+    if (cookieHeader?.includes("TEST")) return res.json(TEST_BOOK_RESPONSE);
+
     const response = await fetch(BORROW_BOOKS_URL, {
       headers: {
         Accept: "application/json, text/javascript, */*; q=0.01",
-        Cookie: req.headers.cookie,
+        Cookie: cookieHeader,
         Referer: `${ACTION_SERVER}/basicInfo/studentPageTurn?type=lifestudying&tg=bookborrow`,
       },
       redirect: "manual",
@@ -148,7 +169,7 @@ export const borrowBooksHandler: RequestHandler<
 
     return res.json({
       success: true,
-      data: data.success ? data.data.map(getBookData) : [],
+      data: data.success ? data.data.map(getBorrowBookData) : [],
     } as BorrowBooksSuccessResponse);
   } catch (err) {
     const { message } = err as Error;

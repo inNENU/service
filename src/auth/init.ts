@@ -14,6 +14,9 @@ import {
 } from "./utils.js";
 import {
   ActionFailType,
+  TEST_COOKIE_STORE,
+  TEST_ID,
+  TEST_INFO,
   UnknownResponse,
   WrongPasswordResponse,
 } from "../config/index.js";
@@ -41,6 +44,17 @@ export type AuthInitInfoSuccessResult = {
 export type AuthInitInfoResult =
   | AuthInitInfoSuccessResult
   | CommonFailedResponse;
+
+const TEST_AUTH_INFO: AuthInitInfoSuccessResult = {
+  success: true,
+  cookieStore: TEST_COOKIE_STORE,
+  salt: "test",
+  needCaptcha: false,
+  captcha: null,
+  params: {
+    username: TEST_ID,
+  },
+};
 
 export const authInitInfo = async (
   id: string,
@@ -135,6 +149,12 @@ export type InitAuthFailedResponse =
     });
 
 export type InitAuthResult = InitAuthSuccessResult | InitAuthFailedResponse;
+
+const TEST_AUTH_INIT: InitAuthSuccessResult = {
+  success: true,
+  info: TEST_INFO,
+  cookieStore: TEST_COOKIE_STORE,
+};
 
 export const initAuth = async (
   { id, password, authToken, salt, params, openid }: InitAuthOptions,
@@ -278,7 +298,11 @@ export const authInitHandler: RequestHandler<
 > = async (req, res) => {
   try {
     if (req.method === "GET") {
-      const result = await authInitInfo(req.query.id);
+      const id = req.query.id;
+
+      const result =
+        // Note: Return fake result for testing
+        id === TEST_ID ? TEST_AUTH_INFO : await authInitInfo(id);
 
       if (result.success) {
         const cookies = result.cookieStore
@@ -301,19 +325,26 @@ export const authInitHandler: RequestHandler<
       return res.json(result);
     }
 
-    const result = await initAuth(req.body, req.headers.cookie!);
+    const cookieHeader = req.headers.cookie!;
 
-    if ("cookieStore" in result) {
-      const cookies = result.cookieStore
-        .getAllCookies()
-        .map((item) => item.toJSON());
+    // Note: Return fake result for testing
+    if (cookieHeader.includes("TEST")) return res.json(TEST_AUTH_INIT);
+
+    const result = await initAuth(req.body, cookieHeader);
+
+    if (result.success) {
+      const { info, cookieStore } = result;
+
+      const cookies = cookieStore.getAllCookies().map((item) => item.toJSON());
 
       cookies.forEach(({ name, value, ...rest }) => {
         res.cookie(name, value, rest);
       });
 
-      // @ts-expect-error: cookieStore is not a JSON-serializable object
-      delete result.cookieStore;
+      return res.json({
+        success: true,
+        info,
+      });
     }
 
     return res.json(result);

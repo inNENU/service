@@ -91,6 +91,62 @@ export type NoticeListResponse =
   | VPNLoginFailedResponse
   | CommonFailedResponse<ActionFailType.Expired | ActionFailType.Unknown>;
 
+const TEST_NOTICE_LIST: NoticeListSuccessResponse = {
+  success: true,
+  data: Array<NoticeInfo>(10).fill({
+    title: "测试标题",
+    from: "测试来源",
+    time: "2021-01-01",
+    id: "test",
+  }),
+  count: 10,
+  size: 20,
+  current: 1,
+  total: 1,
+};
+
+export const getNoticeList = async (
+  cookieHeader: string,
+  type: string,
+  size: number,
+  current: number,
+): Promise<NoticeListResponse> => {
+  const response = await fetch(NOTICE_LIST_QUERY_URL, {
+    method: "POST",
+    headers: {
+      Accept: "application/json, text/javascript, */*; q=0.01",
+      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+      Cookie: cookieHeader,
+      Referer: `${ACTION_SERVER}/basicInfo/studentPageTurn?type=lifeschool`,
+    },
+    body: new URLSearchParams({
+      type,
+      _search: "false",
+      nd: Date.now().toString(),
+      limit: size.toString(),
+      page: current.toString(),
+    }),
+    redirect: "manual",
+  });
+
+  if (response.status === 302) return ExpiredResponse;
+
+  const { data, pageIndex, pageSize, totalCount, totalPage } =
+    (await response.json()) as RawNoticeListData;
+
+  if (!data.length)
+    throw new Error(`获取公告列表失败: ${JSON.stringify(data, null, 2)}`);
+
+  return {
+    success: true,
+    data: data.map(getNoticeItem),
+    count: totalCount,
+    size: pageSize,
+    current: pageIndex,
+    total: totalPage,
+  } as NoticeListSuccessResponse;
+};
+
 export const noticeListHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
@@ -116,40 +172,11 @@ export const noticeListHandler: RequestHandler<
       return res.json(MissingCredentialResponse);
     }
 
-    const response = await fetch(NOTICE_LIST_QUERY_URL, {
-      method: "POST",
-      headers: {
-        Accept: "application/json, text/javascript, */*; q=0.01",
-        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-        Cookie: req.headers.cookie,
-        Referer: `${ACTION_SERVER}/basicInfo/studentPageTurn?type=lifeschool`,
-      },
-      body: new URLSearchParams({
-        type,
-        _search: "false",
-        nd: Date.now().toString(),
-        limit: size.toString(),
-        page: current.toString(),
-      }),
-      redirect: "manual",
-    });
+    const cookieHeader = req.headers.cookie;
 
-    if (response.status === 302) return res.json(ExpiredResponse);
+    if (cookieHeader.includes("TEST")) return res.json(TEST_NOTICE_LIST);
 
-    const { data, pageIndex, pageSize, totalCount, totalPage } =
-      (await response.json()) as RawNoticeListData;
-
-    if (!data.length)
-      throw new Error(`获取公告列表失败: ${JSON.stringify(data, null, 2)}`);
-
-    return res.json({
-      success: true,
-      data: data.map(getNoticeItem),
-      count: totalCount,
-      size: pageSize,
-      current: pageIndex,
-      total: totalPage,
-    } as NoticeListSuccessResponse);
+    return res.json(await getNoticeList(cookieHeader, type, size, current));
   } catch (err) {
     const { message } = err as Error;
 

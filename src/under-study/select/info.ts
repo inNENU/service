@@ -23,74 +23,6 @@ import { UNDER_STUDY_SERVER } from "../utils.js";
 
 const CHECK_URL = `${UNDER_STUDY_SERVER}/new/student/xsxk/checkFinishPj`;
 
-export interface UnderSelectInfoOptions extends LoginOptions {
-  link: string;
-}
-
-export interface UnderSelectBaseInfo {
-  /** 学期 */
-  term: string;
-  /** 选课名称 */
-  name: string;
-  /** 是否可以选课 */
-  canSelect: boolean;
-
-  /** 可用年级 */
-  grades: number[];
-  /** 可用校区 */
-  areas: SelectOptionConfig[];
-  /** 可用专业 */
-  majors: SelectOptionConfig[];
-  /** 可用开课单位 */
-  offices: SelectOptionConfig[];
-  /** 可用课程类别 */
-  types: SelectOptionConfig[];
-  /** 可用课程分类 */
-  categories: SelectOptionConfig[];
-
-  /** 当前校区 */
-  currentArea: string;
-  /** 当前专业 */
-  currentMajor: string;
-  /** 当前年级 */
-  currentGrade: number;
-}
-
-export interface UnderSelectAllowedInfo extends UnderSelectBaseInfo {
-  canSelect: true;
-
-  /** 是否可退选 */
-  canCancel: boolean;
-  /** 选课阶段 */
-  stage: string;
-  /** 开始时间 */
-  startTime: string;
-  /** 结束时间 */
-  endTime: string;
-}
-
-export interface UnderSelectDisallowedInfo extends UnderSelectBaseInfo {
-  canSelect: false;
-}
-
-export type UnderSelectInfo =
-  | UnderSelectAllowedInfo
-  | UnderSelectDisallowedInfo;
-
-export type UnderSelectInfoSuccessResponse =
-  CommonSuccessResponse<UnderSelectInfo>;
-
-export type UnderSelectInfoResponse =
-  | UnderSelectInfoSuccessResponse
-  | AuthLoginFailedResponse
-  | CommonFailedResponse<
-      | ActionFailType.NotInitialized
-      | ActionFailType.MissingCredential
-      | ActionFailType.MissingCommentary
-      | ActionFailType.MissingArg
-      | ActionFailType.Unknown
-    >;
-
 const COURSE_OFFICES_REGEXP =
   /<select id='kkyxdm' name='kkyxdm'.*?><option value=''>\(请选择\)<\/option>(.*?)<\/select>/;
 const COURSE_OFFICE_ITEM_REGEXP = /<option value='(.+?)' >\d+-(.*?)<\/option>/g;
@@ -171,6 +103,60 @@ const setAreas = (content: string): void => {
     areasStore.setState(areas);
   }
 };
+
+export interface UnderSelectInfoOptions extends LoginOptions {
+  link: string;
+}
+
+export interface UnderSelectBaseInfo {
+  /** 学期 */
+  term: string;
+  /** 选课名称 */
+  name: string;
+  /** 是否可以选课 */
+  canSelect: boolean;
+
+  /** 可用年级 */
+  grades: number[];
+  /** 可用校区 */
+  areas: SelectOptionConfig[];
+  /** 可用专业 */
+  majors: SelectOptionConfig[];
+  /** 可用开课单位 */
+  offices: SelectOptionConfig[];
+  /** 可用课程类别 */
+  types: SelectOptionConfig[];
+  /** 可用课程分类 */
+  categories: SelectOptionConfig[];
+
+  /** 当前校区 */
+  currentArea: string;
+  /** 当前专业 */
+  currentMajor: string;
+  /** 当前年级 */
+  currentGrade: number;
+}
+
+export interface UnderSelectAllowedInfo extends UnderSelectBaseInfo {
+  canSelect: true;
+
+  /** 是否可退选 */
+  canCancel: boolean;
+  /** 选课阶段 */
+  stage: string;
+  /** 开始时间 */
+  startTime: string;
+  /** 结束时间 */
+  endTime: string;
+}
+
+export interface UnderSelectDisallowedInfo extends UnderSelectBaseInfo {
+  canSelect: false;
+}
+
+export type UnderSelectInfo =
+  | UnderSelectAllowedInfo
+  | UnderSelectDisallowedInfo;
 
 const getSelectInfo = (content: string): UnderSelectInfo => {
   const [, term, name, canCancelText = ""] = content.match(INFO_TITLE_REGEXP)!;
@@ -284,6 +270,87 @@ const checkCourseCommentary = async (
   }
 };
 
+export type UnderSelectInfoSuccessResponse =
+  CommonSuccessResponse<UnderSelectInfo>;
+
+export type UnderSelectInfoResponse =
+  | UnderSelectInfoSuccessResponse
+  | AuthLoginFailedResponse
+  | CommonFailedResponse<
+      | ActionFailType.NotInitialized
+      | ActionFailType.MissingCredential
+      | ActionFailType.MissingCommentary
+      | ActionFailType.MissingArg
+      | ActionFailType.Unknown
+    >;
+
+export const getUnderSelectInfo = async (
+  cookieHeader: string,
+  link: string,
+): Promise<UnderSelectInfoResponse> => {
+  const categoryUrl = `${UNDER_STUDY_SERVER}${link}`;
+
+  const response = await fetch(categoryUrl, {
+    headers: {
+      "Cache-Control": "max-age=0",
+      Cookie: cookieHeader,
+      Referer: `${UNDER_STUDY_SERVER}/new/student/xsxk/xklx`,
+      ...EDGE_USER_AGENT_HEADERS,
+    },
+    redirect: "manual",
+  });
+
+  if (response.status !== 200) return ExpiredResponse;
+
+  let content = await response.text();
+
+  if (content.match(/<title>.*?评教检查<\/title>/)) {
+    console.log("评教检查");
+
+    const { completed } = await checkCourseCommentary(
+      cookieHeader,
+      /xnxqdm=(\d+)'/.exec(content)![1],
+      categoryUrl,
+    );
+
+    if (!completed) {
+      return {
+        success: false,
+        msg: "未完成评教",
+        type: ActionFailType.MissingCommentary,
+      };
+    }
+
+    // 重新请求选课信息
+    const recheckResponse = await fetch(categoryUrl, {
+      headers: {
+        "Cache-Control": "max-age=0",
+        Cookie: cookieHeader,
+        Referer: `${UNDER_STUDY_SERVER}/new/student/xsxk/xklx`,
+        ...EDGE_USER_AGENT_HEADERS,
+      },
+      redirect: "manual",
+    });
+
+    if (recheckResponse.status !== 200) return ExpiredResponse;
+
+    content = await recheckResponse.text();
+  }
+
+  if (content.includes("选课正在初始化")) {
+    return {
+      success: false,
+      msg: "选课正在初始化，请稍后再试",
+      type: ActionFailType.NotInitialized,
+    };
+  }
+
+  return {
+    success: true,
+    data: getSelectInfo(content),
+  } as UnderSelectInfoSuccessResponse;
+};
+
 export const underStudySelectInfoHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
@@ -306,67 +373,7 @@ export const underStudySelectInfoHandler: RequestHandler<
 
     if (!link) return res.json(MissingArgResponse("link"));
 
-    const categoryUrl = `${UNDER_STUDY_SERVER}${link}`;
-
-    const response = await fetch(categoryUrl, {
-      headers: {
-        "Cache-Control": "max-age=0",
-        Cookie: cookieHeader,
-        Referer: `${UNDER_STUDY_SERVER}/new/student/xsxk/xklx`,
-        ...EDGE_USER_AGENT_HEADERS,
-      },
-      redirect: "manual",
-    });
-
-    if (response.status !== 200) return res.json(ExpiredResponse);
-
-    let content = await response.text();
-
-    if (content.match(/<title>.*?评教检查<\/title>/)) {
-      console.log("评教检查");
-
-      const { completed } = await checkCourseCommentary(
-        cookieHeader,
-        /xnxqdm=(\d+)'/.exec(content)![1],
-        categoryUrl,
-      );
-
-      if (!completed) {
-        return res.json({
-          success: false,
-          msg: "未完成评教",
-          type: ActionFailType.MissingCommentary,
-        });
-      }
-
-      // 重新请求选课信息
-      const recheckResponse = await fetch(categoryUrl, {
-        headers: {
-          "Cache-Control": "max-age=0",
-          Cookie: cookieHeader,
-          Referer: `${UNDER_STUDY_SERVER}/new/student/xsxk/xklx`,
-          ...EDGE_USER_AGENT_HEADERS,
-        },
-        redirect: "manual",
-      });
-
-      if (recheckResponse.status !== 200) return res.json(ExpiredResponse);
-
-      content = await recheckResponse.text();
-    }
-
-    if (content.includes("选课正在初始化")) {
-      return res.json({
-        success: false,
-        msg: "选课正在初始化，请稍后再试",
-        type: ActionFailType.NotInitialized,
-      });
-    }
-
-    return res.json({
-      success: true,
-      data: getSelectInfo(content),
-    } as UnderSelectInfoSuccessResponse);
+    return res.json(await getUnderSelectInfo(cookieHeader, link));
   } catch (err) {
     const { message } = err as Error;
 

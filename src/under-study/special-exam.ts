@@ -105,6 +105,55 @@ const getSpecialExamResults = (
     gradeCode: kjcjdm,
   }));
 
+const TEST_SPECIAL_EXAM_RESPONSE: UnderSpecialExamSuccessResponse = {
+  success: true,
+  data: Array<UnderSpecialExamResult>(4).fill({
+    semester: "20-21学年第一学期",
+    time: "2020-12-31",
+    name: "测试考试",
+    grade: 100,
+    gradeCode: "100",
+  }),
+};
+
+export const getUnderStudySpecialExam = async (
+  cookieHeader: string,
+): Promise<UnderSpecialExamResponse> => {
+  const response = await fetch(QUERY_URL, {
+    method: "POST",
+    headers: {
+      Accept: "application/json, text/javascript, */*; q=0.01",
+      Cookie: cookieHeader,
+      Referer: `${UNDER_STUDY_SERVER}/new/student/xskjcj/xskjcjlist.page`,
+      ...EDGE_USER_AGENT_HEADERS,
+    },
+    body: new URLSearchParams({
+      page: "1",
+      rows: "50",
+      sort: "xnxqdm",
+      order: "asc",
+    }),
+  });
+
+  if (response.headers.get("Content-Type")?.includes("text/html"))
+    return ExpiredResponse;
+
+  const data = (await response.json()) as RawUnderSpecialExamResult;
+
+  if ("code" in data) {
+    if (data.message === "尚未登录，请先登录") return ExpiredResponse;
+
+    throw new Error(data.message);
+  }
+
+  const records = getSpecialExamResults(data.rows);
+
+  return {
+    success: true,
+    data: records,
+  };
+};
+
 export const underStudySpecialExamHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
@@ -123,40 +172,12 @@ export const underStudySpecialExamHandler: RequestHandler<
       return res.json(MissingCredentialResponse);
     }
 
-    const response = await fetch(QUERY_URL, {
-      method: "POST",
-      headers: {
-        Accept: "application/json, text/javascript, */*; q=0.01",
-        Cookie: req.headers.cookie,
-        Referer: `${UNDER_STUDY_SERVER}/new/student/xskjcj/xskjcjlist.page`,
-        ...EDGE_USER_AGENT_HEADERS,
-      },
-      body: new URLSearchParams({
-        page: "1",
-        rows: "50",
-        sort: "xnxqdm",
-        order: "asc",
-      }),
-    });
+    const cookieHeader = req.headers.cookie;
 
-    if (response.headers.get("Content-Type")?.includes("text/html"))
-      return res.json(ExpiredResponse);
+    if (cookieHeader.includes("TEST"))
+      return res.json(TEST_SPECIAL_EXAM_RESPONSE);
 
-    const data = (await response.json()) as RawUnderSpecialExamResult;
-
-    if ("code" in data) {
-      if (data.message === "尚未登录，请先登录")
-        return res.json(ExpiredResponse);
-
-      throw new Error(data.message);
-    }
-
-    const records = getSpecialExamResults(data.rows);
-
-    return res.json({
-      success: true,
-      data: records,
-    } as UnderSpecialExamSuccessResponse);
+    return res.json(await getUnderStudySpecialExam(cookieHeader));
   } catch (err) {
     const { message } = err as Error;
 

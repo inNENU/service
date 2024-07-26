@@ -7,6 +7,7 @@ import { myLogin } from "./login.js";
 import { MY_SERVER } from "./utils.js";
 import {
   MissingCredentialResponse,
+  TEST_INFO,
   UnknownResponse,
   code2major,
   code2org,
@@ -111,6 +112,11 @@ export interface MyInfoSuccessResult {
 }
 
 export type MyInfoResult = MyInfoSuccessResult | CommonFailedResponse;
+
+const TEST_INFO_RESULT: MyInfoSuccessResult = {
+  success: true,
+  data: TEST_INFO,
+};
 
 export const getMyInfo = async (
   cookieHeader: string,
@@ -263,6 +269,10 @@ export const myInfoHandler: RequestHandler<
     } else if (!req.headers.cookie) {
       return res.json(MissingCredentialResponse);
     }
+
+    const cookieHeader = req.headers.cookie;
+
+    if (cookieHeader.includes("TEST")) return res.json(TEST_INFO_RESULT);
 
     return res.json(await getMyInfo(req.headers.cookie));
   } catch (err) {

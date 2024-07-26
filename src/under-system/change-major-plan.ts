@@ -174,6 +174,45 @@ export type UnderChangeMajorPlanResponse =
   | UnderChangeMajorPlanSuccessResponse
   | UnderChangeMajorPlanFailedResponse;
 
+const TEST_UNDER_CHANGE_MAJOR_PLAN_RESPONSE: UnderChangeMajorPlanSuccessResponse =
+  {
+    success: true,
+    header: "2021年度本科生专业转换计划",
+    plans: Array<ChangeMajorPlan>(2).fill({
+      school: "计算机学院",
+      major: "计算机科学与技术",
+      subject: "理科",
+      examType: "统一考试",
+      time: "2021-08-01",
+      location: "A栋101",
+      plan: 100,
+      current: 50,
+      requirement: "准入考核内容\n1. 本科生\n2. 专业课程\n3. 通过率70%",
+      contact: "张三",
+      phone: "123456789",
+    }),
+  };
+
+export const getUnderChangeMajorPlan = async (
+  cookieHeader: string,
+): Promise<UnderChangeMajorPlanResponse> => {
+  const response = await fetch(`${QUERY_URL}?tktime=${getIETimeStamp()}`, {
+    headers: {
+      Cookie: cookieHeader,
+      "User-Agent": IE_8_USER_AGENT,
+    },
+  });
+
+  const content = await response.text();
+  const header = headerRegExp.exec(content)![1].trim();
+
+  return {
+    success: true,
+    header,
+    plans: await getPlanList(cookieHeader, content),
+  };
+};
+
 export const underChangeMajorPlanHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
@@ -194,23 +233,10 @@ export const underChangeMajorPlanHandler: RequestHandler<
 
     const cookieHeader = req.headers.cookie;
 
-    const response = await fetch(`${QUERY_URL}?tktime=${getIETimeStamp()}`, {
-      headers: {
-        Cookie: cookieHeader,
-        "User-Agent": IE_8_USER_AGENT,
-      },
-    });
+    if (cookieHeader.includes("TEST"))
+      return res.json(TEST_UNDER_CHANGE_MAJOR_PLAN_RESPONSE);
 
-    const content = await response.text();
-    const header = headerRegExp.exec(content)![1].trim();
-
-    const plans = await getPlanList(cookieHeader, content);
-
-    return res.json({
-      success: true,
-      header,
-      plans,
-    } as UnderChangeMajorPlanSuccessResponse);
+    return res.json(getUnderChangeMajorPlan(cookieHeader));
   } catch (err) {
     const { message } = err as Error;
 

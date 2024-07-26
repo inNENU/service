@@ -72,11 +72,11 @@ export const changePasswordHandler: RequestHandler<
       throw new Error("修改密码失败");
     }
 
-    const { id, password } = req.body as AccountInfo;
+    const { id, password, authToken } = req.body as AccountInfo;
 
     console.log("Getting params", req.body);
 
-    const result = await authLogin({ id, password });
+    const result = await authLogin({ id, password, authToken });
 
     if (result.success) {
       const changePassWordUrl = `${AUTH_SERVER}/authserver/passwordChange.do`;

@@ -7,6 +7,7 @@ import type { ActionFailType } from "../config/index.js";
 import {
   ExpiredResponse,
   InvalidArgResponse,
+  MissingArgResponse,
   MissingCredentialResponse,
   UnknownResponse,
 } from "../config/index.js";
@@ -17,12 +18,6 @@ import type {
   LoginOptions,
 } from "../typings.js";
 import { EDGE_USER_AGENT_HEADERS } from "../utils/index.js";
-
-export interface GetUnderCourseCommentaryListOptions extends LoginOptions {
-  type: "list";
-  /** 查询时间 */
-  time?: string;
-}
 
 export interface GetUnderCourseCommentaryOptions extends LoginOptions {
   type: "get";
@@ -41,6 +36,54 @@ export interface SubmitUnderCourseCommentaryOptions
   /** 评语 */
   commentary: string;
 }
+
+interface RawUnderCourseCommentarySubmitSuccessResult {
+  code: 0;
+  data: "";
+  message: "评价成功";
+}
+
+interface RawUnderCourseCommentaryListFailedResult {
+  code: number;
+  data: string;
+  message: string;
+}
+
+type RawUnderCourseCommentarySubmitResult =
+  | RawUnderCourseCommentarySubmitSuccessResult
+  | RawUnderCourseCommentaryListFailedResult;
+
+const MAIN_URL = `${UNDER_STUDY_SERVER}/new/student/teapj`;
+const LIST_URL = `${UNDER_STUDY_SERVER}/new/student/teapj/pjDatas`;
+const VIEW_URL = `${UNDER_STUDY_SERVER}/new/student/teapj/viewPjData`;
+const ANSWER_URL = `${UNDER_STUDY_SERVER}/new/student/teapj/pj.page`;
+
+const SELECTED_OPTION_REG =
+  /<option value='([^']*?)' selected>([^<]*?)<\/option>/;
+
+const getCurrentTime = async (
+  cookieHeader: string,
+): Promise<{ time: string; value: string }> => {
+  const response = await fetch(MAIN_URL, {
+    headers: {
+      Cookie: cookieHeader,
+      ...EDGE_USER_AGENT_HEADERS,
+      referer: `${UNDER_STUDY_SERVER}/new/student/teapj`,
+    },
+  });
+
+  const html = await response.text();
+  const timeMatch = SELECTED_OPTION_REG.exec(html);
+
+  if (!timeMatch) throw new Error("无法获取当前评教日期");
+
+  const [, value, time] = timeMatch;
+
+  return {
+    time,
+    value,
+  };
+};
 
 interface RawUnderCourseCommentaryListResultItem {
   rownum_: number;
@@ -106,13 +149,146 @@ export interface UnderCourseCommentaryItem {
   commentaryCode: string;
 }
 
-export type UnderCourseCommentaryListListSuccessResponse =
-  CommonSuccessResponse<UnderCourseCommentaryItem[]>;
+const getCourseList = (
+  records: RawUnderCourseCommentaryListResultItem[],
+): UnderCourseCommentaryItem[] =>
+  records.map(
+    ({
+      xnxqmc: term,
+      jkrq: endDate,
+      kcmc: name,
+      dgksdm: courseCode,
+      teaxm: teacherName,
+      teadm: teacherCode,
+      jxhjmc: teachingLinkName,
+      pjdm: commentaryCode,
+    }) => ({
+      term,
+      endDate,
+      name,
+      courseCode,
+      teacherName,
+      teacherCode,
+      teachingLinkName,
+      commentaryCode,
+    }),
+  );
 
-export type UnderCourseCommentaryListListResponse =
-  | UnderCourseCommentaryListListSuccessResponse
+export interface ListUnderCourseCommentaryOptions extends LoginOptions {
+  type: "list";
+  /** 查询时间 */
+  time?: string;
+}
+
+export type UnderCourseCommentaryListSuccessResponse = CommonSuccessResponse<
+  UnderCourseCommentaryItem[]
+>;
+
+export type UnderCourseCommentaryListResponse =
+  | UnderCourseCommentaryListSuccessResponse
   | AuthLoginFailedResponse
   | CommonFailedResponse<ActionFailType.Expired | ActionFailType.Unknown>;
+
+export const listUnderCourseCommentary = async (
+  cookieHeader: string,
+  time?: string,
+): Promise<UnderCourseCommentaryListResponse> => {
+  const commentaryTime = time ?? (await getCurrentTime(cookieHeader)).value;
+
+  const response = await fetch(LIST_URL, {
+    method: "POST",
+    headers: {
+      Accept: "application/json, text/javascript, */*; q=0.01",
+      Cookie: cookieHeader,
+      Referer: `${UNDER_STUDY_SERVER}/new/student/teapj`,
+      ...EDGE_USER_AGENT_HEADERS,
+    },
+    body: new URLSearchParams({
+      xnxqdm: commentaryTime,
+      source: "kccjlist",
+      primarySort: "kcrwdm asc",
+      page: "1",
+      rows: "150",
+      sort: "jkrq",
+      order: "asc",
+    }),
+  });
+
+  if (response.headers.get("Content-Type")?.includes("text/html"))
+    return ExpiredResponse;
+
+  const data = (await response.json()) as RawUnderCourseCommentaryListResult;
+
+  if ("code" in data) {
+    if (data.message === "尚未登录，请先登录") return ExpiredResponse;
+
+    throw new Error(data.message);
+  }
+
+  return {
+    success: true,
+    data: getCourseList(data.rows),
+  };
+};
+
+interface RawUnderCourseCommentaryScore {
+  dtjg: string;
+  xzpf: number;
+  yjfk: "";
+  zbdm: string;
+  zbfz: number;
+  zbmc: string;
+}
+
+export interface UnderCourseCommentaryScoreItem {
+  name: string;
+  answer: string;
+  score: number;
+}
+
+const getCourseCommentary = (
+  records: RawUnderCourseCommentaryScore[],
+): UnderCourseCommentaryScoreItem[] =>
+  records.map(({ zbfz: score, zbmc: name, dtjg: answer }) => ({
+    name,
+    answer,
+    score,
+  }));
+
+export interface ViewUnderCourseCommentaryOptions extends LoginOptions {
+  type: "view";
+  commentaryCode: string;
+}
+
+export type UnderCourseCommentaryViewSuccessResponse = CommonSuccessResponse<
+  UnderCourseCommentaryScoreItem[]
+>;
+
+export type UnderCourseCommentaryViewResponse =
+  | UnderCourseCommentaryViewSuccessResponse
+  | AuthLoginFailedResponse
+  | CommonFailedResponse<ActionFailType.Expired | ActionFailType.Unknown>;
+
+export const viewUnderCourseCommentary = async (
+  cookieHeader: string,
+  commentaryCode: string,
+): Promise<UnderCourseCommentaryViewResponse> => {
+  const response = await fetch(`${VIEW_URL}?pjdm=${commentaryCode}`, {
+    headers: {
+      Accept: "application/json, text/javascript, */*; q=0.01",
+      Cookie: cookieHeader,
+      Referer: `${UNDER_STUDY_SERVER}/new/student/teapj`,
+      ...EDGE_USER_AGENT_HEADERS,
+    },
+  });
+
+  const data = (await response.json()) as RawUnderCourseCommentaryScore[];
+
+  return {
+    success: true,
+    data: getCourseCommentary(data),
+  };
+};
 
 export interface UnderCourseCommentaryInfo {
   /** 参数 */
@@ -141,108 +317,6 @@ export interface UnderCourseCommentaryInfo {
     name: string;
   };
 }
-
-interface RawUnderCourseCommentarySubmitSuccessResult {
-  code: 0;
-  data: "";
-  message: "评价成功";
-}
-
-interface RawUnderCourseCommentaryListFailedResult {
-  code: number;
-  data: string;
-  message: string;
-}
-
-type RawUnderCourseCommentarySubmitResult =
-  | RawUnderCourseCommentarySubmitSuccessResult
-  | RawUnderCourseCommentaryListFailedResult;
-
-const MAIN_URL = `${UNDER_STUDY_SERVER}/new/student/teapj`;
-const LIST_URL = `${UNDER_STUDY_SERVER}/new/student/teapj/pjDatas`;
-const VIEW_URL = `${UNDER_STUDY_SERVER}/new/student/teapj/viewPjData`;
-const ANSWER_URL = `${UNDER_STUDY_SERVER}/new/student/teapj/pj.page`;
-
-const SELECTED_OPTION_REG =
-  /<option value='([^']*?)' selected>([^<]*?)<\/option>/;
-
-const getCurrentTime = async (
-  cookieHeader: string,
-): Promise<{ time: string; value: string }> => {
-  const response = await fetch(MAIN_URL, {
-    headers: {
-      Cookie: cookieHeader,
-      ...EDGE_USER_AGENT_HEADERS,
-      referer: `${UNDER_STUDY_SERVER}/new/student/teapj`,
-    },
-  });
-
-  const html = await response.text();
-  const timeMatch = SELECTED_OPTION_REG.exec(html);
-
-  if (!timeMatch) throw new Error("无法获取当前评教日期");
-
-  const [, value, time] = timeMatch;
-
-  return {
-    time,
-    value,
-  };
-};
-
-const getCourseList = (
-  records: RawUnderCourseCommentaryListResultItem[],
-): UnderCourseCommentaryItem[] =>
-  records.map(
-    ({
-      xnxqmc: term,
-      jkrq: endDate,
-      kcmc: name,
-      dgksdm: courseCode,
-      teaxm: teacherName,
-      teadm: teacherCode,
-      jxhjmc: teachingLinkName,
-      pjdm: commentaryCode,
-    }) => ({
-      term,
-      endDate,
-      name,
-      courseCode,
-      teacherName,
-      teacherCode,
-      teachingLinkName,
-      commentaryCode,
-    }),
-  );
-
-interface RawUnderCourseCommentaryScore {
-  dtjg: string;
-  xzpf: number;
-  yjfk: "";
-  zbdm: string;
-  zbfz: number;
-  zbmc: string;
-}
-
-export interface ViewUnderCourseCommentaryOptions extends LoginOptions {
-  type: "view";
-  commentaryCode: string;
-}
-
-export interface UnderCourseCommentaryScoreItem {
-  name: string;
-  answer: string;
-  score: number;
-}
-
-const getCourseCommentary = (
-  records: RawUnderCourseCommentaryScore[],
-): UnderCourseCommentaryScoreItem[] =>
-  records.map(({ zbfz: score, zbmc: name, dtjg: answer }) => ({
-    name,
-    answer,
-    score,
-  }));
 
 const PARAMS_REGEXP = /'\/new\/student\/teapj\/savePj',\s+\{\s+([^]*?)\s+wtpf:/;
 const PARAMS_ITEM_REGEXP = /\b([^:]+): ?'([^']+)',/;
@@ -302,7 +376,7 @@ const getCourseInfo = (html: string): UnderCourseCommentaryInfo => {
 
 type UnderCourseCommentaryOptions =
   | ViewUnderCourseCommentaryOptions
-  | GetUnderCourseCommentaryListOptions
+  | ListUnderCourseCommentaryOptions
   | GetUnderCourseCommentaryOptions
   | SubmitUnderCourseCommentaryOptions;
 
@@ -326,66 +400,20 @@ export const underStudyCourseCommentaryHandler: RequestHandler<
 
     const cookieHeader = req.headers.cookie;
 
-    if (req.body.type === "list") {
-      const time = req.body.time ?? (await getCurrentTime(cookieHeader)).value;
-
-      const response = await fetch(LIST_URL, {
-        method: "POST",
-        headers: {
-          Accept: "application/json, text/javascript, */*; q=0.01",
-          Cookie: cookieHeader,
-          Referer: `${UNDER_STUDY_SERVER}/new/student/teapj`,
-          ...EDGE_USER_AGENT_HEADERS,
-        },
-        body: new URLSearchParams({
-          xnxqdm: time,
-          source: "kccjlist",
-          primarySort: "kcrwdm asc",
-          page: "1",
-          rows: "150",
-          sort: "jkrq",
-          order: "asc",
-        }),
-      });
-
-      if (response.headers.get("Content-Type")?.includes("text/html"))
-        return res.json(ExpiredResponse);
-
-      const data =
-        (await response.json()) as RawUnderCourseCommentaryListResult;
-
-      if ("code" in data) {
-        if (data.message === "尚未登录，请先登录")
-          return res.json(ExpiredResponse);
-
-        throw new Error(data.message);
-      }
-
-      return res.json({
-        success: true,
-        data: getCourseList(data.rows),
-      });
-    }
-
-    if (req.body.type === "view") {
-      const response = await fetch(
-        `${VIEW_URL}?pjdm=${req.body.commentaryCode}`,
-        {
-          headers: {
-            Accept: "application/json, text/javascript, */*; q=0.01",
-            Cookie: cookieHeader,
-            Referer: `${UNDER_STUDY_SERVER}/new/student/teapj`,
-            ...EDGE_USER_AGENT_HEADERS,
-          },
-        },
+    if (req.body.type === "list")
+      return res.json(
+        await listUnderCourseCommentary(cookieHeader, req.body.time),
       );
 
-      const data = (await response.json()) as RawUnderCourseCommentaryScore[];
+    if (req.body.type === "view") {
+      const { commentaryCode } = req.body;
 
-      return res.json({
-        success: true,
-        data: getCourseCommentary(data),
-      });
+      if (!commentaryCode)
+        return res.json(MissingArgResponse("commentaryCode"));
+
+      return res.json(
+        await viewUnderCourseCommentary(cookieHeader, req.body.commentaryCode),
+      );
     }
 
     if (req.body.type === "get") {

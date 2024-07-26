@@ -10,7 +10,7 @@ import type {
   EmptyObject,
 } from "../typings.js";
 
-interface IdentityInfo {
+interface RAWIdentityInfo {
   success: true;
   sf: "bks" | "yjs" | "lxs" | "jzg";
 }
@@ -27,6 +27,13 @@ export interface MyIdentitySuccessResult {
 
 export type MyIdentityResult = MyIdentitySuccessResult | CommonFailedResponse;
 
+const TEST_IDENTITY_RESULT: MyIdentitySuccessResult = {
+  success: true,
+  data: {
+    type: "bks",
+  },
+};
+
 export const getMyIdentity = async (
   cookieHeader: string,
 ): Promise<MyIdentityResult> => {
@@ -39,7 +46,7 @@ export const getMyIdentity = async (
       },
     });
 
-    const identityResult = (await infoResponse.json()) as IdentityInfo;
+    const identityResult = (await infoResponse.json()) as RAWIdentityInfo;
 
     if (identityResult.success)
       return {
@@ -80,7 +87,11 @@ export const myIdentityHandler: RequestHandler<
       return res.json(MissingCredentialResponse);
     }
 
-    return res.json(await getMyIdentity(req.headers.cookie));
+    const cookieHeader = req.headers.cookie;
+
+    if (cookieHeader.includes("TEST")) return res.json(TEST_IDENTITY_RESULT);
+
+    return res.json(await getMyIdentity(cookieHeader));
   } catch (err) {
     const { message } = err as Error;
 

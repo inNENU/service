@@ -91,6 +91,16 @@ export const underCourseTableHandler: RequestHandler<
   try {
     const { id, password, authToken, time } = req.body;
 
+    if (id && password && authToken) {
+      const result = await underSystemLogin(req.body as AccountInfo);
+
+      if (!result.success) return res.json(result);
+
+      req.headers.cookie = result.cookieStore.getHeader(UNDER_SYSTEM_SERVER);
+    } else if (!req.headers.cookie) {
+      return res.json(MissingCredentialResponse);
+    }
+
     const QUERY_URL = `${UNDER_SYSTEM_SERVER}/tkglAction.do?${new URLSearchParams(
       {
         method: "goListKbByXs",
@@ -99,16 +109,6 @@ export const underCourseTableHandler: RequestHandler<
         zc: "",
       },
     ).toString()}`;
-
-    if (id && password && authToken) {
-      const result = await underSystemLogin(req.body as AccountInfo);
-
-      if (!result.success) return res.json(result);
-
-      req.headers.cookie = result.cookieStore.getHeader(QUERY_URL);
-    } else if (!req.headers.cookie) {
-      return res.json(MissingCredentialResponse);
-    }
 
     const response = await fetch(QUERY_URL, {
       headers: {

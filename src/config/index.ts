@@ -6,3 +6,4 @@ export * from "./major.js";
 export * from "./org.js";
 export * from "./response.js";
 export * from "./semester-start-time.js";
+export * from "./test.js";

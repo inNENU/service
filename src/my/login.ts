@@ -6,10 +6,14 @@ import { MY_MAIN_PAGE } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
-import { UnknownResponse } from "../config/index.js";
+import {
+  TEST_ID_NUMBER,
+  TEST_LOGIN_RESULT,
+  UnknownResponse,
+} from "../config/index.js";
 import type { AccountInfo, EmptyObject } from "../typings.js";
-import type { VPNLoginFailedResponse } from "../vpn/login.js";
-import { vpnCASLogin } from "../vpn/login.js";
+import type { VPNLoginFailedResponse } from "../vpn/index.js";
+import { vpnCASLogin } from "../vpn/index.js";
 
 export interface MyLoginSuccessResult {
   success: true;
@@ -101,7 +105,11 @@ export const myLoginHandler: RequestHandler<
   AccountInfo
 > = async (req, res) => {
   try {
-    const result = await myLogin(req.body);
+    const result =
+      // fake result for testing
+      req.body.id === TEST_ID_NUMBER
+        ? TEST_LOGIN_RESULT
+        : await myLogin(req.body);
 
     if (result.success) {
       const cookies = result.cookieStore

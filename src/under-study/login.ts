@@ -7,13 +7,22 @@ import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { AUTH_SERVER, WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
 import type { ActionFailType } from "../config/index.js";
-import { RestrictedResponse, UnknownResponse } from "../config/index.js";
+import {
+  RestrictedResponse,
+  TEST_ID_NUMBER,
+  TEST_LOGIN_RESULT,
+  UnknownResponse,
+} from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
   EmptyObject,
 } from "../typings.js";
 import { EDGE_USER_AGENT_HEADERS } from "../utils/index.js";
+
+export interface UnderStudyLoginOptions extends AccountInfo {
+  webVPN?: boolean;
+}
 
 export interface UnderStudyLoginSuccessResult {
   success: true;
@@ -24,10 +33,6 @@ export type UnderStudyLoginResult =
   | UnderStudyLoginSuccessResult
   | AuthLoginFailedResponse
   | CommonFailedResponse<ActionFailType.Restricted>;
-
-export interface UnderStudyLoginOptions extends AccountInfo {
-  webVPN?: boolean;
-}
 
 // FIXME: Add webVPN issue hints
 export const underStudyLogin = async (
@@ -121,7 +126,11 @@ export const underStudyLoginHandler: RequestHandler<
   UnderStudyLoginOptions
 > = async (req, res) => {
   try {
-    const result = await underStudyLogin(req.body);
+    const result =
+      // fake result for testing
+      req.body.id === TEST_ID_NUMBER
+        ? TEST_LOGIN_RESULT
+        : await underStudyLogin(req.body);
 
     if (result.success) {
       const cookies = result.cookieStore

@@ -52,6 +52,85 @@ export type NoticeResponse =
   | VPNLoginFailedResponse
   | CommonFailedResponse<ActionFailType.Expired | ActionFailType.Unknown>;
 
+const TEST_NOTICE_DETAIL: NoticeSuccessResponse = {
+  success: true,
+  data: {
+    title: "测试标题",
+    author: "测试作者",
+    time: "2021-01-01",
+    from: "测试来源",
+    pageView: 100,
+    content: [
+      {
+        type: "node",
+        name: "p",
+        children: [
+          {
+            type: "text",
+            text: "测试内容",
+          },
+        ],
+      },
+    ],
+  },
+};
+
+export const getNoticeDetail = async (
+  cookieHeader: string,
+  noticeID: string,
+): Promise<NoticeResponse> => {
+  const url = `${ACTION_SERVER}/page/viewNews?ID=${noticeID}`;
+
+  const response = await fetch(url, {
+    headers: {
+      Cookie: cookieHeader,
+    },
+    redirect: "manual",
+  });
+
+  if (response.status === 302) return ExpiredResponse;
+
+  const text = await response.text();
+
+  const title = TITLE_REGEXP.exec(text)![1];
+  const author = AUTHOR_REGEXP.exec(text)![1];
+  const time = TIME_REGEXP.exec(text)![1];
+  const from = FROM_REGEXP.exec(text)![1];
+  const pageView = PAGEVIEW_REGEXP.exec(text)![1];
+  const content = CONTENT_REGEXP.exec(text)![1];
+
+  const data = {
+    title,
+    author,
+    from,
+    time,
+    pageView: Number(pageView),
+    content: await getRichTextNodes(content, {
+      transform: {
+        a: (node) => {
+          const href = node.attrs?.href;
+
+          if (
+            href &&
+            !href.startsWith(ACTION_SERVER) &&
+            !href.startsWith(MY_SERVER)
+          )
+            node.children?.push({ type: "text", text: ` (${href})` });
+
+          return node;
+        },
+        // TODO: Support image
+        img: () => null,
+      },
+    }),
+  };
+
+  return {
+    success: true,
+    data,
+  };
+};
+
 export const noticeHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
@@ -62,66 +141,21 @@ export const noticeHandler: RequestHandler<
 
     if (!noticeID) return res.json(MissingArgResponse("公告 ID"));
 
-    const noticeUrl = `${ACTION_SERVER}/page/viewNews?ID=${noticeID}`;
-
     if (id && password && authToken) {
       const result = await actionLogin({ id, password, authToken });
 
       if (!result.success) return res.json(result);
 
-      req.headers.cookie = result.cookieStore.getHeader(noticeUrl);
+      req.headers.cookie = result.cookieStore.getHeader(ACTION_SERVER);
     } else if (!req.headers.cookie) {
       return res.json(MissingCredentialResponse);
     }
 
-    const response = await fetch(noticeUrl, {
-      headers: {
-        Cookie: req.headers.cookie,
-      },
-      redirect: "manual",
-    });
+    const cookieHeader = req.headers.cookie;
 
-    if (response.status === 302) return res.json(ExpiredResponse);
+    if (cookieHeader.includes("TEST")) return res.json(TEST_NOTICE_DETAIL);
 
-    const text = await response.text();
-
-    const title = TITLE_REGEXP.exec(text)![1];
-    const author = AUTHOR_REGEXP.exec(text)![1];
-    const time = TIME_REGEXP.exec(text)![1];
-    const from = FROM_REGEXP.exec(text)![1];
-    const pageView = PAGEVIEW_REGEXP.exec(text)![1];
-    const content = CONTENT_REGEXP.exec(text)![1];
-
-    const data = {
-      title,
-      author,
-      from,
-      time,
-      pageView: Number(pageView),
-      content: await getRichTextNodes(content, {
-        transform: {
-          a: (node) => {
-            const href = node.attrs?.href;
-
-            if (
-              href &&
-              !href.startsWith(ACTION_SERVER) &&
-              !href.startsWith(MY_SERVER)
-            )
-              node.children?.push({ type: "text", text: ` (${href})` });
-
-            return node;
-          },
-          // TODO: Support image
-          img: () => null,
-        },
-      }),
-    };
-
-    return res.json({
-      success: true,
-      data,
-    } as NoticeSuccessResponse);
+    return res.json(await getNoticeDetail(cookieHeader, noticeID));
   } catch (err) {
     const { message } = err as Error;
 

@@ -40,6 +40,42 @@ export type CardBalanceResponse =
   | VPNLoginFailedResponse
   | CommonFailedResponse<ActionFailType.Expired | ActionFailType.Unknown>;
 
+const TEST_CARD_BALANCE_RESPONSE: CardBalanceSuccessResponse = {
+  success: true,
+  data: 10,
+};
+
+export const getCardBalance = async (
+  cookieHeader: string,
+): Promise<CardBalanceResponse> => {
+  const response = await fetch(CARD_BALANCE_URL, {
+    method: "POST",
+    headers: {
+      Accept: "application/json, text/javascript, */*; q=0.01",
+      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+      Cookie: cookieHeader,
+      Referer: `${ACTION_SERVER}/basicInfo/studentPageTurn?type=lifeschool`,
+    },
+    body: CARD_BALANCE_PARAMS,
+    redirect: "manual",
+  });
+
+  if (response.status === 302) return ExpiredResponse;
+
+  const data = (await response.json()) as RawCardBalanceData;
+
+  if (!data.success) throw new Error(JSON.stringify(data));
+
+  const balanceList = data.demo.items.item;
+
+  return {
+    success: true,
+    data: balanceList[0]?.kye.match(/\d+/)
+      ? Number(balanceList[0].kye) / 100
+      : 0,
+  };
+};
+
 export const cardBalanceHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
@@ -58,32 +94,12 @@ export const cardBalanceHandler: RequestHandler<
       return res.json(MissingCredentialResponse);
     }
 
-    const response = await fetch(CARD_BALANCE_URL, {
-      method: "POST",
-      headers: {
-        Accept: "application/json, text/javascript, */*; q=0.01",
-        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-        Cookie: req.headers.cookie,
-        Referer: `${ACTION_SERVER}/basicInfo/studentPageTurn?type=lifeschool`,
-      },
-      body: CARD_BALANCE_PARAMS,
-      redirect: "manual",
-    });
+    const cookieHeader = req.headers.cookie;
 
-    if (response.status === 302) return res.json(ExpiredResponse);
+    if (cookieHeader.includes("TEST"))
+      return res.json(TEST_CARD_BALANCE_RESPONSE);
 
-    const data = (await response.json()) as RawCardBalanceData;
-
-    if (!data.success) throw new Error(JSON.stringify(data));
-
-    const balanceList = data.demo.items.item;
-
-    return res.json({
-      success: true,
-      data: balanceList[0]?.kye.match(/\d+/)
-        ? Number(balanceList[0].kye) / 100
-        : 0,
-    } as CardBalanceSuccessResponse);
+    return res.json(await getCardBalance(cookieHeader));
   } catch (err) {
     const { message } = err as Error;
 

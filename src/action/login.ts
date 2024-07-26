@@ -5,7 +5,11 @@ import type { RequestHandler } from "express";
 import { ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { WEB_VPN_AUTH_SERVER, authLogin } from "../auth/index.js";
-import { UnknownResponse } from "../config/index.js";
+import {
+  TEST_ID_NUMBER,
+  TEST_LOGIN_RESULT,
+  UnknownResponse,
+} from "../config/index.js";
 import type { AccountInfo, EmptyObject } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 import { vpnCASLogin } from "../vpn/index.js";
@@ -81,7 +85,10 @@ export const actionLoginHandler: RequestHandler<
   AccountInfo
 > = async (req, res) => {
   try {
-    const result = await actionLogin(req.body);
+    const result =
+      req.body.id === TEST_ID_NUMBER
+        ? TEST_LOGIN_RESULT
+        : await actionLogin(req.body);
 
     if (result.success) {
       const cookies = result.cookieStore

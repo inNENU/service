@@ -130,6 +130,8 @@ export interface UnderStudyGradeResult {
   point: number;
   /** 成绩标识 */
   mark: string;
+  /** 开课单位 */
+  office: string;
   /** 考试性质 */
   examType: "正常考试" | "校际交流" | "补考";
 }
@@ -183,6 +185,68 @@ const getGradeLists = (
     }),
   );
 
+const TEST_UNDER_GRADE_LIST_RESPONSE: UnderGradeListSuccessResponse = {
+  success: true,
+  data: Array<UnderStudyGradeResult>(10).fill({
+    time: "2021-2022",
+    cid: "2021-2022-1",
+    name: "测试课程",
+    grade: 100,
+    gradeCode: "A",
+    gradeText: "优秀",
+    gradeType: "百分制",
+    courseType: "必修",
+    shortCourseType: "必",
+    office: "测试单位",
+    hours: 36,
+    point: 2,
+    examType: "正常考试",
+    mark: "正常",
+  }),
+};
+
+export const getUnderGradeList = async (
+  cookieHeader: string,
+  time: string,
+): Promise<UnderGradeListResponse> => {
+  const response = await fetch(QUERY_URL, {
+    method: "POST",
+    headers: {
+      Accept: "application/json, text/javascript, */*; q=0.01",
+      Cookie: cookieHeader,
+      Referer: `${UNDER_STUDY_SERVER}/new/student/xskccj/kccjList.page`,
+      ...EDGE_USER_AGENT_HEADERS,
+    },
+    body: new URLSearchParams({
+      xnxqdm: time,
+      source: "kccjlist",
+      primarySort: "cjdm desc",
+      page: "1",
+      rows: "150",
+      sort: "kcmc",
+      order: "asc",
+    }),
+  });
+
+  if (response.headers.get("Content-Type")?.includes("text/html"))
+    return ExpiredResponse;
+
+  const data = (await response.json()) as RawUnderGradeResult;
+
+  if ("code" in data) {
+    if (data.message === "尚未登录，请先登录") return ExpiredResponse;
+
+    throw new Error(data.message);
+  }
+
+  const gradeList = getGradeLists(data.rows);
+
+  return {
+    success: true,
+    data: gradeList,
+  } as UnderGradeListSuccessResponse;
+};
+
 export const underStudyGradeListHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
@@ -201,43 +265,13 @@ export const underStudyGradeListHandler: RequestHandler<
       return res.json(MissingCredentialResponse);
     }
 
-    const response = await fetch(QUERY_URL, {
-      method: "POST",
-      headers: {
-        Accept: "application/json, text/javascript, */*; q=0.01",
-        Cookie: req.headers.cookie,
-        Referer: `${UNDER_STUDY_SERVER}/new/student/xskccj/kccjList.page`,
-        ...EDGE_USER_AGENT_HEADERS,
-      },
-      body: new URLSearchParams({
-        xnxqdm: time,
-        source: "kccjlist",
-        primarySort: "cjdm desc",
-        page: "1",
-        rows: "150",
-        sort: "kcmc",
-        order: "asc",
-      }),
-    });
+    const cookieHeader = req.headers.cookie;
 
-    if (response.headers.get("Content-Type")?.includes("text/html"))
-      return res.json(ExpiredResponse);
-
-    const data = (await response.json()) as RawUnderGradeResult;
-
-    if ("code" in data) {
-      if (data.message === "尚未登录，请先登录")
-        return res.json(ExpiredResponse);
-
-      throw new Error(data.message);
+    if (cookieHeader.includes("TEST")) {
+      return res.json(TEST_UNDER_GRADE_LIST_RESPONSE);
     }
 
-    const gradeList = getGradeLists(data.rows);
-
-    return res.json({
-      success: true,
-      data: gradeList,
-    } as UnderGradeListSuccessResponse);
+    return res.json(await getUnderGradeList(cookieHeader, time));
   } catch (err) {
     const { message } = err as Error;
 

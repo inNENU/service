@@ -2,12 +2,15 @@ import type { RequestHandler } from "express";
 
 import { queryMyActions } from "./actions.js";
 import type { MyInfo } from "./info.js";
-import { getMyInfo } from "./info.js";
 import type { MyLoginFailedResponse } from "./login.js";
 import { myLogin } from "./login.js";
 import { getProcess } from "./process.js";
 import { MY_SERVER } from "./utils.js";
-import { ActionFailType, UnknownResponse } from "../config/index.js";
+import {
+  ActionFailType,
+  MissingCredentialResponse,
+  UnknownResponse,
+} from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
@@ -61,6 +64,7 @@ const getMailInitInfo = async (
 
 export interface GetEmailInfoOptions extends LoginOptions {
   type: "get";
+  id: number;
 }
 
 type RawCheckMailData = { flag: false; yxmc: string } | { flag: true };
@@ -94,9 +98,15 @@ export type GetEmailFailedResponse =
 
 export type GetEmailResponse = GetEmailSuccessResponse | GetEmailFailedResponse;
 
+const TEST_GET_EMAIL_RESPONSE: GetEmailSuccessResponse = {
+  success: true,
+  hasEmail: true,
+  email: "admin@example.com",
+};
+
 export const getEmailInfo = async (
   cookieHeader: string,
-  info: MyInfo,
+  id: number,
 ): Promise<GetEmailResponse> => {
   const checkMailResponse = await fetch(`${MY_SERVER}/Gryxsq/checkMailBox`, {
     method: "POST",
@@ -105,7 +115,7 @@ export const getEmailInfo = async (
       "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
       Cookie: cookieHeader,
     },
-    body: `userId=${info.id}`,
+    body: `userId=${id}`,
   });
 
   const checkResult = (await checkMailResponse.json()) as RawCheckMailData;
@@ -237,7 +247,7 @@ const activateEmail = async (
         Cookie: cookieHeader,
       },
       body: new URLSearchParams({
-        // can be get through the process
+        // This magic string can be get through the process
         f: "72f6e76cde1b4af890adf5f417ee153f",
         b: "null",
         TASK_ID_: taskId,
@@ -276,18 +286,18 @@ export const emailHandler: RequestHandler<
   GetEmailInfoOptions | ActivateEmailOptions
 > = async (req, res) => {
   try {
-    let cookieHeader = req.headers.cookie;
+    const { id, password, authToken } = req.body;
 
-    if (!cookieHeader) {
+    if (id && password && authToken) {
       const result = await myLogin(req.body as AccountInfo);
 
       if (!result.success) return res.json(result);
-      cookieHeader = result.cookieStore.getHeader(MY_SERVER);
+      req.headers.cookie = result.cookieStore.getHeader(MY_SERVER);
+    } else if (!req.headers.cookie) {
+      return res.json(MissingCredentialResponse);
     }
 
-    const info = await getMyInfo(cookieHeader);
-
-    if (!info.success) return res.json(info);
+    const cookieHeader = req.headers.cookie;
 
     if (req.body.type === "set")
       return res.json({
@@ -296,7 +306,9 @@ export const emailHandler: RequestHandler<
       });
     // return res.json(await activateEmail(cookieHeader, req.body, info.data));
 
-    return res.json(await getEmailInfo(cookieHeader, info.data));
+    if (cookieHeader.includes("TEST")) return res.json(TEST_GET_EMAIL_RESPONSE);
+
+    return res.json(await getEmailInfo(cookieHeader, id!));
   } catch (err) {
     const { message } = err as Error;
 

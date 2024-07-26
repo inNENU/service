@@ -56,18 +56,6 @@ export interface UnderSelectCategoryInfo {
   disallowed: UnderSelectDisallowedCategoryItem[];
 }
 
-export type UnderSelectCategorySuccessResponse =
-  CommonSuccessResponse<UnderSelectCategoryInfo>;
-
-export type UnderSelectCategoryResponse =
-  | UnderSelectCategorySuccessResponse
-  | AuthLoginFailedResponse
-  | CommonFailedResponse<
-      | ActionFailType.NotInitialized
-      | ActionFailType.MissingCredential
-      | ActionFailType.Unknown
-    >;
-
 const CATEGORY_PAGE = `${UNDER_STUDY_SERVER}/new/student/xsxk/`;
 
 const ALLOWED_CATEGORY_ITEM_REGEXP =
@@ -104,6 +92,67 @@ const getSelectCategories = (content: string): UnderSelectCategoryInfo => ({
   ),
 });
 
+export type UnderSelectCategorySuccessResponse =
+  CommonSuccessResponse<UnderSelectCategoryInfo>;
+
+export type UnderSelectCategoryResponse =
+  | UnderSelectCategorySuccessResponse
+  | AuthLoginFailedResponse
+  | CommonFailedResponse<
+      | ActionFailType.NotInitialized
+      | ActionFailType.MissingCredential
+      | ActionFailType.Unknown
+    >;
+
+const TEST_UNDER_SELECT_CATEGORY_RESPONSE: UnderSelectCategorySuccessResponse =
+  {
+    success: true,
+    data: {
+      allowed: [],
+      disallowed: [
+        {
+          term: "2021-2022-1",
+          name: "公共课程",
+          link: "/test",
+          canSelect: false,
+          description: "测试分类",
+        },
+      ],
+    },
+  };
+
+export const getUnderSelectCategories = async (
+  cookieHeader: string,
+): Promise<UnderSelectCategoryResponse> => {
+  const response = await fetch(CATEGORY_PAGE, {
+    headers: {
+      Cookie: cookieHeader,
+      Referer: `${UNDER_STUDY_SERVER}/new/welcome.page?ui=new`,
+      ...EDGE_USER_AGENT_HEADERS,
+    },
+    redirect: "manual",
+  });
+
+  if (response.status === 302) return ExpiredResponse;
+
+  const content = await response.text();
+
+  if (
+    ["选课正在初始化", "选课未初始化"].some((item) => content.includes(item))
+  ) {
+    return {
+      success: false,
+      type: ActionFailType.NotInitialized,
+      msg: "选课未初始化完成，请稍后再试",
+    };
+  }
+
+  return {
+    success: true,
+    data: getSelectCategories(content),
+  } as UnderSelectCategorySuccessResponse;
+};
+
 export const underStudySelectCategoryHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
@@ -122,33 +171,12 @@ export const underStudySelectCategoryHandler: RequestHandler<
       return res.json(MissingCredentialResponse);
     }
 
-    const response = await fetch(CATEGORY_PAGE, {
-      headers: {
-        Cookie: req.headers.cookie,
-        Referer: `${UNDER_STUDY_SERVER}/new/welcome.page?ui=new`,
-        ...EDGE_USER_AGENT_HEADERS,
-      },
-      redirect: "manual",
-    });
+    const cookieHeader = req.headers.cookie;
 
-    if (response.status === 302) return res.json(ExpiredResponse);
+    if (cookieHeader.includes("TEST"))
+      return res.json(TEST_UNDER_SELECT_CATEGORY_RESPONSE);
 
-    const content = await response.text();
-
-    if (
-      ["选课正在初始化", "选课未初始化"].some((item) => content.includes(item))
-    ) {
-      return res.json({
-        success: false,
-        type: ActionFailType.NotInitialized,
-        msg: "选课未初始化完成，请稍后再试",
-      });
-    }
-
-    return res.json({
-      success: true,
-      data: getSelectCategories(content),
-    } as UnderSelectCategorySuccessResponse);
+    return res.json(await getUnderSelectCategories(cookieHeader));
   } catch (err) {
     const { message } = err as Error;
 

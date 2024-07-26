@@ -90,16 +90,6 @@ type RawUnderGradeResult =
   | RawUnderGradeSuccessResult
   | RawUnderGradeFailedResult;
 
-export interface UnderGradeDetailSuccessResponse {
-  success: true;
-  data: UnderScoreDetail[];
-}
-
-export type UnderGradeDetailResponse =
-  | UnderGradeDetailSuccessResponse
-  | AuthLoginFailedResponse
-  | CommonFailedResponse;
-
 const getGradeDetail = ({
   cj1,
   cj2,
@@ -128,6 +118,68 @@ const getGradeDetail = ({
   return results;
 };
 
+export interface UnderGradeDetailSuccessResponse {
+  success: true;
+  data: UnderScoreDetail[];
+}
+
+export type UnderGradeDetailResponse =
+  | UnderGradeDetailSuccessResponse
+  | AuthLoginFailedResponse
+  | CommonFailedResponse;
+
+const UNDER_GRADE_DETAIL_RESPONSE: UnderGradeDetailSuccessResponse = {
+  success: true,
+  data: [
+    {
+      name: "平时成绩",
+      score: 80,
+      percent: 20,
+    },
+    {
+      name: "期末成绩",
+      score: 90,
+      percent: 80,
+    },
+  ],
+};
+
+export const getUnderGradeDetail = async (
+  cookieHeader: string,
+  gradeCode: string,
+): Promise<UnderGradeDetailResponse> => {
+  const queryUrl = `${UNDER_STUDY_SERVER}/new/student/xskccj/getDetail?cjdm=${gradeCode}`;
+
+  const response = await fetch(queryUrl, {
+    headers: {
+      Accept: "application/json, text/javascript, */*; q=0.01",
+      Cookie: cookieHeader,
+      Referer: `${UNDER_STUDY_SERVER}/new/student/xskccj/kccjList.page`,
+      ...EDGE_USER_AGENT_HEADERS,
+    },
+  });
+
+  if (response.headers.get("Content-Type")?.includes("text/html"))
+    return ExpiredResponse;
+
+  const data = (await response.json()) as RawUnderGradeResult;
+
+  if (data.code !== 0) {
+    if (data.message === "尚未登录，请先登录") return ExpiredResponse;
+
+    throw new Error(data.message);
+  }
+
+  const gradeDetail = getGradeDetail(
+    (data.data as RawUnderGradeDetailItem[])[0],
+  );
+
+  return {
+    success: true,
+    data: gradeDetail,
+  };
+};
+
 export const underStudyGradeDetailHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
@@ -138,46 +190,22 @@ export const underStudyGradeDetailHandler: RequestHandler<
 
     if (!gradeCode) return res.json(MissingArgResponse("课程代码"));
 
-    const queryUrl = `${UNDER_STUDY_SERVER}/new/student/xskccj/getDetail?cjdm=${gradeCode}`;
-
     if (id && password && authToken) {
       const result = await underStudyLogin({ id, password, authToken });
 
       if (!result.success) return res.json(result);
 
-      req.headers.cookie = result.cookieStore.getHeader(queryUrl);
+      req.headers.cookie = result.cookieStore.getHeader(UNDER_STUDY_SERVER);
     } else if (!req.headers.cookie) {
       return res.json(MissingCredentialResponse);
     }
 
-    const response = await fetch(queryUrl, {
-      headers: {
-        Accept: "application/json, text/javascript, */*; q=0.01",
-        Cookie: req.headers.cookie,
-        Referer: `${UNDER_STUDY_SERVER}/new/student/xskccj/kccjList.page`,
-        ...EDGE_USER_AGENT_HEADERS,
-      },
-    });
+    const cookieHeader = req.headers.cookie;
 
-    if (response.headers.get("Content-Type")?.includes("text/html"))
-      return res.json(ExpiredResponse);
+    if (cookieHeader.includes("TEST"))
+      return res.json(UNDER_GRADE_DETAIL_RESPONSE);
 
-    const data = (await response.json()) as RawUnderGradeResult;
-
-    if (data.code === 0) {
-      const gradeDetail = getGradeDetail(
-        (data.data as RawUnderGradeDetailItem[])[0],
-      );
-
-      return res.json({
-        success: true,
-        data: gradeDetail,
-      } as UnderGradeDetailSuccessResponse);
-    }
-
-    if (data.message === "尚未登录，请先登录") return res.json(ExpiredResponse);
-
-    throw new Error(data.message);
+    return res.json(await getUnderGradeDetail(cookieHeader, gradeCode));
   } catch (err) {
     const { message } = err as Error;
 

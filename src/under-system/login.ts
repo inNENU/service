@@ -6,11 +6,15 @@ import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
-import { ActionFailType } from "../config/index.js";
+import {
+  ActionFailType,
+  TEST_ID_NUMBER,
+  TEST_LOGIN_RESULT,
+} from "../config/index.js";
 import type { AccountInfo, EmptyObject } from "../typings.js";
 import { IE_8_USER_AGENT } from "../utils/index.js";
-import type { VPNLoginFailedResponse } from "../vpn/login.js";
-import { vpnCASLogin } from "../vpn/login.js";
+import type { VPNLoginFailedResponse } from "../vpn/index.js";
+import { vpnCASLogin } from "../vpn/index.js";
 
 export interface UnderSystemLoginSuccessResult {
   success: true;
@@ -129,7 +133,10 @@ export const underSystemLoginHandler: RequestHandler<
   AccountInfo
 > = async (req, res) => {
   try {
-    const result = await underSystemLogin(req.body);
+    const result = // fake result for testing
+      req.body.id === TEST_ID_NUMBER
+        ? TEST_LOGIN_RESULT
+        : await underSystemLogin(req.body);
 
     if (result.success) {
       const cookies = result.cookieStore

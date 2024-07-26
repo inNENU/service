@@ -120,6 +120,57 @@ export type ActionRecentMailResponse =
   | VPNLoginFailedResponse
   | ActionRecentMailFailedResponse;
 
+const TEST_RECENT_EMAIL_RESPONSE: ActionRecentMailSuccessResponse = {
+  success: true,
+  data: {
+    unread: 1,
+    emails: Array<EmailData>(10).fill({
+      subject: "测试邮件",
+      receivedDate: Date.now(),
+      name: "测试用户",
+      email: "admin@example.com",
+      mid: "1",
+      unread: true,
+    }),
+  },
+};
+
+export const getRecentEmails = async (
+  cookieHeader: string,
+): Promise<ActionRecentMailResponse> => {
+  const checkResponse = await fetch(EMAIL_INFO_URL, {
+    method: "POST",
+    headers: {
+      Accept: "application/json, text/javascript, */*; q=0.01",
+      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+      Cookie: cookieHeader,
+      Referer: ACTION_MAIN_PAGE,
+    },
+    body: `domain=nenu.edu.cn&type=1&format=json`,
+  });
+
+  const checkResult = (await checkResponse.json()) as RawRecentMailResponse;
+
+  if (
+    "success" in checkResult &&
+    checkResult.success &&
+    checkResult.emailList.con
+  )
+    return {
+      success: true,
+      data: {
+        unread: Number(checkResult.count),
+        emails: checkResult.emailList.con.var.map(getEmailData),
+      },
+    };
+
+  return {
+    success: false,
+    type: ActionFailType.NotInitialized,
+    msg: "用户无邮箱或未初始化邮箱",
+  };
+};
+
 export const actionRecentEmailHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
@@ -139,37 +190,12 @@ export const actionRecentEmailHandler: RequestHandler<
       return res.json(MissingCredentialResponse);
     }
 
-    const checkResponse = await fetch(EMAIL_INFO_URL, {
-      method: "POST",
-      headers: {
-        Accept: "application/json, text/javascript, */*; q=0.01",
-        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-        Cookie: req.headers.cookie,
-        Referer: ACTION_MAIN_PAGE,
-      },
-      body: `domain=nenu.edu.cn&type=1&format=json`,
-    });
+    const cookieHeader = req.headers.cookie;
 
-    const checkResult = (await checkResponse.json()) as RawRecentMailResponse;
+    if (cookieHeader.includes("TEST"))
+      return res.json(TEST_RECENT_EMAIL_RESPONSE);
 
-    if (
-      "success" in checkResult &&
-      checkResult.success &&
-      checkResult.emailList.con
-    )
-      return res.json({
-        success: true,
-        data: {
-          unread: Number(checkResult.count),
-          emails: checkResult.emailList.con.var.map(getEmailData),
-        },
-      });
-
-    return res.json({
-      success: false,
-      type: ActionFailType.NotInitialized,
-      msg: "用户无邮箱或未初始化邮箱",
-    });
+    return res.json(await getRecentEmails(cookieHeader));
   } catch (err) {
     const { message } = err as Error;
 

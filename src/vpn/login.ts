@@ -2,9 +2,8 @@ import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
 import type { RequestHandler } from "express";
 
-import { VPN_DOMAIN, VPN_SERVER } from "./utils.js";
+import { LOGIN_URL, UPDATE_KEY_URL, VPN_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
-import { authLogin } from "../auth/login.js";
 import { ActionFailType, UnknownResponse } from "../config/index.js";
 import type {
   AccountInfo,
@@ -14,10 +13,6 @@ import type {
 
 const AUTHENTICITY_TOKEN_REGEXP =
   /<input\s+type="hidden"\s+name="authenticity_token" value="(.*?)" \/>/;
-
-const LOGIN_URL = `${VPN_SERVER}/users/sign_in`;
-const CAS_LOGIN_URL = `${VPN_SERVER}/users/auth/cas`;
-const UPDATE_KEY_URL = `${VPN_SERVER}/vpn_key/update`;
 
 export interface VPNLoginSuccessResult {
   success: true;
@@ -35,86 +30,6 @@ export type VPNLoginResult =
   | VPNLoginSuccessResult
   | AuthLoginFailedResponse
   | VPNLoginFailedResponse;
-
-export const vpnCASLogin = async (
-  { id, password, authToken }: AccountInfo,
-  cookieStore = new CookieStore(),
-): Promise<VPNLoginResult> => {
-  const casResponse = await fetch(CAS_LOGIN_URL, {
-    redirect: "manual",
-  });
-
-  cookieStore.applyResponse(casResponse, VPN_DOMAIN);
-
-  if (casResponse.status === 302) {
-    const authResult = await authLogin({
-      id,
-      password,
-      authToken,
-      service: `${VPN_SERVER}/users/auth/cas/callback?url=${encodeURIComponent(
-        `${VPN_SERVER}/users/sign_in`,
-      )}`,
-      cookieStore,
-    });
-
-    if (!authResult.success) return authResult;
-
-    const callbackResponse = await fetch(authResult.location, {
-      headers: {
-        Cookie: cookieStore.getHeader(authResult.location),
-      },
-      redirect: "manual",
-    });
-
-    if (callbackResponse.status === 500)
-      return {
-        success: false,
-        type: ActionFailType.Error,
-        msg: "学校 WebVPN 服务崩溃，请稍后重试。",
-      };
-
-    cookieStore.applyResponse(callbackResponse, authResult.location);
-
-    const location = callbackResponse.headers.get("Location");
-
-    if (callbackResponse.status === 302) {
-      if (location === LOGIN_URL)
-        return {
-          success: false,
-          type: ActionFailType.AccountLocked,
-          msg: "短时间内登录失败过多，账户已锁定。请 10 分钟后重试",
-        };
-
-      if (location === UPDATE_KEY_URL) {
-        const keyResponse = await fetch(UPDATE_KEY_URL, {
-          headers: {
-            Cookie: cookieStore.getHeader(UPDATE_KEY_URL),
-          },
-        });
-
-        cookieStore.applyResponse(keyResponse, VPN_DOMAIN);
-
-        return {
-          success: true,
-          cookieStore,
-        };
-      }
-    }
-  }
-
-  if (casResponse.status === 500)
-    return {
-      success: false,
-      type: ActionFailType.Error,
-      msg: "学校 WebVPN 服务崩溃，请稍后重试。",
-    };
-
-  return {
-    success: false,
-    type: ActionFailType.Unknown,
-    msg: "未知错误",
-  };
-};
 
 export const vpnLogin = async (
   { id, password }: AccountInfo,
@@ -203,41 +118,6 @@ export const vpnLogin = async (
   return UnknownResponse("未知错误");
 };
 
-export const vpnCASLoginHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  AccountInfo
-> = async (req, res) => {
-  try {
-    const { id, password } = req.body;
-
-    const result = await vpnCASLogin({ id, password });
-
-    if (result.success) {
-      const cookies = result.cookieStore
-        .getAllCookies()
-        .map((item) => item.toJSON());
-
-      cookies.forEach(({ name, value, ...rest }) => {
-        res.cookie(name, value, rest);
-      });
-
-      return res.json({
-        success: true,
-        cookies,
-      } as VPNLoginSuccessResponse);
-    }
-
-    return res.json(result);
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
-};
-
 export interface VPNLoginSuccessResponse {
   success: true;
   /** @deprecated */
@@ -255,9 +135,9 @@ export const vpnLoginHandler: RequestHandler<
   AccountInfo
 > = async (req, res) => {
   try {
-    const { id, password } = req.body;
+    const { id, password, authToken } = req.body;
 
-    const result = await vpnLogin({ id, password });
+    const result = await vpnLogin({ id, password, authToken });
 
     if (result.success) {
       const cookies = result.cookieStore
