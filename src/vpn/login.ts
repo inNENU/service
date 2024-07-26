@@ -1,4 +1,5 @@
 import type { CookieType } from "@mptool/net";
+import { CookieStore } from "@mptool/net";
 import type { RequestHandler } from "express";
 
 import { VPN_DOMAIN, VPN_SERVER } from "./utils.js";
@@ -10,7 +11,6 @@ import type {
   CommonFailedResponse,
   EmptyObject,
 } from "../typings.js";
-import { CookieStore } from "../utils/index.js";
 
 const AUTHENTICITY_TOKEN_REGEXP =
   /<input\s+type="hidden"\s+name="authenticity_token" value="(.*?)" \/>/;

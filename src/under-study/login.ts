@@ -1,4 +1,5 @@
 import type { CookieType } from "@mptool/net";
+import { CookieStore } from "@mptool/net";
 import type { RequestHandler } from "express";
 
 import { UNDER_STUDY_SERVER, UNDER_STUDY_VPN_SERVER } from "./utils.js";
@@ -12,7 +13,7 @@ import type {
   CommonFailedResponse,
   EmptyObject,
 } from "../typings.js";
-import { CookieStore, EDGE_USER_AGENT_HEADERS } from "../utils/index.js";
+import { EDGE_USER_AGENT_HEADERS } from "../utils/index.js";
 
 export interface UnderStudyLoginSuccessResult {
   success: true;

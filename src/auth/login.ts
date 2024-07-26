@@ -1,4 +1,5 @@
 import type { CookieType } from "@mptool/net";
+import { CookieStore } from "@mptool/net";
 import type { RequestHandler } from "express";
 
 import { authEncrypt } from "./auth-encrypt.js";
@@ -20,7 +21,7 @@ import type {
   CommonFailedResponse,
   EmptyObject,
 } from "../typings.js";
-import { BLACKLIST_HINT, CookieStore, isInBlackList } from "../utils/index.js";
+import { BLACKLIST_HINT, isInBlackList } from "../utils/index.js";
 
 export interface AuthLoginOptions extends AccountInfo {
   service?: string;

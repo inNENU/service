@@ -1,3 +1,4 @@
+import { CookieStore } from "@mptool/net";
 import type { RequestHandler } from "express";
 
 import { authEncrypt } from "./auth-encrypt.js";
@@ -8,7 +9,6 @@ import {
   UnknownResponse,
 } from "../config/index.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
-import { CookieStore } from "../utils/index.js";
 
 const RESET_PASSWORD_PAGE_URL = `${AUTH_SERVER}/authserver/getBackPasswordMainPage.do`;
 const RESET_PASSWORD_URL = `${AUTH_SERVER}/authserver/getBackPassword.do`;

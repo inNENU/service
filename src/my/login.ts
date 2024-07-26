@@ -1,4 +1,5 @@
 import type { CookieType } from "@mptool/net";
+import { CookieStore } from "@mptool/net";
 import type { RequestHandler } from "express";
 
 import { MY_MAIN_PAGE } from "./utils.js";
@@ -7,7 +8,6 @@ import { authLogin } from "../auth/login.js";
 import { WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
 import { UnknownResponse } from "../config/index.js";
 import type { AccountInfo, EmptyObject } from "../typings.js";
-import { CookieStore } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/login.js";
 import { vpnCASLogin } from "../vpn/login.js";
 

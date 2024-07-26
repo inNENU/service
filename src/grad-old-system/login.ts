@@ -1,4 +1,5 @@
 import type { CookieType } from "@mptool/net";
+import { CookieStore } from "@mptool/net";
 import type { RequestHandler } from "express";
 
 import {
@@ -10,7 +11,7 @@ import { authLogin } from "../auth/login.js";
 import { AUTH_SERVER } from "../auth/utils.js";
 import { ActionFailType, UnknownResponse } from "../config/index.js";
 import type { AccountInfo, EmptyObject } from "../typings.js";
-import { CookieStore, IE_8_USER_AGENT } from "../utils/index.js";
+import { IE_8_USER_AGENT } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/login.js";
 
 export interface GradSystemLoginSuccessResult {

@@ -1,4 +1,5 @@
 import type { CookieType } from "@mptool/net";
+import { CookieStore } from "@mptool/net";
 import type { RequestHandler } from "express";
 
 import { SERVER } from "./utils.js";
@@ -6,7 +7,6 @@ import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { ActionFailType, UnknownResponse } from "../config/index.js";
 import type { AccountInfo, EmptyObject } from "../typings.js";
-import { CookieStore } from "../utils/index.js";
 
 export interface GradSystemLoginSuccessResult {
   success: true;
