@@ -24,13 +24,6 @@ export default [
         target: "node20",
       }),
     ],
-    treeshake: {
-      correctVarValueBeforeDeclaration: false,
-      moduleSideEffects: false,
-      propertyReadSideEffects: false,
-      tryCatchDeoptimization: false,
-      unknownGlobalSideEffects: false,
-    },
     external: isDev
       ? [
           /^node:/,
