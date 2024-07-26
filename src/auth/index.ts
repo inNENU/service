@@ -1,6 +1,6 @@
 export * from "./activate/activate.js";
 export * from "./auth-encrypt.js";
-export * from "./captcha.js";
+export * from "./auth-captcha.js";
 export * from "./change-password.js";
 export * from "./init.js";
 export * from "./login.js";

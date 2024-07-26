@@ -1,9 +1,9 @@
 import { CookieStore } from "@mptool/net";
 import type { RequestHandler } from "express";
 
+import type { AuthCaptchaResponse } from "./auth-captcha.js";
+import { getAuthCaptcha } from "./auth-captcha.js";
 import { authEncrypt } from "./auth-encrypt.js";
-import type { AuthCaptchaResponse } from "./captcha.js";
-import { getAuthCaptcha } from "./captcha.js";
 import {
   AUTH_CAPTCHA_URL,
   AUTH_DOMAIN,
