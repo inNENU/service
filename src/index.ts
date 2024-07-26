@@ -162,8 +162,8 @@ app.post("/auth/init", authInitHandler);
 app.post("/auth/login", authLoginHandler);
 app.get("/auth/re-auth", reAuthHandler);
 app.post("/auth/re-auth", reAuthHandler);
-app.get("/auth/reset", resetPasswordHandler);
-app.post("/auth/reset", resetPasswordHandler);
+app.get("/auth/reset-password", resetPasswordHandler);
+app.post("/auth/reset-password", resetPasswordHandler);
 
 app.post("/my/check", myCheckHandler);
 app.post("/my/email", emailHandler);

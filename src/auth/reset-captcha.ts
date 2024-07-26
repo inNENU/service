@@ -11,25 +11,25 @@ import { generateRandomString } from "../utils/generateRandomString.js";
 
 const CAPTCHA_URL = `${RESET_PREFIX}/generateCaptcha`;
 
-export interface ActivateCaptchaInfo {
+export interface ResetCaptchaInfo {
   /** 验证码图片 base64 字符串 */
   captcha: string;
   /** 验证码 ID */
   captchaId: string;
 }
 
-export type ActivateCaptchaSuccessResponse =
-  CommonSuccessResponse<ActivateCaptchaInfo> & {
+export type ResetCaptchaSuccessResponse =
+  CommonSuccessResponse<ResetCaptchaInfo> & {
     cookieStore: CookieStore;
   };
 
-export type ActivateCaptchaResponse =
-  | ActivateCaptchaSuccessResponse
+export type ResetCaptchaResponse =
+  | ResetCaptchaSuccessResponse
   | CommonFailedResponse<ActionFailType.Restricted | ActionFailType.Unknown>;
 
 export const getResetCaptcha = async (
   cookieStore = new CookieStore(),
-): Promise<ActivateCaptchaResponse> => {
+): Promise<ResetCaptchaResponse> => {
   const captchaId = generateRandomString(16);
   const imageResponse = await fetch(
     `${CAPTCHA_URL}?ltId=${captchaId}&codeType=2`,
