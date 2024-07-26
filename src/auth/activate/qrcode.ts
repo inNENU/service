@@ -1,10 +1,10 @@
-import { ACTIVATE_PREFIX } from "./utils.js";
 import { getActivateUUID } from "./uuid.js";
 import { UnknownResponse } from "../../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../../typings.js";
+import { RESET_PREFIX } from "../utils.js";
 
 export type ActivateGetQrCodeResponse =
   | CommonSuccessResponse<{ qrCode: string }>
@@ -18,7 +18,7 @@ export const getActivateQrCode = async (
   const uuid = await getActivateUUID(cookieHeader, sign);
 
   const response = await fetch(
-    `${ACTIVATE_PREFIX}/realPersonAuth/getQrCodeByFace?uuid=${uuid}`,
+    `${RESET_PREFIX}/realPersonAuth/getQrCodeByFace?uuid=${uuid}`,
     {
       headers: {
         Cookie: cookieHeader,

@@ -1,4 +1,4 @@
-import { ACTIVATE_PREFIX } from "./utils.js";
+import { RESET_PREFIX } from "../utils.js";
 
 // Note: getUuid:
 export const getActivateUUID = async (
@@ -6,7 +6,7 @@ export const getActivateUUID = async (
   sign: string,
 ): Promise<string> => {
   const response = await fetch(
-    `${ACTIVATE_PREFIX}/realPersonAuth/getUuid?authScenes=0&sign=${sign}`,
+    `${RESET_PREFIX}/realPersonAuth/getUuid?authScenes=0&sign=${sign}`,
     {
       headers: {
         Cookie: cookieHeader,

@@ -1,6 +1,6 @@
-import { ACTIVATE_PREFIX } from "./utils.js";
 import { ActionFailType } from "../../config/index.js";
 import type { CommonSuccessResponse } from "../../typings.js";
+import { RESET_PREFIX } from "../utils.js";
 
 export interface ActivateValidSmsOptions {
   type: "valid-sms";
@@ -49,7 +49,7 @@ export const validateActivateSms = async (
   cookieHeader: string,
 ): Promise<ActivateValidSmsResponse> => {
   const response = await fetch(
-    `${ACTIVATE_PREFIX}/accountActivation/checkValidateCode`,
+    `${RESET_PREFIX}/accountActivation/checkValidateCode`,
     {
       method: "POST",
       headers: {

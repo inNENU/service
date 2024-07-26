@@ -1,8 +1,6 @@
 import { CookieStore } from "@mptool/net";
 
-import type { ActivateCaptchaInfo } from "./captcha.js";
-import { getActivateCaptcha } from "./captcha.js";
-import { ACTIVATE_PREFIX, INFO_SALT } from "./utils.js";
+import { INFO_SALT } from "./utils.js";
 import type { ActionFailType } from "../../config/index.js";
 import { UnknownResponse } from "../../config/index.js";
 import type {
@@ -10,6 +8,9 @@ import type {
   CommonSuccessResponse,
 } from "../../typings.js";
 import { authEncrypt } from "../auth-encrypt.js";
+import type { ActivateCaptchaInfo } from "../reset-captcha.js";
+import { getResetCaptcha } from "../reset-captcha.js";
+import { RESET_PREFIX } from "../utils.js";
 
 interface RawValidSuccessResponse {
   success: true;
@@ -58,7 +59,7 @@ export const validAccountInfo = async (
   const cookieStore = new CookieStore();
 
   const response = await fetch(
-    `${ACTIVATE_PREFIX}/accountActivation/queryAccountByLoginNoAndId`,
+    `${RESET_PREFIX}/accountActivation/queryAccountByLoginNoAndId`,
     {
       method: "POST",
       headers: {
@@ -80,7 +81,7 @@ export const validAccountInfo = async (
 
   if (!activateResult.success) return UnknownResponse(activateResult.message);
 
-  const captchaResponse = await getActivateCaptcha(cookieStore);
+  const captchaResponse = await getResetCaptcha(cookieStore);
 
   if (!captchaResponse.success) return captchaResponse;
 

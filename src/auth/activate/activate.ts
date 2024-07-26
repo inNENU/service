@@ -3,12 +3,11 @@ import type { RequestHandler } from "express";
 import { getActivateInfo } from "./get-info.js";
 import type { ActivatePhoneSmsOptions } from "./send-sms.js";
 import { sendActivateSms } from "./send-sms.js";
-import { ACTIVATE_PREFIX } from "./utils.js";
 import type { ActivateValidOptions } from "./validate.js";
 import { validAccountInfo } from "./validate.js";
 import { ActionFailType, UnknownResponse } from "../../config/index.js";
 import type { CommonFailedResponse, EmptyObject } from "../../typings.js";
-import { AUTH_SERVER } from "../utils.js";
+import { AUTH_SERVER, RESET_PREFIX } from "../utils.js";
 
 export interface ActivateSuccessResponse {
   success: true;
@@ -42,7 +41,7 @@ const bindPhone = async (
   cookieHeader: string,
 ): Promise<ActivateBindPhoneResponse> => {
   const response = await fetch(
-    `${ACTIVATE_PREFIX}/accountActivation/checkValidateCode`,
+    `${RESET_PREFIX}/accountActivation/checkValidateCode`,
     {
       method: "POST",
       headers: {

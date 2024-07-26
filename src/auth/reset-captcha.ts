@@ -1,15 +1,15 @@
 import { CookieStore } from "@mptool/net";
 
-import { ACTIVATE_PREFIX } from "./utils.js";
-import type { ActionFailType } from "../../config/index.js";
-import { RestrictedResponse, UnknownResponse } from "../../config/index.js";
+import { RESET_PREFIX } from "./utils.js";
+import type { ActionFailType } from "../config/index.js";
+import { RestrictedResponse, UnknownResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
-} from "../../typings.js";
-import { generateRandomString } from "../../utils/generateRandomString.js";
+} from "../typings.js";
+import { generateRandomString } from "../utils/generateRandomString.js";
 
-const CAPTCHA_URL = `${ACTIVATE_PREFIX}/generateCaptcha`;
+const CAPTCHA_URL = `${RESET_PREFIX}/generateCaptcha`;
 
 export interface ActivateCaptchaInfo {
   captcha: string;
@@ -25,7 +25,7 @@ export type ActivateCaptchaResponse =
   | ActivateCaptchaSuccessResponse
   | CommonFailedResponse<ActionFailType.Restricted | ActionFailType.Unknown>;
 
-export const getActivateCaptcha = async (
+export const getResetCaptcha = async (
   cookieStore = new CookieStore(),
 ): Promise<ActivateCaptchaResponse> => {
   const captchaId = generateRandomString(16);

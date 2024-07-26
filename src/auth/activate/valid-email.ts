@@ -1,6 +1,6 @@
-import { ACTIVATE_PREFIX } from "./utils.js";
 import { ActionFailType } from "../../config/index.js";
 import type { CommonSuccessResponse } from "../../typings.js";
+import { RESET_PREFIX } from "../utils.js";
 
 export interface ActivateValidEmailOptions {
   type: "valid-email";
@@ -50,7 +50,7 @@ export const validateActivateEmail = async (
 ): Promise<ActivateValidEmailResponse> => {
   const response = await fetch(
     // FIXME: url
-    `${ACTIVATE_PREFIX}/accountActivation/checkValidateCode`,
+    `${RESET_PREFIX}/accountActivation/checkValidateCode`,
     {
       method: "POST",
       headers: {
