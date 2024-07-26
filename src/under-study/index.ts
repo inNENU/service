@@ -1,5 +1,5 @@
 export * from "./check.js";
-export * from "./course-commentary.js";
+export * from "./course-commentary/handler.js";
 export * from "./grade-detail.js";
 export * from "./grade-list.js";
 export * from "./login.js";

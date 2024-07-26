@@ -90,7 +90,7 @@ export interface GetUnderCreateStudentArchiveInfoSuccessResponse {
 export type GetUnderCreateStudentArchiveInfoResponse =
   | GetUnderCreateStudentArchiveInfoSuccessResponse
   | AuthLoginFailedResponse
-  | (CommonFailedResponse & { type?: "created" });
+  | CommonFailedResponse<ActionFailType.Existed>;
 
 export const getUnderStudentArchiveInfo = async (
   cookieHeader: string,
@@ -111,7 +111,7 @@ export const getUnderStudentArchiveInfo = async (
   if (welcomePageContent.includes("您已经提交了报到"))
     return {
       success: false,
-      type: "created",
+      type: ActionFailType.Existed,
       msg: "学籍已建立",
     };
 
@@ -137,7 +137,7 @@ export const getUnderStudentArchiveInfo = async (
   if (infoContent.includes("不在控制范围内！"))
     return {
       success: false,
-      type: "created",
+      type: ActionFailType.Existed,
       msg: "学籍已建立",
     };
 

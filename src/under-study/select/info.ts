@@ -371,6 +371,12 @@ export const underStudySelectInfoHandler: RequestHandler<
 
     const cookieHeader = req.headers.cookie;
 
+    if (cookieHeader.includes("TEST"))
+      return res.json({
+        success: false,
+        message: "因子系统逻辑复杂，测试账号暂不提供选课操作模拟",
+      });
+
     if (!link) return res.json(MissingArgResponse("link"));
 
     return res.json(await getUnderSelectInfo(cookieHeader, link));
