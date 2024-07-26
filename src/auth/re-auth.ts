@@ -19,14 +19,21 @@ interface RawReAuthSMSSuccessResponse {
   codeTime: number;
 }
 
-interface RawReAuthSMSFailResponse {
+interface RawReAuthSMSFrequentResponse {
   res: "code_time_fail";
+  codeTime: number;
+  returnMessage: string;
+}
+
+interface RawReAuthSMSFailResponse {
+  res: string;
   codeTime: number;
   returnMessage: string;
 }
 
 type RawReAuthSMSResponse =
   | RawReAuthSMSSuccessResponse
+  | RawReAuthSMSFrequentResponse
   | RawReAuthSMSFailResponse;
 
 interface ReAuthSMSSuccessResponse {
@@ -36,6 +43,7 @@ interface ReAuthSMSSuccessResponse {
 
 export type ReAuthSMSResponse =
   | ReAuthSMSSuccessResponse
+  | (CommonFailedResponse<ActionFailType.TooFrequent> & { codeTime: number })
   | CommonFailedResponse<ActionFailType.Unknown>;
 
 export const sendReAuthSMS = async (
@@ -62,6 +70,14 @@ export const sendReAuthSMS = async (
   });
 
   const result = (await response.json()) as RawReAuthSMSResponse;
+
+  if (result.res === "code_time_fail")
+    return {
+      success: false,
+      type: ActionFailType.TooFrequent,
+      msg: result.returnMessage,
+      codeTime: result.codeTime,
+    };
 
   if (result.res !== "success") return UnknownResponse(result.returnMessage);
 
