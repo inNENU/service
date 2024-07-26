@@ -1,4 +1,4 @@
-export * from "./activate.js";
+export * from "./activate/activate.js";
 export * from "./auth-encrypt.js";
 export * from "./captcha.js";
 export * from "./change-password.js";
