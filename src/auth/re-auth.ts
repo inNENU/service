@@ -38,6 +38,7 @@ type RawReAuthSMSResponse =
 
 interface ReAuthSMSSuccessResponse {
   success: true;
+  /** 下一个验证码的间隔秒数 */
   codeTime: number;
 }
 
@@ -96,6 +97,7 @@ interface RawVerifyReAuthCaptchaResponse {
 
 export interface VerifyReAuthCaptchaSuccessResponse {
   success: true;
+  /** 二次认证令牌 */
   authToken: string;
   cookies: CookieType[];
 }
@@ -157,17 +159,21 @@ export const verifyReAuthCaptcha = async (
   };
 };
 
-export type ReAuthOptions =
-  | {
-      type: "sms";
-      id: string;
-      cookie?: CookieType[];
-    }
-  | {
-      type: "verify";
-      smsCode: string;
-      cookie?: CookieType[];
-    };
+export interface ReAuthSmsOptions {
+  type: "sms";
+  /** 学号 */
+  id: string;
+  cookie?: CookieType[];
+}
+
+export interface ReAuthVerifyOptions {
+  type: "verify";
+  /** 短信验证码 */
+  smsCode: string;
+  cookie?: CookieType[];
+}
+
+export type ReAuthOptions = ReAuthSmsOptions | ReAuthVerifyOptions;
 
 export const reAuthHandler: RequestHandler<
   EmptyObject,

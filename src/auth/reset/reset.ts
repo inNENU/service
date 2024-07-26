@@ -1,18 +1,19 @@
 import { CookieStore } from "@mptool/net";
 import type { RequestHandler } from "express";
 
-import { authEncrypt } from "./auth-encrypt.js";
-import { AUTH_SERVER } from "./utils.js";
+import type { ResetPasswordVerifyInfoOptions } from "./verify.js";
+import { verifyAccountInfo } from "./verify.js";
 import {
   ActionFailType,
   InvalidArgResponse,
   UnknownResponse,
-} from "../config/index.js";
-import type { CommonFailedResponse, EmptyObject } from "../typings.js";
+} from "../../config/index.js";
+import type { CommonFailedResponse, EmptyObject } from "../../typings.js";
+import { authEncrypt } from "../auth-encrypt.js";
+import { getResetCaptcha } from "../reset-captcha.js";
+import { AUTH_SERVER } from "../utils.js";
 
-const RESET_PASSWORD_PAGE_URL = `${AUTH_SERVER}/authserver/getBackPasswordMainPage.do`;
 const RESET_PASSWORD_URL = `${AUTH_SERVER}/authserver/getBackPassword.do`;
-const CAPTCHA_URL = `${AUTH_SERVER}/authserver/captcha.html`;
 
 interface RawFailedData {
   success: false;
@@ -20,111 +21,6 @@ interface RawFailedData {
   code: number;
   message: string;
 }
-
-export interface ResetPasswordCaptchaResult {
-  success: true;
-  cookieStore: CookieStore;
-  captcha: string;
-}
-
-const getCaptcha = async (): Promise<ResetPasswordCaptchaResult> => {
-  const cookieStore = new CookieStore();
-  const pageResponse = await fetch(RESET_PASSWORD_PAGE_URL);
-
-  cookieStore.applyResponse(pageResponse, RESET_PASSWORD_PAGE_URL);
-
-  const captchaResponse = await fetch(`${CAPTCHA_URL}?ts=${Date.now()}`);
-
-  const base64Image = `data:image/jpeg;base64,${Buffer.from(
-    await captchaResponse.arrayBuffer(),
-  ).toString("base64")}`;
-
-  return {
-    success: true,
-    cookieStore,
-    captcha: base64Image,
-  };
-};
-
-type RawResetPasswordInfoData =
-  | {
-      success: true;
-      code: 0;
-      message: null;
-      data: {
-        sign: string;
-        question: unknown;
-        uid: string;
-      };
-    }
-  | RawFailedData;
-
-export interface ResetPasswordInfoOptions {
-  id: string;
-  mobile: string;
-  captcha: string;
-}
-
-interface ResetPasswordInfoSuccessResult {
-  success: true;
-  cookieStore: CookieStore;
-  sign: string;
-}
-
-type ResetPasswordInfoResult =
-  | ResetPasswordInfoSuccessResult
-  | CommonFailedResponse<
-      | ActionFailType.WrongCellphone
-      | ActionFailType.WrongCaptcha
-      | ActionFailType.WrongUserName
-      | ActionFailType.Unknown
-    >;
-
-const verifyAccount = async (
-  { id, mobile, captcha }: ResetPasswordInfoOptions,
-  cookieHeader: string,
-): Promise<ResetPasswordInfoResult> => {
-  const cookieStore = new CookieStore();
-  const verifyResponse = await fetch(RESET_PASSWORD_URL, {
-    method: "POST",
-    headers: {
-      Accept: "application/json, text/javascript, */*; q=0.01",
-      Cookie: cookieHeader,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({
-      userId: id,
-      mobile,
-      captcha,
-      type: "mobile",
-      step: "1",
-    }),
-  });
-
-  cookieStore.applyResponse(verifyResponse, RESET_PASSWORD_URL);
-
-  const data = (await verifyResponse.json()) as RawResetPasswordInfoData;
-
-  if (data.success)
-    return {
-      success: true,
-      cookieStore,
-      sign: data.data.sign,
-    };
-
-  return {
-    success: false,
-    type:
-      data.code === 1
-        ? ActionFailType.WrongUserName
-        : data.code === 2
-          ? ActionFailType.WrongCellphone
-          : data.code === 3
-            ? ActionFailType.WrongCaptcha
-            : ActionFailType.Unknown,
-    msg: data.message,
-  };
-};
 
 export interface ResetPasswordSendSMSOptions {
   /** 学号 */
@@ -338,7 +234,7 @@ const setNewPassword = async (
 };
 
 export type ResetPasswordOptions =
-  | ResetPasswordInfoOptions
+  | ResetPasswordVerifyInfoOptions
   | ResetPasswordSendSMSOptions
   | ResetPasswordVerifySMSOptions
   | ResetPasswordSetNewOptions;
@@ -383,26 +279,9 @@ export const resetPasswordHandler: RequestHandler<
 > = async (req, res) => {
   try {
     if (req.method === "GET") {
-      const { captcha, cookieStore } = await getCaptcha();
+      const result = await getResetCaptcha();
 
-      const cookies = cookieStore.getAllCookies().map((item) => item.toJSON());
-
-      cookies.forEach(({ name, value, ...rest }) => {
-        res.cookie(name, value, rest);
-      });
-
-      return res.json({
-        success: true,
-        captcha,
-      } as ResetPasswordCaptchaResponse);
-    }
-
-    const options = req.body;
-
-    if ("captcha" in options) {
-      const result = await verifyAccount(options, req.headers.cookie ?? "");
-
-      if (result.success) {
+      if ("cookieStore" in result) {
         const cookies = result.cookieStore
           .getAllCookies()
           .map((item) => item.toJSON());
@@ -411,17 +290,21 @@ export const resetPasswordHandler: RequestHandler<
           res.cookie(name, value, rest);
         });
 
-        return res.json({
-          success: true,
-          sign: result.sign,
-        } as ResetPasswordInfoSuccessResponse);
+        // @ts-expect-error: cookieStore is not needed
+        delete result.cookieStore;
       }
 
       return res.json(result);
     }
 
+    const options = req.body;
+
+    if ("captcha" in options) {
+      return res.json(await verifyAccountInfo(options, req.headers.cookie!));
+    }
+
     if ("sign" in options) {
-      const result = await sendSMS(options, req.headers.cookie ?? "");
+      const result = await sendSMS(options, req.headers.cookie!);
 
       if (result.success) {
         const cookies = result.cookieStore

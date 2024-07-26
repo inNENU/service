@@ -5,5 +5,5 @@ export * from "./change-password.js";
 export * from "./init.js";
 export * from "./login.js";
 export * from "./re-auth.js";
-export * from "./reset.js";
+export * from "./reset/reset.js";
 export * from "./utils.js";

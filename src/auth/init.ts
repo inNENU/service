@@ -34,7 +34,9 @@ import { vpnLogin } from "../vpn/login.js";
 export type AuthInitInfoSuccessResult = {
   success: true;
   cookieStore: CookieStore;
+  /** 盐值 */
   salt: string;
+  /** 请求参数 */
   params: Record<string, string>;
 } & (
   | { needCaptcha: true; captcha: AuthCaptchaResponse }
@@ -122,8 +124,11 @@ export const authInitInfo = async (
 };
 
 export interface InitAuthOptions extends AccountInfo {
+  /** 选项 */
   params: Record<string, string>;
+  /** 盐值 */
   salt: string;
+  /** 用户 OpenID */
   openid: string;
 }
 

@@ -16,9 +16,13 @@ interface RawAuthCaptchaResponse {
 interface AuthCaptchaSuccessResponse {
   success: true;
   data: {
+    /** 滑块图片 base64 字符串 */
     slider: string;
+    /** 背景图片 base64 字符串 */
     bg: string;
+    /** 滑块宽度 */
     sliderWidth: number;
+    /** 滑块垂直偏移量 */
     offsetY: number;
   };
 }
@@ -91,13 +95,23 @@ export const verifyAuthCaptcha = async (
   };
 };
 
+export interface AuthCaptchaGetOptions {
+  /** 学号 */
+  id: string;
+  cookie?: CookieType[];
+}
+
+export interface AuthCaptchaVerifyOptions {
+  /** 滑动距离 */
+  distance: number;
+  /** 总宽度 */
+  width?: number;
+  cookie?: CookieType[];
+}
+
 export type AuthCaptchaOptions =
-  | { id: string; cookie?: CookieType[] }
-  | {
-      distance: number;
-      width?: number;
-      cookie?: CookieType[];
-    };
+  | AuthCaptchaGetOptions
+  | AuthCaptchaVerifyOptions;
 
 export const authCaptchaHandler: RequestHandler<
   { id?: string },

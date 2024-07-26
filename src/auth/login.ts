@@ -31,6 +31,7 @@ export interface AuthLoginOptions extends AccountInfo {
 export interface AuthLoginSuccessResult {
   success: true;
   cookieStore: CookieStore;
+  /** 重定向位置 */
   location: string;
 }
 

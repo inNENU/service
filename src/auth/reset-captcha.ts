@@ -12,7 +12,9 @@ import { generateRandomString } from "../utils/generateRandomString.js";
 const CAPTCHA_URL = `${RESET_PREFIX}/generateCaptcha`;
 
 export interface ActivateCaptchaInfo {
+  /** 验证码图片 base64 字符串 */
   captcha: string;
+  /** 验证码 ID */
   captchaId: string;
 }
 
