@@ -8,7 +8,7 @@ import type {
   CommonSuccessResponse,
 } from "../../typings.js";
 import { authEncrypt } from "../auth-encrypt.js";
-import type { ActivateCaptchaInfo } from "../reset-captcha.js";
+import type { ResetCaptchaInfo } from "../reset-captcha.js";
 import { getResetCaptcha } from "../reset-captcha.js";
 import { RESET_PREFIX } from "../utils.js";
 
@@ -44,7 +44,7 @@ export interface ActivateValidOptions {
 }
 
 export type ActivateValidSuccessResponse = CommonSuccessResponse<
-  ActivateCaptchaInfo & { sign: string; loginNo: string }
+  ResetCaptchaInfo & { sign: string; loginNo: string }
 >;
 
 export type ActivateValidResponse =

@@ -4,7 +4,7 @@ import { getRichTextNodes } from "@mptool/parser";
 
 import type { ActionFailType } from "../../config/index.js";
 import type { CommonFailedResponse } from "../../typings.js";
-import type { ActivateCaptchaInfo } from "../reset-captcha.js";
+import type { ResetCaptchaInfo } from "../reset-captcha.js";
 import { getResetCaptcha } from "../reset-captcha.js";
 
 const LICENSE_TEXT = `
@@ -14,7 +14,7 @@ const LICENSE_NODES = await getRichTextNodes(LICENSE_TEXT);
 
 export interface ActivateInfoSuccessResponse {
   success: true;
-  data: ActivateCaptchaInfo & { license: RichTextNode[] };
+  data: ResetCaptchaInfo & { license: RichTextNode[] };
   cookieStore: CookieStore;
 }
 
