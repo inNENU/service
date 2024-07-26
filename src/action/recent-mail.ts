@@ -85,7 +85,7 @@ export interface EmailData {
   unread: boolean;
 }
 
-const getEmailData = ({
+const getRecentEmailData = ({
   subject,
   receivedDate,
   from,
@@ -100,7 +100,7 @@ const getEmailData = ({
   unread: !flags.read,
 });
 
-export interface ActionRecentMailData {
+export interface RecentMailData {
   /** 未读数 */
   unread: number;
   /** 近期邮件 */
@@ -108,7 +108,7 @@ export interface ActionRecentMailData {
 }
 
 export type ActionRecentMailSuccessResponse =
-  CommonSuccessResponse<ActionRecentMailData>;
+  CommonSuccessResponse<RecentMailData>;
 
 export type ActionRecentMailFailedResponse = CommonFailedResponse<
   ActionFailType.NotInitialized | ActionFailType.Unknown
@@ -160,7 +160,7 @@ export const getRecentEmails = async (
       success: true,
       data: {
         unread: Number(checkResult.count),
-        emails: checkResult.emailList.con.var.map(getEmailData),
+        emails: checkResult.emailList.con.var.map(getRecentEmailData),
       },
     };
 
