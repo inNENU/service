@@ -22,7 +22,6 @@ import {
   authInitHandler,
   authLoginHandler,
   changePasswordHandler,
-  infoHandler,
   reAuthHandler,
   resetPasswordHandler,
 } from "./auth/index.js";
@@ -161,7 +160,6 @@ app.patch("/auth/change-password", changePasswordHandler);
 app.get("/auth/init", authInitHandler);
 app.post("/auth/init", authInitHandler);
 app.post("/auth/login", authLoginHandler);
-app.post("/auth/info", infoHandler);
 app.get("/auth/re-auth", reAuthHandler);
 app.post("/auth/re-auth", reAuthHandler);
 app.get("/auth/reset", resetPasswordHandler);
