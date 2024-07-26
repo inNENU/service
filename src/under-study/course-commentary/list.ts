@@ -142,6 +142,23 @@ export type UnderCourseCommentaryListResponse =
       | ActionFailType.Unknown
     >;
 
+export const UNDER_COURSE_COMMENTARY_LIST_TEST_RESPONSE: UnderCourseCommentaryListSuccessResponse =
+  {
+    success: true,
+    data: [
+      {
+        term: "2020-2021-2",
+        endDate: "2021-01-01",
+        name: "测试课程",
+        courseCode: "TEST",
+        teacherName: "测试教师",
+        teacherCode: "TEST",
+        teachingLinkName: "测试环节",
+        commentaryCode: "TEST",
+      },
+    ],
+  };
+
 export const listUnderCourseCommentary = async (
   cookieHeader: string,
   time?: string,

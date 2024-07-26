@@ -52,6 +52,16 @@ export type UnderCourseCommentaryViewResponse =
       | ActionFailType.Unknown
     >;
 
+export const UNDER_COURSE_COMMENTARY_VIEW_TEST_RESPONSE: UnderCourseCommentaryViewSuccessResponse =
+  {
+    success: true,
+    data: Array.from({ length: 10 }, (_, i) => ({
+      name: `得分项目${i}`,
+      answer: "10分",
+      score: 10,
+    })),
+  };
+
 export const viewUnderCourseCommentary = async (
   cookieHeader: string,
   commentaryCode: string,

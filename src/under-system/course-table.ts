@@ -77,11 +77,71 @@ export interface UnderCourseTableSuccessResponse {
 export type UnderCourseTableFailedResponse =
   | AuthLoginFailedResponse
   | VPNLoginFailedResponse
-  | CommonFailedResponse;
+  | CommonFailedResponse<
+      ActionFailType.MissingCommentary | ActionFailType.Unknown
+    >;
 
 export type UnderCourseTableResponse =
   | UnderCourseTableSuccessResponse
   | UnderCourseTableFailedResponse;
+
+export const UNDER_COURSE_TABLE_TEST_RESPONSE: UnderCourseTableSuccessResponse =
+  {
+    success: true,
+    data: Array.from({ length: 6 }).map((_, classIndex) =>
+      Array.from({ length: 7 }).map((_, weekIndex) => [
+        {
+          name: `测试课程 ${weekIndex + 1}-${classIndex + 1}`,
+          teacher: "测试教师",
+          time: `星期${weekIndex + 1} 第${classIndex * 2 + 1}${classIndex * 2 + 2}节`,
+          location: "测试地点",
+        },
+      ]),
+    ),
+    startTime: "2020-09-01",
+  };
+
+export const getUnderCourseTable = async (
+  cookieHeader: string,
+  time: string,
+): Promise<UnderCourseTableResponse> => {
+  const QUERY_URL = `${UNDER_SYSTEM_SERVER}/tkglAction.do?${new URLSearchParams(
+    {
+      method: "goListKbByXs",
+      istsxx: "no",
+      xnxqh: time,
+      zc: "",
+    },
+  ).toString()}`;
+
+  const response = await fetch(QUERY_URL, {
+    headers: {
+      Cookie: cookieHeader,
+      Referer: `${UNDER_SYSTEM_SERVER}/tkglAction.do?method=kbxxXs&tktime=${getIETimeStamp()}`,
+      "User-Agent": IE_8_USER_AGENT,
+    },
+    redirect: "manual",
+  });
+
+  if (response.status === 302) return ExpiredResponse;
+
+  const content = await response.text();
+
+  if (content.includes("评教未完成，不能查看课表！"))
+    return {
+      success: false,
+      type: ActionFailType.MissingCommentary,
+      msg: "上学期评教未完成，不能查看本学期课表",
+    };
+
+  const tableData = getCourses(content);
+
+  return {
+    success: true,
+    data: tableData,
+    startTime: semesterStartTime[time],
+  };
+};
 
 export const underCourseTableHandler: RequestHandler<
   EmptyObject,
@@ -101,42 +161,12 @@ export const underCourseTableHandler: RequestHandler<
       return res.json(MissingCredentialResponse);
     }
 
-    const QUERY_URL = `${UNDER_SYSTEM_SERVER}/tkglAction.do?${new URLSearchParams(
-      {
-        method: "goListKbByXs",
-        istsxx: "no",
-        xnxqh: time,
-        zc: "",
-      },
-    ).toString()}`;
+    const cookieHeader = req.headers.cookie;
 
-    const response = await fetch(QUERY_URL, {
-      headers: {
-        Cookie: req.headers.cookie,
-        Referer: `${UNDER_SYSTEM_SERVER}/tkglAction.do?method=kbxxXs&tktime=${getIETimeStamp()}`,
-        "User-Agent": IE_8_USER_AGENT,
-      },
-      redirect: "manual",
-    });
+    if (cookieHeader.includes("TEST"))
+      return res.json(UNDER_COURSE_TABLE_TEST_RESPONSE);
 
-    if (response.status === 302) return res.json(ExpiredResponse);
-
-    const content = await response.text();
-
-    if (content.includes("评教未完成，不能查看课表！"))
-      return res.json({
-        success: false,
-        type: ActionFailType.MissingCommentary,
-        msg: "上学期评教未完成，不能查看本学期课表",
-      });
-
-    const tableData = getCourses(content);
-
-    return res.json({
-      success: true,
-      data: tableData,
-      startTime: semesterStartTime[time],
-    } as UnderCourseTableSuccessResponse);
+    return res.json(await getUnderCourseTable(cookieHeader, time));
   } catch (err) {
     const { message } = err as Error;
 

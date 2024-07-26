@@ -257,6 +257,60 @@ export const registerStudentArchive = async (
   return UnknownResponse(alert);
 };
 
+const UNDER_STUDENT_ARCHIVE_VIEW_TEST_RESPONSE: UnderGetStudentArchiveSuccessResponse =
+  {
+    success: true,
+    info: {
+      basic: [
+        { text: "张三", value: "某某某" },
+        { text: "性别", value: "男" },
+        { text: "民族", value: "汉" },
+        { text: "出生日期", value: "2000-01-01" },
+      ],
+      study: [
+        {
+          startTime: "开始时间",
+          endTime: "结束时间",
+          school: "学校",
+          title: "职务",
+          witness: "证明人",
+          remark: "备注",
+        },
+        ...Array.from({ length: 5 }, (_, i) => ({
+          startTime: `开始时间${i + 1}`,
+          endTime: `结束时间${i + 1}`,
+          school: `学校${i + 1}`,
+          title: "无",
+          witness: `证明人${i + 1}`,
+          remark: "无",
+        })),
+      ],
+      family: [
+        {
+          name: "姓名",
+          relation: "与本人关系",
+          office: "工作单位",
+          title: "职务",
+          phone: "联系电话",
+          remark: "备注",
+        },
+        ...Array.from({ length: 3 }, (_, i) => ({
+          name: `家庭成员${i + 1}`,
+          relation: `某关系${i + 1}`,
+          office: `某单位${i + 1}`,
+          title: `某职务${i + 1}`,
+          phone: "12345678901",
+          remark: "无",
+        })),
+      ],
+      archiveImage: "https://innenu.com/favicon.ico",
+      examImage: "https://innenu.com/favicon.ico",
+      canRegister: false,
+      isRegistered: true,
+      path: "",
+    },
+  };
+
 export const underStudentArchiveHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
@@ -279,10 +333,21 @@ export const underStudentArchiveHandler: RequestHandler<
 
     const cookieHeader = req.headers.cookie;
 
-    if (req.body.type === "register")
+    if (req.body.type === "register") {
+      if (cookieHeader.includes("TEST"))
+        return res.json({
+          success: false,
+          msg: "学年学籍已注册",
+        });
+
       return res.json(
         await registerStudentArchive(cookieHeader, req.body.path),
       );
+    }
+
+    if (cookieHeader.includes("TEST")) {
+      return res.json(UNDER_STUDENT_ARCHIVE_VIEW_TEST_RESPONSE);
+    }
 
     return res.json(await getUnderStudentArchive(cookieHeader));
   } catch (err) {

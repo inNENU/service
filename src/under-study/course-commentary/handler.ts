@@ -3,11 +3,17 @@ import type { RequestHandler } from "express";
 import type { GetUnderCourseCommentaryOptions } from "./get.js";
 import { getUnderCommentary } from "./get.js";
 import type { ListUnderCourseCommentaryOptions } from "./list.js";
-import { listUnderCourseCommentary } from "./list.js";
+import {
+  UNDER_COURSE_COMMENTARY_LIST_TEST_RESPONSE,
+  listUnderCourseCommentary,
+} from "./list.js";
 import type { SubmitUnderCourseCommentaryOptions } from "./submit.js";
 import { submitUnderCourseCommentary } from "./submit.js";
 import type { ViewUnderCourseCommentaryOptions } from "./view.js";
-import { viewUnderCourseCommentary } from "./view.js";
+import {
+  UNDER_COURSE_COMMENTARY_VIEW_TEST_RESPONSE,
+  viewUnderCourseCommentary,
+} from "./view.js";
 import {
   InvalidArgResponse,
   MissingArgResponse,
@@ -44,19 +50,20 @@ export const underStudyCourseCommentaryHandler: RequestHandler<
 
     const cookieHeader = req.headers.cookie;
 
-    if (cookieHeader.includes("TEST"))
-      return res.json({
-        success: false,
-        message: "因子系统逻辑复杂，测试账号暂不提供课程评价操作模拟",
-      });
+    if (req.body.type === "list") {
+      if (cookieHeader.includes("TEST"))
+        return res.json(UNDER_COURSE_COMMENTARY_LIST_TEST_RESPONSE);
 
-    if (req.body.type === "list")
       return res.json(
         await listUnderCourseCommentary(cookieHeader, req.body.time),
       );
+    }
 
     if (req.body.type === "view") {
       const { commentaryCode } = req.body;
+
+      if (cookieHeader.includes("TEST"))
+        return res.json(UNDER_COURSE_COMMENTARY_VIEW_TEST_RESPONSE);
 
       if (!commentaryCode)
         return res.json(MissingArgResponse("commentaryCode"));

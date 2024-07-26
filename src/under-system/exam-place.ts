@@ -183,6 +183,24 @@ export const underExamPlaceHandler: RequestHandler<
 
     const cookieHeader = req.headers.cookie;
 
+    if (cookieHeader.includes("TEST")) {
+      return res.json({
+        success: true,
+        data: [
+          {
+            name: "测试计划",
+            exams: Array.from({ length: 5 }, (_, i) => ({
+              course: `课程${i + 1}`,
+              time: `2023-01-0${i + 1}`,
+              campus: "校区",
+              building: "教学楼",
+              classroom: "考场",
+            })),
+          },
+        ],
+      } as UnderExamPlaceSuccessResponse);
+    }
+
     const response = await fetch(INFO_URL, {
       headers: {
         Cookie: cookieHeader,

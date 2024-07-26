@@ -614,6 +614,12 @@ export const underCreateStudentArchiveHandler: RequestHandler<
 
     const cookieHeader = req.headers.cookie;
 
+    if (cookieHeader.includes("TEST"))
+      return res.json({
+        success: false,
+        msg: "已创建学籍",
+      });
+
     if (req.body.type === "get-info")
       return res.json(await getUnderStudentArchiveInfo(cookieHeader));
 
