@@ -1,4 +1,4 @@
-import { writeFileSync } from "node:fs";
+import { writeFile } from "node:fs";
 
 import type { RequestHandler } from "express";
 
@@ -45,10 +45,19 @@ export const mpLoginHandler: RequestHandler<
       const inBlacklist = OPENID_BLACK_LIST.includes(openid);
 
       if (inBlacklist)
-        writeFileSync("blacklist", `openid ${openid}\n`, {
-          encoding: "utf8",
-          flag: "a",
-        });
+        writeFile(
+          "blacklist",
+          `openid ${openid}\n`,
+          {
+            encoding: "utf8",
+            flag: "a",
+          },
+          (err) => {
+            if (err) {
+              console.error(err);
+            }
+          },
+        );
 
       return res.json({
         openid,
@@ -71,10 +80,19 @@ export const mpLoginHandler: RequestHandler<
     const inBlacklist = OPENID_BLACK_LIST.includes(openid);
 
     if (inBlacklist)
-      writeFileSync("blacklist", `openid ${openid}\n`, {
-        encoding: "utf8",
-        flag: "a",
-      });
+      writeFile(
+        "blacklist",
+        `openid ${openid}\n`,
+        {
+          encoding: "utf8",
+          flag: "a",
+        },
+        (err) => {
+          if (err) {
+            console.error(err);
+          }
+        },
+      );
 
     return res.json({
       openid,

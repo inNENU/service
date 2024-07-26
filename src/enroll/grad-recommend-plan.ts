@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFile } from "node:fs";
 
 import type { RichTextNode } from "@mptool/parser";
 import { getRichTextNodes } from "@mptool/parser";
@@ -132,14 +132,24 @@ export const gradRecommendPlanHandler: RequestHandler<
       ),
     );
 
-    writeFileSync("./cache/enroll-grad-recommend-plan.html", content, {
-      encoding: "utf-8",
-    });
-    writeFileSync(
+    writeFile(
+      "./cache/enroll-grad-recommend-plan.html",
+      content,
+      { encoding: "utf-8" },
+      (err) => {
+        if (err) {
+          console.error(err);
+        }
+      },
+    );
+    writeFile(
       "./cache/enroll-grad-recommend-plan.json",
       JSON.stringify(schoolInfo),
-      {
-        encoding: "utf-8",
+      { encoding: "utf-8" },
+      (err) => {
+        if (err) {
+          console.error(err);
+        }
       },
     );
 

@@ -1,4 +1,4 @@
-import { writeFileSync } from "node:fs";
+import { writeFile } from "node:fs";
 
 import type { ConditionBlackList } from "../config/index.js";
 import { CONDITION_BLACK_LIST, ID_BLACK_LIST } from "../config/index.js";
@@ -49,10 +49,16 @@ export const isInBlackList = (
   info?: MyInfo | null,
 ): boolean => {
   if (ID_BLACK_LIST.includes(id)) {
-    writeFileSync("blacklist", `${id} with openid ${openid}\n`, {
-      encoding: "utf8",
-      flag: "a",
-    });
+    writeFile(
+      "blacklist",
+      `${id} with openid ${openid}\n`,
+      { encoding: "utf8", flag: "a" },
+      (err) => {
+        if (err) {
+          console.error(err);
+        }
+      },
+    );
 
     return true;
   }
@@ -64,12 +70,17 @@ export const isInBlackList = (
   );
 
   if (result)
-    writeFileSync(
+    writeFile(
       "blacklist",
       `${id} new ${openid ?? ""} ${JSON.stringify(info)}\n`,
       {
         encoding: "utf8",
         flag: "a",
+      },
+      (err) => {
+        if (err) {
+          console.error(err);
+        }
       },
     );
 

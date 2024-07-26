@@ -1,4 +1,4 @@
-import { writeFileSync } from "node:fs";
+import { writeFile } from "node:fs";
 
 import type { RequestHandler } from "express";
 
@@ -9,10 +9,15 @@ export const mpReportHandler: RequestHandler<
   EmptyObject,
   Record<string, unknown>
 > = (req, res) => {
-  writeFileSync(
+  writeFile(
     "./log",
     `${new Date().toLocaleString()} ${JSON.stringify(req.body)}\n`,
     { flag: "a" },
+    (err) => {
+      if (err) {
+        console.error(err);
+      }
+    },
   );
 
   res.end();

@@ -1,4 +1,4 @@
-import { writeFileSync } from "node:fs";
+import { writeFile } from "node:fs";
 
 import type { RequestHandler } from "express";
 
@@ -217,17 +217,29 @@ export const getMyInfo = async (
                 : "unknown";
 
       if (!code2org.has(info.orgId)) {
-        writeFileSync("data", `["${info.org}", ${info.orgId}],\n`, {
-          flag: "a",
-        });
+        writeFile(
+          "data",
+          `["${info.org}", ${info.orgId}],\n`,
+          { flag: "a" },
+          (err) => {
+            if (err) {
+              console.error(err);
+            }
+          },
+        );
         code2org.set(info.orgId, info.org);
       }
 
       if (!code2major.has(info.majorId)) {
-        writeFileSync(
+        writeFile(
           "data",
           `["${info.major}", "${info.majorId}"], // ${info.org}\n`,
           { flag: "a" },
+          (err) => {
+            if (err) {
+              console.error(err);
+            }
+          },
         );
         code2major.set(info.majorId, info.major);
       }
