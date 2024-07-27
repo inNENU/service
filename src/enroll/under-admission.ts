@@ -64,7 +64,7 @@ export const underAdmissionHandler: RequestHandler<
       body: JSON.stringify(params),
     });
 
-    if (response.status !== 200)
+    if (!response.headers.get("content-type")?.includes("application/json"))
       return res.json({
         success: false,
         type: ActionFailType.Closed,
