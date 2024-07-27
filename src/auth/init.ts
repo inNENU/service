@@ -146,6 +146,7 @@ export type InitAuthFailedResponse =
       | ActionFailType.Expired
       | ActionFailType.NeedCaptcha
       | ActionFailType.Unknown
+      | ActionFailType.WeekPassword
       | ActionFailType.WrongCaptcha
       | ActionFailType.WrongPassword
     >
@@ -237,6 +238,17 @@ export const initAuth = async (
 
   if (loginResponse.status === 302) {
     if (location?.startsWith(AUTH_LOGIN_URL)) return WrongPasswordResponse;
+
+    if (
+      location?.startsWith(
+        `${AUTH_SERVER}/authserver/improveInfo/improveUserInfo.do`,
+      )
+    )
+      return {
+        success: false,
+        type: ActionFailType.WeekPassword,
+        msg: "密码太弱，请先前往统一身份认证官网手动修改密码",
+      };
 
     if (location?.startsWith(RE_AUTH_URL))
       return {
