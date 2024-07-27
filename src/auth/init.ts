@@ -9,8 +9,10 @@ import {
   AUTH_DOMAIN,
   AUTH_LOGIN_URL,
   AUTH_SERVER,
+  IMPROVE_INFO_URL,
   RE_AUTH_URL,
   SALT_REGEXP,
+  UPDATE_INFO_URL,
 } from "./utils.js";
 import {
   ActionFailType,
@@ -239,16 +241,24 @@ export const initAuth = async (
   if (loginResponse.status === 302) {
     if (location?.startsWith(AUTH_LOGIN_URL)) return WrongPasswordResponse;
 
-    if (
-      location?.startsWith(
-        `${AUTH_SERVER}/authserver/improveInfo/improveUserInfo.do`,
-      )
-    )
+    if (location?.startsWith(IMPROVE_INFO_URL)) {
+      const response = await fetch(UPDATE_INFO_URL, {
+        method: "POST",
+        headers: {
+          Accept: "application/json, text/javascript, */*; q=0.01",
+          Cookie: cookieHeader + ";" + cookieStore.getHeader(UPDATE_INFO_URL),
+          "User-Agent": "inNENU",
+        },
+      });
+
+      const result = (await response.json()) as { errMsg: string };
+
       return {
         success: false,
         type: ActionFailType.WeekPassword,
-        msg: "密码太弱，请先前往统一身份认证官网手动修改密码",
+        msg: result.errMsg ?? "密码太弱，请手动修改密码",
       };
+    }
 
     if (location?.startsWith(RE_AUTH_URL))
       return {

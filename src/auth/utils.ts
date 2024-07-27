@@ -8,3 +8,5 @@ export const SALT_REGEXP =
   /input type="hidden" id="pwdEncryptSalt" value="([^"]+)" \/>/;
 export const WEB_VPN_AUTH_DOMAIN = "authserver-443.webvpn.nenu.edu.cn";
 export const WEB_VPN_AUTH_SERVER = `https://${WEB_VPN_AUTH_DOMAIN}`;
+export const IMPROVE_INFO_URL = `${AUTH_SERVER}/authserver/improveInfo/improveUserInfo.do`;
+export const UPDATE_INFO_URL = `${AUTH_SERVER}/authserver/improveInfo/updateUserInfo.do`;
