@@ -78,6 +78,7 @@ export interface GetEmailNameResponse {
   success: true;
   hasEmail: true;
   email: string;
+  password: string;
 }
 
 export interface GetEmailInfoResponse {
@@ -102,6 +103,7 @@ const TEST_GET_EMAIL_RESPONSE: GetEmailSuccessResponse = {
   success: true,
   hasEmail: true,
   email: "admin@example.com",
+  password: "password",
 };
 
 export const getEmailInfo = async (
