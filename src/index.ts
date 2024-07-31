@@ -23,6 +23,7 @@ import {
   authLoginHandler,
   changePasswordHandler,
   reAuthHandler,
+  resetCaptchaHandler,
   resetPasswordHandler,
 } from "./auth/index.js";
 import { UnknownResponse } from "./config/index.js";
@@ -162,6 +163,7 @@ app.post("/auth/init", authInitHandler);
 app.post("/auth/login", authLoginHandler);
 app.get("/auth/re-auth", reAuthHandler);
 app.post("/auth/re-auth", reAuthHandler);
+app.get("/auth/reset-captcha", resetCaptchaHandler);
 app.get("/auth/reset-password", resetPasswordHandler);
 app.post("/auth/reset-password", resetPasswordHandler);
 

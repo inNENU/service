@@ -1,4 +1,5 @@
 import { CookieStore } from "@mptool/net";
+import type { RequestHandler } from "express";
 
 import { RESET_PREFIX } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
@@ -6,6 +7,7 @@ import { RestrictedResponse, UnknownResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
+  EmptyObject,
 } from "../typings.js";
 import { generateRandomString } from "../utils/generateRandomString.js";
 
@@ -28,11 +30,26 @@ export type ResetCaptchaResponse =
   | CommonFailedResponse<ActionFailType.Restricted | ActionFailType.Unknown>;
 
 export const getResetCaptcha = async (
-  cookieStore = new CookieStore(),
+  cookieHeaderOrStore?: string | CookieStore,
 ): Promise<ResetCaptchaResponse> => {
+  const cookieStore =
+    cookieHeaderOrStore instanceof CookieStore
+      ? cookieHeaderOrStore
+      : new CookieStore();
+
   const captchaId = generateRandomString(16);
   const imageResponse = await fetch(
     `${CAPTCHA_URL}?ltId=${captchaId}&codeType=2`,
+    {
+      headers: {
+        Cookie:
+          cookieHeaderOrStore instanceof CookieStore
+            ? cookieStore.getHeader(CAPTCHA_URL)
+            : typeof cookieHeaderOrStore === "string"
+              ? cookieHeaderOrStore
+              : "",
+      },
+    },
   );
 
   if (imageResponse.headers.get("Content-Type") === "text/html")
@@ -54,4 +71,11 @@ export const getResetCaptcha = async (
     },
     cookieStore,
   };
+};
+
+export const resetCaptchaHandler: RequestHandler<
+  EmptyObject,
+  EmptyObject
+> = async (req, res) => {
+  return res.json(await getResetCaptcha(req.headers.cookie ?? ""));
 };

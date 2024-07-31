@@ -1,4 +1,4 @@
-export * from "./activate/activate.js";
+export * from "./activate/index.js";
 export * from "./auth-encrypt.js";
 export * from "./auth-captcha.js";
 export * from "./change-password.js";
@@ -6,4 +6,5 @@ export * from "./init.js";
 export * from "./login.js";
 export * from "./re-auth.js";
 export * from "./reset/reset.js";
+export * from "./reset-captcha.js";
 export * from "./utils.js";

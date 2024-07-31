@@ -1,8 +1,7 @@
 import { CookieStore } from "@mptool/net";
 
 import { INFO_SALT } from "./utils.js";
-import type { ActionFailType } from "../../config/index.js";
-import { UnknownResponse } from "../../config/index.js";
+import { ActionFailType, UnknownResponse } from "../../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
@@ -12,7 +11,7 @@ import type { ResetCaptchaInfo } from "../reset-captcha.js";
 import { getResetCaptcha } from "../reset-captcha.js";
 import { RESET_PREFIX } from "../utils.js";
 
-interface RawValidSuccessResponse {
+interface RawValidationSuccessResponse {
   success: true;
   code: "0";
   remainTime: number;
@@ -22,7 +21,7 @@ interface RawValidSuccessResponse {
   };
 }
 
-interface RawValidFailResponse {
+interface RawValidationFailResponse {
   success: false;
   code: "0";
   remainTime: number;
@@ -31,10 +30,12 @@ interface RawValidFailResponse {
   messages: string;
 }
 
-type RawValidResponse = RawValidSuccessResponse | RawValidFailResponse;
+type RawValidationResponse =
+  | RawValidationSuccessResponse
+  | RawValidationFailResponse;
 
-export interface ActivateValidOptions {
-  type: "valid";
+export interface ActivateValidationOptions {
+  type: "validate-info";
   name: string;
   schoolId: string;
   idType: number;
@@ -43,19 +44,21 @@ export interface ActivateValidOptions {
   captchaId: string;
 }
 
-export type ActivateValidSuccessResponse = CommonSuccessResponse<
+export type ActivateValidationSuccessResponse = CommonSuccessResponse<
   ResetCaptchaInfo & { sign: string; loginNo: string }
 >;
 
-export type ActivateValidResponse =
-  | ActivateValidSuccessResponse
+export type ActivateValidationResponse =
+  | ActivateValidationSuccessResponse
+  | (CommonFailedResponse<ActionFailType.WrongCaptcha> & {
+      data: ResetCaptchaInfo;
+    })
   | CommonFailedResponse<ActionFailType.Restricted | ActionFailType.Unknown>;
 
-// NOTE: e.checkValidateCode(
 export const validAccountInfo = async (
-  { schoolId, name, id, idType, captcha, captchaId }: ActivateValidOptions,
+  { schoolId, name, id, idType, captcha, captchaId }: ActivateValidationOptions,
   cookieHeader: string,
-): Promise<ActivateValidResponse> => {
+): Promise<ActivateValidationResponse> => {
   const cookieStore = new CookieStore();
 
   const response = await fetch(
@@ -64,7 +67,7 @@ export const validAccountInfo = async (
       method: "POST",
       headers: {
         Cookie: cookieHeader,
-        "Content-Type": "application/json;charset=UTF-8",
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         loginNo: schoolId,
@@ -77,9 +80,24 @@ export const validAccountInfo = async (
     },
   );
 
-  const activateResult = (await response.json()) as RawValidResponse;
+  const data = (await response.json()) as RawValidationResponse;
 
-  if (!activateResult.success) return UnknownResponse(activateResult.message);
+  if (!data.success) {
+    if (data.message === "验证码不正确") {
+      const captchaResponse = await getResetCaptcha(cookieHeader);
+
+      if (!captchaResponse.success) return captchaResponse;
+
+      return {
+        success: false,
+        type: ActionFailType.WrongCaptcha,
+        msg: data.message,
+        data: captchaResponse.data,
+      };
+    }
+
+    return UnknownResponse(data.message);
+  }
 
   const captchaResponse = await getResetCaptcha(cookieStore);
 
@@ -89,7 +107,7 @@ export const validAccountInfo = async (
     success: true,
     data: {
       ...captchaResponse.data,
-      ...activateResult.result,
+      ...data.result,
     },
   };
 };

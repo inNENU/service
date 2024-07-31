@@ -1,11 +1,13 @@
 import { INFO_SALT } from "./utils.js";
-import { UnknownResponse } from "../../config/index.js";
+import { ActionFailType, UnknownResponse } from "../../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../../typings.js";
 import { authEncrypt } from "../auth-encrypt.js";
-import { AUTH_SERVER } from "../utils.js";
+import type { ResetCaptchaInfo } from "../reset-captcha.js";
+import { getResetCaptcha } from "../reset-captcha.js";
+import { RESET_PREFIX } from "../utils.js";
 
 interface RawSendSmsSuccessResponse {
   code: "0";
@@ -25,7 +27,7 @@ interface RawSendSmsFailedResponse {
 
 type RawSendSmsResponse = RawSendSmsSuccessResponse | RawSendSmsFailedResponse;
 
-export interface ActivatePhoneSmsOptions {
+export interface ActivateSendSmsOptions {
   type: "send-sms";
   sign: string;
   mobile: string;
@@ -33,27 +35,29 @@ export interface ActivatePhoneSmsOptions {
   captchaId: string;
 }
 
-export type ActivatePhoneSmsSuccessResponse = CommonSuccessResponse<{
+export type ActivateSendSmsSuccessResponse = CommonSuccessResponse<{
   remainTime: number;
   sign: string;
 }>;
 
-export type ActivatePhoneSmsResponse =
-  | ActivatePhoneSmsSuccessResponse
-  | CommonFailedResponse;
+export type ActivateSendSmsResponse =
+  | ActivateSendSmsSuccessResponse
+  | (CommonFailedResponse<ActionFailType.WrongCaptcha> & {
+      data: ResetCaptchaInfo;
+    })
+  | CommonFailedResponse<ActionFailType.Restricted | ActionFailType.Unknown>;
 
-// e.getMobileCode({
 export const sendActivateSms = async (
-  { sign, mobile, captcha, captchaId }: ActivatePhoneSmsOptions,
+  { sign, mobile, captcha, captchaId }: ActivateSendSmsOptions,
   cookieHeader: string,
-): Promise<ActivatePhoneSmsResponse> => {
-  const sendCodeResponse = await fetch(
-    `${AUTH_SERVER}/queryValidateCodeByMobile`,
+): Promise<ActivateSendSmsResponse> => {
+  const response = await fetch(
+    `${RESET_PREFIX}/accountActivation/queryValidateCodeByMobile`,
     {
       method: "POST",
       headers: {
         Cookie: cookieHeader,
-        "Content-Type": "application/json;charset=UTF-8",
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         sign,
@@ -65,15 +69,30 @@ export const sendActivateSms = async (
     },
   );
 
-  const sendCodeResult = (await sendCodeResponse.json()) as RawSendSmsResponse;
+  const data = (await response.json()) as RawSendSmsResponse;
 
-  if (!sendCodeResult.success) return UnknownResponse(sendCodeResult.message);
+  if (!data.success) {
+    if (data.message === "验证码不正确") {
+      const captchaResponse = await getResetCaptcha();
+
+      if (!captchaResponse.success) return captchaResponse;
+
+      return {
+        success: false,
+        type: ActionFailType.WrongCaptcha,
+        msg: data.message,
+        data: captchaResponse.data,
+      };
+    }
+
+    return UnknownResponse(data.message);
+  }
 
   return {
     success: true,
     data: {
-      remainTime: sendCodeResult.remainTime,
-      sign: sendCodeResult.result.sign,
+      remainTime: data.remainTime,
+      sign: data.result.sign,
     },
   };
 };

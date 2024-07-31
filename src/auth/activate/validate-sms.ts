@@ -3,9 +3,8 @@ import type { CommonSuccessResponse } from "../../typings.js";
 import { RESET_PREFIX } from "../utils.js";
 
 export interface ActivateValidSmsOptions {
-  type: "valid-sms";
+  type: "validate-sms";
   sign: string;
-  mobile: string;
   code: string;
 }
 
@@ -21,7 +20,9 @@ interface RawValidSmsSuccessResponse {
 interface RawValidSmsFailedResponse {
   code: "0";
   success: false;
+  message: string;
   messages: string;
+  result: null;
 }
 
 type RawValidSmsResponse =
@@ -43,9 +44,8 @@ export type ActivateValidSmsResponse =
   | ActivateSuccessResponse
   | ActivateValidSmsConflictResponse;
 
-// e.checkValidateCode
 export const validateActivateSms = async (
-  { sign, code, mobile }: ActivateValidSmsOptions,
+  { sign, code }: ActivateValidSmsOptions,
   cookieHeader: string,
 ): Promise<ActivateValidSmsResponse> => {
   const response = await fetch(
@@ -56,22 +56,21 @@ export const validateActivateSms = async (
         Cookie: cookieHeader,
         "Content-Type": "application/json;charset=UTF-8",
       },
-      // FIXME:
-      body: JSON.stringify({ sign, mobile, checkCode: code }),
+      body: JSON.stringify({ sign, validateCode: code }),
     },
   );
 
-  const content = (await response.json()) as RawValidSmsResponse;
+  const data = (await response.json()) as RawValidSmsResponse;
 
-  if (!content.success)
+  if (!data.success)
     return {
       success: false,
       type: ActionFailType.WrongCaptcha,
-      msg: content.messages,
+      msg: data.messages,
     };
 
   return {
     success: true,
-    data: content.result,
+    data: data.result,
   };
 };
