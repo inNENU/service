@@ -74,7 +74,7 @@ export const getClasses = (
         /^复制(.*)-1$/.exec(rawClassInfo)?.[1] ?? rawClassInfo
       ).split(",");
 
-      const isTarget = classInfos.every((info) => info.match(/^\d{4}.+$/));
+      const isTarget = classInfos.every((info) => /^\d{4}.+$/.exec(info));
 
       return {
         name,

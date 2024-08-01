@@ -36,7 +36,7 @@ export const myCheckHandler: RequestHandler<
       success: true,
       valid: identityResult.success,
     } as CookieVerifyResponse);
-  } catch (err) {
+  } catch {
     return res.json({
       success: true,
       valid: false,

@@ -46,7 +46,6 @@ const getWechatQRCode = async (
       body: JSON.stringify({
         page,
         scene,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         auto_color: true,
       }),
     },

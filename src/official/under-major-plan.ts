@@ -33,7 +33,7 @@ export const underMajorPlanHandler: RequestHandler<
 
     const html = await response.text();
 
-    const listContent = html.match(MAJOR_PLAN_LIST_REGEXP)?.[1];
+    const listContent = MAJOR_PLAN_LIST_REGEXP.exec(html)?.[1];
 
     if (!listContent) throw new Error("未找到列表");
 

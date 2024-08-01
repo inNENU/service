@@ -76,7 +76,7 @@ export const authInitInfo = async (
   const content = await loginPageResponse.text();
 
   const salt = SALT_REGEXP.exec(content)![1];
-  const execution = content.match(/name="execution" value="(.*?)"/)![1];
+  const execution = /name="execution" value="(.*?)"/.exec(content)![1];
 
   cookieStore.set({
     name: "org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE",

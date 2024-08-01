@@ -67,7 +67,7 @@ const getInfo = async ({
 
   const content = await response.text();
 
-  if (/<button type="submit" >查询<\/button>/.test(content))
+  if (content.includes('<button type="submit" >查询</button>'))
     return {
       success: false,
       type: ActionFailType.Unknown,

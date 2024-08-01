@@ -31,7 +31,11 @@ export const actionCheckHandler: RequestHandler<
       redirect: "manual",
     });
 
-    if (response.status !== 200) throw -1;
+    if (response.status !== 200)
+      return res.json({
+        success: true,
+        valid: false,
+      } as CookieVerifyResponse);
 
     const result = (await response.json()) as { success: boolean };
 

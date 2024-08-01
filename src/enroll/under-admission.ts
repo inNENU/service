@@ -101,7 +101,7 @@ export const getUnderAdmission = async ({
         },
         {
           text: "录取通知书单号",
-          value: hasMailed ? mailCode?.String ?? "暂无" : "暂无",
+          value: hasMailed ? (mailCode?.String ?? "暂无") : "暂无",
         },
         {
           text: "是否已寄出",

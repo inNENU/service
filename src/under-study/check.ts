@@ -40,8 +40,11 @@ export const underStudyCheckHandler: RequestHandler<
         } as CookieVerifyResponse);
     }
 
-    throw -1;
-  } catch (err) {
+    return res.json({
+      success: true,
+      valid: false,
+    } as CookieVerifyResponse);
+  } catch {
     return res.json({
       success: true,
       valid: false,

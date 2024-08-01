@@ -3,7 +3,7 @@ import mysql from "mysql2/promise";
 // 创建 MySQL 连接池
 const pool = mysql.createPool({
   host: process.env.MYSQL_HOST ?? "localhost",
-  port: Number(process.env.MYSQL_PORT) ?? 3306,
+  port: process.env.MYSQL_PORT ? Number(process.env.MYSQL_PORT) : 3306,
   database: "innenu-service",
   user: process.env.MYSQL_USER ?? "innenu",
   password: process.env.MYSQL_PASSWORD,

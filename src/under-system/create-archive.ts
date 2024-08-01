@@ -19,7 +19,6 @@ const infoRowRegExp =
   /<tr height="25px"\s*><td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<\/tr>/g;
 const info2RowRegExp =
   /<tr height="25px"\s*><td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<\/tr>/g;
-const requiredRegExp = /<font color="red">\*<\/font>/;
 const readonlyRegExp = /<font[^>]+>ø<\/font>/;
 const inputRegExp = /<input[^>]*name="(.*?)"[^>]*value="(.*?)"[^>]*\/>/;
 const checkBoxRegExp =
@@ -120,7 +119,7 @@ export const getUnderStudentArchiveInfo = async (
       msg: "学籍已建立",
     };
 
-  const link = welcomePageContent.match(nextLinkRegExp)?.[1];
+  const link = nextLinkRegExp.exec(welcomePageContent)?.[1];
 
   if (!link)
     return {
@@ -294,7 +293,7 @@ export const submitUnderStudentArchiveInfo = async (
     )
     .map(([text, input, remark]) => {
       const [, name, value] = Array.from(input.matchAll(fieldsRegExp))[0];
-      const required = requiredRegExp.test(input);
+      const required = input.includes('<font color="red">*</font>');
 
       return {
         text,

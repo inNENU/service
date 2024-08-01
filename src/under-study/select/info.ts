@@ -46,7 +46,7 @@ const ALLOWED_INFO_REGEXP =
 
 const setMajors = (content: string): void => {
   if (!majorsStore.state.length) {
-    const majorText = content.match(MAJORS_REGEXP)![1];
+    const majorText = MAJORS_REGEXP.exec(content)![1];
 
     const majors = Array.from(majorText.matchAll(MAJOR_ITEM_REGEXP)).map(
       ([, value, name]) => ({
@@ -61,7 +61,7 @@ const setMajors = (content: string): void => {
 
 const setCourseOffices = (content: string): void => {
   if (!officesStore.state.length) {
-    const courseOfficeText = content.match(COURSE_OFFICES_REGEXP)![1];
+    const courseOfficeText = COURSE_OFFICES_REGEXP.exec(content)![1];
 
     const offices = Array.from(
       courseOfficeText.matchAll(COURSE_OFFICE_ITEM_REGEXP),
@@ -76,7 +76,7 @@ const setCourseOffices = (content: string): void => {
 
 const setCourseTypes = (content: string): void => {
   if (!typesStore.state.length) {
-    const courseTypeText = content.match(COURSE_TYPES_REGEXP)![1];
+    const courseTypeText = COURSE_TYPES_REGEXP.exec(content)![1];
 
     const types = Array.from(
       courseTypeText.matchAll(COURSE_TYPE_ITEM_REGEXP),
@@ -91,7 +91,7 @@ const setCourseTypes = (content: string): void => {
 
 const setAreas = (content: string): void => {
   if (!areasStore.state.length) {
-    const areaText = content.match(AREAS_REGEXP)![1];
+    const areaText = AREAS_REGEXP.exec(content)![1];
 
     const areas = Array.from(areaText.matchAll(AREA_ITEM_REGEXP)).map(
       ([, value, name]) => ({
@@ -159,7 +159,7 @@ export type UnderSelectInfo =
   | UnderSelectDisallowedInfo;
 
 const getSelectInfo = (content: string): UnderSelectInfo => {
-  const [, term, name, canCancelText = ""] = content.match(INFO_TITLE_REGEXP)!;
+  const [, term, name, canCancelText = ""] = INFO_TITLE_REGEXP.exec(content)!;
 
   const canSelect = !content.includes("现在不是选课时间");
 
@@ -202,7 +202,7 @@ const getSelectInfo = (content: string): UnderSelectInfo => {
   };
 
   if (canSelect) {
-    const [, stage, startTime, endTime] = content.match(ALLOWED_INFO_REGEXP)!;
+    const [, stage, startTime, endTime] = ALLOWED_INFO_REGEXP.exec(content)!;
 
     return {
       canCancel: canCancelText === "可退选",
@@ -236,7 +236,7 @@ const checkCourseCommentary = async (
     },
   });
 
-  if (response.status !== 200) throw `status: ${response.status}`;
+  if (response.status !== 200) throw new Error(`status: ${response.status}`);
 
   try {
     const content = await response.text();
@@ -304,7 +304,7 @@ export const getUnderSelectInfo = async (
 
   let content = await response.text();
 
-  if (content.match(/<title>.*?评教检查<\/title>/)) {
+  if (/<title>.*?评教检查<\/title>/.exec(content)) {
     console.log("评教检查");
 
     const { completed } = await checkCourseCommentary(
