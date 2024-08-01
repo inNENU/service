@@ -33,7 +33,7 @@ type RawEnrollResult = RawEnrollSuccessResult | RawEnrollFailedResult;
 
 export interface UnderAdmissionSuccessResponse {
   success: true;
-  info: { text: string; value: string }[];
+  data: { text: string; value: string }[];
 }
 
 export type UnderAdmissionResponse =
@@ -80,36 +80,34 @@ export const getUnderAdmission = async ({
       is_mailed: hasMailed,
     } = result.student;
 
-    const info = [
-      {
-        text: "姓名",
-        value: name,
-      },
-      {
-        text: "考生号",
-        value: testId,
-      },
-      {
-        text: "录取专业",
-        value: major,
-      },
-      {
-        text: "所在学院",
-        value: department,
-      },
-      {
-        text: "录取通知书单号",
-        value: hasMailed ? mailCode?.String ?? "暂无" : "暂无",
-      },
-      {
-        text: "是否已寄出",
-        value: hasMailed ? "是" : "否",
-      },
-    ];
-
     return {
       success: true,
-      info,
+      data: [
+        {
+          text: "姓名",
+          value: name,
+        },
+        {
+          text: "考生号",
+          value: testId,
+        },
+        {
+          text: "录取专业",
+          value: major,
+        },
+        {
+          text: "所在学院",
+          value: department,
+        },
+        {
+          text: "录取通知书单号",
+          value: hasMailed ? mailCode?.String ?? "暂无" : "暂无",
+        },
+        {
+          text: "是否已寄出",
+          value: hasMailed ? "是" : "否",
+        },
+      ],
     };
   } catch (err) {
     const { message } = err as Error;
