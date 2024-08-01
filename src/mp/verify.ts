@@ -187,7 +187,7 @@ export const verifyHandler: RequestHandler<
   VerifyInfoOptions | VerifyUUIDOptions
 > = async (req, res) => {
   if (!req.headers.referer?.startsWith("https://innenu.com/"))
-    return res.status(500).json({
+    return res.status(403).json({
       success: false,
       msg: "Fuck you",
     });
