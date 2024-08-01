@@ -28,8 +28,8 @@ export const enum ActionFailType {
   WrongCaptcha = "wrong-captcha",
   /** 账号密码错误 */
   WrongPassword = "wrong-password",
-  /** 手机号错误 */
-  WrongCellphone = "wrong-cellphone",
+  /** 信息错误 */
+  WrongInfo = "wrong-info",
   /** 用户名错误 */
   WrongUserName = "wrong-username",
 

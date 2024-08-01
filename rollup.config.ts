@@ -35,6 +35,7 @@ export default [
           "cheerio/lib/slim",
           "compression",
           "cookie-parser",
+          "cors",
           "crypto-js",
           "crypto-js/aes.js",
           "crypto-js/enc-utf8.js",
@@ -43,7 +44,9 @@ export default [
           "express",
           "iconv-lite",
           "morgan",
+          "mysql2/promise",
           "qrcode",
+          "uuid",
         ]
       : [/^node:/],
   },

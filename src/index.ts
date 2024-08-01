@@ -1,6 +1,7 @@
 import bodyParser from "body-parser";
 import compression from "compression";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import type { Response } from "express";
 import express from "express";
 import morgan from "morgan";
@@ -51,6 +52,7 @@ import {
   mpQrCodeHandler,
   mpReportHandler,
   mpSearchHandler,
+  verifyHandler,
 } from "./mp/index.js";
 import {
   emailHandler,
@@ -117,6 +119,15 @@ global.fetch = async (url, options): Promise<globalThis.Response> => {
   return response;
 };
 
+app.use(
+  cors({
+    origin: [
+      "https://servicewechat.com",
+      /^https:\/\/.*\.innenu\.com$/,
+      "https://innenu.com",
+    ],
+  }),
+);
 app.use(cookieParser());
 app.use(compression());
 app.use(bodyParser.json());
@@ -232,6 +243,7 @@ app.post("/mp/login", mpLoginHandler);
 app.post("/mp/report", mpReportHandler);
 app.post("/mp/search", mpSearchHandler);
 app.get("/mp/qrcode", mpQrCodeHandler);
+app.post("/mp/verify", verifyHandler);
 
 app.get("/library/people", libraryPeopleHandler);
 
