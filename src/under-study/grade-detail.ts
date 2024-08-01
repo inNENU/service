@@ -80,15 +80,13 @@ interface RawUnderGradeSuccessResult {
   message: string;
 }
 
-interface RawUnderGradeFailedResult {
+interface RawUnderGradeFailResult {
   code: number;
   data: unknown;
   message: string;
 }
 
-type RawUnderGradeResult =
-  | RawUnderGradeSuccessResult
-  | RawUnderGradeFailedResult;
+type RawUnderGradeResult = RawUnderGradeSuccessResult | RawUnderGradeFailResult;
 
 const getGradeDetail = ({
   cj1,
@@ -188,7 +186,7 @@ export const underStudyGradeDetailHandler: RequestHandler<
   try {
     const { id, password, authToken, gradeCode } = req.body;
 
-    if (!gradeCode) return res.json(MissingArgResponse("课程代码"));
+    if (!gradeCode) return res.json(MissingArgResponse("gradeCode"));
 
     if (id && password && authToken) {
       const result = await underStudyLogin({ id, password, authToken });
