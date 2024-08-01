@@ -40,14 +40,12 @@ export type UnderAdmissionResponse =
   | UnderAdmissionSuccessResponse
   | CommonFailedResponse<ActionFailType.Closed | ActionFailType.Unknown>;
 
-export const underAdmissionHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  UnderAdmissionOptions
-> = async (req, res) => {
+export const getUnderAdmission = async ({
+  name,
+  id,
+  testId,
+}: UnderAdmissionOptions): Promise<UnderAdmissionResponse> => {
   try {
-    const { testId, id, name } = req.body;
-
     const params = {
       name,
       id_code: id,
@@ -65,16 +63,15 @@ export const underAdmissionHandler: RequestHandler<
     });
 
     if (!response.headers.get("content-type")?.includes("application/json"))
-      return res.json({
+      return {
         success: false,
         type: ActionFailType.Closed,
         msg: "查询通道已关闭",
-      });
+      };
 
     const result = (await response.json()) as RawEnrollResult;
 
-    if (result.student === null)
-      return res.json(UnknownResponse(result.message));
+    if (result.student === null) return UnknownResponse(result.message);
 
     const {
       department,
@@ -110,10 +107,26 @@ export const underAdmissionHandler: RequestHandler<
       },
     ];
 
-    return res.json({
+    return {
       success: true,
       info,
-    } as UnderAdmissionSuccessResponse);
+    };
+  } catch (err) {
+    const { message } = err as Error;
+
+    console.error(err);
+
+    return UnknownResponse(message);
+  }
+};
+
+export const underAdmissionHandler: RequestHandler<
+  EmptyObject,
+  EmptyObject,
+  UnderAdmissionOptions
+> = async (req, res) => {
+  try {
+    return res.json(await getUnderAdmission(req.body));
   } catch (err) {
     const { message } = err as Error;
 
