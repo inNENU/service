@@ -352,7 +352,7 @@ export const authInitHandler: RequestHandler<
       return res.json(result);
     }
 
-    const cookieHeader = req.headers.cookie!;
+    const cookieHeader = req.headers.cookie ?? "";
 
     // Note: Return fake result for testing
     if (cookieHeader.includes("TEST")) return res.json(TEST_AUTH_INIT);
