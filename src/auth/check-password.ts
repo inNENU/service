@@ -1,6 +1,5 @@
-import { INFO_SALT } from "./activate/utils.js";
 import { authEncrypt } from "./auth-encrypt.js";
-import { RESET_PREFIX } from "./utils.js";
+import { RESET_PREFIX, RESET_SALT } from "./utils.js";
 import { ActionFailType, UnknownResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
@@ -47,7 +46,7 @@ export const checkPassword = async (
     },
     body: JSON.stringify({
       sign,
-      password: authEncrypt(password, INFO_SALT),
+      password: authEncrypt(password, RESET_SALT),
       operationSource,
     }),
   });

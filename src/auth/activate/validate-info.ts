@@ -1,6 +1,5 @@
 import { CookieStore } from "@mptool/net";
 
-import { INFO_SALT } from "./utils.js";
 import { ActionFailType, UnknownResponse } from "../../config/index.js";
 import type {
   CommonFailedResponse,
@@ -9,7 +8,7 @@ import type {
 import { authEncrypt } from "../auth-encrypt.js";
 import type { ResetCaptchaInfo } from "../reset-captcha.js";
 import { getResetCaptcha } from "../reset-captcha.js";
-import { RESET_PREFIX } from "../utils.js";
+import { RESET_PREFIX, RESET_SALT } from "../utils.js";
 
 interface RawValidationSuccessResponse {
   success: true;
@@ -75,7 +74,7 @@ export const validAccountInfo = async (
         captcha,
         captchaId,
         idType,
-        idNo: authEncrypt(id, INFO_SALT),
+        idNo: authEncrypt(id, RESET_SALT),
       }),
     },
   );

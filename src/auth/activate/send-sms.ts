@@ -1,4 +1,3 @@
-import { INFO_SALT } from "./utils.js";
 import { ActionFailType, UnknownResponse } from "../../config/index.js";
 import type {
   CommonFailedResponse,
@@ -7,7 +6,7 @@ import type {
 import { authEncrypt } from "../auth-encrypt.js";
 import type { ResetCaptchaInfo } from "../reset-captcha.js";
 import { getResetCaptcha } from "../reset-captcha.js";
-import { RESET_PREFIX } from "../utils.js";
+import { RESET_PREFIX, RESET_SALT } from "../utils.js";
 
 interface RawSendSmsSuccessResponse {
   code: "0";
@@ -62,7 +61,7 @@ export const sendActivateSms = async (
       body: JSON.stringify({
         sign,
         accountType: 1,
-        accountNum: authEncrypt(mobile, INFO_SALT),
+        accountNum: authEncrypt(mobile, RESET_SALT),
         captcha,
         captchaId,
       }),

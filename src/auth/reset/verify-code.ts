@@ -3,12 +3,11 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../../typings.js";
-import { INFO_SALT } from "../activate/utils.js";
 import { authEncrypt } from "../auth-encrypt.js";
 import { getPasswordRule } from "../get-password-rule.js";
 import type { ResetCaptchaInfo } from "../reset-captcha.js";
 import { getResetCaptcha } from "../reset-captcha.js";
-import { RESET_PREFIX } from "../utils.js";
+import { RESET_PREFIX, RESET_SALT } from "../utils.js";
 
 const VERIFY_CODE_URL = `${RESET_PREFIX}/passwordRetrieve/checkCode`;
 
@@ -96,8 +95,8 @@ export const verifyCode = async (
       captchaId,
       hideCellphone,
       hideEmail,
-      cellphone: cellphone ? authEncrypt(cellphone, INFO_SALT) : "",
-      email: email ? authEncrypt(email, INFO_SALT) : "",
+      cellphone: cellphone ? authEncrypt(cellphone, RESET_SALT) : "",
+      email: email ? authEncrypt(email, RESET_SALT) : "",
       code,
       password: "",
       confirmPassword: "",

@@ -1,11 +1,10 @@
-import { INFO_SALT } from "./utils.js";
 import { UnknownResponse } from "../../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../../typings.js";
 import { authEncrypt } from "../auth-encrypt.js";
-import { RESET_PREFIX } from "../utils.js";
+import { RESET_PREFIX, RESET_SALT } from "../utils.js";
 
 export interface ActivateSetPasswordOptions {
   type: "set-password";
@@ -46,8 +45,8 @@ export const setPassword = async (
       },
       body: JSON.stringify({
         sign,
-        password: authEncrypt(password, INFO_SALT),
-        confirmPassword: authEncrypt(password, INFO_SALT),
+        password: authEncrypt(password, RESET_SALT),
+        confirmPassword: authEncrypt(password, RESET_SALT),
       }),
     },
   );

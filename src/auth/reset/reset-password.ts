@@ -1,8 +1,7 @@
 import { ActionFailType } from "../../config/index.js";
 import type { CommonFailedResponse } from "../../typings.js";
-import { INFO_SALT } from "../activate/utils.js";
 import { authEncrypt } from "../auth-encrypt.js";
-import { RESET_PREFIX } from "../utils.js";
+import { RESET_PREFIX, RESET_SALT } from "../utils.js";
 
 const RESET_PASSWORD_URL = `${RESET_PREFIX}/passwordRetrieve/resetPassword`;
 
@@ -77,11 +76,11 @@ export const resetPassword = async (
       captchaId,
       hideCellphone,
       hideEmail,
-      cellphone: cellphone ? authEncrypt(cellphone, INFO_SALT) : "",
-      email: email ? authEncrypt(email, INFO_SALT) : "",
+      cellphone: cellphone ? authEncrypt(cellphone, RESET_SALT) : "",
+      email: email ? authEncrypt(email, RESET_SALT) : "",
       code,
-      password: authEncrypt(password, INFO_SALT),
-      confirmPassword: authEncrypt(password, INFO_SALT),
+      password: authEncrypt(password, RESET_SALT),
+      confirmPassword: authEncrypt(password, RESET_SALT),
       isAppealFlag,
       appealSign,
       sign,
