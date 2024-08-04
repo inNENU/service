@@ -1,5 +1,5 @@
 import { INFO_SALT } from "./utils.js";
-import { UnknownResponse } from "../../config/index.js";
+import { ActionFailType, UnknownResponse } from "../../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
@@ -14,7 +14,10 @@ export interface ActivateCheckPasswordOptions {
 }
 
 interface RawCheckPasswordSuccessResponse {
-  code: 0;
+  code: "0";
+  datas: {
+    rules: Record<string, boolean>;
+  };
   message: "SUCCESS";
 }
 
@@ -52,6 +55,19 @@ export const checkPassword = async (
 
   if (data.code !== "0" || data.message !== "SUCCESS")
     return UnknownResponse(data.message);
+
+  const warnings = Object.entries(
+    (data as RawCheckPasswordSuccessResponse).datas.rules,
+  )
+    .filter(([, value]) => !value)
+    .map(([key]) => key);
+
+  if (warnings.length > 0)
+    return {
+      success: false,
+      type: ActionFailType.Unknown,
+      msg: `密码不满足要求: ${warnings.join(", ")}`,
+    };
 
   return {
     success: true,
