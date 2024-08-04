@@ -1,13 +1,13 @@
-import { INFO_SALT } from "./utils.js";
-import { ActionFailType, UnknownResponse } from "../../config/index.js";
+import { INFO_SALT } from "./activate/utils.js";
+import { authEncrypt } from "./auth-encrypt.js";
+import { RESET_PREFIX } from "./utils.js";
+import { ActionFailType, UnknownResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
-} from "../../typings.js";
-import { authEncrypt } from "../auth-encrypt.js";
-import { RESET_PREFIX } from "../utils.js";
+} from "../typings.js";
 
-export interface ActivateCheckPasswordOptions {
+export interface CheckPasswordOptions {
   type: "check-password";
   sign: string;
   password: string;
@@ -30,14 +30,15 @@ type RawCheckPasswordResponse =
   | RawCheckPasswordSuccessResponse
   | RawCheckPasswordFailResponse;
 
-export type ActivateCheckPasswordResponse =
+export type CheckPasswordResponse =
   | CommonSuccessResponse
   | CommonFailedResponse;
 
 export const checkPassword = async (
-  { sign, password }: ActivateCheckPasswordOptions,
+  { sign, password }: CheckPasswordOptions,
   cookieHeader: string,
-): Promise<ActivateCheckPasswordResponse> => {
+  operationSource: number,
+): Promise<CheckPasswordResponse> => {
   const response = await fetch(`${RESET_PREFIX}/common/passwordScoreCheck`, {
     method: "POST",
     headers: {
@@ -47,7 +48,7 @@ export const checkPassword = async (
     body: JSON.stringify({
       sign,
       password: authEncrypt(password, INFO_SALT),
-      operationSource: 3,
+      operationSource,
     }),
   });
 

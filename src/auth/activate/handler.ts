@@ -1,7 +1,5 @@
 import type { RequestHandler } from "express";
 
-import type { ActivateCheckPasswordOptions } from "./check-password.js";
-import { checkPassword } from "./check-password.js";
 import { getActivateInfo } from "./get-info.js";
 import type { ActivateSendSmsOptions } from "./send-sms.js";
 import { sendActivateSms } from "./send-sms.js";
@@ -13,12 +11,14 @@ import type { ActivateValidSmsOptions } from "./validate-sms.js";
 import { validateActivateSms } from "./validate-sms.js";
 import { InvalidArgResponse } from "../../config/response.js";
 import type { CommonFailedResponse, EmptyObject } from "../../typings.js";
+import type { CheckPasswordOptions } from "../check-password.js";
+import { checkPassword } from "../check-password.js";
 
 export type ActivateOptions =
   | ActivateValidationOptions
   | ActivateSendSmsOptions
   | ActivateValidSmsOptions
-  | ActivateCheckPasswordOptions
+  | CheckPasswordOptions
   | ActivateSetPasswordOptions;
 
 export const activateHandler: RequestHandler<
@@ -61,7 +61,7 @@ export const activateHandler: RequestHandler<
         return res.json(validateActivateSms(options, cookieHeader));
 
       if (options.type === "check-password")
-        return res.json(checkPassword(options, cookieHeader));
+        return res.json(checkPassword(options, cookieHeader, 3));
 
       if (options.type === "set-password")
         return res.json(setPassword(options, cookieHeader));
