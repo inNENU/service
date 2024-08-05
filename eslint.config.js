@@ -18,7 +18,9 @@ export default config(
       parserOptions: {
         parser: tsParser,
         tsconfigDirName: import.meta.dirname,
-        project: "./tsconfig.json",
+        projectService: {
+          allowDefaultProject: ["eslint.config.js"],
+        },
       },
     },
   },
