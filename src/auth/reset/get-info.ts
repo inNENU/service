@@ -3,6 +3,8 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../../typings.js";
+import type { ResetCaptchaInfo } from "../reset-captcha.js";
+import { getResetCaptcha } from "../reset-captcha.js";
 import { RESET_PREFIX } from "../utils.js";
 
 const GET_ID_INFO_URL = `${RESET_PREFIX}/passwordRetrieve/checkUserInfo`;
@@ -49,11 +51,18 @@ export type ResetPasswordGetInfoSuccessResponse = CommonSuccessResponse<{
   isAppealFlag: "0" | "1";
   appealSign: string;
   sign: string;
+  /** 验证码图片 base64 字符串 */
+  captcha: string;
+  /** 验证码 ID */
+  captchaId: string;
 }>;
 
 export type ResetPasswordGetInfoResponse =
   | ResetPasswordGetInfoSuccessResponse
-  | CommonFailedResponse<ActionFailType.Unknown>;
+  | (CommonFailedResponse<ActionFailType.WrongCaptcha> & {
+      data: ResetCaptchaInfo;
+    })
+  | CommonFailedResponse<ActionFailType.Restricted | ActionFailType.Unknown>;
 
 export const getInfo = async (
   { id, captcha, captchaId }: ResetPasswordGetInfoOptions,
@@ -76,12 +85,30 @@ export const getInfo = async (
 
   const data = (await verifyResponse.json()) as RawResetPasswordGetInfoData;
 
-  if (data.code !== "0")
+  if (data.code !== "0") {
+    if (data.message === "验证码错误") {
+      const captchaResponse = await getResetCaptcha();
+
+      if (!captchaResponse.success) return captchaResponse;
+
+      return {
+        success: false,
+        type: ActionFailType.WrongCaptcha,
+        msg: data.message,
+        data: captchaResponse.data,
+      };
+    }
+
     return {
       success: false,
       type: ActionFailType.Unknown,
       msg: data.message,
     };
+  }
+
+  const captchaResponse = await getResetCaptcha();
+
+  if (!captchaResponse.success) return captchaResponse;
 
   const { isAppealFlag, hideCellphone, hideEmail, sign, appealSign } =
     JSON.parse(data.datas) as RawResetPasswordGetInfoParsedData;
@@ -94,6 +121,7 @@ export const getInfo = async (
       sign,
       hideCellphone,
       hideEmail,
+      ...captchaResponse.data,
     },
   };
 };

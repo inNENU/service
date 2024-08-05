@@ -109,7 +109,7 @@ export const verifyCode = async (
   const data = (await verifyResponse.json()) as RawResetPasswordVerifyCodeData;
 
   if (data.code !== "0") {
-    if (data.message === "验证码不正确") {
+    if (data.message === "验证码错误") {
       const captchaResponse = await getResetCaptcha();
 
       if (!captchaResponse.success) return captchaResponse;

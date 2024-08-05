@@ -83,7 +83,7 @@ export const sendCode = async (
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      type: "cellphone",
+      type: cellphone ? "cellphone" : "email",
       loginNo: id,
       captcha,
       captchaId,
@@ -103,7 +103,7 @@ export const sendCode = async (
   const data = (await verifyResponse.json()) as RawResetPasswordSendCodeData;
 
   if (data.code !== "0") {
-    if (data.message === "验证码不正确") {
+    if (data.message === "验证码错误") {
       const captchaResponse = await getResetCaptcha();
 
       if (!captchaResponse.success) return captchaResponse;
