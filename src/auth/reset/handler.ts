@@ -6,8 +6,8 @@ import type { ResetPasswordSetOptions } from "./reset-password.js";
 import { resetPassword } from "./reset-password.js";
 import type { ResetPasswordSendCodeOptions } from "./send-code.js";
 import { sendCode } from "./send-code.js";
-import type { ResetPasswordVerifyCodeOptions } from "./verify-code.js";
-import { verifyCode } from "./verify-code.js";
+import type { ResetPasswordVerifyCodeOptions } from "./validate-code.js";
+import { validateCode } from "./validate-code.js";
 import { InvalidArgResponse, UnknownResponse } from "../../config/index.js";
 import type { EmptyObject } from "../../typings.js";
 import type { CheckPasswordOptions } from "../check-password.js";
@@ -56,8 +56,8 @@ export const resetPasswordHandler: RequestHandler<
       return res.json(await sendCode(options, req.headers.cookie!));
     }
 
-    if (options.type === "verify-code") {
-      return res.json(await verifyCode(options, req.headers.cookie!));
+    if (options.type === "validate-code") {
+      return res.json(await validateCode(options, req.headers.cookie!));
     }
 
     if (options.type === "check-password") {

@@ -1,3 +1,4 @@
+import { RESET_PAGE_URL } from "./utils.js";
 import { ActionFailType } from "../../config/index.js";
 import type {
   CommonFailedResponse,
@@ -33,7 +34,7 @@ type RawResetPasswordVerifyCodeData =
   | RawResetPasswordVerifyCodeFailedData;
 
 export interface ResetPasswordVerifyCodeOptions {
-  type: "verify-code";
+  type: "validate-code";
   /** 学号 */
   id: string;
   /** 验证码图片 base64 字符串 */
@@ -65,7 +66,7 @@ export type ResetPasswordVerifyCodeResponse =
     })
   | CommonFailedResponse<ActionFailType.Restricted | ActionFailType.Unknown>;
 
-export const verifyCode = async (
+export const validateCode = async (
   {
     id,
     captcha,
@@ -87,22 +88,25 @@ export const verifyCode = async (
       Accept: "application/json",
       Cookie: cookieHeader,
       "Content-Type": "application/json",
+      Referer: RESET_PAGE_URL,
     },
     body: JSON.stringify({
-      type: "cellphone",
+      accountId: "",
       loginNo: id,
-      captcha,
-      captchaId,
-      hideCellphone,
-      hideEmail,
       cellphone: cellphone ? authEncrypt(cellphone, RESET_SALT) : "",
       email: email ? authEncrypt(email, RESET_SALT) : "",
+      hideCellphone,
+      hideEmail,
+      captchaId,
+      captcha,
       code,
+      type: "cellphone",
       password: "",
       confirmPassword: "",
-      isAppealFlag,
-      appealSign,
       sign,
+      appealSign,
+      isAppealFlag,
+      limitTime: 120,
     }),
   });
 
@@ -110,7 +114,10 @@ export const verifyCode = async (
 
   if (data.code !== "0") {
     if (data.message === "验证码错误") {
-      const captchaResponse = await getResetCaptcha();
+      const captchaResponse = await getResetCaptcha(
+        cookieHeader,
+        RESET_PAGE_URL,
+      );
 
       if (!captchaResponse.success) return captchaResponse;
 

@@ -31,6 +31,7 @@ export type ResetCaptchaResponse =
 
 export const getResetCaptcha = async (
   cookieHeaderOrStore?: string | CookieStore,
+  referer = "",
 ): Promise<ResetCaptchaResponse> => {
   const cookieStore =
     cookieHeaderOrStore instanceof CookieStore
@@ -48,6 +49,7 @@ export const getResetCaptcha = async (
             : typeof cookieHeaderOrStore === "string"
               ? cookieHeaderOrStore
               : "",
+        Referer: referer,
       },
     },
   );

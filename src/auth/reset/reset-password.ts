@@ -1,3 +1,4 @@
+import { RESET_PAGE_URL } from "./utils.js";
 import { ActionFailType } from "../../config/index.js";
 import type { CommonFailedResponse } from "../../typings.js";
 import { authEncrypt } from "../auth-encrypt.js";
@@ -68,6 +69,7 @@ export const resetPassword = async (
       Accept: "application/json",
       Cookie: cookieHeader,
       "Content-Type": "application/json",
+      Referer: RESET_PAGE_URL,
     },
     body: JSON.stringify({
       type: "cellphone",

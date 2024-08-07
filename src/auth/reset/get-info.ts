@@ -1,3 +1,4 @@
+import { RESET_PAGE_URL } from "./utils.js";
 import { ActionFailType } from "../../config/index.js";
 import type {
   CommonFailedResponse,
@@ -74,6 +75,7 @@ export const getInfo = async (
       Accept: "application/json",
       Cookie: cookieHeader,
       "Content-Type": "application/json",
+      Referer: RESET_PAGE_URL,
     },
     body: JSON.stringify({
       type: "cellphone",
@@ -87,7 +89,10 @@ export const getInfo = async (
 
   if (data.code !== "0") {
     if (data.message === "验证码错误") {
-      const captchaResponse = await getResetCaptcha();
+      const captchaResponse = await getResetCaptcha(
+        cookieHeader,
+        RESET_PAGE_URL,
+      );
 
       if (!captchaResponse.success) return captchaResponse;
 
@@ -106,7 +111,7 @@ export const getInfo = async (
     };
   }
 
-  const captchaResponse = await getResetCaptcha();
+  const captchaResponse = await getResetCaptcha(cookieHeader, RESET_PAGE_URL);
 
   if (!captchaResponse.success) return captchaResponse;
 
