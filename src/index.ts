@@ -48,11 +48,11 @@ import {
 } from "./grad-system/index.js";
 import { libraryPeopleHandler } from "./library/people.js";
 import {
+  idCodeHandler,
   mpLoginHandler,
   mpQrCodeHandler,
   mpReportHandler,
   mpSearchHandler,
-  verifyHandler,
 } from "./mp/index.js";
 import {
   emailHandler,
@@ -243,7 +243,7 @@ app.post("/mp/login", mpLoginHandler);
 app.post("/mp/report", mpReportHandler);
 app.post("/mp/search", mpSearchHandler);
 app.get("/mp/qrcode", mpQrCodeHandler);
-app.post("/mp/verify", verifyHandler);
+app.post("/mp/id-code", idCodeHandler);
 
 app.get("/library/people", libraryPeopleHandler);
 

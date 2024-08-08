@@ -1,7 +1,9 @@
+import { v7 } from "uuid";
+
 const CUSTOM_CHARS =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
-export const getShortUUID = (uuid: string): string => {
+export const getShortUUID = (uuid = v7()): string => {
   // Remove dashes from UUID and convert hexadecimal to bytes
   const hex = uuid.replace(/-/g, "");
   const bytes: number[] = [];

@@ -7,66 +7,36 @@ import {
   appIDInfo,
 } from "../config/index.js";
 import type { CommonFailedResponse } from "../typings.js";
-import { getWechatAccessToken } from "../utils/index.js";
+import { getWechatMPCode } from "../utils/index.js";
 
-export interface WechatQRCodeOptions {
+export interface WechatMpCodeOptions {
   appID: "wx33acb831ee1831a5" | "wx2550e3fd373b79a8";
   page: string;
   scene: string;
 }
 
-export interface QQQRCodeOptions {
+export interface QQMpCodeOptions {
   appID: "1109559721";
   page: string;
 }
 
-export type QRCodeOptions = WechatQRCodeOptions | QQQRCodeOptions;
+export type MpCodeOptions = WechatMpCodeOptions | QQMpCodeOptions;
 
-export interface WechatQRCodeError {
-  errcode: number;
-  errmsg: string;
-}
-
-export interface QRCodeSuccessResponse {
+export interface MpCodeSuccessResponse {
   success: true;
   image: string;
 }
 
-export type QRCodeResponse = QRCodeSuccessResponse | CommonFailedResponse;
+export type MpCodeResponse = MpCodeSuccessResponse | CommonFailedResponse;
 
-const getWechatQRCode = async (
-  accessToken: string,
-  page: string,
-  scene: string,
-): Promise<Buffer | WechatQRCodeError> => {
-  const response = await fetch(
-    `https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=${accessToken}`,
-    {
-      method: "POST",
-      body: JSON.stringify({
-        page,
-        scene,
-        auto_color: true,
-      }),
-    },
-  );
-
-  const image = Buffer.from(await response.arrayBuffer());
-
-  if (image.byteLength < 1024)
-    return JSON.parse(image.toString()) as WechatQRCodeError;
-
-  return image;
-};
-
-const getQQQRCode = async (appID: number, page: string): Promise<Buffer> =>
+const getQQMpCode = async (appID: number, page: string): Promise<Buffer> =>
   toBuffer(`https://m.q.qq.com/a/p/${appID}?s=${encodeURI(page)}`);
 
 export const mpQrCodeHandler: RequestHandler<
   Record<never, never>,
   Record<never, never>,
   Record<never, never>,
-  QRCodeOptions
+  MpCodeOptions
 > = async (req, res) => {
   try {
     const { appID, page } = req.query;
@@ -76,14 +46,10 @@ export const mpQrCodeHandler: RequestHandler<
     if (!appIDInfo[appID]) return res.json(InvalidArgResponse("appID"));
 
     if (Number.isNaN(Number(appID))) {
-      const wechatAccessToken = await getWechatAccessToken(
-        appID as "wx33acb831ee1831a5" | "wx2550e3fd373b79a8",
-      );
-
-      const image = await getWechatQRCode(
-        wechatAccessToken,
+      const image = await getWechatMPCode(
+        appID,
         page,
-        (req.query as WechatQRCodeOptions).scene,
+        (req.query as WechatMpCodeOptions).scene,
       );
 
       if (image instanceof Buffer) {
@@ -98,7 +64,7 @@ export const mpQrCodeHandler: RequestHandler<
       return res.json(UnknownResponse(image.errmsg));
     }
 
-    const image = await getQQQRCode(Number(appID), page);
+    const image = await getQQMpCode(Number(appID), page);
 
     res.set({
       "Content-Disposition": `qrcode.png`,

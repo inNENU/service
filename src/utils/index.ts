@@ -9,4 +9,5 @@ export * from "./mysql.js";
 export * from "./shortUUID.js";
 export * from "./splitWords.js";
 export * from "./wechatAccessToken.js";
+export * from "./wechatMPCode.js";
 export * from "./ua.js";
