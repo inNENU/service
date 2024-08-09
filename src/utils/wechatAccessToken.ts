@@ -3,9 +3,7 @@ import { appIDInfo } from "../config/index.js";
 const currentAccessToken: Record<string, { token: string; timeStamp: number }> =
   {};
 
-export const getWechatAccessToken = async (
-  appid: keyof typeof appIDInfo,
-): Promise<string> => {
+export const getWechatAccessToken = async (appid: string): Promise<string> => {
   if (
     currentAccessToken[appid] &&
     Date.now() < currentAccessToken[appid].timeStamp

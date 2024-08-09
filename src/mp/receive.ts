@@ -1,9 +1,9 @@
 import type { RequestHandler } from "express";
 import { sha1 } from "js-sha1";
 
-import { DatabaseError } from "../config/index.js";
+import { DatabaseError, rawID2appID } from "../config/index.js";
 import type { EmptyObject } from "../typings.js";
-import { connect, getShortUUID } from "../utils/index.js";
+import { connect, getShortUUID, getWechatAccessToken } from "../utils/index.js";
 import "../config/loadEnv.js";
 
 interface BaseMessage {
@@ -68,12 +68,13 @@ export const mpReceiveHandler: RequestHandler<
     const { connection, release } = await connect();
 
     await connection.execute(
-      `INSERT INTO contact (uuid, appId, openid, createTime, content) VALUES (?, ?, ?, FROM_UNIXTIME(?), ?)`,
+      `INSERT INTO contact (uuid, appId, openid, createTime, type, content) VALUES (?, ?, ?, FROM_UNIXTIME(?), ?, ?)`,
       [
         getShortUUID(),
         ToUserName,
         FromUserName,
         CreateTime,
+        MsgType ?? "Unknown",
         MsgType === "text" ? req.body.Content : null,
       ],
     );
@@ -85,9 +86,36 @@ export const mpReceiveHandler: RequestHandler<
       MsgType === "image" ||
       MsgType === "miniprogrampage"
     ) {
+      const response = await fetch(
+        `https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=${await getWechatAccessToken(rawID2appID[ToUserName])}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            touser: FromUserName,
+            msgtype: "text",
+            text: {
+              content:
+                "当前消息已通知给 Mr.Hope，您可继续留言完整阐述您的问题。待 Mr.Hope 接入后会向您解答。",
+            },
+          }),
+        },
+      );
+
+      const data = (await response.json()) as {
+        errcode: number;
+        errmsg: string;
+      };
+
+      if (data.errcode) {
+        console.error("Failed to send message to user:", data);
+      }
+
       return res.json({
-        ToUserName,
-        FromUserName,
+        ToUserName: FromUserName,
+        FromUserName: "inNENU",
         CreateTime,
         MsgType: "transfer_customer_service",
       });
