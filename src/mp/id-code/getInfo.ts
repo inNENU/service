@@ -1,11 +1,11 @@
 import type { RowDataPacket } from "mysql2";
 
-import { ActionFailType } from "../../config/index.js";
+import { ActionFailType, DatabaseError } from "../../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../../typings.js";
-import { getConnection } from "../../utils/index.js";
+import { connect } from "../../utils/index.js";
 
 export interface GetInfoOptions {
   uuid: string;
@@ -26,35 +26,45 @@ export type GetInfoSuccessResponse = CommonSuccessResponse<InfoData>;
 
 export type GetInfoResponse =
   | GetInfoSuccessResponse
-  | CommonFailedResponse<ActionFailType.WrongInfo>;
+  | CommonFailedResponse<
+      ActionFailType.DatabaseError | ActionFailType.WrongInfo
+    >;
 
 export const getInfo = async ({
   uuid,
   remark,
 }: GetInfoOptions): Promise<GetInfoResponse> => {
-  const connection = await getConnection();
+  try {
+    const { connection, release } = await connect();
 
-  const [rows] = await connection.execute<RowDataPacket[]>(
-    `SELECT * FROM student-info WHERE uuid = ?`,
-    [uuid],
-  );
+    const [rows] = await connection.execute<RowDataPacket[]>(
+      `SELECT * FROM student_info WHERE uuid = ?`,
+      [uuid],
+    );
 
-  if (rows.length === 0)
+    if (rows.length === 0)
+      return {
+        success: false,
+        type: ActionFailType.WrongInfo,
+        msg: "UUID 不存在",
+      };
+
+    const row = rows[0] as InfoData;
+
+    await connection.execute(
+      `UPDATE student_info SET verifyTime = ?, verifyRemark = ? WHERE uuid = ?`,
+      [Math.round(Date.now() / 1000), remark ?? "", uuid],
+    );
+
+    release();
+
     return {
-      success: false,
-      type: ActionFailType.WrongInfo,
-      msg: "UUID 不存在",
+      success: true,
+      data: row,
     };
+  } catch (err) {
+    console.error(err);
 
-  const row = rows[0] as InfoData;
-
-  await connection.execute(
-    `UPDATE student-info SET verifyTime = ?, verifyRemark = ? WHERE uuid = ?`,
-    [Math.round(Date.now() / 1000), remark ?? "", uuid],
-  );
-
-  return {
-    success: true,
-    data: row,
-  };
+    return DatabaseError((err as Error).message);
+  }
 };

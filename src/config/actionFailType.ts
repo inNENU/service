@@ -49,6 +49,8 @@ export const enum ActionFailType {
   Error = "error",
   /** 系统关闭 */
   Closed = "closed",
+  /** 数据库错误 */
+  DatabaseError = "database-error",
 
   /** 未完成评教 */
   MissingCommentary = "missing-commentary",

@@ -1,5 +1,5 @@
 import type { ActionFailType } from "../../config/index.js";
-import { UnknownResponse } from "../../config/index.js";
+import { DatabaseError, UnknownResponse } from "../../config/index.js";
 import { getMyInfo } from "../../my/info.js";
 import { myLogin } from "../../my/login.js";
 import { MY_SERVER } from "../../my/utils.js";
@@ -7,11 +7,7 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../../typings.js";
-import {
-  getConnection,
-  getShortUUID,
-  getWechatMPCode,
-} from "../../utils/index.js";
+import { connect, getShortUUID, getWechatMPCode } from "../../utils/index.js";
 
 export interface StoreAccountInfoOptions {
   id: number;
@@ -35,6 +31,7 @@ export type StoreAccountInfoResponse =
       | ActionFailType.WrongPassword
       | ActionFailType.BlackList
       | ActionFailType.EnabledSSO
+      | ActionFailType.DatabaseError
       | ActionFailType.Error
       | ActionFailType.AccountLocked
       | ActionFailType.NeedCaptcha
@@ -47,58 +44,72 @@ export type StoreAccountInfoResponse =
 export const storeStoreAccountInfo = async (
   options: StoreAccountInfoOptions,
 ): Promise<StoreAccountInfoResponse> => {
-  const loginResult = await myLogin(options);
+  try {
+    const loginResult = await myLogin(options);
 
-  if (!loginResult.success) return loginResult;
+    if (!loginResult.success) return loginResult;
 
-  const infoResult = await getMyInfo(
-    loginResult.cookieStore.getHeader(MY_SERVER),
-  );
-
-  if (!infoResult.success) return infoResult;
-
-  const uuid = getShortUUID();
-
-  const connection = await getConnection();
-
-  await connection.query(
-    `INSERT INTO student-info (uuid, name, gender, school, major, grade, remark) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [
-      uuid,
-      infoResult.data.name,
-      infoResult.data.gender[0],
-      infoResult.data.org,
-      infoResult.data.major,
-      infoResult.data.grade,
-      options.remark ?? "",
-    ],
-  );
-
-  const { appID } = options;
-
-  if (appID) {
-    const result = await getWechatMPCode(
-      appID,
-      "pkg/user/pages/account/login",
-      `verify:${uuid}`,
+    const infoResult = await getMyInfo(
+      loginResult.cookieStore.getHeader(MY_SERVER),
     );
 
-    if (result instanceof Buffer) {
-      return {
-        success: true,
-        data: {
-          code: `data:image/jpeg;base64,${result.toString("base64")}`,
-        },
-      };
+    if (!infoResult.success) return infoResult;
+
+    const uuid = getShortUUID();
+
+    try {
+      const { connection, release } = await connect();
+
+      await connection.query(
+        `INSERT INTO student_info (uuid, name, gender, school, major, grade, remark) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [
+          uuid,
+          infoResult.data.name,
+          infoResult.data.gender[0],
+          infoResult.data.org,
+          infoResult.data.major,
+          infoResult.data.grade,
+          options.remark ?? "",
+        ],
+      );
+
+      release();
+    } catch (err) {
+      console.error(err);
+
+      return DatabaseError((err as Error).message);
     }
 
-    return UnknownResponse(result.errmsg);
-  }
+    const { appID } = options;
 
-  return {
-    success: true,
-    data: {
-      uuid,
-    },
-  };
+    if (appID) {
+      const result = await getWechatMPCode(
+        appID,
+        "pkg/user/pages/account/login",
+        `verify:${uuid}`,
+      );
+
+      if (result instanceof Buffer) {
+        return {
+          success: true,
+          data: {
+            code: `data:image/jpeg;base64,${result.toString("base64")}`,
+          },
+        };
+      }
+
+      return UnknownResponse(result.errmsg);
+    }
+
+    return {
+      success: true,
+      data: {
+        uuid,
+      },
+    };
+  } catch (err) {
+    console.error(err);
+
+    return UnknownResponse((err as Error).message);
+  }
 };

@@ -28,6 +28,14 @@ export const WrongPasswordResponse: CommonFailedResponse<ActionFailType.WrongPas
     msg: "用户名或密码错误",
   };
 
+export const DatabaseError = (
+  msg: string,
+): CommonFailedResponse<ActionFailType.DatabaseError> => ({
+  success: false,
+  type: ActionFailType.DatabaseError,
+  msg,
+});
+
 export const MissingArgResponse = (
   name = "必要",
 ): CommonFailedResponse<ActionFailType.MissingArg> => ({

@@ -1,15 +1,15 @@
-import { ActionFailType, UnknownResponse } from "../../config/index.js";
+import {
+  ActionFailType,
+  DatabaseError,
+  UnknownResponse,
+} from "../../config/index.js";
 import type { UnderAdmissionOptions } from "../../enroll/index.js";
 import { getUnderAdmission } from "../../enroll/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../../typings.js";
-import {
-  getConnection,
-  getShortUUID,
-  getWechatMPCode,
-} from "../../utils/index.js";
+import { connect, getShortUUID, getWechatMPCode } from "../../utils/index.js";
 
 export interface StoreAdmissionInfoOptions extends UnderAdmissionOptions {
   remark: string;
@@ -27,7 +27,11 @@ export type StoreAdmissionInfoUUIDSuccessResponse = CommonSuccessResponse<{
 export type StoreAdmissionInfoResponse =
   | StoreAdmissionInfoCodeSuccessResponse
   | StoreAdmissionInfoUUIDSuccessResponse
-  | CommonFailedResponse<ActionFailType.WrongInfo | ActionFailType.Unknown>;
+  | CommonFailedResponse<
+      | ActionFailType.DatabaseError
+      | ActionFailType.WrongInfo
+      | ActionFailType.Unknown
+    >;
 
 export const storeStoreAdmissionInfo = async (
   options: StoreAdmissionInfoOptions,
@@ -52,21 +56,29 @@ export const storeStoreAdmissionInfo = async (
 
   const uuid = getShortUUID();
 
-  const connection = await getConnection();
+  try {
+    const { connection, release } = await connect();
 
-  await connection.query(
-    `INSERT INTO student-info (uuid, name, school, major, grade, remark) VALUES (?, ?, ?, ?, ?, ?)`,
-    [
-      uuid,
-      name,
-      result.data[3].text,
-      result.data[2].text,
-      new Date().getMonth() < 7
-        ? new Date().getFullYear() - 1
-        : new Date().getFullYear(),
-      options.remark ?? "",
-    ],
-  );
+    await connection.query(
+      `INSERT INTO student_info (uuid, name, school, major, grade, remark) VALUES (?, ?, ?, ?, ?, ?)`,
+      [
+        uuid,
+        name,
+        result.data[3].text,
+        result.data[2].text,
+        new Date().getMonth() < 7
+          ? new Date().getFullYear() - 1
+          : new Date().getFullYear(),
+        options.remark ?? "",
+      ],
+    );
+
+    release();
+  } catch (err) {
+    console.error(err);
+
+    return DatabaseError((err as Error).message);
+  }
 
   const { appID } = options;
 

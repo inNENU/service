@@ -1,4 +1,6 @@
+import type { PoolConnection } from "mysql2/promise";
 import mysql from "mysql2/promise";
+import "../config/loadEnv.js";
 
 // 创建 MySQL 连接池
 const pool = mysql.createPool({
@@ -7,11 +9,22 @@ const pool = mysql.createPool({
   database: "innenu-service",
   user: process.env.MYSQL_USER ?? "innenu",
   password: process.env.MYSQL_PASSWORD,
+  connectTimeout: 5000,
   connectionLimit: 20,
 });
 
-export const getConnection = (): Promise<mysql.PoolConnection> =>
-  pool.getConnection().catch((error) => {
-    console.error("Error connecting to MySQL:", error);
-    throw error;
-  });
+export const connect = (): Promise<{
+  connection: PoolConnection;
+  release: () => void;
+}> =>
+  pool
+    .getConnection()
+    .then((connection) => ({
+      connection,
+      release: (): void => pool.releaseConnection(connection),
+    }))
+    .catch((error) => {
+      console.error("Error connecting to MySQL:", error);
+
+      throw error;
+    });
