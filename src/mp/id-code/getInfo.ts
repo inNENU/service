@@ -1,5 +1,6 @@
 import type { RowDataPacket } from "mysql2";
 
+import type { InfoData } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
 import { authLogin } from "../../auth/index.js";
 import { ActionFailType, DatabaseError } from "../../config/index.js";
@@ -13,16 +14,6 @@ import { connect } from "../../utils/index.js";
 export interface GetInfoOptions extends AccountInfo {
   uuid: string;
   remark?: string;
-}
-
-export interface InfoData {
-  name: string;
-  gender: string;
-  school: string;
-  major: string;
-  grade: number;
-  createTime: number;
-  remark: string;
 }
 
 export type GetInfoSuccessResponse = CommonSuccessResponse<InfoData>;
@@ -66,6 +57,21 @@ export const getInfo = async ({
       };
 
     const row = rows[0] as InfoData;
+
+    if (row.verifyId)
+      return {
+        success: false,
+        type: ActionFailType.Expired,
+        msg: "身份码已过期",
+      };
+
+    if (row.id === id) {
+      return {
+        success: false,
+        type: ActionFailType.Forbidden,
+        msg: "不能核验自己的身份码",
+      };
+    }
 
     await connection.execute(
       `UPDATE student_info SET verifyId = ?, verifyTime = ?, verifyRemark = ? WHERE uuid = ?`,

@@ -62,7 +62,7 @@ export const mpLoginHandler: RequestHandler<
       return res.json({
         openid,
         inBlacklist,
-        isAdmin: false,
+        isAdmin: openid === "oPPTV5eTpBIR3ruGw8VecNZ1mDQk",
       } as MPloginSuccessResponse);
     }
 
@@ -97,7 +97,7 @@ export const mpLoginHandler: RequestHandler<
     return res.json({
       openid,
       inBlacklist,
-      isAdmin: false,
+      isAdmin: openid === "oPPTV5eTpBIR3ruGw8VecNZ1mDQk",
     } as MPloginSuccessResponse);
   } catch (err) {
     const { message } = err as Error;
