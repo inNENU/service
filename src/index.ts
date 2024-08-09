@@ -56,6 +56,7 @@ import {
   idCodeHandler,
   mpLoginHandler,
   mpQrCodeHandler,
+  mpReceiveHandler,
   mpReportHandler,
   mpSearchHandler,
 } from "./mp/index.js";
@@ -248,10 +249,12 @@ app.post("/vpn/cas-login", vpnCASLoginHandler);
 app.post("/vpn/login", vpnLoginHandler);
 
 app.post("/mp/login", mpLoginHandler);
+app.post("/mp/id-code", idCodeHandler);
+app.get("/mp/qrcode", mpQrCodeHandler);
+app.get("/mp/receive", mpReceiveHandler);
+app.post("/mp/receive", mpReceiveHandler);
 app.post("/mp/report", mpReportHandler);
 app.post("/mp/search", mpSearchHandler);
-app.get("/mp/qrcode", mpQrCodeHandler);
-app.post("/mp/id-code", idCodeHandler);
 
 app.get("/library/people", libraryPeopleHandler);
 

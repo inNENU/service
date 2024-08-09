@@ -43,6 +43,7 @@ export default [
           "dotenv",
           "express",
           "iconv-lite",
+          "js-sha1",
           "morgan",
           "mysql2/promise",
           "qrcode",

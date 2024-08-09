@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 
 import { DatabaseError } from "../config/index.js";
 import type { EmptyObject } from "../typings.js";
-import { connect } from "../utils/index.js";
+import { connect, getShortUUID } from "../utils/index.js";
 
 export const mpReportHandler: RequestHandler<
   EmptyObject,
@@ -12,10 +12,10 @@ export const mpReportHandler: RequestHandler<
   try {
     const { connection, release } = await connect();
 
-    await connection.execute(`INSERT INTO log (type, content) VALUES (?, ?)`, [
-      req.body.type ?? null,
-      JSON.stringify(req.body),
-    ]);
+    await connection.execute(
+      `INSERT INTO log (uuid, type, content) VALUES (?, ?, ?)`,
+      [getShortUUID(), req.body.type ?? null, JSON.stringify(req.body)],
+    );
 
     release();
 
