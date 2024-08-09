@@ -2,7 +2,7 @@ import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 
 import type { InfoData } from "./utils.js";
 import type { ActionFailType } from "../../config/index.js";
-import { DatabaseError, UnknownResponse } from "../../config/index.js";
+import { DatabaseError, TEST_ID, UnknownResponse } from "../../config/index.js";
 import { getMyInfo } from "../../my/info.js";
 import { myLogin } from "../../my/login.js";
 import { MY_SERVER } from "../../my/utils.js";
@@ -50,6 +50,10 @@ export const storeStoreAccountInfo = async ({
   appID,
 }: StoreAccountInfoOptions): Promise<StoreAccountInfoResponse> => {
   try {
+    if (id.toString() === TEST_ID) {
+      return UnknownResponse("测试账号不支持生成身份码");
+    }
+
     const loginResult = await myLogin({ id, password, authToken });
 
     if (!loginResult.success) return loginResult;
