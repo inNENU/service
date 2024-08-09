@@ -1,24 +1,28 @@
-import { writeFile } from "node:fs";
-
 import type { RequestHandler } from "express";
 
+import { DatabaseError } from "../config/index.js";
 import type { EmptyObject } from "../typings.js";
+import { connect } from "../utils/index.js";
 
 export const mpReportHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
   Record<string, unknown>
-> = (req, res) => {
-  writeFile(
-    "./log",
-    `${new Date().toLocaleString()} ${JSON.stringify(req.body)}\n`,
-    { flag: "a" },
-    (err) => {
-      if (err) {
-        console.error(err);
-      }
-    },
-  );
+> = async (req, res) => {
+  try {
+    const { connection, release } = await connect();
 
-  res.end();
+    await connection.execute(`INSERT INTO log (type, content) VALUES (?, ?)`, [
+      req.body.type ?? null,
+      JSON.stringify(req.body),
+    ]);
+
+    release();
+
+    res.send({ success: true });
+  } catch (err) {
+    console.error(err);
+
+    return DatabaseError((err as Error).message);
+  }
 };

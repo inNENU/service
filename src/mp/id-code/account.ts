@@ -111,7 +111,7 @@ export const storeStoreAccountInfo = async ({
     try {
       const { connection, release } = await connect();
 
-      await connection.query(
+      await connection.execute(
         `INSERT INTO student_info (uuid, type, id, name, gender, school, major, grade, remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           uuid,
