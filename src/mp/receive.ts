@@ -115,7 +115,7 @@ export const mpReceiveHandler: RequestHandler<
 
       return res.json({
         ToUserName: FromUserName,
-        FromUserName: "inNENU",
+        FromUserName: ToUserName,
         CreateTime,
         MsgType: "transfer_customer_service",
       });
