@@ -56,8 +56,6 @@ export const underStudyLogin = async (
     return result;
   }
 
-  console.log("Login location", result.location);
-
   const ticketResponse = await fetch(
     webVPN
       ? result.location.replace(UNDER_STUDY_SERVER, UNDER_STUDY_VPN_SERVER)
@@ -78,14 +76,10 @@ export const underStudyLogin = async (
   }
 
   if (ticketResponse.status !== 302) {
-    console.log("ticket response", await ticketResponse.text());
-
     return UnknownResponse("登录失败");
   }
 
   const finalLocation = ticketResponse.headers.get("Location");
-
-  console.log("location: ", finalLocation);
 
   if (finalLocation === SSO_LOGIN_URL) {
     const ssoResponse = await fetch(SSO_LOGIN_URL, {

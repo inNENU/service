@@ -181,9 +181,6 @@ export const authLogin = async ({
 
     cookieStore.applyResponse(response, server);
 
-    console.log(`Request location:`, location);
-    console.log("Login cookies:", cookieStore.getCookiesMap(server));
-
     if (response.status === 401) return WrongPasswordResponse;
 
     if (response.status === 200) {

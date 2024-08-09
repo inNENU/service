@@ -155,8 +155,6 @@ export const getGradeLists = async (
 
   const grades = shouldRefetch ? [] : getGrades(content);
 
-  console.log("Total pages:", totalPages);
-
   if (totalPages === 1 && !shouldRefetch) return grades;
 
   const field = String(fieldRegExp.exec(content)?.[1]);

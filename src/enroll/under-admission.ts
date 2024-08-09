@@ -52,8 +52,6 @@ export const getUnderAdmission = async ({
       student_code: testId,
     };
 
-    console.log("Getting params", params);
-
     const response = await fetch(QUERY_URL, {
       method: "POST",
       headers: {

@@ -92,8 +92,6 @@ export const getExamList = async (
 
   const exams = shouldRefetch ? [] : getExamPlaces(content);
 
-  console.log("Total pages:", totalPages);
-
   if (totalPages === 1 && !shouldRefetch) return exams;
 
   const field = String(fieldRegExp.exec(content)?.[1]);

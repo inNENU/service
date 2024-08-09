@@ -241,8 +241,6 @@ const checkCourseCommentary = async (
   try {
     const content = await response.text();
 
-    console.log(content);
-
     if (content.includes("评价已完成")) {
       return { completed: true, msg: "已完成评教" };
     }
@@ -256,8 +254,6 @@ const checkCourseCommentary = async (
     if (content.includes("评价未完成")) {
       return { completed: false, msg: "未完成评教" };
     }
-
-    console.log(content);
 
     return {
       completed: false,
@@ -305,8 +301,6 @@ export const getUnderSelectInfo = async (
   let content = await response.text();
 
   if (/<title>.*?评教检查<\/title>/.exec(content)) {
-    console.log("评教检查");
-
     const { completed } = await checkCourseCommentary(
       cookieHeader,
       /xnxqdm=(\d+)'/.exec(content)![1],

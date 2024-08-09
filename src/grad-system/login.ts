@@ -42,11 +42,7 @@ export const gradSystemLogin = async (
 
   cookieStore.applyResponse(ticketResponse, result.location);
 
-  console.log("ticket", ticketResponse.headers.get("Location"));
-
   if (ticketResponse.status !== 302) {
-    console.log("ticket response", await ticketResponse.text());
-
     return UnknownResponse("登录失败");
   }
 

@@ -103,8 +103,6 @@ export const authInitInfo = async (
       isNeed: boolean;
     }>);
 
-  console.log("Need captcha:", needCaptcha);
-
   const captchaResponse = needCaptcha
     ? await getAuthCaptcha(cookieStore.getHeader(AUTH_CAPTCHA_URL), id)
     : null;
@@ -189,8 +187,6 @@ export const initAuth = async (
 
   const location = loginResponse.headers.get("Location");
   const resultContent = await loginResponse.text();
-
-  console.log(`Request location:`, location);
 
   if (loginResponse.status === 401) return WrongPasswordResponse;
 

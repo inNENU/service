@@ -105,8 +105,6 @@ export const getPlanList = async (
 
   const plans = shouldRefetch ? [] : getPlans(content);
 
-  console.log("Total pages:", totalPages);
-
   if (totalPages === 1 && !shouldRefetch) return plans;
 
   const field = String(fieldRegExp.exec(content)?.[1]);

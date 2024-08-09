@@ -58,12 +58,6 @@ export const myLogin = async (
 
   cookieStore.applyResponse(ticketResponse, ticketUrl);
 
-  console.log(
-    "ticket",
-    ticketResponse.headers.get("Location"),
-    await ticketResponse.text(),
-  );
-
   if (ticketResponse.status !== 302) return UnknownResponse("登录失败");
 
   const sessionLocation = ticketResponse.headers.get("Location");

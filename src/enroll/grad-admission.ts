@@ -45,8 +45,6 @@ const getInfo = async ({
     zjhm: id,
   });
 
-  console.log("Getting params", params);
-
   const searchUrl = "https://yzb.nenu.edu.cn/yjs/sslq_result/2023";
 
   const response = await fetch(searchUrl, {

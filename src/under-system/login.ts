@@ -56,8 +56,6 @@ export const underSystemLogin = async (
     } as AuthLoginFailedResponse;
   }
 
-  console.log("Login location", result.location);
-
   const ticketResponse = await fetch(result.location, {
     headers: {
       Cookie: cookieStore.getHeader(result.location),
@@ -70,8 +68,6 @@ export const underSystemLogin = async (
   cookieStore.applyResponse(ticketResponse, result.location);
 
   if (ticketResponse.status !== 302) {
-    console.log("ticket response", await ticketResponse.text());
-
     return {
       success: false,
       type: ActionFailType.Unknown,
@@ -80,8 +76,6 @@ export const underSystemLogin = async (
   }
 
   const finalLocation = ticketResponse.headers.get("Location");
-
-  console.log("location: ", finalLocation);
 
   if (finalLocation?.includes("http://wafnenu.nenu.edu.cn/offCampus.html"))
     return {

@@ -41,8 +41,6 @@ export const changePasswordHandler: RequestHandler<
       const { authCookie, captcha, oldPassword, newPassword, salt } =
         req.body as ChangePasswordOptions;
 
-      console.log("Getting params", req.body);
-
       const changePasswordResponse = await fetch(
         `${AUTH_SERVER}/authserver/passwordChange.do`,
         {
@@ -62,8 +60,6 @@ export const changePasswordHandler: RequestHandler<
 
       const changePasswordResponseText = await changePasswordResponse.text();
 
-      console.log(`Getting:`, changePasswordResponseText);
-
       if (changePasswordResponseText.includes("个人密码修改成功"))
         return res.json({
           success: true,
@@ -73,8 +69,6 @@ export const changePasswordHandler: RequestHandler<
     }
 
     const { id, password, authToken } = req.body as AccountInfo;
-
-    console.log("Getting params", req.body);
 
     const result = await authLogin({ id, password, authToken });
 

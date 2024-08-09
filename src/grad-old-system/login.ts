@@ -45,8 +45,6 @@ export const gradOldSystemLogin = async (
     return result;
   }
 
-  console.log("Login location", result.location);
-
   const ticketResponse = await fetch(result.location, {
     headers: {
       Cookie: cookieStore.getHeader(result.location),
@@ -66,14 +64,10 @@ export const gradOldSystemLogin = async (
   cookieStore.applyResponse(ticketResponse, result.location);
 
   if (ticketResponse.status !== 302) {
-    console.log("ticket response", await ticketResponse.text());
-
     return UnknownResponse("登录失败");
   }
 
   const finalLocation = ticketResponse.headers.get("Location");
-
-  console.log("location: ", finalLocation);
 
   if (finalLocation?.includes("http://wafnenu.nenu.edu.cn/offCampus.html"))
     return {

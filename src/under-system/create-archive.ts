@@ -586,8 +586,6 @@ export const submitUnderStudentArchiveFamily = async (
       success: true,
     };
 
-  console.log(content);
-
   return {
     success: false,
     type: ActionFailType.Unknown,

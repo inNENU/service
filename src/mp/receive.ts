@@ -68,7 +68,7 @@ export const mpReceiveHandler: RequestHandler<
     const { connection, release } = await connect();
 
     await connection.execute(
-      `INSERT INTO contact (uuid, appId, openid, content,) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO contact (uuid, appId, openid, createTime, content) VALUES (?, ?, ?, FROM_UNIXTIME(?), ?)`,
       [
         getShortUUID(),
         ToUserName,
@@ -85,9 +85,7 @@ export const mpReceiveHandler: RequestHandler<
       MsgType === "image" ||
       MsgType === "miniprogrampage"
     ) {
-      res.header("Content-Type", "application/json");
-
-      return res.end({
+      return res.json({
         ToUserName,
         FromUserName,
         CreateTime,

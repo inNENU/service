@@ -53,8 +53,6 @@ export const vpnLogin = async (
     commit: "登录 Login",
   });
 
-  console.log("Requesting with params:", params);
-
   const loginResponse = await fetch(LOGIN_URL, {
     method: "POST",
     headers: {
@@ -68,8 +66,6 @@ export const vpnLogin = async (
   const location = loginResponse.headers.get("Location");
 
   cookieStore.applyResponse(loginResponse, VPN_SERVER);
-
-  console.log("Request location:", location);
 
   if (loginResponse.status === 302) {
     if (location === LOGIN_URL)

@@ -120,7 +120,7 @@ const originalFetch = fetch;
 global.fetch = async (url, options): Promise<globalThis.Response> => {
   const response = await originalFetch(url, options);
 
-  console.log("Fetching", url, `with ${response.status}`);
+  console.debug("Fetching", url, `with ${response.status}`);
 
   return response;
 };
@@ -274,7 +274,7 @@ app.use((err: Error, _req: Request, res: Response, _next: () => void) => {
 });
 
 app.listen(port, () => {
-  console.log(`Service listening on port ${port}`);
+  console.info(`Service is started on port ${port}`);
 });
 
 setInterval(() => {
