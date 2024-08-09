@@ -65,13 +65,33 @@ export const storeStoreAccountInfo = async ({
         [id],
       );
 
-      if (rows.length > 0)
+      if (rows.length > 0) {
+        const { uuid } = rows[0] as InfoData;
+
+        if (appID) {
+          const result = await getWechatMPCode(
+            appID,
+            "pkg/user/pages/account/login",
+            `verify:${uuid}`,
+          );
+
+          if (result instanceof Buffer) {
+            return {
+              success: true,
+              data: {
+                code: `data:image/jpeg;base64,${result.toString("base64")}`,
+              },
+            };
+          }
+
+          return UnknownResponse(result.errmsg);
+        }
+
         return {
           success: true,
-          data: {
-            uuid: (rows[0] as InfoData).uuid,
-          },
+          data: { uuid },
         };
+      }
 
       release();
     } catch (err) {
