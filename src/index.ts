@@ -158,6 +158,8 @@ app.get("/", (_req, res) => {
 `);
 });
 
+/*  ------------ 融合门户 ------------ */
+
 app.post("/action/login", actionLoginHandler);
 app.post("/action/check", actionCheckHandler);
 app.post("/action/borrow-books", borrowBooksHandler);
@@ -168,14 +170,14 @@ app.post("/action/recent-email", actionRecentEmailHandler);
 app.post("/action/notice-detail", noticeHandler);
 app.post("/action/notice-list", noticeListHandler);
 
+/*  ------------ 统一身份认证 ------------ */
+
 app.get("/auth/activate", activateHandler);
 app.post("/auth/activate", activateHandler);
 app.post("/auth/avatar", avatarHandler);
 app.post("/auth/encrypt", authEncryptHandler);
 app.get("/auth/auth-captcha", authCaptchaHandler);
 app.post("/auth/auth-captcha", authCaptchaHandler);
-app.post("/auth/center-check", authCenterCheckHandler);
-app.post("/auth/center-login", authCenterLoginHandler);
 app.post("/auth/change-password", changePasswordHandler);
 app.patch("/auth/change-password", changePasswordHandler);
 app.get("/auth/init", authInitHandler);
@@ -187,11 +189,20 @@ app.get("/auth/reset-captcha", resetCaptchaHandler);
 app.get("/auth/reset-password", resetPasswordHandler);
 app.post("/auth/reset-password", resetPasswordHandler);
 
+/*  ------------ 统一身份认证管理中心 ------------ */
+
+app.post("/auth-center/check", authCenterCheckHandler);
+app.post("/auth-center/login", authCenterLoginHandler);
+
+/*  ------------ 服务大厅 ------------ */
+
 app.post("/my/check", myCheckHandler);
 app.post("/my/email", emailHandler);
 app.post("/my/info", myInfoHandler);
 app.post("/my/login", myLoginHandler);
 app.post("/my/identity", myIdentityHandler);
+
+/*  ------------ 本科教务系统 ------------ */
 
 app.post("/under-study/check", underStudyCheckHandler);
 app.post("/under-study/course-commentary", underStudyCourseCommentaryHandler);
@@ -206,6 +217,8 @@ app.post("/under-study/select/process", underStudyProcessCourseHandler);
 app.post("/under-study/select/selected", underStudySelectedCourseHandler);
 app.post("/under-study/special-exam", underStudySpecialExamHandler);
 
+/*  ------------ 旧本科教务系统 ------------ */
+
 app.post("/under-system/login", underSystemLoginHandler);
 app.post("/under-system/check", underSystemCheckHandler);
 app.post("/under-system/change-major-plan", underChangeMajorPlanHandler);
@@ -216,8 +229,12 @@ app.post("/under-system/info", underInfoHandler);
 app.post("/under-system/student-archive", underStudentArchiveHandler);
 app.post("/under-system/test-query", underTestQueryHandler);
 
+/*  ------------ 研究生教务系统 ------------ */
+
 app.post("/grad-system/login", gradSystemLoginHandler);
 app.post("/grad-system/info", gradInfoHandler);
+
+/*  ------------ 旧研究生教务系统 ------------ */
 
 app.post("/grad-old-system/login", gradOldSystemLoginHandler);
 app.post("/grad-old-system/check", gradOldSystemCheckHandler);
@@ -245,8 +262,12 @@ app.post("/enroll/grad-admission", gradAdmissionHandler);
 app.post("/enroll/grad-recommend-plan", gradRecommendPlanHandler);
 app.post("/enroll/grad-plan", gradEnrollPlanHandler);
 
+/*  ------------ WebVPN ------------ */
+
 app.post("/vpn/cas-login", vpnCASLoginHandler);
 app.post("/vpn/login", vpnLoginHandler);
+
+/*  ------------ 小程序 ------------ */
 
 app.post("/mp/login", mpLoginHandler);
 app.post("/mp/id-code", idCodeHandler);
@@ -256,9 +277,15 @@ app.post("/mp/receive", mpReceiveHandler);
 app.post("/mp/report", mpReportHandler);
 app.post("/mp/search", mpSearchHandler);
 
+/*  ------------ 图书馆 ------------ */
+
 app.get("/library/people", libraryPeopleHandler);
 
+/*  ------------ 天气 ------------ */
+
 app.get("/weather", weatherHandler);
+
+/*  ------------ 测试 API ------------ */
 
 app.get("/test/get", testGetHandler);
 app.post("/test/post", testPostHandler);
