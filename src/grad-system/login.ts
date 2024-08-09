@@ -59,7 +59,7 @@ export const gradSystemLogin = async (
       msg: "此账户无法登录研究生教学服务系统",
     };
 
-  if (finalLocation === "https://math127.nenu.edu.cn/HProg/yjsy/index_pc.php") {
+  if (finalLocation === "https://pg.nenu.edu.cn/HProg/yjsy/index_pc.php") {
     const indexResponse = await fetch(finalLocation, {
       headers: {
         Cookie: cookieStore.getHeader(finalLocation),
