@@ -1,1 +1,1 @@
-export { authEncrypt } from "../auth/auth-encrypt.js";
+export { authEncrypt } from "../auth/encrypt.js";

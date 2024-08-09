@@ -1,9 +1,9 @@
 import { CookieStore } from "@mptool/net";
 import type { RequestHandler } from "express";
 
-import type { AuthCaptchaResponse } from "./auth-captcha.js";
-import { getAuthCaptcha } from "./auth-captcha.js";
-import { authEncrypt } from "./auth-encrypt.js";
+import type { AuthCaptchaResponse } from "./captcha.js";
+import { getAuthCaptcha } from "./captcha.js";
+import { authEncrypt } from "./encrypt.js";
 import {
   AUTH_CAPTCHA_URL,
   AUTH_DOMAIN,
@@ -14,6 +14,8 @@ import {
   SALT_REGEXP,
   UPDATE_INFO_URL,
 } from "./utils.js";
+import { authCenterLogin, getAvatar } from "../auth-center/index.js";
+import { INFO_PREFIX } from "../auth-center/utils.js";
 import {
   ActionFailType,
   TEST_COOKIE_STORE,
@@ -136,7 +138,7 @@ export interface InitAuthOptions extends AccountInfo {
 
 export interface InitAuthSuccessResult {
   success: true;
-  info: MyInfo | null;
+  info: (MyInfo & { avatar: string }) | null;
   cookieStore: CookieStore;
 }
 
@@ -268,7 +270,7 @@ export const initAuth = async (
         cookieStore,
       };
 
-    let info: MyInfo | null = null;
+    let info: (MyInfo & { avatar: string }) | null = null;
 
     let loginResult = await myLogin({ id, password, authToken }, cookieStore);
 
@@ -291,7 +293,27 @@ export const initAuth = async (
     if (loginResult.success) {
       const studentInfo = await getMyInfo(cookieStore.getHeader(MY_SERVER));
 
-      if (studentInfo.success) info = studentInfo.data;
+      if (studentInfo.success) {
+        let avatar = "";
+
+        const authCenterResult = await authCenterLogin(
+          { id, password, authToken },
+          cookieStore,
+        );
+
+        if (authCenterResult.success) {
+          const avatarInfo = await getAvatar(
+            cookieStore.getHeader(INFO_PREFIX),
+          );
+
+          if (avatarInfo.success) avatar = avatarInfo.data.avatar;
+        }
+
+        info = {
+          avatar,
+          ...studentInfo.data,
+        };
+      }
 
       console.log(`${id} 登录信息:\n`, JSON.stringify(info, null, 2));
     }

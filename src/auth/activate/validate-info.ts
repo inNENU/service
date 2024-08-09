@@ -5,7 +5,7 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../../typings.js";
-import { authEncrypt } from "../auth-encrypt.js";
+import { authEncrypt } from "../encrypt.js";
 import type { ResetCaptchaInfo } from "../reset-captcha.js";
 import { getResetCaptcha } from "../reset-captcha.js";
 import { RESET_PREFIX, RESET_SALT } from "../utils.js";

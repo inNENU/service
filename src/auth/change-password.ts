@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { authEncrypt } from "./auth-encrypt.js";
+import { authEncrypt } from "./encrypt.js";
 import { authLogin } from "./login.js";
 import { AUTH_SERVER, SALT_REGEXP } from "./utils.js";
 import { UnknownResponse } from "../config/index.js";

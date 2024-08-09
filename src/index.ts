@@ -27,6 +27,11 @@ import {
   resetCaptchaHandler,
   resetPasswordHandler,
 } from "./auth/index.js";
+import {
+  authCenterCheckHandler,
+  authCenterLoginHandler,
+  avatarHandler,
+} from "./auth-center/index.js";
 import { UnknownResponse } from "./config/index.js";
 import {
   gradAdmissionHandler,
@@ -164,9 +169,12 @@ app.post("/action/notice-list", noticeListHandler);
 
 app.get("/auth/activate", activateHandler);
 app.post("/auth/activate", activateHandler);
+app.post("/auth/avatar", avatarHandler);
 app.post("/auth/encrypt", authEncryptHandler);
 app.get("/auth/auth-captcha", authCaptchaHandler);
 app.post("/auth/auth-captcha", authCaptchaHandler);
+app.post("/auth/center-check", authCenterCheckHandler);
+app.post("/auth/center-login", authCenterLoginHandler);
 app.post("/auth/change-password", changePasswordHandler);
 app.patch("/auth/change-password", changePasswordHandler);
 app.get("/auth/init", authInitHandler);

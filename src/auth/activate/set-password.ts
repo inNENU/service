@@ -3,7 +3,7 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../../typings.js";
-import { authEncrypt } from "../auth-encrypt.js";
+import { authEncrypt } from "../encrypt.js";
 import { RESET_PREFIX, RESET_SALT } from "../utils.js";
 
 export interface ActivateSetPasswordOptions {

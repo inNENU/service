@@ -8,7 +8,11 @@ import {
   InvalidArgResponse,
   UnknownResponse,
 } from "../config/index.js";
-import type { CommonFailedResponse, EmptyObject } from "../typings.js";
+import type {
+  CommonFailedResponse,
+  CommonSuccessResponse,
+  EmptyObject,
+} from "../typings.js";
 
 const RE_AUTH_SMS_URL = `${AUTH_SERVER}/authserver/dynamicCode/getDynamicCodeByReauth.do`;
 
@@ -26,7 +30,7 @@ interface RawReAuthSMSFrequentResponse {
 }
 
 interface RawReAuthSMSFailResponse {
-  res: string;
+  res: `${string}_fail`;
   codeTime: number;
   returnMessage: string;
 }
@@ -36,11 +40,12 @@ type RawReAuthSMSResponse =
   | RawReAuthSMSFrequentResponse
   | RawReAuthSMSFailResponse;
 
-interface ReAuthSMSSuccessResponse {
-  success: true;
+type ReAuthSMSSuccessResponse = CommonSuccessResponse<{
   /** 下一个验证码的间隔秒数 */
   codeTime: number;
-}
+  /** 手机号 */
+  hiddenCellphone: string;
+}>;
 
 export type ReAuthSMSResponse =
   | ReAuthSMSSuccessResponse
@@ -84,7 +89,10 @@ export const sendReAuthSMS = async (
 
   return {
     success: true,
-    codeTime: result.codeTime,
+    data: {
+      codeTime: result.codeTime,
+      hiddenCellphone: result.mobile,
+    },
   };
 };
 

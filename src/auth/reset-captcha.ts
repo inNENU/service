@@ -9,7 +9,7 @@ import type {
   CommonSuccessResponse,
   EmptyObject,
 } from "../typings.js";
-import { generateRandomString } from "../utils/generateRandomString.js";
+import { generateRandomString } from "../utils/index.js";
 
 const CAPTCHA_URL = `${RESET_PREFIX}/generateCaptcha`;
 

@@ -1,7 +1,7 @@
 import { RESET_PAGE_URL } from "./utils.js";
 import { ActionFailType } from "../../config/index.js";
 import type { CommonFailedResponse } from "../../typings.js";
-import { authEncrypt } from "../auth-encrypt.js";
+import { authEncrypt } from "../encrypt.js";
 import { RESET_PREFIX, RESET_SALT } from "../utils.js";
 
 const RESET_PASSWORD_URL = `${RESET_PREFIX}/passwordRetrieve/resetPassword`;

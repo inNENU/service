@@ -2,42 +2,38 @@ import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
 import type { RequestHandler } from "express";
 
-import { MY_MAIN_PAGE } from "./utils.js";
-import type { AuthLoginFailedResponse } from "../auth/login.js";
+import { INFO_PAGE } from "./utils.js";
+import type {
+  AuthLoginFailedResponse,
+  AuthLoginOptions,
+} from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
-import { WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
+import { AUTH_SERVER } from "../auth/utils.js";
 import {
   TEST_ID_NUMBER,
   TEST_LOGIN_RESULT,
   UnknownResponse,
 } from "../config/index.js";
 import type { AccountInfo, EmptyObject } from "../typings.js";
-import type { VPNLoginFailedResponse } from "../vpn/index.js";
-import { vpnCASLogin } from "../vpn/index.js";
 
-export interface MyLoginSuccessResult {
+export interface AuthCenterLoginSuccessResult {
   success: true;
   cookieStore: CookieStore;
 }
 
-export type MyLoginFailedResponse =
-  | AuthLoginFailedResponse
-  | VPNLoginFailedResponse;
+export type AuthCenterLoginFailResult = AuthLoginFailedResponse;
 
-export type MyLoginResult = MyLoginSuccessResult | MyLoginFailedResponse;
+export type AuthCenterLoginResult =
+  | AuthCenterLoginSuccessResult
+  | AuthCenterLoginFailResult;
 
-export const myLogin = async (
+export const authCenterLogin = async (
   options: AccountInfo,
   cookieStore = new CookieStore(),
-): Promise<MyLoginResult> => {
-  const vpnLoginResult = await vpnCASLogin(options, cookieStore);
-
-  if (!vpnLoginResult.success) return vpnLoginResult;
-
+): Promise<AuthCenterLoginResult> => {
   const result = await authLogin({
     ...options,
-    service: MY_MAIN_PAGE,
-    webVPN: true,
+    service: INFO_PAGE,
     cookieStore,
   });
 
@@ -48,68 +44,52 @@ export const myLogin = async (
   }
 
   const ticketUrl = result.location;
+
   const ticketResponse = await fetch(ticketUrl, {
     headers: {
       Cookie: cookieStore.getHeader(ticketUrl),
-      Referer: WEB_VPN_AUTH_SERVER,
+      Referer: AUTH_SERVER,
     },
     redirect: "manual",
   });
 
   cookieStore.applyResponse(ticketResponse, ticketUrl);
 
-  console.log(
-    "ticket",
-    ticketResponse.headers.get("Location"),
-    await ticketResponse.text(),
-  );
-
   if (ticketResponse.status !== 302) return UnknownResponse("登录失败");
 
-  const sessionLocation = ticketResponse.headers.get("Location");
+  const finalLocation = ticketResponse.headers.get("Location");
 
-  if (sessionLocation?.includes("jsessionid=")) {
-    const mainResponse = await fetch(sessionLocation, {
-      headers: {
-        Cookie: cookieStore.getHeader(ticketUrl),
-        Referer: WEB_VPN_AUTH_SERVER,
-      },
-      redirect: "manual",
-    });
-
-    cookieStore.applyResponse(mainResponse, sessionLocation);
-
-    const content = await mainResponse.text();
-
-    if (content.includes("<title>网上服务大厅</title>"))
-      return {
-        success: true,
-        cookieStore,
-      };
+  if (finalLocation === INFO_PAGE) {
+    return {
+      success: true,
+      cookieStore,
+    };
   }
 
   return UnknownResponse("登录失败");
 };
 
-export interface MyLoginSuccessResponse {
+export interface AuthCenterLoginSuccessResponse {
   success: true;
   /** @deprecated */
   cookies: CookieType[];
 }
 
-export type MyLoginResponse = MyLoginSuccessResponse | MyLoginFailedResponse;
+export type AuthCenterLoginResponse =
+  | AuthCenterLoginSuccessResponse
+  | AuthCenterLoginFailResult;
 
-export const myLoginHandler: RequestHandler<
+export const authCenterLoginHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  AccountInfo
+  AuthLoginOptions
 > = async (req, res) => {
   try {
     const result =
       // fake result for testing
       req.body.id === TEST_ID_NUMBER
         ? TEST_LOGIN_RESULT
-        : await myLogin(req.body);
+        : await authCenterLogin(req.body);
 
     if (result.success) {
       const cookies = result.cookieStore
@@ -123,7 +103,7 @@ export const myLoginHandler: RequestHandler<
       return res.json({
         success: true,
         cookies,
-      } as MyLoginSuccessResponse);
+      } as AuthCenterLoginSuccessResponse);
     }
 
     return res.json(result);

@@ -1,4 +1,4 @@
-import { authEncrypt } from "./auth-encrypt.js";
+import { authEncrypt } from "./encrypt.js";
 import { RESET_PREFIX, RESET_SALT } from "./utils.js";
 import { ActionFailType, UnknownResponse } from "../config/index.js";
 import type {

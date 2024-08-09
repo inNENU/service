@@ -9,7 +9,7 @@ import type { ActivateValidationOptions } from "./validate-info.js";
 import { validAccountInfo } from "./validate-info.js";
 import type { ActivateValidSmsOptions } from "./validate-sms.js";
 import { validateActivateSms } from "./validate-sms.js";
-import { InvalidArgResponse } from "../../config/response.js";
+import { InvalidArgResponse } from "../../config/index.js";
 import type { CommonFailedResponse, EmptyObject } from "../../typings.js";
 import type { CheckPasswordOptions } from "../check-password.js";
 import { checkPassword } from "../check-password.js";

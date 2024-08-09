@@ -16,6 +16,7 @@ TEST_COOKIE_STORE.set({
 });
 
 export const TEST_INFO = {
+  avatar: "",
   id: TEST_ID_NUMBER,
   name: "测试用户",
   idCard: "123456789012345678",

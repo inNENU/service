@@ -2,7 +2,7 @@ import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
 import type { RequestHandler } from "express";
 
-import { authEncrypt } from "./auth-encrypt.js";
+import { authEncrypt } from "./encrypt.js";
 import {
   AUTH_DOMAIN,
   AUTH_LOGIN_URL,
