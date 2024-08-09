@@ -60,9 +60,10 @@ export const storeStoreAdmissionInfo = async (
     const { connection, release } = await connect();
 
     await connection.query(
-      `INSERT INTO student_info (uuid, name, gender, school, major, grade, remark) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO student_info (uuid, type, name, gender, school, major, grade, remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         uuid,
+        "admission",
         name,
         Number(id[17]) % 2 === 0 ? "女" : "男",
         result.data[3].text,

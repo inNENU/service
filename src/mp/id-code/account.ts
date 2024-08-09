@@ -4,15 +4,13 @@ import { getMyInfo } from "../../my/info.js";
 import { myLogin } from "../../my/login.js";
 import { MY_SERVER } from "../../my/utils.js";
 import type {
+  AccountInfo,
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../../typings.js";
 import { connect, getShortUUID, getWechatMPCode } from "../../utils/index.js";
 
-export interface StoreAccountInfoOptions {
-  id: number;
-  password: string;
-  authToken: string;
+export interface StoreAccountInfoOptions extends AccountInfo {
   remark: string;
   appID?: string;
 }
@@ -61,9 +59,10 @@ export const storeStoreAccountInfo = async (
       const { connection, release } = await connect();
 
       await connection.query(
-        `INSERT INTO student_info (uuid, name, gender, school, major, grade, remark) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO student_info (uuid, type, name, gender, school, major, grade, remark) VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [
           uuid,
+          "account",
           infoResult.data.name,
           infoResult.data.gender[0],
           infoResult.data.org,
