@@ -188,7 +188,29 @@ export const initAuth = async (
   const location = loginResponse.headers.get("Location");
   const resultContent = await loginResponse.text();
 
-  if (loginResponse.status === 401) return WrongPasswordResponse;
+  if (loginResponse.status === 401) {
+    if (resultContent.includes("您提供的用户名或者密码有误"))
+      return WrongPasswordResponse;
+
+    const lockedResult = /<span>账号已冻结，预计解冻时间：(.*?)<\/span>/.exec(
+      resultContent,
+    );
+
+    if (lockedResult)
+      return {
+        success: false,
+        type: ActionFailType.AccountLocked,
+        msg: `账号已冻结，预计解冻时间：${lockedResult[1]}`,
+      };
+
+    console.error(
+      "Unknown login response: ",
+      loginResponse.status,
+      resultContent,
+    );
+
+    return UnknownResponse("未知错误");
+  }
 
   if (loginResponse.status === 200) {
     if (resultContent.includes("无效的验证码"))
@@ -200,15 +222,6 @@ export const initAuth = async (
 
     if (resultContent.includes("您提供的用户名或者密码有误"))
       return WrongPasswordResponse;
-
-    if (
-      resultContent.includes("该帐号已经被锁定，请点击&ldquo;账号激活&rdquo;")
-    )
-      return {
-        success: false,
-        type: ActionFailType.AccountLocked,
-        msg: "该帐号已经被锁定，请使用小程序的“账号激活”功能",
-      };
 
     if (resultContent.includes("会话已失效，请刷新页面再登录"))
       return {
@@ -328,7 +341,11 @@ export const initAuth = async (
     };
   }
 
-  console.error("Unknown login response: ", resultContent);
+  console.error(
+    "Unknown login response: ",
+    loginResponse.status,
+    resultContent,
+  );
 
   return UnknownResponse("登录失败");
 };

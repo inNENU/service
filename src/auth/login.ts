@@ -181,7 +181,25 @@ export const authLogin = async ({
 
     cookieStore.applyResponse(response, server);
 
-    if (response.status === 401) return WrongPasswordResponse;
+    if (response.status === 401) {
+      if (resultContent.includes("您提供的用户名或者密码有误"))
+        return WrongPasswordResponse;
+
+      const lockedResult = /<span>账号已冻结，预计解冻时间：(.*?)<\/span>/.exec(
+        resultContent,
+      );
+
+      if (lockedResult)
+        return {
+          success: false,
+          type: ActionFailType.AccountLocked,
+          msg: `账号已冻结，预计解冻时间：${lockedResult[1]}`,
+        };
+
+      console.error("Unknown login response: ", response.status, resultContent);
+
+      return UnknownResponse("未知错误");
+    }
 
     if (response.status === 200) {
       if (resultContent.includes("您提供的用户名或者密码有误"))
@@ -192,15 +210,6 @@ export const authLogin = async ({
           success: false,
           type: ActionFailType.Expired,
           msg: "会话已过期，请重新登陆",
-        };
-
-      if (
-        resultContent.includes("该帐号已经被锁定，请点击&ldquo;账号激活&rdquo;")
-      )
-        return {
-          success: false,
-          type: ActionFailType.AccountLocked,
-          msg: "该帐号已经被锁定，请使用小程序的“账号激活”功能",
         };
 
       if (
@@ -228,7 +237,7 @@ export const authLogin = async ({
           msg: "用户账号没有此服务权限。",
         };
 
-      console.error("Unknown login response: ", resultContent);
+      console.error("Unknown login response: ", response.status, resultContent);
 
       return UnknownResponse("未知错误");
     }
@@ -245,7 +254,7 @@ export const authLogin = async ({
     }
   }
 
-  console.error("Unknown login response: ", loginPageResponse.status);
+  console.error("Unknown login page status: ", loginPageResponse.status);
 
   return UnknownResponse("未知错误");
 };
