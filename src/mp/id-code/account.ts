@@ -87,7 +87,7 @@ export const storeStoreAccountInfo = async ({
             return {
               success: true,
               data: {
-                code: `data:image/jpeg;base64,${result.toString("base64")}`,
+                code: `data:image/png;base64,${result.toString("base64")}`,
               },
             };
           }
