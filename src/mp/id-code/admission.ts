@@ -1,3 +1,4 @@
+import { setInfo } from "./setInfo.js";
 import {
   ActionFailType,
   DatabaseError,
@@ -9,11 +10,11 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../../typings.js";
-import { connect, getShortUUID, getWechatMPCode } from "../../utils/index.js";
+import { getShortUUID, getWechatMPCode } from "../../utils/index.js";
 
 export interface StoreAdmissionInfoOptions extends UnderAdmissionOptions {
-  openid?: string;
   remark: string;
+  openid?: string | null;
   appID?: string;
 }
 
@@ -38,7 +39,7 @@ export const storeStoreAdmissionInfo = async ({
   name,
   id,
   testId,
-  openid,
+  openid = null,
   remark,
   appID,
 }: StoreAdmissionInfoOptions): Promise<StoreAdmissionInfoResponse> => {
@@ -61,26 +62,22 @@ export const storeStoreAdmissionInfo = async ({
   const uuid = getShortUUID();
 
   try {
-    const { connection, release } = await connect();
-
-    await connection.execute(
-      `INSERT INTO student_info (uuid, openid, type, name, gender, school, major, grade, remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        uuid,
-        openid ?? null,
-        "admission",
+    await setInfo({
+      type: "admission",
+      info: {
+        id: null,
+        openid,
         name,
-        Number(id[17]) % 2 === 0 ? "女" : "男",
-        result.data[3].text,
-        result.data[2].text,
-        new Date().getMonth() < 7
-          ? new Date().getFullYear() - 1
-          : new Date().getFullYear(),
-        remark ?? null,
-      ],
-    );
-
-    release();
+        gender: Number(id[17]) % 2 === 0 ? "女" : "男",
+        org: result.data[3].text,
+        major: result.data[2].text,
+        grade:
+          new Date().getMonth() < 7
+            ? new Date().getFullYear() - 1
+            : new Date().getFullYear(),
+      },
+      remark,
+    });
   } catch (err) {
     console.error(err);
 

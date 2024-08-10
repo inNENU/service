@@ -1,5 +1,7 @@
 import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 
+import type { PersonalInfo } from "./setInfo.js";
+import { setInfo } from "./setInfo.js";
 import type { InfoData } from "./utils.js";
 import type { ActionFailType } from "../../config/index.js";
 import { DatabaseError, TEST_ID, UnknownResponse } from "../../config/index.js";
@@ -13,16 +15,7 @@ import type {
 } from "../../typings.js";
 import { connect, getShortUUID, getWechatMPCode } from "../../utils/index.js";
 
-export interface PersonalInfo {
-  name: string;
-  gender: string;
-  org: string;
-  major: string;
-  grade: number;
-}
-
 export interface StoreAccountInfoOptions extends AccountInfo {
-  openid?: string;
   remark: string;
   appID?: string;
   info?: PersonalInfo | null;
@@ -56,7 +49,6 @@ export const storeStoreAccountInfo = async ({
   id,
   password,
   authToken,
-  openid,
   remark,
   appID,
   info = null,
@@ -98,6 +90,7 @@ export const storeStoreAccountInfo = async ({
               success: true,
               data: {
                 code: `data:image/png;base64,${result.toString("base64")}`,
+                uuid,
               },
             };
           }
@@ -139,36 +132,24 @@ export const storeStoreAccountInfo = async ({
       const { name, gender, org, major, grade } = infoResult.data;
 
       infoData = {
+        id,
         name,
         gender: gender[0],
         org,
         major,
         grade,
+        openid: null,
       };
     }
 
     const uuid = getShortUUID();
 
     try {
-      const { connection, release } = await connect();
-
-      await connection.execute(
-        `INSERT INTO student_info (uuid, openid, type, id, name, gender, school, major, grade, remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          uuid,
-          openid ?? null,
-          "account",
-          id,
-          infoData.name,
-          infoData.gender[0],
-          infoData.org,
-          infoData.major,
-          infoData.grade,
-          remark ?? null,
-        ],
-      );
-
-      release();
+      await setInfo({
+        type: "account",
+        info: infoData,
+        remark,
+      });
     } catch (err) {
       console.error(err);
 
