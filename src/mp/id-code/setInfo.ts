@@ -29,7 +29,7 @@ export const setInfo = async ({
   const uuid = getShortUUID();
 
   await connection.execute(
-    `INSERT INTO student_info (uuid, openid, type, id, name, gender, school, major, grade, remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO id_code (uuid, openid, type, id, name, gender, school, major, grade, remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       uuid,
       openid ?? null,

@@ -69,7 +69,7 @@ export const storeStoreAccountInfo = async ({
       ({ connection, release } = await connect());
 
       const [rows] = await connection.execute<RowDataPacket[]>(
-        `SELECT * FROM student_info WHERE id = ? AND verifyId IS NULL`,
+        `SELECT * FROM id_code WHERE id = ? AND verifyId IS NULL`,
         [id],
       );
 

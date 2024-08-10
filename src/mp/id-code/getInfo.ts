@@ -45,7 +45,7 @@ export const getInfo = async ({
       };
 
     const [rows] = await connection.execute<RowDataPacket[]>(
-      `SELECT * FROM student_info WHERE uuid = ?`,
+      `SELECT * FROM id_code WHERE uuid = ?`,
       [uuid],
     );
 
@@ -74,7 +74,7 @@ export const getInfo = async ({
     }
 
     await connection.execute(
-      `UPDATE student_info SET verifyId = ?, verifyTime = FROM_UNIXTIME(?), verifyRemark = ? WHERE uuid = ?`,
+      `UPDATE id_code SET verifyId = ?, verifyTime = FROM_UNIXTIME(?), verifyRemark = ? WHERE uuid = ?`,
       [id, Math.round(Date.now() / 1000), remark ?? "", uuid],
     );
 
