@@ -9,7 +9,7 @@ export const getShortUUID = (uuid = v7()): string => {
   const bytes: number[] = [];
 
   for (let i = 0; i < hex.length; i += 2) {
-    bytes.push(parseInt(hex.substr(i, 2), 16));
+    bytes.push(parseInt(hex.substring(i, 2), 16));
   }
 
   // Convert bytes to custom Base64 representation
