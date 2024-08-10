@@ -12,6 +12,7 @@ import type {
 import { connect, getShortUUID, getWechatMPCode } from "../../utils/index.js";
 
 export interface StoreAdmissionInfoOptions extends UnderAdmissionOptions {
+  openid?: string;
   remark: string;
   appID?: string;
 }
@@ -33,11 +34,14 @@ export type StoreAdmissionInfoResponse =
       | ActionFailType.Unknown
     >;
 
-export const storeStoreAdmissionInfo = async (
-  options: StoreAdmissionInfoOptions,
-): Promise<StoreAdmissionInfoResponse> => {
-  const { name, id, testId } = options;
-
+export const storeStoreAdmissionInfo = async ({
+  name,
+  id,
+  testId,
+  openid,
+  remark,
+  appID,
+}: StoreAdmissionInfoOptions): Promise<StoreAdmissionInfoResponse> => {
   if (testId.length < 14)
     return {
       success: false,
@@ -60,9 +64,10 @@ export const storeStoreAdmissionInfo = async (
     const { connection, release } = await connect();
 
     await connection.execute(
-      `INSERT INTO student_info (uuid, type, name, gender, school, major, grade, remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO student_info (uuid, openid, type, name, gender, school, major, grade, remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         uuid,
+        openid ?? null,
         "admission",
         name,
         Number(id[17]) % 2 === 0 ? "女" : "男",
@@ -71,7 +76,7 @@ export const storeStoreAdmissionInfo = async (
         new Date().getMonth() < 7
           ? new Date().getFullYear() - 1
           : new Date().getFullYear(),
-        options.remark ?? "",
+        remark ?? null,
       ],
     );
 
@@ -82,13 +87,13 @@ export const storeStoreAdmissionInfo = async (
     return DatabaseError((err as Error).message);
   }
 
-  const { appID } = options;
-
   if (appID) {
     const result = await getWechatMPCode(
       appID,
       "pkg/user/pages/account/login",
       `verify:${uuid}`,
+      // FIXME: issues in release version
+      "trial",
     );
 
     if (result instanceof Buffer) {

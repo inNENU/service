@@ -74,7 +74,7 @@ export const getInfo = async ({
     }
 
     await connection.execute(
-      `UPDATE student_info SET verifyId = ?, verifyTime = ?, verifyRemark = ? WHERE uuid = ?`,
+      `UPDATE student_info SET verifyId = ?, verifyTime = FROM_UNIXTIME(?), verifyRemark = ? WHERE uuid = ?`,
       [id, Math.round(Date.now() / 1000), remark ?? "", uuid],
     );
 

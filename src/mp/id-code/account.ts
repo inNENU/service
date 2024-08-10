@@ -14,6 +14,7 @@ import type {
 import { connect, getShortUUID, getWechatMPCode } from "../../utils/index.js";
 
 export interface StoreAccountInfoOptions extends AccountInfo {
+  openid?: string;
   remark: string;
   appID?: string;
 }
@@ -46,7 +47,8 @@ export const storeStoreAccountInfo = async ({
   id,
   password,
   authToken,
-  remark = "",
+  openid,
+  remark,
   appID,
 }: StoreAccountInfoOptions): Promise<StoreAccountInfoResponse> => {
   try {
@@ -77,6 +79,8 @@ export const storeStoreAccountInfo = async ({
             appID,
             "pkg/user/pages/account/login",
             `verify:${uuid}`,
+            // FIXME: issues in release version
+            "trial",
           );
 
           if (result instanceof Buffer) {
@@ -116,9 +120,10 @@ export const storeStoreAccountInfo = async ({
       const { connection, release } = await connect();
 
       await connection.execute(
-        `INSERT INTO student_info (uuid, type, id, name, gender, school, major, grade, remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO student_info (uuid, openid, type, id, name, gender, school, major, grade, remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           uuid,
+          openid ?? null,
           "account",
           infoResult.data.id,
           infoResult.data.name,
@@ -126,7 +131,7 @@ export const storeStoreAccountInfo = async ({
           infoResult.data.org,
           infoResult.data.major,
           infoResult.data.grade,
-          remark,
+          remark ?? null,
         ],
       );
 

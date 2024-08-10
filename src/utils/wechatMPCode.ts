@@ -9,6 +9,7 @@ export const getWechatMPCode = async (
   appID: string,
   page: string,
   scene: string,
+  env: "release" | "trial" | "develop" = "release",
 ): Promise<Buffer | WechatMpCodeError> => {
   const accessToken = await getWechatAccessToken(
     appID as "wx33acb831ee1831a5" | "wx2550e3fd373b79a8",
@@ -22,6 +23,8 @@ export const getWechatMPCode = async (
         page,
         scene,
         auto_color: true,
+        env_version: env,
+        is_hyaline: true,
       }),
     },
   );
