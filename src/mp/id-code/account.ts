@@ -13,10 +13,19 @@ import type {
 } from "../../typings.js";
 import { connect, getShortUUID, getWechatMPCode } from "../../utils/index.js";
 
+export interface PersonalInfo {
+  name: string;
+  gender: string;
+  org: string;
+  major: string;
+  grade: number;
+}
+
 export interface StoreAccountInfoOptions extends AccountInfo {
   openid?: string;
   remark: string;
   appID?: string;
+  info?: PersonalInfo | null;
 }
 
 export type StoreAccountInfoCodeSuccessResponse = CommonSuccessResponse<{
@@ -50,6 +59,7 @@ export const storeStoreAccountInfo = async ({
   openid,
   remark,
   appID,
+  info = null,
 }: StoreAccountInfoOptions): Promise<StoreAccountInfoResponse> => {
   try {
     if (id.toString() === TEST_ID) {
@@ -108,11 +118,34 @@ export const storeStoreAccountInfo = async ({
       return DatabaseError((err as Error).message);
     }
 
-    const infoResult = await getMyInfo(
-      loginResult.cookieStore.getHeader(MY_SERVER),
-    );
+    let infoData: PersonalInfo | null = info;
 
-    if (!infoResult.success) return infoResult;
+    if (
+      typeof infoData !== "object" ||
+      typeof infoData?.gender !== "string" ||
+      typeof infoData?.org !== "string" ||
+      typeof infoData?.major !== "string" ||
+      typeof infoData?.grade !== "number" ||
+      !infoData.gender ||
+      !infoData.org ||
+      !infoData.major
+    ) {
+      const infoResult = await getMyInfo(
+        loginResult.cookieStore.getHeader(MY_SERVER),
+      );
+
+      if (!infoResult.success) return infoResult;
+
+      const { name, gender, org, major, grade } = infoResult.data;
+
+      infoData = {
+        name,
+        gender: gender[0],
+        org,
+        major,
+        grade,
+      };
+    }
 
     const uuid = getShortUUID();
 
@@ -125,12 +158,12 @@ export const storeStoreAccountInfo = async ({
           uuid,
           openid ?? null,
           "account",
-          infoResult.data.id,
-          infoResult.data.name,
-          infoResult.data.gender[0],
-          infoResult.data.org,
-          infoResult.data.major,
-          infoResult.data.grade,
+          id,
+          infoData.name,
+          infoData.gender[0],
+          infoData.org,
+          infoData.major,
+          infoData.grade,
           remark ?? null,
         ],
       );
