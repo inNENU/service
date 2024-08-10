@@ -161,6 +161,7 @@ export const authLogin = async ({
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
         Cookie: cookieStore.getHeader(url),
+        Referer: url,
         "User-Agent": "inNENU service",
       },
       body: new URLSearchParams({

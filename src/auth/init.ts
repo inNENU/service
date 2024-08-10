@@ -174,6 +174,7 @@ export const initAuth = async (
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
       Cookie: cookieHeader,
+      Referer: AUTH_LOGIN_URL,
       "User-Agent": "inNENU service",
     },
     body: new URLSearchParams({
