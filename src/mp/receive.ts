@@ -1,14 +1,11 @@
 import type { RequestHandler } from "express";
 import { sha1 } from "js-sha1";
 import type { PoolConnection } from "mysql2/promise";
+import { v7 } from "uuid";
 
 import { DatabaseErrorResponse, UnknownResponse } from "../config/index.js";
 import type { EmptyObject } from "../typings.js";
-import {
-  getConnection,
-  getShortUUID,
-  releaseConnection,
-} from "../utils/index.js";
+import { getConnection, releaseConnection } from "../utils/index.js";
 import "../config/loadEnv.js";
 
 interface BaseMessage {
@@ -78,7 +75,7 @@ export const mpReceiveHandler: RequestHandler<
       await connection.execute(
         `INSERT INTO contact (uuid, appId, openid, createTime, type, content) VALUES (?, ?, ?, FROM_UNIXTIME(?), ?, ?)`,
         [
-          getShortUUID(),
+          v7(),
           ToUserName,
           FromUserName,
           CreateTime,

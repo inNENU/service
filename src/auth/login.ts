@@ -183,7 +183,7 @@ export const authLogin = async ({
     cookieStore.applyResponse(response, server);
 
     if (response.status === 401) {
-      if (resultContent.includes("您提供的用户名或者密码有误"))
+      if (resultContent.includes("该账号非常用账号或用户名密码有误"))
         return WrongPasswordResponse;
 
       const lockedResult = /<span>账号已冻结，预计解冻时间：(.*?)<\/span>/.exec(
@@ -203,9 +203,6 @@ export const authLogin = async ({
     }
 
     if (response.status === 200) {
-      if (resultContent.includes("您提供的用户名或者密码有误"))
-        return WrongPasswordResponse;
-
       if (resultContent.includes("会话已失效，请刷新页面再登录"))
         return {
           success: false,
