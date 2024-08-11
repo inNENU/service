@@ -15,13 +15,14 @@ import {
   ActionFailType,
   UnknownResponse,
   WrongPasswordResponse,
+  getRandomBlacklistHint,
 } from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
   EmptyObject,
 } from "../typings.js";
-import { BLACKLIST_HINT, isInBlackList } from "../utils/index.js";
+import { isInBlackList } from "../utils/index.js";
 
 export interface AuthLoginOptions extends AccountInfo {
   service?: string;
@@ -59,11 +60,11 @@ export const authLogin = async ({
 }: AuthLoginOptions & {
   cookieStore?: CookieStore;
 }): Promise<AuthLoginResult> => {
-  if (isInBlackList(id))
+  if (await isInBlackList(id))
     return {
       success: false,
       type: ActionFailType.BlackList,
-      msg: BLACKLIST_HINT[Math.floor(Math.random() * BLACKLIST_HINT.length)],
+      msg: getRandomBlacklistHint(),
     };
 
   const domain = webVPN ? WEB_VPN_AUTH_DOMAIN : AUTH_DOMAIN;
@@ -183,7 +184,10 @@ export const authLogin = async ({
     cookieStore.applyResponse(response, server);
 
     if (response.status === 401) {
-      if (resultContent.includes("该账号非常用账号或用户名密码有误"))
+      if (
+        resultContent.includes("该账号非常用账号或用户名密码有误") ||
+        resultContent.includes("您提供的用户名或者密码有误")
+      )
         return WrongPasswordResponse;
 
       const lockedResult = /<span>账号已冻结，预计解冻时间：(.*?)<\/span>/.exec(

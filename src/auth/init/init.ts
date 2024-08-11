@@ -12,6 +12,7 @@ import {
   TEST_INFO,
   UnknownResponse,
   WrongPasswordResponse,
+  getRandomBlacklistHint,
 } from "../../config/index.js";
 import type { MyInfo } from "../../my/index.js";
 import { getMyInfo, myLogin } from "../../my/index.js";
@@ -22,7 +23,6 @@ import type {
   EmptyObject,
 } from "../../typings.js";
 import {
-  BLACKLIST_HINT,
   getConnection,
   isInBlackList,
   releaseConnection,
@@ -102,7 +102,10 @@ export const initAuth = async (
   const resultContent = await loginResponse.text();
 
   if (loginResponse.status === 401) {
-    if (resultContent.includes("该账号非常用账号或用户名密码有误"))
+    if (
+      resultContent.includes("该账号非常用账号或用户名密码有误") ||
+      resultContent.includes("您提供的用户名或者密码有误")
+    )
       return WrongPasswordResponse;
 
     const lockedResult = /<span>账号已冻结，预计解冻时间：(.*?)<\/span>/.exec(
@@ -288,11 +291,11 @@ export const initAuth = async (
       }
     }
 
-    if (isInBlackList(id, openid, info))
+    if (await isInBlackList(id, openid, info))
       return {
         success: false,
         type: ActionFailType.BlackList,
-        msg: BLACKLIST_HINT[Math.floor(Math.random() * BLACKLIST_HINT.length)],
+        msg: getRandomBlacklistHint(),
       };
 
     return {
