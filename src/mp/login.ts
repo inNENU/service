@@ -1,13 +1,14 @@
-import { writeFile } from "node:fs";
-
 import type { RequestHandler } from "express";
+import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 
 import {
-  OPENID_BLACK_LIST,
+  DatabaseErrorResponse,
+  MissingArgResponse,
   UnknownResponse,
   appIDInfo,
 } from "../config/index.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
+import { getConnection, releaseConnection } from "../utils/index.js";
 
 export type AppID = "wx33acb831ee1831a5" | "wx2550e3fd373b79a8" | 1109559721;
 export type Env = "qq" | "wx" | "web";
@@ -39,65 +40,60 @@ export const mpLoginHandler: RequestHandler<
   MPLoginCodeOptions | MPLoginOpenidOptions
 > = async (req, res) => {
   try {
+    let openid = "";
+
     if ("openid" in req.body) {
-      const { openid } = req.body;
+      if (!req.body.openid) return MissingArgResponse("openid");
+      ({ openid } = req.body);
+    } else {
+      const { env, appID, code } = req.body;
 
-      const inBlacklist = OPENID_BLACK_LIST.includes(openid);
+      if (!env) return MissingArgResponse("env");
+      if (!appID) return MissingArgResponse("appID");
+      if (!code) return MissingArgResponse("code");
 
-      if (inBlacklist)
-        writeFile(
-          "blacklist",
-          `openid ${openid}\n`,
-          {
-            encoding: "utf8",
-            flag: "a",
-          },
-          (err) => {
-            if (err) {
-              console.error(err);
-            }
-          },
-        );
+      const url = `https://api.${
+        env === "qq" ? "q" : "weixin"
+      }.qq.com/sns/jscode2session?appid=${appID}&secret=${
+        appIDInfo[appID]
+      }&js_code=${code}&grant_type=authorization_code`;
+      const response = await fetch(url);
 
-      return res.json({
-        openid,
-        inBlacklist,
-        isAdmin: openid === "oPPTV5eTpBIR3ruGw8VecNZ1mDQk",
-      } as MPloginSuccessResponse);
+      ({ openid } = (await response.json()) as { openid: string });
     }
 
-    const { env, appID, code } = req.body;
+    let connection: PoolConnection | null = null;
+    let inBlacklist = false;
+    let isAdmin = false;
 
-    const url = `https://api.${
-      env === "qq" ? "q" : "weixin"
-    }.qq.com/sns/jscode2session?appid=${appID}&secret=${
-      appIDInfo[appID]
-    }&js_code=${code}&grant_type=authorization_code`;
-    const response = await fetch(url);
+    try {
+      connection = await getConnection();
 
-    const { openid } = (await response.json()) as { openid: string };
-
-    const inBlacklist = OPENID_BLACK_LIST.includes(openid);
-
-    if (inBlacklist)
-      writeFile(
-        "blacklist",
-        `openid ${openid}\n`,
-        {
-          encoding: "utf8",
-          flag: "a",
-        },
-        (err) => {
-          if (err) {
-            console.error(err);
-          }
-        },
+      const [openidRows] = await connection.execute<RowDataPacket[]>(
+        "SELECT * FROM openid_blacklist WHERE openid = ?",
+        [openid],
       );
+      const [adminRows] = await connection.execute<RowDataPacket[]>(
+        "SELECT * FROM openid_blacklist WHERE openid = ?",
+        [openid],
+      );
+
+      inBlacklist = openidRows.length > 0;
+      isAdmin = adminRows.length > 0;
+
+      console.info(`Blocking user ${openid}`);
+    } catch (err) {
+      console.error(err);
+
+      return DatabaseErrorResponse((err as Error).message);
+    } finally {
+      releaseConnection(connection);
+    }
 
     return res.json({
       openid,
       inBlacklist,
-      isAdmin: openid === "oPPTV5eTpBIR3ruGw8VecNZ1mDQk",
+      isAdmin,
     } as MPloginSuccessResponse);
   } catch (err) {
     const { message } = err as Error;

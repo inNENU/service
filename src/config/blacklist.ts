@@ -1,12 +1,5 @@
 import type { MyInfo } from "../my/index.js";
 
-export const OPENID_BLACK_LIST: string[] = [
-  "oPPTV5XIq6LcgfO2pbpZVU4tjZKs",
-  "oPPTV5YV7Fijf_7CiDgiKNpenVmw",
-  // 辱骂
-  "oPPTV5V7kt9qnn3EP9bsbTysjJig",
-];
-
 export const ID_BLACK_LIST = [2021012638, 2023010767];
 
 export type ConditionBlackList = {
