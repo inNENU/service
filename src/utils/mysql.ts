@@ -13,18 +13,18 @@ const pool = mysql.createPool({
   connectionLimit: 20,
 });
 
-export const connect = (): Promise<{
-  connection: PoolConnection;
-  release: () => void;
-}> =>
+export const getConnection = (): Promise<PoolConnection> =>
   pool
     .getConnection()
-    .then((connection) => ({
-      connection,
-      release: (): void => pool.releaseConnection(connection),
-    }))
+    .then((connection) => connection)
     .catch((error) => {
       console.error("Error connecting to MySQL:", error);
 
       throw error;
     });
+
+export const releaseConnection = (connection?: PoolConnection | null): void => {
+  if (connection) {
+    pool.releaseConnection(connection);
+  }
+};

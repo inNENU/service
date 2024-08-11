@@ -1,10 +1,12 @@
 import { CookieStore } from "@mptool/net";
+import type { PoolConnection } from "mysql2/promise";
 import { v7 } from "uuid";
 
 import { authCenterLogin, getAvatar } from "../../auth-center/index.js";
 import { INFO_PREFIX } from "../../auth-center/utils.js";
 import {
   ActionFailType,
+  DatabaseErrorResponse,
   TEST_COOKIE_STORE,
   TEST_INFO,
   UnknownResponse,
@@ -14,7 +16,12 @@ import type { MyInfo } from "../../my/index.js";
 import { getMyInfo, myLogin } from "../../my/index.js";
 import { MY_SERVER } from "../../my/utils.js";
 import type { AccountInfo, CommonFailedResponse } from "../../typings.js";
-import { BLACKLIST_HINT, connect, isInBlackList } from "../../utils/index.js";
+import {
+  BLACKLIST_HINT,
+  getConnection,
+  isInBlackList,
+  releaseConnection,
+} from "../../utils/index.js";
 import { vpnLogin } from "../../vpn/login.js";
 import { authEncrypt } from "../encrypt.js";
 import {
@@ -43,6 +50,7 @@ export type InitAuthFailedResponse =
   | CommonFailedResponse<
       | ActionFailType.AccountLocked
       | ActionFailType.BlackList
+      | ActionFailType.DatabaseError
       | ActionFailType.EnabledSSO
       | ActionFailType.Expired
       | ActionFailType.NeedCaptcha
@@ -203,60 +211,78 @@ export const initAuth = async (
       const studentInfo = await getMyInfo(cookieStore.getHeader(MY_SERVER));
 
       if (studentInfo.success) {
-        const { connection, release } = await connect();
+        let connection: PoolConnection | null = null;
 
-        let avatar = "";
+        try {
+          let avatar = "";
 
-        const authCenterResult = await authCenterLogin(
-          { id, password, authToken },
-          cookieStore,
-        );
-
-        if (authCenterResult.success) {
-          const avatarInfo = await getAvatar(
-            cookieStore.getHeader(INFO_PREFIX),
+          const authCenterResult = await authCenterLogin(
+            { id, password, authToken },
+            cookieStore,
           );
 
-          if (avatarInfo.success) {
-            avatar = avatarInfo.data.avatar;
-            await connection.execute(
-              `REPLACE INTO student_avatar (id, avatar) VALUES (?, ?);`,
-              [id, avatar],
+          if (authCenterResult.success) {
+            const avatarInfo = await getAvatar(
+              cookieStore.getHeader(INFO_PREFIX),
             );
+
+            try {
+              connection = await getConnection();
+
+              if (avatarInfo.success) {
+                avatar = avatarInfo.data.avatar;
+                await connection.execute(
+                  `REPLACE INTO student_avatar (id, avatar) VALUES (?, ?);`,
+                  [id, avatar],
+                );
+              }
+            } catch (err) {
+              console.error(err);
+
+              return DatabaseErrorResponse((err as Error).message);
+            }
           }
+
+          info = {
+            avatar,
+            ...studentInfo.data,
+          };
+
+          try {
+            if (!connection) connection = await getConnection();
+
+            await connection.execute(
+              `REPLACE INTO student_info (id, uuid, name, org, orgId, major, majorId, inYear, grade, type, typeId, code, politicalStatus, people, peopleId, gender, genderId, birth, location) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+              [
+                info.id,
+                v7(),
+                info.name,
+                info.org,
+                info.orgId,
+                info.major,
+                info.majorId,
+                info.inYear,
+                info.grade,
+                info.type,
+                info.typeId,
+                info.code,
+                info.politicalStatus,
+                info.people,
+                info.peopleId,
+                info.gender,
+                info.genderId,
+                info.birth,
+                info.location,
+              ],
+            );
+          } catch (err) {
+            console.error(err);
+
+            return DatabaseErrorResponse((err as Error).message);
+          }
+        } finally {
+          releaseConnection(connection);
         }
-
-        info = {
-          avatar,
-          ...studentInfo.data,
-        };
-
-        await connection.execute(
-          `REPLACE INTO student_info (id, uuid, name, org, orgId, major, majorId, inYear, grade, type, typeId, code, politicalStatus, people, peopleId, gender, genderId, birth, location) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
-          [
-            info.id,
-            v7(),
-            info.name,
-            info.org,
-            info.orgId,
-            info.major,
-            info.majorId,
-            info.inYear,
-            info.grade,
-            info.type,
-            info.typeId,
-            info.code,
-            info.politicalStatus,
-            info.people,
-            info.peopleId,
-            info.gender,
-            info.genderId,
-            info.birth,
-            info.location,
-          ],
-        );
-
-        release();
       }
     }
 

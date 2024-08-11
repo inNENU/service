@@ -1,28 +1,35 @@
 import type { RequestHandler } from "express";
+import type { PoolConnection } from "mysql2/promise";
 
-import { DatabaseError } from "../config/index.js";
+import { DatabaseErrorResponse } from "../config/index.js";
 import type { EmptyObject } from "../typings.js";
-import { connect, getShortUUID } from "../utils/index.js";
+import {
+  getConnection,
+  getShortUUID,
+  releaseConnection,
+} from "../utils/index.js";
 
 export const mpReportHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
   Record<string, unknown>
 > = async (req, res) => {
+  let connection: PoolConnection | null = null;
+
   try {
-    const { connection, release } = await connect();
+    connection = await getConnection();
 
     await connection.execute(
       `INSERT INTO log (uuid, type, content) VALUES (?, ?, ?)`,
       [getShortUUID(), req.body.type ?? null, JSON.stringify(req.body)],
     );
 
-    release();
-
-    res.send({ success: true });
+    return res.send({ success: true });
   } catch (err) {
     console.error(err);
 
-    return DatabaseError((err as Error).message);
+    return DatabaseErrorResponse((err as Error).message);
+  } finally {
+    releaseConnection(connection);
   }
 };

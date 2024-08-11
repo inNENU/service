@@ -28,7 +28,7 @@ export const WrongPasswordResponse: CommonFailedResponse<ActionFailType.WrongPas
     msg: "用户名或密码错误",
   };
 
-export const DatabaseError = (
+export const DatabaseErrorResponse = (
   msg: string,
 ): CommonFailedResponse<ActionFailType.DatabaseError> => ({
   success: false,

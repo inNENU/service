@@ -1,10 +1,10 @@
-import type { RowDataPacket } from "mysql2";
+import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 
 import type { IDCodeData } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
 import {
   ActionFailType,
-  DatabaseError,
+  DatabaseErrorResponse,
   MissingArgResponse,
   MissingCredentialResponse,
 } from "../../config/index.js";
@@ -13,7 +13,7 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../../typings.js";
-import { connect } from "../../utils/index.js";
+import { getConnection, releaseConnection } from "../../utils/index.js";
 
 export interface GetInfoOptions {
   id: number;
@@ -50,11 +50,13 @@ export const checkIDCode = async ({
   uuid,
   remark,
 }: GetInfoOptions): Promise<GetInfoResponse> => {
+  let connection: PoolConnection | null = null;
+
   try {
     if (!mpToken || !id) return MissingCredentialResponse;
     if (!uuid) return MissingArgResponse("uuid");
 
-    const { connection, release } = await connect();
+    connection = await getConnection();
 
     // check whether the mpToken is valid
     const [validatorInfoRows] = await connection.execute<RowDataPacket[]>(
@@ -119,8 +121,6 @@ export const checkIDCode = async ({
       [id, Math.round(Date.now() / 1000), remark ?? "", uuid],
     );
 
-    release();
-
     return {
       success: true,
       data: {
@@ -136,6 +136,8 @@ export const checkIDCode = async ({
   } catch (err) {
     console.error(err);
 
-    return DatabaseError((err as Error).message);
+    return DatabaseErrorResponse((err as Error).message);
+  } finally {
+    releaseConnection(connection);
   }
 };

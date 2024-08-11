@@ -1,6 +1,8 @@
+import type { PoolConnection } from "mysql2/promise";
+
 import {
   ActionFailType,
-  DatabaseError,
+  DatabaseErrorResponse,
   UnknownResponse,
 } from "../../config/index.js";
 import type { UnderAdmissionOptions } from "../../enroll/index.js";
@@ -9,7 +11,12 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../../typings.js";
-import { connect, getShortUUID, getWechatMPCode } from "../../utils/index.js";
+import {
+  getConnection,
+  getShortUUID,
+  getWechatMPCode,
+  releaseConnection,
+} from "../../utils/index.js";
 
 export interface StoreAdmissionInfoOptions extends UnderAdmissionOptions {
   remark: string;
@@ -60,8 +67,10 @@ export const storeStoreAdmissionInfo = async ({
 
   const uuid = getShortUUID();
 
+  let connection: PoolConnection | null = null;
+
   try {
-    const { connection, release } = await connect();
+    connection = await getConnection();
 
     await connection.execute(
       `INSERT INTO admission_code (uuid, openid, type, id, name, gender, school, major, grade, remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -79,12 +88,12 @@ export const storeStoreAdmissionInfo = async ({
         remark ?? null,
       ],
     );
-
-    release();
   } catch (err) {
     console.error(err);
 
-    return DatabaseError((err as Error).message);
+    return DatabaseErrorResponse((err as Error).message);
+  } finally {
+    releaseConnection(connection);
   }
 
   if (appID) {

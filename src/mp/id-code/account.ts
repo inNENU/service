@@ -1,4 +1,4 @@
-import type { RowDataPacket } from "mysql2/promise";
+import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 
 import type { IDCodeData } from "./utils.js";
 import {
@@ -12,7 +12,12 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../../typings.js";
-import { connect, getShortUUID, getWechatMPCode } from "../../utils/index.js";
+import {
+  getConnection,
+  getShortUUID,
+  getWechatMPCode,
+  releaseConnection,
+} from "../../utils/index.js";
 
 export interface StoreAccountInfoOptions {
   id: number;
@@ -45,6 +50,8 @@ export const storeStoreAccountInfo = async ({
   appID,
   force = false,
 }: StoreAccountInfoOptions): Promise<StoreAccountInfoResponse> => {
+  let connection: PoolConnection | null = null;
+
   try {
     if (id.toString() === TEST_ID)
       return UnknownResponse("不支持为测试账号生成身份码");
@@ -57,10 +64,8 @@ export const storeStoreAccountInfo = async ({
 
     let existed = false;
     let uuid: string | null = null;
-    // let connection: PoolConnection | null = null;
-    // let release: (() => void) | null = null;
 
-    const { connection, release } = await connect();
+    connection = await getConnection();
 
     // check whether the mpToken is valid
     const [infoRows] = await connection.execute<RowDataPacket[]>(
@@ -108,8 +113,6 @@ export const storeStoreAccountInfo = async ({
       );
     }
 
-    release();
-
     const result = await getWechatMPCode(
       appID,
       "pkg/user/pages/account/login",
@@ -131,5 +134,7 @@ export const storeStoreAccountInfo = async ({
     console.error(err);
 
     return UnknownResponse((err as Error).message);
+  } finally {
+    releaseConnection(connection);
   }
 };
