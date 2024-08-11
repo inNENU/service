@@ -58,7 +58,11 @@ export const myLogin = async (
 
   cookieStore.applyResponse(ticketResponse, ticketUrl);
 
-  if (ticketResponse.status !== 302) return UnknownResponse("登录失败");
+  if (ticketResponse.status !== 302) {
+    console.error("Login to my failed", ticketResponse.status);
+
+    return UnknownResponse("登录失败");
+  }
 
   const sessionLocation = ticketResponse.headers.get("Location");
 
@@ -81,6 +85,8 @@ export const myLogin = async (
         cookieStore,
       };
   }
+
+  console.error("login to my failed", sessionLocation);
 
   return UnknownResponse("登录失败");
 };
