@@ -1,4 +1,5 @@
 import { CookieStore } from "@mptool/net";
+import { v7 } from "uuid";
 
 import { authCenterLogin, getAvatar } from "../../auth-center/index.js";
 import { INFO_PREFIX } from "../../auth-center/utils.js";
@@ -13,7 +14,7 @@ import type { MyInfo } from "../../my/index.js";
 import { getMyInfo, myLogin } from "../../my/index.js";
 import { MY_SERVER } from "../../my/utils.js";
 import type { AccountInfo, CommonFailedResponse } from "../../typings.js";
-import { BLACKLIST_HINT, isInBlackList } from "../../utils/index.js";
+import { BLACKLIST_HINT, connect, isInBlackList } from "../../utils/index.js";
 import { vpnLogin } from "../../vpn/login.js";
 import { authEncrypt } from "../encrypt.js";
 import {
@@ -202,6 +203,8 @@ export const initAuth = async (
       const studentInfo = await getMyInfo(cookieStore.getHeader(MY_SERVER));
 
       if (studentInfo.success) {
+        const { connection, release } = await connect();
+
         let avatar = "";
 
         const authCenterResult = await authCenterLogin(
@@ -214,16 +217,47 @@ export const initAuth = async (
             cookieStore.getHeader(INFO_PREFIX),
           );
 
-          if (avatarInfo.success) avatar = avatarInfo.data.avatar;
+          if (avatarInfo.success) {
+            avatar = avatarInfo.data.avatar;
+            await connection.execute(
+              `REPLACE INTO student_avatar (id, avatar) VALUES (?, ?);`,
+              [id, avatar],
+            );
+          }
         }
 
         info = {
           avatar,
           ...studentInfo.data,
         };
-      }
 
-      console.log(`${id} 登录信息:\n`, JSON.stringify(info, null, 2));
+        await connection.execute(
+          `REPLACE INTO student_info (id, uuid, name, org, orgId, major, majorId, inYear, grade, type, typeId, code, politicalStatus, people, peopleId, gender, genderId, birth, location) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+          [
+            info.id,
+            v7(),
+            info.name,
+            info.org,
+            info.orgId,
+            info.major,
+            info.majorId,
+            info.inYear,
+            info.grade,
+            info.type,
+            info.typeId,
+            info.code,
+            info.politicalStatus,
+            info.people,
+            info.peopleId,
+            info.gender,
+            info.genderId,
+            info.birth,
+            info.location,
+          ],
+        );
+
+        release();
+      }
     }
 
     if (isInBlackList(id, openid, info))
