@@ -325,6 +325,8 @@ export const initAuth = async (
               console.error("Database error", err);
             }
           }
+        } else {
+          console.error("Login to my.nenu.edu.cn failed", loginResult);
         }
       }
 
