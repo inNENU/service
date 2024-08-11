@@ -1,4 +1,5 @@
 import { CookieStore } from "@mptool/net";
+import type { RequestHandler } from "express";
 import type { PoolConnection } from "mysql2/promise";
 import { v7 } from "uuid";
 
@@ -15,7 +16,11 @@ import {
 import type { MyInfo } from "../../my/index.js";
 import { getMyInfo, myLogin } from "../../my/index.js";
 import { MY_SERVER } from "../../my/utils.js";
-import type { AccountInfo, CommonFailedResponse } from "../../typings.js";
+import type {
+  AccountInfo,
+  CommonFailedResponse,
+  EmptyObject,
+} from "../../typings.js";
 import {
   BLACKLIST_HINT,
   getConnection,
@@ -304,4 +309,41 @@ export const initAuth = async (
   );
 
   return UnknownResponse("登录失败");
+};
+
+export const authInitHandler: RequestHandler<
+  EmptyObject,
+  EmptyObject,
+  InitAuthOptions,
+  { id: string }
+> = async (req, res) => {
+  try {
+    const cookieHeader = req.headers.cookie ?? "";
+
+    // Note: Return fake result for testing
+    if (cookieHeader.includes("TEST")) return res.json(TEST_AUTH_INIT);
+
+    const result = await initAuth(req.body, cookieHeader);
+
+    if ("cookieStore" in result) {
+      const cookies = result.cookieStore
+        .getAllCookies()
+        .map((item) => item.toJSON());
+
+      cookies.forEach(({ name, value, ...rest }) => {
+        res.cookie(name, value, rest);
+      });
+
+      // @ts-expect-error: cookieStore is not a JSON-serializable object
+      delete result.cookieStore;
+    }
+
+    return res.json(result);
+  } catch (err) {
+    const { message } = err as Error;
+
+    console.error(err);
+
+    return res.json(UnknownResponse(message));
+  }
 };

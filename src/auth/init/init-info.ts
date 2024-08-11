@@ -1,7 +1,12 @@
 import { CookieStore } from "@mptool/net";
+import type { RequestHandler } from "express";
 
-import { TEST_COOKIE_STORE, TEST_ID } from "../../config/index.js";
-import type { CommonFailedResponse } from "../../typings.js";
+import {
+  TEST_COOKIE_STORE,
+  TEST_ID,
+  UnknownResponse,
+} from "../../config/index.js";
+import type { CommonFailedResponse, EmptyObject } from "../../typings.js";
 import type { AuthCaptchaResponse } from "../captcha.js";
 import { getAuthCaptcha } from "../captcha.js";
 import {
@@ -100,4 +105,45 @@ export const getAuthInitInfo = async (
       rememberMe: "true",
     },
   } as AuthInitInfoSuccessResult;
+};
+
+export const authInitInfoHandler: RequestHandler<
+  EmptyObject,
+  EmptyObject,
+  EmptyObject,
+  { id: string }
+> = async (req, res) => {
+  try {
+    const id = req.query.id;
+
+    const result =
+      // Note: Return fake result for testing
+      id === TEST_ID ? TEST_AUTH_INIT_INFO : await getAuthInitInfo(id);
+
+    if (result.success) {
+      const cookies = result.cookieStore
+        .getAllCookies()
+        .map((item) => item.toJSON());
+
+      cookies.forEach(({ name, value, ...rest }) => {
+        res.cookie(name, value, rest);
+      });
+
+      return res.json({
+        success: true,
+        needCaptcha: result.needCaptcha,
+        captcha: result.captcha,
+        params: result.params,
+        salt: result.salt,
+      } as AuthInitInfoSuccessResult);
+    }
+
+    return res.json(result);
+  } catch (err) {
+    const { message } = err as Error;
+
+    console.error(err);
+
+    return res.json(UnknownResponse(message));
+  }
 };

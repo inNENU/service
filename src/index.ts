@@ -21,6 +21,7 @@ import {
   authCaptchaHandler,
   authEncryptHandler,
   authInitHandler,
+  authInitInfoHandler,
   authLoginHandler,
   changePasswordHandler,
   reAuthHandler,
@@ -181,7 +182,7 @@ app.get("/auth/auth-captcha", authCaptchaHandler);
 app.post("/auth/auth-captcha", authCaptchaHandler);
 app.post("/auth/change-password", changePasswordHandler);
 app.patch("/auth/change-password", changePasswordHandler);
-app.get("/auth/init", authInitHandler);
+app.get("/auth/init", authInitInfoHandler);
 app.post("/auth/init", authInitHandler);
 app.post("/auth/login", authLoginHandler);
 app.get("/auth/re-auth", reAuthHandler);
