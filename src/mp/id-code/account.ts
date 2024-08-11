@@ -68,12 +68,12 @@ export const storeStoreAccountInfo = async ({
     connection = await getConnection();
 
     // check whether the mpToken is valid
-    const [infoRows] = await connection.execute<RowDataPacket[]>(
-      `SELECT * FROM student_info WHERE id = ? AND uuid = ?`,
-      [id, mpToken],
+    const [tokenRows] = await connection.execute<RowDataPacket[]>(
+      "SELECT * FROM `token` WHERE id = ? AND uuid = ? and `appId` = ?",
+      [id, mpToken, appID],
     );
 
-    if (!infoRows.length)
+    if (!tokenRows.length)
       return {
         success: false,
         type: ActionFailType.Expired,
@@ -82,7 +82,7 @@ export const storeStoreAccountInfo = async ({
 
     // check whether there is existing uuid
     const [rows] = await connection.execute<RowDataPacket[]>(
-      `SELECT * FROM id_code WHERE id = ? AND verifyId IS NULL`,
+      "SELECT * FROM `id_code` WHERE `id` = ? AND `verifyId` IS NULL",
       [id],
     );
 
@@ -92,10 +92,10 @@ export const storeStoreAccountInfo = async ({
       if (force) {
         uuid = getShortUUID();
 
-        await connection.execute(`UPDATE id_code SET uuid = ? WHERE uuid = ?`, [
-          uuid,
-          rows[0].uuid,
-        ]);
+        await connection.execute(
+          "UPDATE `id_code` SET `uuid` = ? WHERE `uuid` = ?",
+          [uuid, rows[0].uuid],
+        );
       }
       // use old uuid
       else {
@@ -108,7 +108,7 @@ export const storeStoreAccountInfo = async ({
       uuid = getShortUUID();
 
       await connection.execute(
-        `INSERT INTO id_code (uuid, id, remark) VALUES (?, ?, ?)`,
+        "INSERT INTO `id_code` (`uuid`, `id`, `remark`) VALUES (?, ?, ?)",
         [uuid, id, remark ?? null],
       );
     }

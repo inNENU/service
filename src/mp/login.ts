@@ -70,11 +70,11 @@ export const mpLoginHandler: RequestHandler<
       connection = await getConnection();
 
       const [openidRows] = await connection.execute<RowDataPacket[]>(
-        "SELECT * FROM openid_blacklist WHERE openid = ?",
+        "SELECT * FROM `openid_blacklist` WHERE `openid` = ?",
         [openid],
       );
       const [adminRows] = await connection.execute<RowDataPacket[]>(
-        "SELECT * FROM openid_blacklist WHERE openid = ?",
+        "SELECT * FROM `admin` WHERE `openid` = ?",
         [openid],
       );
 

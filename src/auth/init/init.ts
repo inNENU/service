@@ -278,7 +278,7 @@ export const initAuth = async (
                   if (!connection) connection = await getConnection();
 
                   await connection.execute(
-                    `REPLACE INTO student_avatar (id, avatar) VALUES (?, ?);`,
+                    "REPLACE INTO `student_avatar` (`id`, `avatar`) VALUES (?, ?)",
                     [id, avatar],
                   );
                 } catch (err) {
@@ -298,7 +298,7 @@ export const initAuth = async (
               if (!connection) connection = await getConnection();
 
               await connection.execute(
-                "INSERT INTO student_info (id, name, org, orgId, major, majorId, inYear, grade, type, typeId, code, politicalStatus, people, peopleId, gender, genderId, birth, location, updateTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, FROM_UNIXTIME(?)) ON DUPLICATE KEY UPDATE name = VALUES(name), org = VALUES(org), orgId = VALUES(orgId), major = VALUES(major), majorId = VALUES(majorId), inYear = VALUES(inYear), grade = VALUES(grade), type = VALUES(type), typeId = VALUES(typeId), code = VALUES(code), politicalStatus = VALUES(politicalStatus), people = VALUES(people), peopleId = VALUES(peopleId), gender = VALUES(gender), genderId = VALUES(genderId), birth = VALUES(birth), location = VALUES(location), updateTime = VALUES(updateTime);",
+                "INSERT INTO `student_info` (`id`, `name`, `org`, `orgId`, `major`, `majorId`, `inYear`, `grade`, `type`, `typeId`, `code`, `politicalStatus`, `people`, `peopleId`, `gender`, `genderId`, `birth`, `location`, `updateTime`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, FROM_UNIXTIME(?)) ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `org` = VALUES(`org`), `orgId` = VALUES(`orgId`), `major` = VALUES(`major`), `majorId` = VALUES(`majorId`), `inYear` = VALUES(`inYear`), `grade` = VALUES(`grade`), `type` = VALUES(`type`), `typeId` = VALUES(`typeId`), `code` = VALUES(`code`), `politicalStatus` = VALUES(`politicalStatus`), `people` = VALUES(`people`), `peopleId` = VALUES(`peopleId`), `gender` = VALUES(`gender`), `genderId` = VALUES(`genderId`), `birth` = VALUES(`birth`), `location` = VALUES(`location`), `updateTime` = VALUES(`updateTime`);",
                 [
                   info.id,
                   info.name,

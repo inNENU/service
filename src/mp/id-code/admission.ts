@@ -73,7 +73,7 @@ export const storeStoreAdmissionInfo = async ({
     connection = await getConnection();
 
     await connection.execute(
-      `INSERT INTO admission_code (uuid, openid, type, id, name, gender, school, major, grade, remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      "INSERT INTO `admission_code` (`uuid`, `openid`, `type`, `id`, `name`, `gender`, `school`, `major`, `remark`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [
         uuid,
         openid ?? null,
@@ -82,9 +82,6 @@ export const storeStoreAdmissionInfo = async ({
         Number(id[17]) % 2 === 0 ? "女" : "男",
         result.data[3].text,
         result.data[2].text,
-        new Date().getMonth() < 7
-          ? new Date().getFullYear() - 1
-          : new Date().getFullYear(),
         remark ?? null,
       ],
     );

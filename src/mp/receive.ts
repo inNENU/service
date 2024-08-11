@@ -73,7 +73,7 @@ export const mpReceiveHandler: RequestHandler<
       connection = await getConnection();
 
       await connection.execute(
-        `INSERT INTO contact (uuid, appId, openid, createTime, type, content) VALUES (?, ?, ?, FROM_UNIXTIME(?), ?, ?)`,
+        "INSERT INTO contact (`uuid`, `appId`, `openid`, `createTime`, `type`, `content`) VALUES (?, ?, ?, FROM_UNIXTIME(?), ?, ?)",
         [
           v7(),
           ToUserName,

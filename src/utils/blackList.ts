@@ -36,7 +36,7 @@ export const isInBlackList = async (
 
     if (openid)
       await connection.execute(
-        "INSERT IGNORE INTO `openid_blacklist` (openid, remark) VALUES (?, ?)",
+        "INSERT IGNORE INTO `openid_blacklist` (`openid`, `remark`) VALUES (?, ?)",
         [openid, `因登录 ${id} 添加`],
       );
 

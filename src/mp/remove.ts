@@ -1,33 +1,52 @@
 import type { RequestHandler } from "express";
-import type { PoolConnection, ResultSetHeader } from "mysql2/promise";
+import type {
+  PoolConnection,
+  ResultSetHeader,
+  RowDataPacket,
+} from "mysql2/promise";
 
-import { MissingCredentialResponse, UnknownResponse } from "../config/index.js";
+import {
+  MissingArgResponse,
+  MissingCredentialResponse,
+  UnknownResponse,
+  WrongPasswordResponse,
+} from "../config/index.js";
 import type { EmptyObject } from "../typings.js";
 import { getConnection, releaseConnection } from "../utils/index.js";
 
 export const mpRemoveHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  { id: string; mpToken: string }
+  { id: string; mpToken: string; appId: string }
 > = async (req, res) => {
   let connection: PoolConnection | null = null;
 
   try {
-    const { id, mpToken } = req.body;
+    const { appId, id, mpToken } = req.body;
 
-    if (!mpToken || !id) return MissingCredentialResponse;
+    if (!appId) return res.json(MissingArgResponse("appId"));
+    if (!mpToken || !id) return res.json(MissingCredentialResponse);
 
     connection = await getConnection();
 
-    // remove record
-    const [results] = await connection.execute<ResultSetHeader>(
-      `DELETE * FROM student_info WHERE id = ? AND uuid = ?`,
-      [id, mpToken],
+    const [tokenResults] = await connection.execute<RowDataPacket[]>(
+      "SELECT * FROM `token` WHERE `id` = ? AND `token` = ? AND `appId` = ?",
+      [id, mpToken, appId],
     );
 
-    return res.json({
-      success: results.affectedRows > 0,
-    });
+    if (!tokenResults.length) return res.json(WrongPasswordResponse);
+
+    // remove info from database
+    await connection.execute<ResultSetHeader>(
+      "DELETE * FROM `student_info` WHERE `id` = ?",
+      [id],
+    );
+    await connection.execute<ResultSetHeader>(
+      "DELETE * FROM `student_avatar` WHERE `id` = ?",
+      [id],
+    );
+
+    return res.json({ success: true });
   } catch (err) {
     console.error(err);
 

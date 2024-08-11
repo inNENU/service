@@ -18,6 +18,7 @@ import { getConnection, releaseConnection } from "../../utils/index.js";
 export interface GetInfoOptions {
   id: number;
   mpToken: string;
+  appId: string;
   uuid: string;
   remark?: string;
 }
@@ -47,6 +48,7 @@ export type GetInfoResponse =
 export const checkIDCode = async ({
   id,
   mpToken,
+  appId,
   uuid,
   remark,
 }: GetInfoOptions): Promise<GetInfoResponse> => {
@@ -54,17 +56,18 @@ export const checkIDCode = async ({
 
   try {
     if (!mpToken || !id) return MissingCredentialResponse;
+    if (!appId) return MissingArgResponse("appId");
     if (!uuid) return MissingArgResponse("uuid");
 
     connection = await getConnection();
 
     // check whether the mpToken is valid
-    const [validatorInfoRows] = await connection.execute<RowDataPacket[]>(
-      `SELECT * FROM student_info WHERE id = ? AND uuid = ?`,
-      [id, mpToken],
+    const [tokenRows] = await connection.execute<RowDataPacket[]>(
+      "SELECT * FROM `token` WHERE `id` = ? AND `uuid` = ? AND `appId` = ?",
+      [id, mpToken, appId],
     );
 
-    if (!validatorInfoRows.length)
+    if (!tokenRows.length)
       return {
         success: false,
         type: ActionFailType.Expired,
@@ -73,7 +76,7 @@ export const checkIDCode = async ({
 
     // check whether uuid is valid
     const [idCodeRows] = await connection.execute<RowDataPacket[]>(
-      `SELECT * FROM id_code WHERE uuid = ?`,
+      "SELECT * FROM `id_code` WHERE `uuid` = ?",
       [uuid],
     );
 
@@ -103,7 +106,7 @@ export const checkIDCode = async ({
 
     // 获取用户信息
     const [infoRows] = await connection.execute<RowDataPacket[]>(
-      `SELECT * FROM student_info WHERE id = ?`,
+      "SELECT * FROM `student_info` WHERE `id` = ?",
       [id],
     );
 
@@ -117,7 +120,7 @@ export const checkIDCode = async ({
     const info = infoRows[0] as MyInfo;
 
     await connection.execute(
-      `UPDATE id_code SET verifyId = ?, verifyTime = FROM_UNIXTIME(?), verifyRemark = ? WHERE uuid = ?`,
+      "UPDATE `id_code` SET `verifyId` = ?, `verifyTime` = FROM_UNIXTIME(?), `verifyRemark` = ? WHERE `uuid` = ?",
       [id, Math.round(Date.now() / 1000), remark ?? "", uuid],
     );
 
