@@ -1,186 +1,132 @@
-import type { PoolConnection, RowDataPacket } from "mysql2/promise";
+import type { RowDataPacket } from "mysql2/promise";
 
-import type { PersonalInfo } from "./setInfo.js";
-import { setInfo } from "./setInfo.js";
-import type { InfoData } from "./utils.js";
-import type { ActionFailType } from "../../config/index.js";
-import { DatabaseError, TEST_ID, UnknownResponse } from "../../config/index.js";
-import { getMyInfo } from "../../my/info.js";
-import { myLogin } from "../../my/login.js";
-import { MY_SERVER } from "../../my/utils.js";
+import type { IDCodeData } from "./utils.js";
+import {
+  ActionFailType,
+  MissingArgResponse,
+  MissingCredentialResponse,
+  TEST_ID,
+  UnknownResponse,
+} from "../../config/index.js";
 import type {
-  AccountInfo,
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../../typings.js";
 import { connect, getShortUUID, getWechatMPCode } from "../../utils/index.js";
 
-export interface StoreAccountInfoOptions extends AccountInfo {
+export interface StoreAccountInfoOptions {
+  id: number;
+  mpToken: string;
   remark: string;
-  appID?: string;
-  info?: PersonalInfo | null;
+  appID: string;
+  force?: boolean;
 }
 
 export type StoreAccountInfoCodeSuccessResponse = CommonSuccessResponse<{
   code: string;
-}>;
-export type StoreAccountInfoUUIDSuccessResponse = CommonSuccessResponse<{
-  uuid: string;
+  existed: boolean;
 }>;
 
 export type StoreAccountInfoResponse =
   | StoreAccountInfoCodeSuccessResponse
-  | StoreAccountInfoUUIDSuccessResponse
   | CommonFailedResponse<
-      | ActionFailType.WrongPassword
-      | ActionFailType.BlackList
-      | ActionFailType.EnabledSSO
-      | ActionFailType.DatabaseError
-      | ActionFailType.Error
-      | ActionFailType.AccountLocked
-      | ActionFailType.NeedCaptcha
-      | ActionFailType.NeedReAuth
       | ActionFailType.Expired
-      | ActionFailType.Forbidden
+      | ActionFailType.Existed
+      | ActionFailType.DatabaseError
+      | ActionFailType.MissingArg
+      | ActionFailType.MissingCredential
       | ActionFailType.Unknown
     >;
 
 export const storeStoreAccountInfo = async ({
   id,
-  password,
-  authToken,
+  mpToken,
   remark,
   appID,
-  info = null,
+  force = false,
 }: StoreAccountInfoOptions): Promise<StoreAccountInfoResponse> => {
   try {
-    if (id.toString() === TEST_ID) {
-      return UnknownResponse("测试账号不支持生成身份码");
-    }
+    if (id.toString() === TEST_ID)
+      return UnknownResponse("不支持为测试账号生成身份码");
 
-    const loginResult = await myLogin({ id, password, authToken });
+    // FIXME: Update issue
+    if (!mpToken) return UnknownResponse("身份码功能升级中...");
+    if (!mpToken || !id) return MissingCredentialResponse;
+    if (!remark) return MissingArgResponse("remark");
+    if (!appID) return MissingArgResponse("appID");
 
-    if (!loginResult.success) return loginResult;
+    let existed = false;
+    let uuid: string | null = null;
+    // let connection: PoolConnection | null = null;
+    // let release: (() => void) | null = null;
 
-    let connection: PoolConnection;
-    let release: () => void;
+    const { connection, release } = await connect();
 
-    try {
-      ({ connection, release } = await connect());
+    // check whether the mpToken is valid
+    const [infoRows] = await connection.execute<RowDataPacket[]>(
+      `SELECT * FROM student_info WHERE id = ? AND uuid = ?`,
+      [id, mpToken],
+    );
 
-      const [rows] = await connection.execute<RowDataPacket[]>(
-        `SELECT * FROM id_code WHERE id = ? AND verifyId IS NULL`,
-        [id],
-      );
+    if (!infoRows.length)
+      return {
+        success: false,
+        type: ActionFailType.Expired,
+        msg: "用户凭据已失效，无法取得身份信息，请重新登录。\n提示: 为了保证身份码的可靠性，您只能在最后一次登录的设备获取身份码。",
+      };
 
-      if (rows.length > 0) {
-        const { uuid } = rows[0] as InfoData;
+    // check whether there is existing uuid
+    const [rows] = await connection.execute<RowDataPacket[]>(
+      `SELECT * FROM id_code WHERE id = ? AND verifyId IS NULL`,
+      [id],
+    );
 
-        if (appID) {
-          const result = await getWechatMPCode(
-            appID,
-            "pkg/user/pages/account/login",
-            `verify:${uuid}`,
-            // FIXME: issues in release version
-            "trial",
-          );
+    // there is existing uuid
+    if (rows.length > 0) {
+      // refresh uuid when force
+      if (force) {
+        uuid = getShortUUID();
 
-          if (result instanceof Buffer) {
-            return {
-              success: true,
-              data: {
-                code: `data:image/png;base64,${result.toString("base64")}`,
-                uuid,
-              },
-            };
-          }
-
-          return UnknownResponse(result.errmsg);
-        }
-
-        return {
-          success: true,
-          data: { uuid },
-        };
+        await connection.execute(`UPDATE id_code SET uuid = ? WHERE uuid = ?`, [
+          uuid,
+          rows[0].uuid,
+        ]);
       }
+      // use old uuid
+      else {
+        existed = true;
+        uuid = (rows[0] as IDCodeData).uuid;
+      }
+    }
+    // generate new uuid
+    else {
+      uuid = getShortUUID();
 
-      release();
-    } catch (err) {
-      console.error(err);
-
-      return DatabaseError((err as Error).message);
+      await connection.execute(
+        `INSERT INTO id_code (uuid, id, remark) VALUES (?, ?, ?)`,
+        [uuid, id, remark ?? null],
+      );
     }
 
-    let infoData: PersonalInfo | null = info;
+    release();
 
-    if (
-      typeof infoData !== "object" ||
-      typeof infoData?.gender !== "string" ||
-      typeof infoData?.org !== "string" ||
-      typeof infoData?.major !== "string" ||
-      typeof infoData?.grade !== "number" ||
-      !infoData.gender ||
-      !infoData.org ||
-      !infoData.major
-    ) {
-      const infoResult = await getMyInfo(
-        loginResult.cookieStore.getHeader(MY_SERVER),
-      );
+    const result = await getWechatMPCode(
+      appID,
+      "pkg/user/pages/account/login",
+      `verify:${uuid}`,
+    );
 
-      if (!infoResult.success) return infoResult;
-
-      const { name, gender, org, major, grade } = infoResult.data;
-
-      infoData = {
-        id,
-        name,
-        gender: gender[0],
-        org,
-        major,
-        grade,
-        openid: null,
+    if (result instanceof Buffer) {
+      return {
+        success: true,
+        data: {
+          existed,
+          code: `data:image/jpeg;base64,${result.toString("base64")}`,
+        },
       };
     }
 
-    const uuid = getShortUUID();
-
-    try {
-      await setInfo({
-        type: "account",
-        info: infoData,
-        remark,
-      });
-    } catch (err) {
-      console.error(err);
-
-      return DatabaseError((err as Error).message);
-    }
-
-    if (appID) {
-      const result = await getWechatMPCode(
-        appID,
-        "pkg/user/pages/account/login",
-        `verify:${uuid}`,
-      );
-
-      if (result instanceof Buffer) {
-        return {
-          success: true,
-          data: {
-            code: `data:image/jpeg;base64,${result.toString("base64")}`,
-          },
-        };
-      }
-
-      return UnknownResponse(result.errmsg);
-    }
-
-    return {
-      success: true,
-      data: {
-        uuid,
-      },
-    };
+    return UnknownResponse(result.errmsg);
   } catch (err) {
     console.error(err);
 

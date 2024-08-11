@@ -1,14 +1,7 @@
-export interface InfoData {
+export interface IDCodeData {
   uuid: string;
-  openid?: string;
-  type: "account" | "admission";
-  id?: number;
-  name: string;
-  gender: string;
-  school: string;
-  major: string;
-  grade: number;
-  createTime: number;
+  id: number;
+  createTime: string;
   remark: string;
   verifyId?: number;
   verifyRemark?: string;
