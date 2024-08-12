@@ -4,7 +4,6 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import type { Response } from "express";
 import express from "express";
-import morgan from "morgan";
 
 import {
   actionCheckHandler,
@@ -52,7 +51,8 @@ import {
   gradInfoHandler,
   gradSystemLoginHandler,
 } from "./grad-system/index.js";
-import { libraryPeopleHandler } from "./library/people.js";
+import { libraryPeopleHandler } from "./library/index.js";
+import { morganMiddleware } from "./middlewire/index.js";
 import {
   checkIdCodeHandler,
   generateIdCodeHandler,
@@ -141,7 +141,24 @@ app.use(
 app.use(cookieParser());
 app.use(compression());
 app.use(bodyParser.json());
-app.use(morgan("common"));
+
+// store the response body to res.body
+app.use((_req, res, next) => {
+  const originalSend = res.json;
+
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  res.json = function (body) {
+    // @ts-expect-error: Express type issue
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    res.body = body;
+
+    // @ts-expect-error: Express type issue
+    // eslint-disable-next-line
+    return originalSend.apply(this, arguments);
+  };
+  next();
+});
+app.use(morganMiddleware);
 
 app.get("/", (_req, res) => {
   res.header("Content-Type", "text/html");
@@ -301,9 +318,9 @@ app.post("/test/302", test302Handler);
 // @ts-expect-error: Express type issue
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((err: Error, _req: Request, res: Response, _next: () => void) => {
-  console.error(err.stack);
+  console.error(err);
 
-  res.status(500).json(UnknownResponse("未知错误"));
+  res.status(500).json(UnknownResponse(err.message ?? "未知错误"));
 });
 
 app.listen(port, () => {
