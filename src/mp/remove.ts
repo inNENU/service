@@ -17,21 +17,21 @@ import { getConnection, releaseConnection } from "../utils/index.js";
 export const mpRemoveHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
-  { id: string; mpToken: string; appId: string }
+  { id: string; authToken: string; appId: string }
 > = async (req, res) => {
   let connection: PoolConnection | null = null;
 
   try {
-    const { appId, id, mpToken } = req.body;
+    const { appId, id, authToken } = req.body;
 
     if (!appId) return res.json(MissingArgResponse("appId"));
-    if (!mpToken || !id) return res.json(MissingCredentialResponse);
+    if (!authToken || !id) return res.json(MissingCredentialResponse);
 
     connection = await getConnection();
 
     const [tokenResults] = await connection.execute<RowDataPacket[]>(
-      "SELECT * FROM `token` WHERE `id` = ? AND `token` = ? AND `appId` = ?",
-      [id, mpToken, appId],
+      "SELECT * FROM `token` WHERE `appId` = ? AND `id` = ? AND `token` = ?",
+      [appId, id, authToken],
     );
 
     if (!tokenResults.length) return res.json(WrongPasswordResponse);

@@ -85,7 +85,7 @@ export const mpLoginHandler: RequestHandler<
     } catch (err) {
       console.error(err);
 
-      return DatabaseErrorResponse((err as Error).message);
+      return res.json(DatabaseErrorResponse((err as Error).message));
     } finally {
       releaseConnection(connection);
     }

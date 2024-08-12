@@ -3,7 +3,7 @@ import { sha1 } from "js-sha1";
 import type { PoolConnection } from "mysql2/promise";
 import { v7 } from "uuid";
 
-import { DatabaseErrorResponse, UnknownResponse } from "../config/index.js";
+import { UnknownResponse } from "../config/index.js";
 import type { EmptyObject } from "../typings.js";
 import { getConnection, releaseConnection } from "../utils/index.js";
 import "../config/loadEnv.js";
@@ -52,6 +52,8 @@ export const mpReceiveHandler: RequestHandler<
   EmptyObject,
   ContactMessage | EnterEvent
 > = async (req, res) => {
+  let connection: PoolConnection | null = null;
+
   try {
     const { signature, timestamp, nonce } = req.query;
 
@@ -66,8 +68,6 @@ export const mpReceiveHandler: RequestHandler<
     }
 
     const { ToUserName, FromUserName, CreateTime, MsgType } = req.body;
-
-    let connection: PoolConnection | null = null;
 
     try {
       connection = await getConnection();
@@ -84,11 +84,7 @@ export const mpReceiveHandler: RequestHandler<
         ],
       );
     } catch (err) {
-      console.error(err);
-
-      return DatabaseErrorResponse((err as Error).message);
-    } finally {
-      releaseConnection(connection);
+      console.error("Database error", err);
     }
 
     if (
@@ -135,6 +131,8 @@ export const mpReceiveHandler: RequestHandler<
   } catch (err) {
     console.error(err);
 
-    return UnknownResponse((err as Error).message);
+    return res.json(UnknownResponse((err as Error).message));
+  } finally {
+    releaseConnection(connection);
   }
 };
