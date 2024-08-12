@@ -8,6 +8,7 @@ import {
   DatabaseErrorResponse,
   MissingArgResponse,
   MissingCredentialResponse,
+  TEST_ID,
   UnknownResponse,
 } from "../../config/index.js";
 import type { MyInfo } from "../../my/index.js";
@@ -78,6 +79,9 @@ export const checkIDCode = async ({
   let connection: PoolConnection | null = null;
 
   try {
+    if (id.toString() === TEST_ID)
+      return UnknownResponse("不支持为测试账号生成身份码");
+
     if (!authToken || !id) return MissingCredentialResponse;
     if (!appID) return MissingArgResponse("appID");
     if (!openid) return MissingArgResponse("openid");
