@@ -93,6 +93,7 @@ const DATABASE_FIELDS = [
   "genderId",
   "birth",
   "location",
+  "createTime",
   "updateTime",
 ];
 
@@ -100,8 +101,8 @@ const SQL_STRING = `INSERT INTO \`student_info\` (${DATABASE_FIELDS.map(
   (field) => `\`${field}\``,
 ).join(
   ", ",
-)}) VALUES (${new Array(DATABASE_FIELDS.length - 1).fill("?").join(", ")}, FROM_UNIXTIME(?)) ON DUPLICATE KEY UPDATE ${DATABASE_FIELDS.slice(
-  1,
+)}) VALUES (${new Array(DATABASE_FIELDS.length - 2).fill("?").join(", ")}, NOW(), NOW()) ON DUPLICATE KEY UPDATE ${DATABASE_FIELDS.filter(
+  (field) => !["id", "createTime"].includes(field),
 )
   .map((field) => `\`${field}\` = VALUES(\`${field}\`)`)
   .join(", ")}`;
@@ -348,7 +349,6 @@ export const initAuth = async (
                 info.genderId,
                 info.birth,
                 info.location,
-                Math.round(Date.now() / 1000),
               ]);
             } catch (err) {
               console.error("Database error", err);
