@@ -30,8 +30,8 @@ export const isInBlackList = async (
   if (!info) return false;
 
   const [conditionRows] = await connection.execute<RowDataPacket[]>(
-    "SELECT * FROM `condition_blacklist` WHERE (`name` = ? OR `name` IS NULL) AND (`gender` = ? OR `gender` IS NULL) AND (`grade` = ? OR `grade` IS NULL) AND (`org` = ? OR `org` IS NULL) AND (`major` = ? OR `major` IS NULL)",
-    [info.name, info.gender, info.grade, info.org, info.major],
+    "SELECT * FROM `condition_blacklist` WHERE (`name` = ? OR `name` IS NULL) AND (`type` = ? OR `type` IS NULL) AND (`grade` = ? OR `grade` IS NULL) AND (`org` = ? OR `org` IS NULL) AND (`major` = ? OR `major` IS NULL)",
+    [info.name, info.type, info.grade, info.org, info.major],
   );
 
   if (conditionRows.length > 0) {
