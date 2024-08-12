@@ -1,7 +1,10 @@
 import type { RequestHandler } from "express";
 
 import { UnknownResponse } from "../config/index.js";
-import type { CommonFailedResponse } from "../typings.js";
+import type {
+  CommonFailedResponse,
+  CommonSuccessResponse,
+} from "../typings.js";
 
 interface LibraryPeopleRawData {
   code: number;
@@ -15,13 +18,15 @@ interface LibraryPeopleRawData {
   status: number;
 }
 
-export interface LibraryPeopleSuccessResponse {
-  success: true;
+export interface LibraryPeopleData {
   benbu: number;
   benbuMax: number;
   jingyue: number;
   jingyueMax: number;
 }
+
+export type LibraryPeopleSuccessResponse =
+  CommonSuccessResponse<LibraryPeopleData>;
 
 export type LibraryPeopleResponse =
   | LibraryPeopleSuccessResponse
@@ -40,10 +45,12 @@ export const libraryPeopleHandler: RequestHandler = async (_, res) => {
 
       return res.json({
         success: true,
-        benbu: MainNum,
-        benbuMax: AbleMainNum,
-        jingyue: JingYueNum,
-        jingyueMax: AbleJingYueNum,
+        data: {
+          benbu: MainNum,
+          benbuMax: AbleMainNum,
+          jingyue: JingYueNum,
+          jingyueMax: AbleJingYueNum,
+        },
       });
     }
 
