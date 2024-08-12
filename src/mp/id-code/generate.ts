@@ -92,8 +92,8 @@ export const generateIdCode = async ({
         uuid = getShortUUID();
 
         await connection.execute(
-          "UPDATE `id_code` SET `uuid` = ? WHERE `uuid` = ?",
-          [uuid, rows[0].uuid],
+          "UPDATE `id_code` SET `uuid` = ?, `remark` = ? WHERE `uuid` = ?",
+          [uuid, remark, rows[0].uuid],
         );
       }
       // use old uuid
