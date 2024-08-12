@@ -117,7 +117,7 @@ export const initAuth = async (
 ): Promise<InitAuthResult> => {
   let connection: PoolConnection | null = null;
 
-  if (!id || !password || !authToken) return MissingCredentialResponse;
+  if (!id || !password) return MissingCredentialResponse;
 
   if (!salt || Object.keys(params).length === 0) {
     console.error("Missing salt or params", {
