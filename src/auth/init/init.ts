@@ -6,6 +6,7 @@ import { authCenterLogin, getAvatar } from "../../auth-center/index.js";
 import { INFO_PREFIX } from "../../auth-center/utils.js";
 import {
   ActionFailType,
+  MissingCredentialResponse,
   TEST_COOKIE_STORE,
   TEST_INFO,
   UnknownResponse,
@@ -59,6 +60,7 @@ export type InitAuthFailedResponse =
       | ActionFailType.EnabledSSO
       | ActionFailType.Expired
       | ActionFailType.NeedCaptcha
+      | ActionFailType.MissingCredential
       | ActionFailType.Unknown
       | ActionFailType.WeekPassword
       | ActionFailType.WrongCaptcha
@@ -114,6 +116,17 @@ export const initAuth = async (
   cookieHeader: string,
 ): Promise<InitAuthResult> => {
   let connection: PoolConnection | null = null;
+
+  if (!id || !password || !authToken) return MissingCredentialResponse;
+
+  if (!salt || Object.keys(params).length === 0) {
+    console.error("Missing salt or params", {
+      salt,
+      params,
+    });
+
+    return UnknownResponse("未成功取得初始化信息，请重新输入学号");
+  }
 
   try {
     const cookieStore = new CookieStore();
