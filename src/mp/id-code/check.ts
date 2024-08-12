@@ -38,6 +38,7 @@ export interface IdCodeInfo {
   org: string;
   major: string;
   createTime: string;
+  remark: string;
 
   /**
    * @description Only available for admin
@@ -219,6 +220,7 @@ export const checkIDCode = async ({
         id: isAdmin ? info.id : null,
         gender: isAdmin ? info.gender : null,
         createTime: row.createTime,
+        remark: row.remark,
       },
     };
   } catch (err) {
