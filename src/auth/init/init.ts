@@ -74,6 +74,38 @@ export const TEST_AUTH_INIT: InitAuthSuccessResult = {
   cookieStore: TEST_COOKIE_STORE,
 };
 
+const DATABASE_FIELDS = [
+  "id",
+  "name",
+  "org",
+  "orgId",
+  "major",
+  "majorId",
+  "inYear",
+  "grade",
+  "type",
+  "typeId",
+  "code",
+  "politicalStatus",
+  "people",
+  "peopleId",
+  "gender",
+  "genderId",
+  "birth",
+  "location",
+  "updateTime",
+];
+
+const SQL_STRING = `INSERT INTO \`student_info\` (${DATABASE_FIELDS.map(
+  (field) => `\`${field}\``,
+).join(
+  ", ",
+)}) VALUES (${new Array(DATABASE_FIELDS.length - 1).fill("?").join(", ")}, FROM_UNIXTIME(?)) ON DUPLICATE KEY UPDATE ${DATABASE_FIELDS.slice(
+  1,
+)
+  .map((field) => `\`${field}\` = VALUES(\`${field}\`)`)
+  .join(", ")}`;
+
 export const initAuth = async (
   { id, password, authToken, salt, params, openid }: InitAuthOptions,
   cookieHeader: string,
@@ -297,30 +329,27 @@ export const initAuth = async (
             try {
               if (!connection) connection = await getConnection();
 
-              await connection.execute(
-                "INSERT INTO `student_info` (`id`, `name`, `org`, `orgId`, `major`, `majorId`, `inYear`, `grade`, `type`, `typeId`, `code`, `politicalStatus`, `people`, `peopleId`, `gender`, `genderId`, `birth`, `location`, `updateTime`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, FROM_UNIXTIME(?)) ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `org` = VALUES(`org`), `orgId` = VALUES(`orgId`), `major` = VALUES(`major`), `majorId` = VALUES(`majorId`), `inYear` = VALUES(`inYear`), `grade` = VALUES(`grade`), `type` = VALUES(`type`), `typeId` = VALUES(`typeId`), `code` = VALUES(`code`), `politicalStatus` = VALUES(`politicalStatus`), `people` = VALUES(`people`), `peopleId` = VALUES(`peopleId`), `gender` = VALUES(`gender`), `genderId` = VALUES(`genderId`), `birth` = VALUES(`birth`), `location` = VALUES(`location`), `updateTime` = VALUES(`updateTime`);",
-                [
-                  info.id,
-                  info.name,
-                  info.org,
-                  info.orgId,
-                  info.major,
-                  info.majorId,
-                  info.inYear,
-                  info.grade,
-                  info.type,
-                  info.typeId,
-                  info.code,
-                  info.politicalStatus,
-                  info.people,
-                  info.peopleId,
-                  info.gender,
-                  info.genderId,
-                  info.birth,
-                  info.location,
-                  Math.round(Date.now() / 1000),
-                ],
-              );
+              await connection.execute(SQL_STRING, [
+                info.id,
+                info.name,
+                info.org,
+                info.orgId,
+                info.major,
+                info.majorId,
+                info.inYear,
+                info.grade,
+                info.type,
+                info.typeId,
+                info.code,
+                info.politicalStatus,
+                info.people,
+                info.peopleId,
+                info.gender,
+                info.genderId,
+                info.birth,
+                info.location,
+                Math.round(Date.now() / 1000),
+              ]);
             } catch (err) {
               console.error("Database error", err);
             }
