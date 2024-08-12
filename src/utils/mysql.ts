@@ -10,7 +10,7 @@ const pool = mysql.createPool({
   user: process.env.MYSQL_USER ?? "innenu",
   password: process.env.MYSQL_PASSWORD,
   connectTimeout: 5000,
-  connectionLimit: 20,
+  connectionLimit: 50,
 });
 
 export const getConnection = (): Promise<PoolConnection> =>
