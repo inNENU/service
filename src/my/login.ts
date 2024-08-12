@@ -7,6 +7,7 @@ import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
 import {
+  ActionFailType,
   TEST_ID_NUMBER,
   TEST_LOGIN_RESULT,
   UnknownResponse,
@@ -14,6 +15,7 @@ import {
 import type { AccountInfo, EmptyObject } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 import { vpnCASLogin } from "../vpn/index.js";
+import { FORBIDDEN_URL } from "../vpn/utils.js";
 
 export interface MyLoginSuccessResult {
   success: true;
@@ -84,6 +86,14 @@ export const myLogin = async (
         success: true,
         cookieStore,
       };
+  }
+
+  if (sessionLocation === FORBIDDEN_URL) {
+    return {
+      success: false,
+      type: ActionFailType.Forbidden,
+      msg: "当前系统暂未开放",
+    };
   }
 
   console.error("login to my failed", sessionLocation);

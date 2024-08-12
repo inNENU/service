@@ -59,6 +59,7 @@ export type InitAuthFailedResponse =
       | ActionFailType.DatabaseError
       | ActionFailType.EnabledSSO
       | ActionFailType.Expired
+      | ActionFailType.Forbidden
       | ActionFailType.NeedCaptcha
       | ActionFailType.MissingCredential
       | ActionFailType.Unknown
@@ -376,6 +377,12 @@ export const initAuth = async (
               console.error("Database error", err);
             }
           }
+        } else if (loginResult.type === ActionFailType.Forbidden) {
+          return {
+            success: false,
+            type: ActionFailType.Forbidden,
+            msg: "当前时段服务大厅暂未开放，无法获取个人信息",
+          };
         }
       }
 
