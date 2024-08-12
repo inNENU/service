@@ -139,7 +139,7 @@ export const checkIDCode = async ({
           success: true,
           data: {
             existed: false,
-            verifier: isAdmin ? "管理员" : row.verifyRemark,
+            verifier: row.verifyRemark,
           },
         };
 
@@ -210,7 +210,12 @@ export const checkIDCode = async ({
 
     await connection.execute(
       "UPDATE `id_code` SET `verifyId` = ?, `verifyTime` = FROM_UNIXTIME(?), `verifyRemark` = ? WHERE `uuid` = ?",
-      [id, Math.round(Date.now() / 1000), remark ?? "", uuid],
+      [
+        id,
+        Math.round(Date.now() / 1000),
+        isAdmin ? "管理员" : (remark ?? ""),
+        uuid,
+      ],
     );
 
     return {
