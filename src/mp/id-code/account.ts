@@ -57,7 +57,6 @@ export const storeStoreAccountInfo = async ({
       return UnknownResponse("不支持为测试账号生成身份码");
 
     if (!authToken || !id) return MissingCredentialResponse;
-    if (!remark) return MissingArgResponse("remark");
     if (!appID) return MissingArgResponse("appID");
 
     let existed = false;
@@ -103,6 +102,9 @@ export const storeStoreAccountInfo = async ({
     }
     // generate new uuid
     else {
+      // remark must be provided
+      if (!remark) return MissingArgResponse("remark");
+
       uuid = getShortUUID();
 
       await connection.execute(
@@ -122,7 +124,7 @@ export const storeStoreAccountInfo = async ({
         success: true,
         data: {
           existed,
-          code: `data:image/jpeg;base64,${result.toString("base64")}`,
+          code: `data:image/png;base64,${result.toString("base64")}`,
         },
       };
     }
