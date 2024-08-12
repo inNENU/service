@@ -17,7 +17,7 @@ export const mpReportHandler: RequestHandler<
     connection = await getConnection();
 
     await connection.execute(
-      "INSERT INTO `log` (`uuid`, `type`, `content`) VALUES (?, ?, ?)",
+      "INSERT INTO `log` (`uuid`, `type`, `content`, `createTime`) VALUES (?, ?, ?, NOW())",
       [v7(), req.body.type ?? null, JSON.stringify(req.body)],
     );
 
