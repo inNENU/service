@@ -1,17 +1,3 @@
-import type { MyInfo } from "../my/index.js";
-
-export type ConditionBlackList = {
-  [I in keyof MyInfo]?: MyInfo[I] | RegExp;
-};
-
-export const CONDITION_BLACK_LIST: ConditionBlackList[] = [
-  {
-    grade: 2023,
-    name: "6ZKf5Y2a5a6H",
-    org: "5pWw5a2m5a2m6Zmi",
-  },
-];
-
 const BLACKLIST_HINT = [
   "外星人来了！",
   "发生什么事了？",

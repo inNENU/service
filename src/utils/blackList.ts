@@ -1,37 +1,21 @@
-import { writeFile } from "node:fs";
-
 import type { RowDataPacket } from "mysql2/promise";
 
 import { getConnection } from "./mysql.js";
-import type { ConditionBlackList } from "../config/index.js";
-import { CONDITION_BLACK_LIST } from "../config/index.js";
 import type { MyInfo } from "../my/index.js";
-
-const testCondition = (info: MyInfo, condition: ConditionBlackList): boolean =>
-  Object.entries(condition).every(([key, value]) => {
-    if (value instanceof RegExp)
-      return value.test(info[key as keyof MyInfo] as string);
-
-    if (typeof value === "number") return info[key as keyof MyInfo] === value;
-
-    return (
-      info[key as keyof MyInfo] === Buffer.from(value, "base64").toString()
-    );
-  });
 
 export const isInBlackList = async (
   id: number,
-  openid?: string,
-  info?: MyInfo | null,
+  openid: string | null = null,
+  info: MyInfo | null = null,
 ): Promise<boolean> => {
   const connection = await getConnection();
 
-  const [rows] = await connection.execute<RowDataPacket[]>(
+  const [idRows] = await connection.execute<RowDataPacket[]>(
     "SELECT * FROM `id_blacklist` WHERE `id` = ?",
     [id],
   );
 
-  if (rows.length > 0) {
+  if (idRows.length > 0) {
     console.info(`Blocking user ${id}`);
 
     if (openid)
@@ -45,24 +29,27 @@ export const isInBlackList = async (
 
   if (!info) return false;
 
-  const result = CONDITION_BLACK_LIST.some((condition) =>
-    testCondition(info, condition),
+  const [conditionRows] = await connection.execute<RowDataPacket[]>(
+    "SELECT * FROM `conditional_blacklist` WHERE (`name` = ? OR `name` IS NULL) AND (`gender` = ? OR `gender` IS NULL) AND (`grade` = ? OR `grade` IS NULL) AND (`org` = ? OR `org` IS NULL) AND (`major` = ? OR `major` IS NULL)",
+    [info.name, info.gender, info.grade, info.org, info.major],
   );
 
-  if (result)
-    writeFile(
-      "blacklist",
-      `${id} new ${openid ?? ""} ${JSON.stringify(info)}\n`,
-      {
-        encoding: "utf8",
-        flag: "a",
-      },
-      (err) => {
-        if (err) {
-          console.error(err);
-        }
-      },
+  if (conditionRows.length > 0) {
+    console.info(`Blocking user ${id} due to condition`, conditionRows[0]);
+
+    await connection.execute(
+      "INSERT IGNORE INTO `id_blacklist` (`id`, `remark`) VALUES (?, ?)",
+      [id, `因符合规则添加: ${JSON.stringify(conditionRows[0])}`],
     );
 
-  return result;
+    if (openid)
+      await connection.execute(
+        "INSERT IGNORE INTO `openid_blacklist` (`openid`, `remark`) VALUES (?, ?)",
+        [openid, `因登录 ${id} 添加`],
+      );
+
+    return true;
+  }
+
+  return false;
 };
