@@ -191,7 +191,7 @@ export const checkIDCode = async ({
     // 获取用户信息
     const [infoRows] = await connection.execute<RowDataPacket[]>(
       "SELECT * FROM `student_info` WHERE `id` = ?",
-      [id],
+      [row.id],
     );
 
     if (!infoRows.length)
