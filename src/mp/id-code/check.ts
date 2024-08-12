@@ -89,6 +89,19 @@ export const checkIDCode = async ({
         msg: "用户凭据已失效，无法校验身份码，请重新登录。\n提示: 为了保证身份码的可靠性，您只能在最后一次登录的设备校验身份码。",
       };
 
+    let isAdmin = false;
+
+    try {
+      const [adminRows] = await connection.execute<RowDataPacket[]>(
+        "SELECT * FROM `admin` WHERE `openid` = ?",
+        [openid],
+      );
+
+      isAdmin = adminRows.length > 0;
+    } catch (err) {
+      console.error(`Querying admin with openid ${openid}`, err);
+    }
+
     if (!uuid) {
       // get the latest uuid
       const [idCodeRows] = await connection.execute<RowDataPacket[]>(
@@ -113,7 +126,7 @@ export const checkIDCode = async ({
         data: row.verifyRemark
           ? {
               existed: false,
-              verifier: row.verifyRemark,
+              verifier: isAdmin ? "管理员" : row.verifyRemark,
             }
           : {
               existed: true,
@@ -171,19 +184,6 @@ export const checkIDCode = async ({
       "UPDATE `id_code` SET `verifyId` = ?, `verifyTime` = FROM_UNIXTIME(?), `verifyRemark` = ? WHERE `uuid` = ?",
       [id, Math.round(Date.now() / 1000), remark ?? "", uuid],
     );
-
-    let isAdmin = false;
-
-    try {
-      const [adminRows] = await connection.execute<RowDataPacket[]>(
-        "SELECT * FROM `admin` WHERE `openid` = ?",
-        [openid],
-      );
-
-      isAdmin = adminRows.length > 0;
-    } catch (err) {
-      console.error(`Querying admin with openid ${openid}`, err);
-    }
 
     return {
       success: true,
