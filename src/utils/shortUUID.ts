@@ -32,6 +32,8 @@ export const getShortUUID = (uuid?: string): string => {
     customBase64 += char1 + char2 + char3 + char4;
   }
 
+  console.log(uuid, customBase64);
+
   // Return the first 22 characters of the custom Base64 string
   return customBase64.substring(0, 22);
 };
