@@ -17,7 +17,7 @@ import { getConnection, releaseConnection } from "../../utils/index.js";
 
 export interface GetInfoOptions {
   id: number;
-  mpToken: string;
+  authToken: string;
   appId: string;
   uuid: string;
   remark?: string;
@@ -47,7 +47,7 @@ export type GetInfoResponse =
 
 export const checkIDCode = async ({
   id,
-  mpToken,
+  authToken,
   appId,
   uuid,
   remark,
@@ -55,16 +55,16 @@ export const checkIDCode = async ({
   let connection: PoolConnection | null = null;
 
   try {
-    if (!mpToken || !id) return MissingCredentialResponse;
+    if (!authToken || !id) return MissingCredentialResponse;
     if (!appId) return MissingArgResponse("appId");
     if (!uuid) return MissingArgResponse("uuid");
 
     connection = await getConnection();
 
-    // check whether the mpToken is valid
+    // check whether the id and authToken are valid
     const [tokenRows] = await connection.execute<RowDataPacket[]>(
-      "SELECT * FROM `token` WHERE `id` = ? AND `uuid` = ? AND `appId` = ?",
-      [id, mpToken, appId],
+      "SELECT * FROM `token` WHERE `id` = ? AND `authToken` = ?",
+      [id, authToken],
     );
 
     if (!tokenRows.length)

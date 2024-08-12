@@ -39,6 +39,8 @@ export interface InitAuthOptions extends AccountInfo {
   params: Record<string, string>;
   /** 盐值 */
   salt: string;
+  /** Appid */
+  appId: string;
   /** 用户 OpenID */
   openid: string;
 }
@@ -108,7 +110,7 @@ const SQL_STRING = `INSERT INTO \`student_info\` (${DATABASE_FIELDS.map(
   .join(", ")}`;
 
 export const initAuth = async (
-  { id, password, authToken, salt, params, openid }: InitAuthOptions,
+  { id, password, authToken, salt, params, appId, openid }: InitAuthOptions,
   cookieHeader: string,
 ): Promise<InitAuthResult> => {
   let connection: PoolConnection | null = null;
@@ -356,6 +358,19 @@ export const initAuth = async (
           }
         }
       }
+
+      // store authToken in database for auth
+      if (appId)
+        try {
+          if (!connection) connection = await getConnection();
+
+          await connection.execute(
+            "INSERT INTO `token` (`authToken`, `id`, `appId`, `openId`, `updateTime`) VALUES (?, ?, ?, ?, NOW())",
+            [authToken, id, appId, openid ?? null],
+          );
+        } catch (err) {
+          console.error("Database error", err);
+        }
 
       if (await isInBlackList(id, openid, info))
         return {

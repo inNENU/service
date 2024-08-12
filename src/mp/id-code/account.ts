@@ -21,7 +21,7 @@ import {
 
 export interface StoreAccountInfoOptions {
   id: number;
-  mpToken: string;
+  authToken: string;
   remark: string;
   appID: string;
   force?: boolean;
@@ -45,7 +45,7 @@ export type StoreAccountInfoResponse =
 
 export const storeStoreAccountInfo = async ({
   id,
-  mpToken,
+  authToken,
   remark,
   appID,
   force = false,
@@ -56,9 +56,7 @@ export const storeStoreAccountInfo = async ({
     if (id.toString() === TEST_ID)
       return UnknownResponse("不支持为测试账号生成身份码");
 
-    // FIXME: Update issue
-    if (!mpToken) return UnknownResponse("身份码功能升级中...");
-    if (!mpToken || !id) return MissingCredentialResponse;
+    if (!authToken || !id) return MissingCredentialResponse;
     if (!remark) return MissingArgResponse("remark");
     if (!appID) return MissingArgResponse("appID");
 
@@ -67,10 +65,10 @@ export const storeStoreAccountInfo = async ({
 
     connection = await getConnection();
 
-    // check whether the mpToken is valid
+    // check whether the id and authToken are valid
     const [tokenRows] = await connection.execute<RowDataPacket[]>(
-      "SELECT * FROM `token` WHERE id = ? AND uuid = ? and `appId` = ?",
-      [id, mpToken, appID],
+      "SELECT * FROM `token` WHERE `id` = ? AND `authToken` = ?",
+      [id, authToken],
     );
 
     if (!tokenRows.length)
