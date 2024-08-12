@@ -113,7 +113,8 @@ import {
 import { getMemoryUsage } from "./utils/index.js";
 import { vpnCASLoginHandler, vpnLoginHandler } from "./vpn/index.js";
 import { weatherHandler } from "./weather.js";
-import pkg from "../package.json" assert { type: "json" };
+
+const currentDate = new Date().toLocaleDateString("zh");
 
 const app = express();
 const port = process.env.PORT ? Number(process.env.PORT) : 8080;
@@ -154,7 +155,7 @@ app.get("/", (_req, res) => {
   <title>inNENU 服务</title>
 </head>
 <body>
-  当前版本: ${pkg.version}
+  当前版本: ${currentDate}
   <h1><a href="https://innenu.com">访问网页版 inNENU</a></h1>
 </body>
 </html>\
