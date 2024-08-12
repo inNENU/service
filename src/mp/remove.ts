@@ -24,8 +24,8 @@ export const mpRemoveHandler: RequestHandler<
   try {
     const { appID, id, authToken } = req.body;
 
-    if (!appID) return res.json(MissingArgResponse("appID"));
     if (!authToken || !id) return res.json(MissingCredentialResponse);
+    if (!appID) return res.json(MissingArgResponse("appID"));
 
     connection = await getConnection();
 

@@ -276,7 +276,7 @@ app.post("/mp/id-code", idCodeHandler);
 app.get("/mp/qrcode", mpQrCodeHandler);
 app.get("/mp/receive", mpReceiveHandler);
 app.post("/mp/receive", mpReceiveHandler);
-app.post("/my/remove", mpRemoveHandler);
+app.post("/mp/remove", mpRemoveHandler);
 app.post("/mp/report", mpReportHandler);
 app.post("/mp/search", mpSearchHandler);
 
