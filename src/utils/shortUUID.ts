@@ -7,33 +7,22 @@ export const getShortUUID = (uuid?: string): string => {
   // Generate a random UUID if not provided
   if (!uuid) uuid = v7();
 
-  // Remove dashes from UUID and convert hexadecimal to bytes
+  // Remove dashes from UUID
   const hex = uuid.replace(/-/g, "");
-  const bytes: number[] = [];
+  // Generate 8 bit BigInt
+  let bigInt = BigInt("0x" + hex);
 
-  for (let i = 0; i < hex.length; i += 2) {
-    bytes.push(parseInt(hex.substring(i, 2), 16));
+  // 转换为 64 进制字符串
+  let shortUUID = "";
+
+  while (bigInt > 0) {
+    const index = Number(bigInt % 64n);
+
+    shortUUID = CUSTOM_CHARS[index] + shortUUID;
+    bigInt = bigInt / 64n;
   }
 
-  // Convert bytes to custom Base64 representation
-  let customBase64 = "";
-  let i = 0;
+  while (shortUUID.length < 24) shortUUID = "A" + shortUUID;
 
-  while (i < bytes.length) {
-    const byte1 = bytes[i++];
-    const byte2 = i < bytes.length ? bytes[i++] : 0;
-    const byte3 = i < bytes.length ? bytes[i++] : 0;
-
-    const char1 = CUSTOM_CHARS.charAt(byte1 >> 2);
-    const char2 = CUSTOM_CHARS.charAt(((byte1 & 3) << 4) | (byte2 >> 4));
-    const char3 = CUSTOM_CHARS.charAt(((byte2 & 15) << 2) | (byte3 >> 6));
-    const char4 = CUSTOM_CHARS.charAt(byte3 & 63);
-
-    customBase64 += char1 + char2 + char3 + char4;
-  }
-
-  console.log(uuid, customBase64);
-
-  // Return the first 22 characters of the custom Base64 string
-  return customBase64.substring(0, 22);
+  return shortUUID;
 };
