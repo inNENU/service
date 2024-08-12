@@ -81,7 +81,7 @@ export const mpLoginHandler: RequestHandler<
       inBlacklist = openidRows.length > 0;
       isAdmin = adminRows.length > 0;
 
-      console.info(`Blocking user ${openid}`);
+      if (inBlacklist) console.info(`Blocking user ${openid}`);
     } catch (err) {
       console.error(`Querying with openid ${openid}`, err);
 

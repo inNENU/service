@@ -15,28 +15,37 @@ import type {
 } from "../../typings.js";
 import { getConnection, releaseConnection } from "../../utils/index.js";
 
-export interface GetInfoOptions {
+export interface CheckIDCodeOptions {
   id: number;
   authToken: string;
   appId: string;
   uuid: string;
+  openid: string;
   remark?: string;
 }
 
 export interface IdCodeInfo {
-  id: number;
   name: string;
-  gender: string;
   grade: number;
+  type: string;
   org: string;
   major: string;
   createTime: string;
+
+  /**
+   * @description Only available for admin
+   */
+  id: number | null;
+  /**
+   * @description Only available for admin
+   */
+  gender: string | null;
 }
 
-export type GetInfoSuccessResponse = CommonSuccessResponse<IdCodeInfo>;
+export type CheckIDCodeInfoSuccessResponse = CommonSuccessResponse<IdCodeInfo>;
 
-export type GetInfoResponse =
-  | GetInfoSuccessResponse
+export type CheckIDCodeInfoResponse =
+  | CheckIDCodeInfoSuccessResponse
   | AuthLoginFailedResponse
   | CommonFailedResponse<
       | ActionFailType.DatabaseError
@@ -50,14 +59,16 @@ export const checkIDCode = async ({
   authToken,
   appId,
   uuid,
+  openid,
   remark,
-}: GetInfoOptions): Promise<GetInfoResponse> => {
+}: CheckIDCodeOptions): Promise<CheckIDCodeInfoResponse> => {
   let connection: PoolConnection | null = null;
 
   try {
     if (!authToken || !id) return MissingCredentialResponse;
     if (!appId) return MissingArgResponse("appId");
     if (!uuid) return MissingArgResponse("uuid");
+    if (!openid) return MissingArgResponse("openid");
 
     connection = await getConnection();
 
@@ -124,15 +135,29 @@ export const checkIDCode = async ({
       [id, Math.round(Date.now() / 1000), remark ?? "", uuid],
     );
 
+    let isAdmin = false;
+
+    try {
+      const [adminRows] = await connection.execute<RowDataPacket[]>(
+        "SELECT * FROM `admin` WHERE `openid` = ?",
+        [openid],
+      );
+
+      isAdmin = adminRows.length > 0;
+    } catch (err) {
+      console.error(`Querying admin with openid ${openid}`, err);
+    }
+
     return {
       success: true,
       data: {
-        id: row.id,
         name: info.name,
-        gender: info.gender,
         grade: info.grade,
         org: info.org,
         major: info.major,
+        type: info.type,
+        id: isAdmin ? row.id : null,
+        gender: isAdmin ? info.gender : null,
         createTime: row.createTime,
       },
     };
