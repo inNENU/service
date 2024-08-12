@@ -19,8 +19,8 @@ export interface CheckIDCodeOptions {
   id: number;
   authToken: string;
   appID: string;
-  uuid: string;
   openid: string;
+  uuid?: string;
   remark?: string;
 }
 
@@ -42,9 +42,14 @@ export interface IdCodeInfo {
   gender: string | null;
 }
 
+export type CheckIDCodeStatusSuccessResponse = CommonSuccessResponse<
+  | { existed: false; verifier: string | null }
+  | { existed: true; remark: string }
+>;
 export type CheckIDCodeInfoSuccessResponse = CommonSuccessResponse<IdCodeInfo>;
 
 export type CheckIDCodeInfoResponse =
+  | CheckIDCodeStatusSuccessResponse
   | CheckIDCodeInfoSuccessResponse
   | AuthLoginFailedResponse
   | CommonFailedResponse<
@@ -67,7 +72,6 @@ export const checkIDCode = async ({
   try {
     if (!authToken || !id) return MissingCredentialResponse;
     if (!appID) return MissingArgResponse("appID");
-    if (!uuid) return MissingArgResponse("uuid");
     if (!openid) return MissingArgResponse("openid");
 
     connection = await getConnection();
@@ -82,8 +86,41 @@ export const checkIDCode = async ({
       return {
         success: false,
         type: ActionFailType.Expired,
-        msg: "用户凭据已失效，无法取得校验身份码，请重新登录。\n提示: 为了保证身份码的可靠性，您只能在最后一次登录的设备校验身份码。",
+        msg: "用户凭据已失效，无法校验身份码，请重新登录。\n提示: 为了保证身份码的可靠性，您只能在最后一次登录的设备校验身份码。",
       };
+
+    if (!uuid) {
+      // get the latest uuid
+      const [idCodeRows] = await connection.execute<RowDataPacket[]>(
+        "SELECT * FROM `id_code` WHERE `id` = ? ORDER BY `createTime` DESC LIMIT 1",
+        [id],
+      );
+
+      // if no id code exists
+      if (idCodeRows.length === 0)
+        return {
+          success: true,
+          data: {
+            existed: false,
+            verifier: null,
+          },
+        };
+
+      const row = idCodeRows[0] as IDCodeData;
+
+      return {
+        success: true,
+        data: row.verifyRemark
+          ? {
+              existed: false,
+              verifier: row.verifyRemark,
+            }
+          : {
+              existed: true,
+              remark: row.remark,
+            },
+      };
+    }
 
     // check whether uuid is valid
     const [idCodeRows] = await connection.execute<RowDataPacket[]>(
@@ -156,7 +193,7 @@ export const checkIDCode = async ({
         org: info.org,
         major: info.major,
         type: info.type,
-        id: isAdmin ? row.id : null,
+        id: isAdmin ? info.id : null,
         gender: isAdmin ? info.gender : null,
         createTime: row.createTime,
       },
