@@ -175,7 +175,7 @@ export type UnderChangeMajorPlanResponse =
 const TEST_UNDER_CHANGE_MAJOR_PLAN_RESPONSE: UnderChangeMajorPlanSuccessResponse =
   {
     success: true,
-    header: "2021年度本科生专业转换计划",
+    header: `${new Date().getFullYear()}年度本科生专业转换计划`,
     plans: Array<ChangeMajorPlan>(2).fill({
       school: "计算机学院",
       major: "计算机科学与技术",

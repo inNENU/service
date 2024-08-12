@@ -89,14 +89,18 @@ export const UNDER_COURSE_TABLE_TEST_RESPONSE: UnderCourseTableSuccessResponse =
   {
     success: true,
     data: Array.from({ length: 6 }).map((_, classIndex) =>
-      Array.from({ length: 7 }).map((_, weekIndex) => [
-        {
-          name: `测试课程 ${weekIndex + 1}-${classIndex + 1}`,
-          teacher: "测试教师",
-          time: `星期${weekIndex + 1} 第${classIndex * 2 + 1}${classIndex * 2 + 2}节`,
-          location: "测试地点",
-        },
-      ]),
+      Array.from({ length: 7 }).map((_, weekIndex) =>
+        Math.random() * 7 > 5
+          ? [
+              {
+                name: `测试课程 ${weekIndex + 1}-${classIndex + 1}`,
+                teacher: "测试教师",
+                time: `星期${weekIndex + 1} 第${classIndex * 2 + 1}${classIndex * 2 + 2}节`,
+                location: "测试地点",
+              },
+            ]
+          : [],
+      ),
     ),
     startTime: "2020-09-01",
   };

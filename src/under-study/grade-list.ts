@@ -187,22 +187,24 @@ const getGradeLists = (
 
 const TEST_UNDER_GRADE_LIST_RESPONSE: UnderGradeListSuccessResponse = {
   success: true,
-  data: Array<UnderStudyGradeResult>(10).fill({
-    time: "2021-2022",
-    cid: "2021-2022-1",
-    name: "测试课程",
-    grade: 100,
-    gradeCode: "A",
-    gradeText: "优秀",
-    gradeType: "百分制",
-    courseType: "必修",
-    shortCourseType: "必",
-    office: "测试单位",
-    hours: 36,
-    point: 2,
-    examType: "正常考试",
-    mark: "正常",
-  }),
+  data: Array(10)
+    .fill(null)
+    .map((_, i) => ({
+      time: `${new Date().getFullYear() - 1}-${new Date().getFullYear()}`,
+      cid: `${new Date().getFullYear() - 1}-${new Date().getFullYear()}-1`,
+      name: `测试课程${i + 1}`,
+      grade: 100 - i * 2,
+      gradeCode: "A",
+      gradeText: "优秀",
+      gradeType: "百分制",
+      courseType: "必修",
+      shortCourseType: "必",
+      office: "测试单位",
+      hours: 36,
+      point: 2,
+      examType: "正常考试",
+      mark: "正常",
+    })),
 };
 
 export const getUnderGradeList = async (

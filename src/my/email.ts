@@ -102,8 +102,8 @@ export type GetEmailResponse = GetEmailSuccessResponse | GetEmailFailedResponse;
 const TEST_GET_EMAIL_RESPONSE: GetEmailSuccessResponse = {
   success: true,
   hasEmail: true,
-  email: "admin@example.com",
-  password: "password",
+  email: "test@nenu.edu.cn",
+  password: "test-password",
 };
 
 export const getEmailInfo = async (

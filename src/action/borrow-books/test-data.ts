@@ -1,19 +1,20 @@
-import type { BorrowBookData } from "./converter.js";
 import type { BorrowBooksSuccessResponse } from "./provider.js";
 
 export const BORROW_BOOKS_TEST_RESPONSE: BorrowBooksSuccessResponse = {
   success: true,
-  data: Array<BorrowBookData>(4).fill({
-    name: "测试书籍",
-    author: "测试作者",
-    year: 2021,
-    status: "借出",
-    barcode: "000000000000",
-    loanDate: "2021-09-01",
-    dueDate: "2021-09-30",
-    location: "测试位置",
-    shelfNumber: "A1",
-    renew: true,
-    renewTime: "2021-09-15",
-  }),
+  data: Array(4)
+    .fill(null)
+    .map((_, i) => ({
+      name: `测试书籍${i + 1}`,
+      author: `书籍作者${i + 1}`,
+      year: new Date().getFullYear(),
+      status: "借出",
+      barcode: Date.now().toString(),
+      loanDate: `${new Date().getFullYear()}-01-01`,
+      dueDate: `${new Date().getFullYear()}-01-31`,
+      location: `位置${i + 1}`,
+      shelfNumber: `A${i}`,
+      renew: true,
+      renewTime: `${new Date().getFullYear()}-01-15`,
+    })),
 };

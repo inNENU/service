@@ -93,12 +93,14 @@ export type NoticeListResponse =
 
 const TEST_NOTICE_LIST: NoticeListSuccessResponse = {
   success: true,
-  data: Array<NoticeInfo>(10).fill({
-    title: "测试标题",
-    from: "测试来源",
-    time: "2021-01-01",
-    id: "test",
-  }),
+  data: Array(10)
+    .fill(null)
+    .map((_, i) => ({
+      title: `测试通知标题${i + 1}`,
+      from: `来源${i + 1}`,
+      time: `${new Date().getFullYear()}/${i + 1}/${i + 1}`,
+      id: "test",
+    })),
   count: 10,
   size: 20,
   current: 1,

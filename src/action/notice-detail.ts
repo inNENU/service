@@ -57,9 +57,9 @@ const TEST_NOTICE_DETAIL: NoticeSuccessResponse = {
   data: {
     title: "测试标题",
     author: "测试作者",
-    time: "2021-01-01",
+    time: `${new Date().getFullYear()}-01-01`,
     from: "测试来源",
-    pageView: 100,
+    pageView: 123,
     content: [
       {
         type: "node",
@@ -67,7 +67,17 @@ const TEST_NOTICE_DETAIL: NoticeSuccessResponse = {
         children: [
           {
             type: "text",
-            text: "测试内容",
+            text: "测试内容1",
+          },
+        ],
+      },
+      {
+        type: "node",
+        name: "p",
+        children: [
+          {
+            type: "text",
+            text: "测试内容2",
           },
         ],
       },
