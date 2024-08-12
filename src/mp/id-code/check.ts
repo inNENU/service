@@ -7,13 +7,18 @@ import {
   DatabaseErrorResponse,
   MissingArgResponse,
   MissingCredentialResponse,
+  UnknownResponse,
 } from "../../config/index.js";
 import type { MyInfo } from "../../my/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../../typings.js";
-import { getConnection, releaseConnection } from "../../utils/index.js";
+import {
+  getConnection,
+  getWechatMPCode,
+  releaseConnection,
+} from "../../utils/index.js";
 
 export interface CheckIDCodeOptions {
   id: number;
@@ -43,8 +48,8 @@ export interface IdCodeInfo {
 }
 
 export type CheckIDCodeStatusSuccessResponse = CommonSuccessResponse<
+  | { existed: true; code: string; remark: string }
   | { existed: false; verifier: string | null }
-  | { existed: true; remark: string }
 >;
 export type CheckIDCodeInfoSuccessResponse = CommonSuccessResponse<IdCodeInfo>;
 
@@ -121,18 +126,34 @@ export const checkIDCode = async ({
 
       const row = idCodeRows[0] as IDCodeData;
 
-      return {
-        success: true,
-        data: row.verifyRemark
-          ? {
-              existed: false,
-              verifier: isAdmin ? "管理员" : row.verifyRemark,
-            }
-          : {
-              existed: true,
-              remark: row.remark,
-            },
-      };
+      // already verified
+      if (row.verifyRemark)
+        return {
+          success: true,
+          data: {
+            existed: false,
+            verifier: isAdmin ? "管理员" : row.verifyRemark,
+          },
+        };
+
+      const result = await getWechatMPCode(
+        appID,
+        "pkg/user/pages/account/login",
+        `verify:${row.uuid}`,
+      );
+
+      if (result instanceof Buffer) {
+        return {
+          success: true,
+          data: {
+            existed: true,
+            code: `data:image/png;base64,${result.toString("base64")}`,
+            remark: row.remark,
+          },
+        };
+      }
+
+      return UnknownResponse(result.errmsg);
     }
 
     // check whether uuid is valid
