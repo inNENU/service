@@ -7,4 +7,5 @@ export * from "./login.js";
 export * from "./re-auth/index.js";
 export * from "./reset/index.js";
 export * from "./reset-captcha.js";
+export * from "./routes.js";
 export * from "./utils.js";

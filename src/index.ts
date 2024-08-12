@@ -5,28 +5,8 @@ import cors from "cors";
 import type { Response } from "express";
 import express from "express";
 
-import {
-  actionCheckHandler,
-  actionEmailPageHandler,
-  actionLoginHandler,
-  actionRecentEmailHandler,
-  borrowBooksHandler,
-  cardBalanceHandler,
-  noticeHandler,
-  noticeListHandler,
-} from "./action/index.js";
-import {
-  activateHandler,
-  authCaptchaHandler,
-  authEncryptHandler,
-  authInitHandler,
-  authInitInfoHandler,
-  authLoginHandler,
-  changePasswordHandler,
-  reAuthHandler,
-  resetCaptchaHandler,
-  resetPasswordHandler,
-} from "./auth/index.js";
+import { registerActionRoutes } from "./action/index.js";
+import { registerAuthRoutes } from "./auth/index.js";
 import {
   authCenterCheckHandler,
   authCenterLoginHandler,
@@ -179,41 +159,12 @@ app.get("/", (_req, res) => {
 `);
 });
 
-/*  ------------ 融合门户 ------------ */
-
-app.post("/action/login", actionLoginHandler);
-app.post("/action/check", actionCheckHandler);
-app.post("/action/borrow-books", borrowBooksHandler);
-app.post("/action/card-balance", cardBalanceHandler);
-app.get("/action/email-page", actionEmailPageHandler);
-app.post("/action/email-page", actionEmailPageHandler);
-app.post("/action/recent-email", actionRecentEmailHandler);
-app.post("/action/notice-detail", noticeHandler);
-app.post("/action/notice-list", noticeListHandler);
-
-/*  ------------ 统一身份认证 ------------ */
-
-app.get("/auth/activate", activateHandler);
-app.post("/auth/activate", activateHandler);
-app.post("/auth/avatar", avatarHandler);
-app.post("/auth/encrypt", authEncryptHandler);
-app.get("/auth/auth-captcha", authCaptchaHandler);
-app.post("/auth/auth-captcha", authCaptchaHandler);
-app.post("/auth/change-password", changePasswordHandler);
-app.patch("/auth/change-password", changePasswordHandler);
-app.get("/auth/init", authInitInfoHandler);
-app.post("/auth/init", authInitHandler);
-app.post("/auth/login", authLoginHandler);
-app.get("/auth/re-auth", reAuthHandler);
-app.post("/auth/re-auth", reAuthHandler);
-app.get("/auth/reset-captcha", resetCaptchaHandler);
-app.get("/auth/reset-password", resetPasswordHandler);
-app.post("/auth/reset-password", resetPasswordHandler);
-
-/*  ------------ 统一身份认证管理中心 ------------ */
+registerActionRoutes(app);
+registerAuthRoutes(app);
 
 app.post("/auth-center/check", authCenterCheckHandler);
 app.post("/auth-center/login", authCenterLoginHandler);
+app.post("/auth-center/avatar", avatarHandler);
 
 /*  ------------ 服务大厅 ------------ */
 
