@@ -83,7 +83,7 @@ export const mpLoginHandler: RequestHandler<
 
       console.info(`Blocking user ${openid}`);
     } catch (err) {
-      console.error(err);
+      console.error(`Querying with openid ${openid}`, err);
 
       return res.json(DatabaseErrorResponse((err as Error).message));
     } finally {
