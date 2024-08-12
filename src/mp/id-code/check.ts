@@ -18,7 +18,7 @@ import { getConnection, releaseConnection } from "../../utils/index.js";
 export interface CheckIDCodeOptions {
   id: number;
   authToken: string;
-  appId: string;
+  appID: string;
   uuid: string;
   openid: string;
   remark?: string;
@@ -57,7 +57,7 @@ export type CheckIDCodeInfoResponse =
 export const checkIDCode = async ({
   id,
   authToken,
-  appId,
+  appID,
   uuid,
   openid,
   remark,
@@ -66,7 +66,7 @@ export const checkIDCode = async ({
 
   try {
     if (!authToken || !id) return MissingCredentialResponse;
-    if (!appId) return MissingArgResponse("appId");
+    if (!appID) return MissingArgResponse("appID");
     if (!uuid) return MissingArgResponse("uuid");
     if (!openid) return MissingArgResponse("openid");
 
