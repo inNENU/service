@@ -1,3 +1,4 @@
+import type { RequestHandler } from "express";
 import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 
 import type { IDCodeData } from "./utils.js";
@@ -13,6 +14,7 @@ import type { MyInfo } from "../../my/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
+  EmptyObject,
 } from "../../typings.js";
 import {
   getConnection,
@@ -225,5 +227,19 @@ export const checkIDCode = async ({
     return DatabaseErrorResponse((err as Error).message);
   } finally {
     releaseConnection(connection);
+  }
+};
+
+export const checkIdCodeHandler: RequestHandler<
+  EmptyObject,
+  EmptyObject,
+  CheckIDCodeOptions
+> = async (req, res) => {
+  try {
+    return res.json(await checkIDCode(req.body));
+  } catch (err) {
+    console.error(err);
+
+    return res.json(UnknownResponse((err as Error).message));
   }
 };

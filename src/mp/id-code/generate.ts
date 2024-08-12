@@ -1,3 +1,4 @@
+import type { RequestHandler } from "express";
 import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 
 import type { IDCodeData } from "./utils.js";
@@ -11,6 +12,7 @@ import {
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
+  EmptyObject,
 } from "../../typings.js";
 import {
   getConnection,
@@ -19,7 +21,7 @@ import {
   releaseConnection,
 } from "../../utils/index.js";
 
-export interface StoreAccountInfoOptions {
+export interface GenerateIdCodeOptions {
   id: number;
   authToken: string;
   remark: string;
@@ -27,13 +29,13 @@ export interface StoreAccountInfoOptions {
   force?: boolean;
 }
 
-export type StoreAccountInfoCodeSuccessResponse = CommonSuccessResponse<{
+export type GenerateIdCodeCodeSuccessResponse = CommonSuccessResponse<{
   code: string;
   existed: boolean;
 }>;
 
-export type StoreAccountInfoResponse =
-  | StoreAccountInfoCodeSuccessResponse
+export type GenerateIdCodeResponse =
+  | GenerateIdCodeCodeSuccessResponse
   | CommonFailedResponse<
       | ActionFailType.Expired
       | ActionFailType.Existed
@@ -43,13 +45,13 @@ export type StoreAccountInfoResponse =
       | ActionFailType.Unknown
     >;
 
-export const storeStoreAccountInfo = async ({
+export const generateIdCode = async ({
   id,
   authToken,
   remark,
   appID,
   force = false,
-}: StoreAccountInfoOptions): Promise<StoreAccountInfoResponse> => {
+}: GenerateIdCodeOptions): Promise<GenerateIdCodeResponse> => {
   let connection: PoolConnection | null = null;
 
   try {
@@ -136,5 +138,19 @@ export const storeStoreAccountInfo = async ({
     return UnknownResponse((err as Error).message);
   } finally {
     releaseConnection(connection);
+  }
+};
+
+export const generateIdCodeHandler: RequestHandler<
+  EmptyObject,
+  EmptyObject,
+  GenerateIdCodeOptions
+> = async (req, res) => {
+  try {
+    return res.json(await generateIdCode(req.body));
+  } catch (err) {
+    console.error(err);
+
+    return res.json(UnknownResponse((err as Error).message));
   }
 };

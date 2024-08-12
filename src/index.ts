@@ -54,7 +54,8 @@ import {
 } from "./grad-system/index.js";
 import { libraryPeopleHandler } from "./library/people.js";
 import {
-  idCodeHandler,
+  checkIdCodeHandler,
+  generateIdCodeHandler,
   mpLoginHandler,
   mpQrCodeHandler,
   mpReceiveHandler,
@@ -272,7 +273,8 @@ app.post("/vpn/login", vpnLoginHandler);
 /*  ------------ 小程序 ------------ */
 
 app.post("/mp/login", mpLoginHandler);
-app.post("/mp/id-code", idCodeHandler);
+app.post("/mp/check-id-code", checkIdCodeHandler);
+app.post("/mp/generate-id-code", generateIdCodeHandler);
 app.get("/mp/qrcode", mpQrCodeHandler);
 app.get("/mp/receive", mpReceiveHandler);
 app.post("/mp/receive", mpReceiveHandler);
