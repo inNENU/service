@@ -111,7 +111,7 @@ export const generateIdCode = async ({
 
       await connection.execute(
         "INSERT INTO `id_code` (`uuid`, `id`, `remark`) VALUES (?, ?, ?)",
-        [uuid, id, remark ?? null],
+        [uuid, id, remark],
       );
     }
 

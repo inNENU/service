@@ -331,7 +331,7 @@ export const initAuth = async (
                 avatar = avatarInfo.data.avatar;
 
                 try {
-                  if (!connection) connection = await getConnection();
+                  connection ??= await getConnection();
 
                   await connection.execute(
                     "REPLACE INTO `student_avatar` (`id`, `avatar`) VALUES (?, ?)",
@@ -351,7 +351,7 @@ export const initAuth = async (
             };
 
             try {
-              if (!connection) connection = await getConnection();
+              connection ??= await getConnection();
 
               await connection.execute(SQL_STRING, [
                 info.id,
@@ -389,7 +389,7 @@ export const initAuth = async (
       // store authToken in database for auth
       if (appID)
         try {
-          if (!connection) connection = await getConnection();
+          connection ??= await getConnection();
 
           await connection.execute(
             "INSERT INTO `token` (`authToken`, `id`, `appId`, `openId`, `updateTime`) VALUES (?, ?, ?, ?, NOW())",
