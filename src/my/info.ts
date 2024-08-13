@@ -196,6 +196,9 @@ export const getMyInfo = async (
         "050201",
         "055101",
         "055102",
+        "1013973",
+        "1014014",
+        "1014030",
       ].includes(info.majorId)
         ? "benbu"
         : [
@@ -208,6 +211,13 @@ export const getMyInfo = async (
               "167140",
               "167141",
               "167180",
+              "1014014",
+              "050202",
+              "1013992",
+              "1014015",
+              "1014073",
+              "1014199",
+              "050211",
             ].includes(info.majorId)
           ? "jingyue"
           : ["070201"].includes(info.majorId) || info.major === "细胞生物学"
@@ -218,8 +228,8 @@ export const getMyInfo = async (
                 ].includes(info.orgId)
               ? "benbu"
               : [
-                    161000, 168000, 169000, 178000, 235000, 246000, 252000,
-                    261000,
+                    161000, 168000, 169000, 178000, 235000, 245000, 246000,
+                    252000, 261000,
                   ].includes(info.orgId)
                 ? "jingyue"
                 : "unknown";
