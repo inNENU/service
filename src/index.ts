@@ -264,7 +264,7 @@ setInterval(() => {
 
   const { rss, heapTotal, heapUsed, arrayBuffers } = process.memoryUsage();
 
-  console.log(
+  console.debug(
     `rss: ${Math.round((rss / 1024 / 1024 / 100) * 100)} MB, heap: ${Math.round(
       (heapUsed / 1024 / 1024 / 100) * 100,
     )} / ${Math.round(

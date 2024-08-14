@@ -10,15 +10,12 @@ morgan.token(
     res: ServerResponse<IncomingMessage> & {
       body: string | Record<string, unknown>;
     },
-  ) => {
-    console.log(JSON.stringify(res.body));
-
-    return typeof res.body === "object" && typeof res.body.success === "boolean"
+  ) =>
+    typeof res.body === "object" && typeof res.body.success === "boolean"
       ? res.body.success
         ? picocolors.green("success")
         : picocolors.red("fail")
-      : picocolors.gray("-");
-  },
+      : picocolors.gray("-"),
 );
 
 morgan.token("status-code", (_req, res) => {

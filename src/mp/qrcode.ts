@@ -39,9 +39,9 @@ export const mpQrCodeHandler: RequestHandler<
   MpCodeOptions
 > = async (req, res) => {
   try {
-    const { appID, page } = req.query;
+    console.info("Requesting MP QRCode with", req.query);
 
-    console.log("Requesting qrcode with", req.query);
+    const { appID, page } = req.query;
 
     if (!appIDInfo[appID]) return res.json(InvalidArgResponse("appID"));
 
