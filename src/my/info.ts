@@ -1,6 +1,5 @@
-import { writeFile } from "node:fs";
-
 import type { RequestHandler } from "express";
+import type { PoolConnection } from "mysql2/promise";
 
 import type { MyLoginFailedResponse } from "./login.js";
 import { myLogin } from "./login.js";
@@ -9,14 +8,13 @@ import {
   MissingCredentialResponse,
   TEST_INFO,
   UnknownResponse,
-  code2major,
-  code2org,
 } from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
   EmptyObject,
 } from "../typings.js";
+import { getConnection, releaseConnection } from "../utils/index.js";
 
 interface RawInfo {
   success: true;
@@ -121,6 +119,8 @@ const TEST_INFO_RESULT: MyInfoSuccessResult = {
 export const getMyInfo = async (
   cookieHeader: string,
 ): Promise<MyInfoResult> => {
+  let connection: PoolConnection | null = null;
+
   try {
     const infoResponse = await fetch(`${MY_SERVER}/sysform/loadIntelligent`, {
       method: "POST",
@@ -234,32 +234,18 @@ export const getMyInfo = async (
                 ? "jingyue"
                 : "unknown";
 
-      if (!code2org.has(info.orgId)) {
-        writeFile(
-          "data",
-          `["${info.org}", ${info.orgId}],\n`,
-          { flag: "a" },
-          (err) => {
-            if (err) {
-              console.error(err);
-            }
-          },
+      try {
+        connection = await getConnection();
+        await connection.execute(
+          "INSERT IGNORE INTO `org_id` (`orgId`, `org) VALUES (?, ?)",
+          [info.orgId, info.org],
         );
-        code2org.set(info.orgId, info.org);
-      }
-
-      if (!code2major.has(info.majorId)) {
-        writeFile(
-          "data",
-          `["${info.major}", "${info.majorId}"], // ${info.org}\n`,
-          { flag: "a" },
-          (err) => {
-            if (err) {
-              console.error(err);
-            }
-          },
+        await connection.execute(
+          "INSERT IGNORE INTO `major_id` (`majorId`, `major`, `orgId`) VALUES (?, ?, ?)",
+          [info.majorId, info.major, info.orgId],
         );
-        code2major.set(info.majorId, info.major);
+      } catch (err) {
+        console.error("Database error", err);
       }
 
       return {
@@ -278,6 +264,8 @@ export const getMyInfo = async (
     console.error(err);
 
     return UnknownResponse(message);
+  } finally {
+    releaseConnection(connection);
   }
 };
 
