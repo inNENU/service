@@ -122,12 +122,15 @@ export const authLogin = async ({
     if (
       content.includes("不允许使用认证服务来认证您访问的目标应用。") ||
       content.includes("不允许访问")
-    )
+    ) {
+      console.error("Forbidden service", service, "for id", id);
+
       return {
         success: false,
         type: ActionFailType.Forbidden,
         msg: "用户账号没有此服务权限。",
       };
+    }
 
     const salt = SALT_REGEXP.exec(content)![1];
     const execution = /name="execution" value="(.*?)"/.exec(content)![1];
@@ -237,12 +240,17 @@ export const authLogin = async ({
           msg: "需要验证码，请重新登录。",
         };
 
-      if (resultContent.includes("不允许使用认证服务来认证您访问的目标应用。"))
+      if (
+        resultContent.includes("不允许使用认证服务来认证您访问的目标应用。")
+      ) {
+        console.error("Forbidden service", service, "for id", id);
+
         return {
           success: false,
           type: ActionFailType.Forbidden,
           msg: "用户账号没有此服务权限。",
         };
+      }
 
       console.error("Unknown login response: ", response.status, resultContent);
 
