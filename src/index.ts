@@ -5,7 +5,7 @@ import cors from "cors";
 import type { Response } from "express";
 import express from "express";
 
-import { registerActionRoutes } from "./action/index.js";
+import { actionRouter } from "./action/index.js";
 import { registerAuthRoutes } from "./auth/index.js";
 import {
   authCenterCheckHandler,
@@ -90,7 +90,6 @@ import {
   underSystemLoginHandler,
   underTestQueryHandler,
 } from "./under-system/index.js";
-import { getMemoryUsage } from "./utils/index.js";
 import { vpnCASLoginHandler, vpnLoginHandler } from "./vpn/index.js";
 import { weatherHandler } from "./weather.js";
 
@@ -159,7 +158,7 @@ app.get("/", (_req, res) => {
 `);
 });
 
-registerActionRoutes(app);
+app.use("/action", actionRouter);
 registerAuthRoutes(app);
 
 app.post("/auth-center/check", authCenterCheckHandler);
@@ -280,8 +279,17 @@ app.listen(port, () => {
 
 setInterval(() => {
   global.gc?.();
-  getMemoryUsage();
-}, 60 * 1000);
+
+  const { rss, heapTotal, heapUsed, arrayBuffers } = process.memoryUsage();
+
+  console.log(
+    `rss: ${Math.round((rss / 1024 / 1024) * 100) / 100} MB, heap: ${Math.round(
+      heapUsed / 1024 / 1024,
+    )} / ${Math.round(
+      heapTotal / 1024 / 1024,
+    )} MB, arrayBuffers: ${Math.round(arrayBuffers / 1024 / 1024)} MB`,
+  );
+}, /** 5 min */ 300000);
 
 process.on("uncaughtException", (err) => {
   console.error("Uncaught Exception:", err);

@@ -1,14 +1,9 @@
 import type { RequestHandler } from "express";
 
-import { actionLogin } from "./login.js";
 import { ACTION_MAIN_PAGE, ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
 import type { ActionFailType } from "../config/index.js";
-import {
-  ExpiredResponse,
-  MissingCredentialResponse,
-  UnknownResponse,
-} from "../config/index.js";
+import { ExpiredResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
@@ -82,30 +77,9 @@ export const actionEmailPageHandler: RequestHandler<
   ActionEmailPageOptions,
   ActionEmailPageOptions
 > = async (req, res) => {
-  try {
-    const { id, password, authToken } = req.body;
+  const cookieHeader = req.headers.cookie!;
 
-    if (id && password && authToken) {
-      const result = await actionLogin({ id, password, authToken });
+  if (cookieHeader.includes("TEST")) return res.json(TEST_EMAIL_PAGE_RESPONSE);
 
-      if (!result.success) return res.json(result);
-
-      req.headers.cookie = result.cookieStore.getHeader(ACTION_SERVER);
-    } else if (!req.headers.cookie) {
-      return res.json(MissingCredentialResponse);
-    }
-
-    const cookieHeader = req.headers.cookie;
-
-    if (cookieHeader.includes("TEST"))
-      return res.json(TEST_EMAIL_PAGE_RESPONSE);
-
-    return res.json(await getEmailPage(cookieHeader, req.body.mid));
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
+  return res.json(await getEmailPage(cookieHeader, req.body.mid));
 };

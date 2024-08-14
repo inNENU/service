@@ -1,20 +1,12 @@
-import type { RequestHandler } from "express";
-
-import { actionLogin } from "./login.js";
 import { ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type { ActionFailType } from "../config/index.js";
-import {
-  ExpiredResponse,
-  MissingCredentialResponse,
-  UnknownResponse,
-} from "../config/index.js";
+import { ExpiredResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
-  EmptyObject,
-  LoginOptions,
 } from "../typings.js";
+import { middleware } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/login.js";
 
 const CARD_BALANCE_URL = `${ACTION_SERVER}/soapBasic/postSoap`;
@@ -76,35 +68,13 @@ export const getCardBalance = async (
   };
 };
 
-export const cardBalanceHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  LoginOptions
-> = async (req, res) => {
-  try {
-    const { id, password, authToken } = req.body;
-
-    if (id && password && authToken) {
-      const result = await actionLogin({ id, password, authToken });
-
-      if (!result.success) return res.json(result);
-
-      req.headers.cookie = result.cookieStore.getHeader(CARD_BALANCE_URL);
-    } else if (!req.headers.cookie) {
-      return res.json(MissingCredentialResponse);
-    }
-
-    const cookieHeader = req.headers.cookie;
+export const cardBalanceHandler = middleware<CardBalanceResponse>(
+  async (req, res) => {
+    const cookieHeader = req.headers.cookie!;
 
     if (cookieHeader.includes("TEST"))
       return res.json(TEST_CARD_BALANCE_RESPONSE);
 
     return res.json(await getCardBalance(cookieHeader));
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
-};
+  },
+);

@@ -41,4 +41,4 @@ export const TEST_INFO = {
 export const TEST_LOGIN_RESULT = {
   success: true,
   cookieStore: TEST_COOKIE_STORE,
-};
+} as const;

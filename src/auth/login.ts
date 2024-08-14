@@ -96,7 +96,12 @@ export const authLogin = async ({
 
   if (loginPageResponse.status === 302) {
     if (
-      location?.startsWith(`${server}/authserver/reAuthCheck/reAuthSubmit.do`)
+      location?.startsWith(
+        `${server}/authserver/reAuthCheck/reAuthSubmit.do`,
+      ) ||
+      location?.startsWith(
+        `${server}/authserver/reAuthCheck/reAuthLoginView.do`,
+      )
     )
       return {
         success: false,

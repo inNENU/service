@@ -1,16 +1,23 @@
 import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
-import type { RequestHandler } from "express";
 
 import { ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { WEB_VPN_AUTH_SERVER, authLogin } from "../auth/index.js";
+import type { ActionFailType } from "../config/index.js";
 import {
+  MissingCredentialResponse,
   TEST_ID_NUMBER,
   TEST_LOGIN_RESULT,
   UnknownResponse,
 } from "../config/index.js";
-import type { AccountInfo, EmptyObject } from "../typings.js";
+import type {
+  AccountInfo,
+  CommonFailedResponse,
+  EmptyObject,
+  LoginOptions,
+} from "../typings.js";
+import { middleware } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 import { vpnCASLogin } from "../vpn/index.js";
 
@@ -74,43 +81,68 @@ export interface ActionLoginSuccessResponse {
   cookies: CookieType[];
 }
 
-export type ActionLoginResponse =
-  | ActionLoginSuccessResponse
+export type ActionLoginFailedResponse =
   | AuthLoginFailedResponse
   | VPNLoginFailedResponse;
 
-export const actionLoginHandler: RequestHandler<
+export type ActionLoginResponse =
+  | ActionLoginSuccessResponse
+  | ActionLoginFailedResponse;
+
+export const loginToAction = middleware<
+  | ActionLoginFailedResponse
+  | CommonFailedResponse<ActionFailType.MissingCredential>,
+  LoginOptions,
   EmptyObject,
-  EmptyObject,
-  AccountInfo
-> = async (req, res) => {
-  try {
-    const result =
-      req.body.id === TEST_ID_NUMBER
-        ? TEST_LOGIN_RESULT
-        : await actionLogin(req.body);
+  { path: string }
+>(async (req, res, next) => {
+  if (["/check", "/login"].includes(req.params.path)) return next();
 
-    if (result.success) {
-      const cookies = result.cookieStore
-        .getAllCookies()
-        .map((item) => item.toJSON());
+  const { id, password, authToken } = req.body;
 
-      cookies.forEach(({ name, value, ...rest }) => {
-        res.cookie(name, value, rest);
-      });
+  if (id && password && authToken) {
+    const result = await actionLogin({ id, password, authToken });
 
-      return res.json({
-        success: true,
-        cookies,
-      } as ActionLoginSuccessResponse);
-    }
+    if (!result.success) return res.json(result);
 
-    return res.json(result);
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
+    req.headers.cookie = result.cookieStore.getHeader(ACTION_SERVER);
+  } else if (!req.headers.cookie) {
+    return res.json(MissingCredentialResponse);
   }
-};
+
+  return next();
+});
+
+export const actionLoginHandler = middleware<ActionLoginResponse, AccountInfo>(
+  async (req, res) => {
+    try {
+      const result =
+        req.body.id === TEST_ID_NUMBER
+          ? TEST_LOGIN_RESULT
+          : await actionLogin(req.body);
+
+      if (result.success) {
+        const cookies = result.cookieStore
+          .getAllCookies()
+          .map((item) => item.toJSON());
+
+        cookies.forEach(({ name, value, ...rest }) => {
+          res.cookie(name, value, rest);
+        });
+
+        return res.json({
+          success: true,
+          cookies,
+        });
+      }
+
+      return res.json(result);
+    } catch (err) {
+      const { message } = err as Error;
+
+      console.error(err);
+
+      return res.json(UnknownResponse(message));
+    }
+  },
+);

@@ -1,24 +1,17 @@
 import type { RichTextNode } from "@mptool/parser";
 import { getRichTextNodes } from "@mptool/parser";
-import type { RequestHandler } from "express";
 
-import { actionLogin } from "./login.js";
 import { ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type { ActionFailType } from "../config/index.js";
-import {
-  ExpiredResponse,
-  MissingArgResponse,
-  MissingCredentialResponse,
-  UnknownResponse,
-} from "../config/index.js";
+import { ExpiredResponse, MissingArgResponse } from "../config/index.js";
 import { MY_SERVER } from "../my/utils.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
-  EmptyObject,
   LoginOptions,
 } from "../typings.js";
+import { middleware } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/login.js";
 
 const TITLE_REGEXP = /var title = '(.*?)';/;
@@ -50,7 +43,11 @@ export type NoticeResponse =
   | NoticeSuccessResponse
   | AuthLoginFailedResponse
   | VPNLoginFailedResponse
-  | CommonFailedResponse<ActionFailType.Expired | ActionFailType.Unknown>;
+  | CommonFailedResponse<
+      | ActionFailType.MissingArg
+      | ActionFailType.MissingCredential
+      | ActionFailType.Unknown
+    >;
 
 const TEST_NOTICE_DETAIL: NoticeSuccessResponse = {
   success: true,
@@ -141,36 +138,16 @@ export const getNoticeDetail = async (
   };
 };
 
-export const noticeHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  NoticeOptions
-> = async (req, res) => {
-  try {
-    const { id, password, noticeID, authToken } = req.body;
+export const noticeHandler = middleware<NoticeResponse, NoticeOptions>(
+  async (req, res) => {
+    const { noticeID } = req.body;
 
     if (!noticeID) return res.json(MissingArgResponse("公告 ID"));
 
-    if (id && password && authToken) {
-      const result = await actionLogin({ id, password, authToken });
-
-      if (!result.success) return res.json(result);
-
-      req.headers.cookie = result.cookieStore.getHeader(ACTION_SERVER);
-    } else if (!req.headers.cookie) {
-      return res.json(MissingCredentialResponse);
-    }
-
-    const cookieHeader = req.headers.cookie;
+    const cookieHeader = req.headers.cookie!;
 
     if (cookieHeader.includes("TEST")) return res.json(TEST_NOTICE_DETAIL);
 
     return res.json(await getNoticeDetail(cookieHeader, noticeID));
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
-};
+  },
+);

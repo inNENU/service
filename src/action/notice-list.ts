@@ -1,21 +1,13 @@
-import type { RequestHandler } from "express";
-
-import { actionLogin } from "./login.js";
+import type { ActionLoginResponse } from "./login.js";
 import { ACTION_SERVER } from "./utils.js";
-import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type { ActionFailType } from "../config/index.js";
-import {
-  ExpiredResponse,
-  MissingCredentialResponse,
-  UnknownResponse,
-} from "../config/index.js";
+import { ExpiredResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonListSuccessResponse,
-  EmptyObject,
   LoginOptions,
 } from "../typings.js";
-import type { VPNLoginFailedResponse } from "../vpn/login.js";
+import { middleware } from "../utils/handler.js";
 
 const NOTICE_LIST_QUERY_URL = `${ACTION_SERVER}/page/queryList`;
 
@@ -87,9 +79,10 @@ export interface NoticeListSuccessResponse
 
 export type NoticeListResponse =
   | NoticeListSuccessResponse
-  | AuthLoginFailedResponse
-  | VPNLoginFailedResponse
-  | CommonFailedResponse<ActionFailType.Expired | ActionFailType.Unknown>;
+  | ActionLoginResponse
+  | CommonFailedResponse<
+      ActionFailType.MissingCredential | ActionFailType.Unknown
+    >;
 
 const TEST_NOTICE_LIST: NoticeListSuccessResponse = {
   success: true,
@@ -149,41 +142,15 @@ export const getNoticeList = async (
   } as NoticeListSuccessResponse;
 };
 
-export const noticeListHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
+export const noticeListHandler = middleware<
+  NoticeListResponse,
   NoticeListOptions
-> = async (req, res) => {
-  try {
-    const {
-      id,
-      password,
-      authToken,
-      type = "notice",
-      size = 20,
-      current = 1,
-    } = req.body;
+>(async (req, res) => {
+  const { type = "notice", size = 20, current = 1 } = req.body;
 
-    if (id && password && authToken) {
-      const result = await actionLogin({ id, password, authToken });
+  const cookieHeader = req.headers.cookie!;
 
-      if (!result.success) return res.json(result);
+  if (cookieHeader.includes("TEST")) return res.json(TEST_NOTICE_LIST);
 
-      req.headers.cookie = result.cookieStore.getHeader(NOTICE_LIST_QUERY_URL);
-    } else if (!req.headers.cookie) {
-      return res.json(MissingCredentialResponse);
-    }
-
-    const cookieHeader = req.headers.cookie;
-
-    if (cookieHeader.includes("TEST")) return res.json(TEST_NOTICE_LIST);
-
-    return res.json(await getNoticeList(cookieHeader, type, size, current));
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
-};
+  return res.json(await getNoticeList(cookieHeader, type, size, current));
+});

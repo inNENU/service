@@ -1,19 +1,11 @@
-import type { RequestHandler } from "express";
-
-import { actionLogin } from "./login.js";
 import { ACTION_MAIN_PAGE, ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
-import {
-  ActionFailType,
-  MissingCredentialResponse,
-  UnknownResponse,
-} from "../config/index.js";
+import { ActionFailType } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
-  EmptyObject,
-  LoginOptions,
 } from "../typings.js";
+import { middleware } from "../utils/handler.js";
 import type { VPNLoginFailedResponse } from "../vpn/login.js";
 
 const EMAIL_INFO_URL = `${ACTION_SERVER}/extract/getEmailInfo`;
@@ -107,20 +99,21 @@ export interface RecentMailData {
   emails: EmailData[];
 }
 
-export type ActionRecentMailSuccessResponse =
-  CommonSuccessResponse<RecentMailData>;
+export type RecentMailSuccessResponse = CommonSuccessResponse<RecentMailData>;
 
-export type ActionRecentMailFailedResponse = CommonFailedResponse<
-  ActionFailType.NotInitialized | ActionFailType.Unknown
+export type RecentMailFailedResponse = CommonFailedResponse<
+  | ActionFailType.MissingCredential
+  | ActionFailType.NotInitialized
+  | ActionFailType.Unknown
 >;
 
 export type ActionRecentMailResponse =
-  | ActionRecentMailSuccessResponse
+  | RecentMailSuccessResponse
   | AuthLoginFailedResponse
   | VPNLoginFailedResponse
-  | ActionRecentMailFailedResponse;
+  | RecentMailFailedResponse;
 
-const TEST_RECENT_EMAIL_RESPONSE: ActionRecentMailSuccessResponse = {
+const TEST_RECENT_EMAIL_RESPONSE: RecentMailSuccessResponse = {
   success: true,
   data: {
     unread: 1,
@@ -171,36 +164,13 @@ export const getRecentEmails = async (
   };
 };
 
-export const actionRecentEmailHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  LoginOptions,
-  LoginOptions & { mid?: string }
-> = async (req, res) => {
-  try {
-    const { id, password, authToken } = req.body;
-
-    if (id && password && authToken) {
-      const result = await actionLogin({ id, password, authToken });
-
-      if (!result.success) return res.json(result);
-
-      req.headers.cookie = result.cookieStore.getHeader(ACTION_SERVER);
-    } else if (!req.headers.cookie) {
-      return res.json(MissingCredentialResponse);
-    }
-
-    const cookieHeader = req.headers.cookie;
+export const actionRecentEmailHandler = middleware<ActionRecentMailResponse>(
+  async (req, res) => {
+    const cookieHeader = req.headers.cookie!;
 
     if (cookieHeader.includes("TEST"))
       return res.json(TEST_RECENT_EMAIL_RESPONSE);
 
     return res.json(await getRecentEmails(cookieHeader));
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
-};
+  },
+);
