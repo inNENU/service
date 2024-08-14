@@ -6,21 +6,14 @@ import type { Response } from "express";
 import express from "express";
 
 import { actionRouter } from "./action/index.js";
-import { registerAuthRoutes } from "./auth/index.js";
+import { authRouter } from "./auth/index.js";
 import {
   authCenterCheckHandler,
   authCenterLoginHandler,
   avatarHandler,
 } from "./auth-center/index.js";
 import { UnknownResponse } from "./config/index.js";
-import {
-  gradAdmissionHandler,
-  gradEnrollPlanHandler,
-  gradRecommendPlanHandler,
-  underAdmissionHandler,
-  underEnrollPlanHandler,
-  underHistoryScoreHandler,
-} from "./enroll/index.js";
+import { enrollRouter } from "./enroll/index.js";
 import {
   gradOldCourseTableHandler,
   gradOldGradeListHandler,
@@ -151,7 +144,8 @@ app.get("/", (_req, res) => {
 });
 
 app.use("/action", actionRouter);
-registerAuthRoutes(app);
+app.use("/auth", authRouter);
+app.use("/enroll", enrollRouter);
 app.use("/official", officialRouter);
 
 app.post("/auth-center/check", authCenterCheckHandler);
@@ -204,16 +198,6 @@ app.post("/grad-old-system/login", gradOldSystemLoginHandler);
 app.post("/grad-old-system/check", gradOldSystemCheckHandler);
 app.post("/grad-old-system/course-table", gradOldCourseTableHandler);
 app.post("/grad-old-system/grade-list", gradOldGradeListHandler);
-
-/*  ------------ 招生相关 ------------ */
-
-app.get("/enroll/under-admission", underAdmissionHandler);
-app.post("/enroll/under-admission", underAdmissionHandler);
-app.post("/enroll/under-history-score", underHistoryScoreHandler);
-app.post("/enroll/under-plan", underEnrollPlanHandler);
-app.post("/enroll/grad-admission", gradAdmissionHandler);
-app.post("/enroll/grad-recommend-plan", gradRecommendPlanHandler);
-app.post("/enroll/grad-plan", gradEnrollPlanHandler);
 
 /*  ------------ WebVPN ------------ */
 

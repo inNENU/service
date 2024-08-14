@@ -1,8 +1,15 @@
-import { ActionFailType, UnknownResponse } from "../../config/index.js";
+import {
+  ActionFailType,
+  MissingArgResponse,
+  MissingCredentialResponse,
+  UnknownResponse,
+} from "../../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
+  EmptyObject,
 } from "../../typings.js";
+import { middleware } from "../../utils/index.js";
 import { AUTH_SERVER, RE_AUTH_URL } from "../utils.js";
 
 const RE_AUTH_SMS_URL = `${AUTH_SERVER}/authserver/dynamicCode/getDynamicCodeByReauth.do`;
@@ -86,3 +93,17 @@ export const sendReAuthSMS = async (
     },
   };
 };
+
+export const startReAuthHandler = middleware<
+  ReAuthSMSResponse,
+  EmptyObject,
+  { id: string }
+>(async (req, res) => {
+  const cookieHeader = req.headers.cookie;
+  const { id } = req.query;
+
+  if (!cookieHeader) return MissingCredentialResponse;
+  if (!id) return MissingArgResponse("id");
+
+  return res.json(await sendReAuthSMS(cookieHeader, id));
+});

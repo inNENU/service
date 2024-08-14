@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import { Router } from "express";
 import rateLimit from "express-rate-limit";
 import type { Request } from "express-serve-static-core";
 
@@ -8,15 +8,15 @@ import { changePasswordHandler } from "./change-password.js";
 import { authEncryptHandler } from "./encrypt.js";
 import { authInitHandler, authInitInfoHandler } from "./init/index.js";
 import { authLoginHandler } from "./login.js";
-import { reAuthHandler } from "./re-auth/index.js";
+import { startReAuthHandler, verifyReAuthHandler } from "./re-auth/index.js";
 import { resetPasswordHandler } from "./reset/index.js";
 import { resetCaptchaHandler } from "./reset-captcha.js";
 import { ActionFailType } from "../config/index.js";
 import type { EmptyObject } from "../typings.js";
 
-const limiter = rateLimit({
-  windowMs: 30 * 1000, // 1 分钟
-  max: 4,
+const loginLimiter = rateLimit({
+  windowMs: 60000, // 1 分钟
+  max: 3,
   legacyHeaders: false,
   standardHeaders: true,
   keyGenerator: (req: Request<EmptyObject, { id: number }, { id: number }>) =>
@@ -32,26 +32,28 @@ const limiter = rateLimit({
     return {
       success: false,
       type: ActionFailType.TooFrequent,
-      msg: "请求过于频繁，请 30 秒后重试",
+      msg: "登录过于频繁，请 1 分钟后重试",
     };
   },
 });
 
-export const registerAuthRoutes = (app: Express): void => {
-  app.get("/auth/activate", activateHandler);
-  app.post("/auth/activate", activateHandler);
-  app.post("/auth/encrypt", authEncryptHandler);
-  app.get("/auth/auth-captcha", authCaptchaHandler);
-  app.post("/auth/auth-captcha", authCaptchaHandler);
-  app.post("/auth/change-password", changePasswordHandler);
-  app.patch("/auth/change-password", changePasswordHandler);
-  app.use("/auth/init", limiter);
-  app.get("/auth/init", authInitInfoHandler);
-  app.post("/auth/init", authInitHandler);
-  app.post("/auth/login", authLoginHandler);
-  app.get("/auth/re-auth", reAuthHandler);
-  app.post("/auth/re-auth", reAuthHandler);
-  app.get("/auth/reset-captcha", resetCaptchaHandler);
-  app.get("/auth/reset-password", resetPasswordHandler);
-  app.post("/auth/reset-password", resetPasswordHandler);
-};
+const authRouter = Router();
+
+authRouter.get("/activate", activateHandler);
+authRouter.post("/activate", activateHandler);
+authRouter.post("/encrypt", authEncryptHandler);
+authRouter.get("/auth-captcha", authCaptchaHandler);
+authRouter.post("/auth-captcha", authCaptchaHandler);
+authRouter.post("/change-password", changePasswordHandler);
+authRouter.patch("/change-password", changePasswordHandler);
+authRouter.use("/init", loginLimiter);
+authRouter.get("/init", authInitInfoHandler);
+authRouter.post("/init", authInitHandler);
+authRouter.post("/login", authLoginHandler);
+authRouter.get("/re-auth", startReAuthHandler);
+authRouter.post("/re-auth", verifyReAuthHandler);
+authRouter.get("/reset-captcha", resetCaptchaHandler);
+authRouter.get("/reset-password", resetPasswordHandler);
+authRouter.post("/reset-password", resetPasswordHandler);
+
+export { authRouter };

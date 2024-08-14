@@ -222,11 +222,7 @@ export const authLogin = async ({
           msg: "会话已过期，请重新登陆",
         };
 
-      if (
-        resultContent.includes(
-          "当前存在其他用户使用同一帐号登录，是否注销其他使用同一帐号的用户。",
-        )
-      )
+      if (resultContent.includes("当前账户已在其他PC端登录会话。"))
         return {
           success: false,
           type: ActionFailType.EnabledSSO,

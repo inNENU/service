@@ -237,7 +237,7 @@ export const getMyInfo = async (
       try {
         connection = await getConnection();
         await connection.execute(
-          "INSERT IGNORE INTO `org_id` (`orgId`, `org) VALUES (?, ?)",
+          "INSERT IGNORE INTO `org_id` (`orgId`, `org`) VALUES (?, ?)",
           [info.orgId, info.org],
         );
         await connection.execute(

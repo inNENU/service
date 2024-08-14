@@ -1,7 +1,6 @@
-import type { RequestHandler } from "express";
-
 import { ActionFailType, UnknownResponse } from "../config/index.js";
-import type { CommonFailedResponse, EmptyObject } from "../typings.js";
+import type { CommonFailedResponse } from "../typings.js";
+import { middleware } from "../utils/handler.js";
 
 const QUERY_URL = "https://gkcx.nenu.edu.cn/api/user/admissionQuery";
 
@@ -116,18 +115,9 @@ export const getUnderAdmission = async ({
   }
 };
 
-export const underAdmissionHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
+export const underAdmissionHandler = middleware<
+  UnderAdmissionResponse,
   UnderAdmissionOptions
-> = async (req, res) => {
-  try {
-    return res.json(await getUnderAdmission(req.body));
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
-};
+>(async (req, res) => {
+  return res.json(await getUnderAdmission(req.body));
+});

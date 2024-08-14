@@ -1,8 +1,14 @@
 import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
 
-import { ActionFailType, UnknownResponse } from "../../config/index.js";
+import {
+  ActionFailType,
+  InvalidArgResponse,
+  MissingCredentialResponse,
+  UnknownResponse,
+} from "../../config/index.js";
 import type { CommonFailedResponse } from "../../typings.js";
+import { middleware } from "../../utils/index.js";
 import { AUTH_SERVER, RE_AUTH_URL } from "../utils.js";
 
 const RE_AUTH_VERIFY_URL = `${AUTH_SERVER}/authserver/reAuthCheck/reAuthSubmit.do`;
@@ -75,3 +81,29 @@ export const verifyReAuthCaptcha = async (
     cookies,
   };
 };
+
+export interface ReAuthVerifyOptions {
+  /** 短信验证码 */
+  smsCode: string;
+}
+
+export const verifyReAuthHandler = middleware<
+  VerifyReAuthCaptchaResponse,
+  ReAuthVerifyOptions
+>(async (req, res) => {
+  const cookieHeader = req.headers.cookie;
+  const { smsCode } = req.body;
+
+  if (!cookieHeader) return MissingCredentialResponse;
+  if (!smsCode) return InvalidArgResponse("smsCode");
+
+  const result = await verifyReAuthCaptcha(cookieHeader, smsCode);
+
+  if (result.success) {
+    result.cookies.forEach(({ name, value, ...rest }) => {
+      res.cookie(name, value, rest);
+    });
+  }
+
+  return res.json(result);
+});

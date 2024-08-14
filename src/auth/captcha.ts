@@ -3,7 +3,10 @@ import type { RequestHandler } from "express";
 
 import { AUTH_CAPTCHA_URL, AUTH_LOGIN_URL, AUTH_SERVER } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
-import { MissingArgResponse, UnknownResponse } from "../config/index.js";
+import {
+  MissingArgResponse,
+  MissingCredentialResponse,
+} from "../config/index.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
 
 interface RawAuthCaptchaResponse {
@@ -118,40 +121,31 @@ export const authCaptchaHandler: RequestHandler<
   EmptyObject,
   AuthCaptchaOptions
 > = async (req, res) => {
-  try {
-    const cookieHeader = req.body.cookie
-      ? req.body.cookie.map(({ name, value }) => `${name}=${value}`).join("; ")
-      : req.headers.cookie;
+  const cookieHeader = req.body.cookie
+    ? req.body.cookie.map(({ name, value }) => `${name}=${value}`).join("; ")
+    : req.headers.cookie;
 
-    if (!cookieHeader) throw new Error("Cookie not found");
+  if (!cookieHeader) return MissingCredentialResponse;
 
-    if (req.method === "GET") {
-      const id = req.params.id;
+  if (req.method === "GET") {
+    const id = req.params.id;
 
-      if (!id) return res.json(MissingArgResponse("id"));
+    if (!id) return res.json(MissingArgResponse("id"));
 
-      return res.json(await getAuthCaptcha(cookieHeader, id));
-    }
-
-    if ("id" in req.body) {
-      return res.json(await getAuthCaptcha(cookieHeader, req.body.id));
-    }
-
-    if (!req.body.distance)
-      return res.json(MissingArgResponse("id or distance"));
-
-    const result = await verifyAuthCaptcha(
-      cookieHeader,
-      req.body.distance,
-      req.body.width ?? 295,
-    );
-
-    return res.json(result);
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
+    return res.json(await getAuthCaptcha(cookieHeader, id));
   }
+
+  if ("id" in req.body) {
+    return res.json(await getAuthCaptcha(cookieHeader, req.body.id));
+  }
+
+  if (!req.body.distance) return res.json(MissingArgResponse("id or distance"));
+
+  const result = await verifyAuthCaptcha(
+    cookieHeader,
+    req.body.distance,
+    req.body.width ?? 295,
+  );
+
+  return res.json(result);
 };

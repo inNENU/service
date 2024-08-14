@@ -1,16 +1,10 @@
-import type { RequestHandler } from "express";
-
 import type { ActionFailType } from "../config/index.js";
-import {
-  InvalidArgResponse,
-  MissingArgResponse,
-  UnknownResponse,
-} from "../config/index.js";
+import { InvalidArgResponse, MissingArgResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
-  EmptyObject,
 } from "../typings.js";
+import { middleware } from "../utils/index.js";
 
 export interface UnderHistoryScoreInfoOptions {
   type: "info";
@@ -27,10 +21,6 @@ export interface UnderHistoryScoreQueryOptions {
   /** 专业类型 */
   majorType: string;
 }
-
-export type UnderHistoryScoreOptions =
-  | UnderHistoryScoreInfoOptions
-  | UnderHistoryScoreQueryOptions;
 
 const INFO_URL = "https://gkcx.nenu.edu.cn/api/user/param";
 
@@ -202,26 +192,26 @@ export const queryUnderHistoryScore = async ({
   };
 };
 
-export const underHistoryScoreHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
+export type UnderHistoryScoreOptions =
+  | UnderHistoryScoreInfoOptions
+  | UnderHistoryScoreQueryOptions;
+
+export type UnderHistoryScoreResponse =
+  | UnderHistoryScoreInfoResponse
+  | UnderHistoryScoreQueryResponse
+  | CommonFailedResponse<ActionFailType.InvalidArg>;
+
+export const underHistoryScoreHandler = middleware<
+  UnderHistoryScoreResponse,
   UnderHistoryScoreOptions
-> = async (req, res) => {
-  try {
-    if (req.body.type === "info") {
-      return res.json(await getUnderHistoryScoreInfo());
-    }
-
-    if (req.body.type === "query") {
-      return res.json(await queryUnderHistoryScore(req.body));
-    }
-
-    return res.json(InvalidArgResponse("type"));
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
+>(async (req, res) => {
+  if (req.body.type === "info") {
+    return res.json(await getUnderHistoryScoreInfo());
   }
-};
+
+  if (req.body.type === "query") {
+    return res.json(await queryUnderHistoryScore(req.body));
+  }
+
+  return res.json(InvalidArgResponse("type"));
+});

@@ -1,5 +1,4 @@
 import { CookieStore } from "@mptool/net";
-import type { RequestHandler } from "express";
 import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 
 import { authCenterLogin, getAvatar } from "../../auth-center/index.js";
@@ -16,14 +15,11 @@ import {
 import type { MyInfo } from "../../my/index.js";
 import { getMyInfo, myLogin } from "../../my/index.js";
 import { MY_SERVER } from "../../my/utils.js";
-import type {
-  AccountInfo,
-  CommonFailedResponse,
-  EmptyObject,
-} from "../../typings.js";
+import type { AccountInfo, CommonFailedResponse } from "../../typings.js";
 import {
   getConnection,
   isInBlackList,
+  middleware,
   releaseConnection,
 } from "../../utils/index.js";
 import { vpnLogin } from "../../vpn/login.js";
@@ -46,7 +42,7 @@ export interface InitAuthOptions extends AccountInfo {
   openid: string;
 }
 
-export interface InitAuthSuccessResult {
+export interface InitAuthSuccessResponse {
   success: true;
   info: (MyInfo & { avatar: string }) | null;
   cookieStore: CookieStore;
@@ -71,9 +67,9 @@ export type InitAuthFailedResponse =
       cookieStore: CookieStore;
     });
 
-export type InitAuthResult = InitAuthSuccessResult | InitAuthFailedResponse;
+export type InitAuthResponse = InitAuthSuccessResponse | InitAuthFailedResponse;
 
-export const TEST_AUTH_INIT: InitAuthSuccessResult = {
+export const TEST_AUTH_INIT: InitAuthSuccessResponse = {
   success: true,
   info: TEST_INFO,
   cookieStore: TEST_COOKIE_STORE,
@@ -115,7 +111,7 @@ const SQL_STRING = `INSERT INTO \`student_info\` (${DATABASE_FIELDS.map(
 export const initAuth = async (
   { id, password, authToken, salt, params, appID, openid }: InitAuthOptions,
   cookieHeader: string,
-): Promise<InitAuthResult> => {
+): Promise<InitAuthResponse> => {
   let connection: PoolConnection | null = null;
 
   if (!id || !password) return MissingCredentialResponse;
@@ -200,11 +196,7 @@ export const initAuth = async (
           msg: "会话已过期，请重新登陆",
         };
 
-      if (
-        resultContent.includes(
-          "当前存在其他用户使用同一帐号登录，是否注销其他使用同一帐号的用户。",
-        )
-      )
+      if (resultContent.includes("当前账户已在其他PC端登录会话。"))
         return {
           success: false,
           type: ActionFailType.EnabledSSO,
@@ -392,7 +384,7 @@ export const initAuth = async (
           connection ??= await getConnection();
 
           await connection.execute(
-            "INSERT INTO `token` (`authToken`, `id`, `appId`, `openId`, `updateTime`) VALUES (?, ?, ?, ?, NOW())",
+            "INSERT INTO `token` (`authToken`, `id`, `appId`, `openId`, `updateTime`) VALUES (?, ?, ?, ?, NOW()) ON DUPLICATE KEY UPDATE `appId` = VALUES(`appId`), `openId` = VALUES(`openId`), `updateTime` = VALUES(`updateTime`)",
             [authToken, id, appID, openid ?? null],
           );
         } catch (err) {
@@ -425,39 +417,32 @@ export const initAuth = async (
   }
 };
 
-export const authInitHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
+export const authInitHandler = middleware<
+  InitAuthResponse,
   InitAuthOptions,
   { id: string }
-> = async (req, res) => {
-  try {
-    const cookieHeader = req.headers.cookie ?? "";
+>(async (req, res) => {
+  const cookieHeader = req.headers.cookie;
 
-    // Note: Return fake result for testing
-    if (cookieHeader.includes("TEST")) return res.json(TEST_AUTH_INIT);
+  if (!cookieHeader) return MissingCredentialResponse;
 
-    const result = await initAuth(req.body, cookieHeader);
+  // Note: Return fake result for testing
+  if (cookieHeader.includes("TEST")) return res.json(TEST_AUTH_INIT);
 
-    if ("cookieStore" in result) {
-      const cookies = result.cookieStore
-        .getAllCookies()
-        .map((item) => item.toJSON());
+  const result = await initAuth(req.body, cookieHeader);
 
-      cookies.forEach(({ name, value, ...rest }) => {
-        res.cookie(name, value, rest);
-      });
+  if ("cookieStore" in result) {
+    const cookies = result.cookieStore
+      .getAllCookies()
+      .map((item) => item.toJSON());
 
-      // @ts-expect-error: cookieStore is not a JSON-serializable object
-      delete result.cookieStore;
-    }
+    cookies.forEach(({ name, value, ...rest }) => {
+      res.cookie(name, value, rest);
+    });
 
-    return res.json(result);
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
+    // @ts-expect-error: cookieStore is not a JSON-serializable object
+    delete result.cookieStore;
   }
-};
+
+  return res.json(result);
+});

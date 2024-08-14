@@ -5,6 +5,6 @@ export * from "./email-page.js";
 export * from "./login.js";
 export * from "./notice-detail.js";
 export * from "./recent-mail.js";
-export * from "./routes.js";
+export * from "./router.js";
 export * from "./notice-list.js";
 export * from "./utils.js";

@@ -1,12 +1,11 @@
 import { CookieStore } from "@mptool/net";
-import type { RequestHandler } from "express";
 
-import { ActionFailType, UnknownResponse } from "../config/index.js";
+import { ActionFailType } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
-  EmptyObject,
 } from "../typings.js";
+import { middleware } from "../utils/index.js";
 
 export interface GradAdmissionOptions {
   name: string;
@@ -148,18 +147,9 @@ const getInfo = async ({
   };
 };
 
-export const gradAdmissionHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
+export const gradAdmissionHandler = middleware<
+  GradAdmissionResponse,
   GradAdmissionOptions
-> = async (req, res) => {
-  try {
-    res.json(await getInfo(req.body));
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
-};
+>(async (req, res) => {
+  return res.json(await getInfo(req.body));
+});

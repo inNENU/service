@@ -1,17 +1,34 @@
-import type { RequestHandler } from "express";
-
+import type { ActivateInfoResponse } from "./get-info.js";
 import { getActivateInfo } from "./get-info.js";
-import type { ActivateSendSmsOptions } from "./send-sms.js";
+import type {
+  ActivateSendSmsOptions,
+  ActivateSendSmsResponse,
+} from "./send-sms.js";
 import { sendActivateSms } from "./send-sms.js";
-import type { ActivateSetPasswordOptions } from "./set-password.js";
+import type {
+  ActivateSetPasswordOptions,
+  ActivateSetPasswordResponse,
+} from "./set-password.js";
 import { setPassword } from "./set-password.js";
-import type { ActivateValidationOptions } from "./validate-info.js";
+import type {
+  ActivateValidationOptions,
+  ActivateValidationResponse,
+} from "./validate-info.js";
 import { validAccountInfo } from "./validate-info.js";
-import type { ActivateValidSmsOptions } from "./validate-sms.js";
+import type {
+  ActivateValidSmsOptions,
+  ActivateValidSmsResponse,
+} from "./validate-sms.js";
 import { validateActivateSms } from "./validate-sms.js";
-import { InvalidArgResponse } from "../../config/index.js";
-import type { CommonFailedResponse, EmptyObject } from "../../typings.js";
-import type { CheckPasswordOptions } from "../check-password.js";
+import {
+  InvalidArgResponse,
+  MissingCredentialResponse,
+} from "../../config/index.js";
+import { middleware } from "../../utils/index.js";
+import type {
+  CheckPasswordOptions,
+  CheckPasswordResponse,
+} from "../check-password.js";
 import { checkPassword } from "../check-password.js";
 
 export type ActivateOptions =
@@ -21,12 +38,16 @@ export type ActivateOptions =
   | CheckPasswordOptions
   | ActivateSetPasswordOptions;
 
-export const activateHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  ActivateOptions
-> = async (req, res) => {
-  try {
+export type ActivateResponse =
+  | ActivateValidationResponse
+  | ActivateInfoResponse
+  | ActivateSendSmsResponse
+  | ActivateValidSmsResponse
+  | ActivateSetPasswordResponse
+  | CheckPasswordResponse;
+
+export const activateHandler = middleware<ActivateResponse, ActivateOptions>(
+  async (req, res) => {
     if (req.method === "GET") {
       const response = await getActivateInfo();
 
@@ -44,38 +65,29 @@ export const activateHandler: RequestHandler<
       }
 
       return res.json(response);
-    } else {
-      const options = req.body;
-
-      if (!req.headers.cookie) throw new Error(`Cookie is missing!`);
-
-      const cookieHeader = req.headers.cookie;
-
-      if (options.type === "validate-info")
-        return res.json(validAccountInfo(options, cookieHeader));
-
-      if (options.type === "send-sms")
-        return res.json(sendActivateSms(options, cookieHeader));
-
-      if (options.type === "validate-sms")
-        return res.json(validateActivateSms(options, cookieHeader));
-
-      if (options.type === "check-password")
-        return res.json(checkPassword(options, cookieHeader, 3));
-
-      if (options.type === "set-password")
-        return res.json(setPassword(options, cookieHeader));
-
-      return InvalidArgResponse("type");
     }
-  } catch (err) {
-    const { message } = err as Error;
 
-    console.error(err);
+    if (!req.headers.cookie) return MissingCredentialResponse;
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as CommonFailedResponse);
-  }
-};
+    const options = req.body;
+
+    const cookieHeader = req.headers.cookie;
+
+    if (options.type === "validate-info")
+      return res.json(await validAccountInfo(options, cookieHeader));
+
+    if (options.type === "send-sms")
+      return res.json(await sendActivateSms(options, cookieHeader));
+
+    if (options.type === "validate-sms")
+      return res.json(await validateActivateSms(options, cookieHeader));
+
+    if (options.type === "check-password")
+      return res.json(await checkPassword(options, cookieHeader, 3));
+
+    if (options.type === "set-password")
+      return res.json(await setPassword(options, cookieHeader));
+
+    return InvalidArgResponse("type");
+  },
+);

@@ -22,7 +22,6 @@ export type ActivateInfoResponse =
   | ActivateInfoSuccessResponse
   | CommonFailedResponse<ActionFailType.Restricted | ActionFailType.Unknown>;
 
-// Note: e.queryaccountById
 export const getActivateInfo = async (
   cookieStore = new CookieStore(),
 ): Promise<ActivateInfoResponse> => {

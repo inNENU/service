@@ -1,16 +1,10 @@
-import type { RequestHandler } from "express";
-
 import type { ActionFailType } from "../config/index.js";
-import {
-  InvalidArgResponse,
-  MissingArgResponse,
-  UnknownResponse,
-} from "../config/index.js";
+import { InvalidArgResponse, MissingArgResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
-  EmptyObject,
 } from "../typings.js";
+import { middleware } from "../utils/index.js";
 
 export interface UnderEnrollPlanInfoOptions {
   type: "info";
@@ -27,10 +21,6 @@ export interface UnderEnrollPlanQueryOptions {
   /** 专业类型 */
   majorType: string;
 }
-
-export type UnderEnrollPlanOptions =
-  | UnderEnrollPlanInfoOptions
-  | UnderEnrollPlanQueryOptions;
 
 const INFO_URL = "https://gkcx.nenu.edu.cn/api/user/param";
 
@@ -130,11 +120,8 @@ export const queryUnderEnrollPlan = async ({
   majorType,
 }: UnderEnrollPlanQueryOptions): Promise<UnderEnrollPlanQueryResponse> => {
   if (!province) return MissingArgResponse("province");
-
   if (!year) return MissingArgResponse("year");
-
   if (!classType) return MissingArgResponse("classType");
-
   if (!majorType) return MissingArgResponse("majorType");
 
   const queryResponse = await fetch(
@@ -175,26 +162,26 @@ export const queryUnderEnrollPlan = async ({
   };
 };
 
-export const underEnrollPlanHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
+export type UnderEnrollPlanOptions =
+  | UnderEnrollPlanInfoOptions
+  | UnderEnrollPlanQueryOptions;
+
+export type UnderEnrollPlanResponse =
+  | UnderEnrollPlanInfoResponse
+  | UnderEnrollPlanQueryResponse
+  | CommonFailedResponse<ActionFailType.InvalidArg>;
+
+export const underEnrollPlanHandler = middleware<
+  UnderEnrollPlanResponse,
   UnderEnrollPlanOptions
-> = async (req, res) => {
-  try {
-    if (req.body.type === "info") {
-      return res.json(await getUnderEnrollInfo());
-    }
-
-    if (req.body.type === "query") {
-      return res.json(await queryUnderEnrollPlan(req.body));
-    }
-
-    return res.json(InvalidArgResponse("type"));
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
+>(async (req, res) => {
+  if (req.body.type === "info") {
+    return res.json(await getUnderEnrollInfo());
   }
-};
+
+  if (req.body.type === "query") {
+    return res.json(await queryUnderEnrollPlan(req.body));
+  }
+
+  return res.json(InvalidArgResponse("type"));
+});

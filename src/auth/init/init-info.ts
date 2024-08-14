@@ -1,12 +1,8 @@
 import { CookieStore } from "@mptool/net";
-import type { RequestHandler } from "express";
 
-import {
-  TEST_COOKIE_STORE,
-  TEST_ID,
-  UnknownResponse,
-} from "../../config/index.js";
+import { TEST_COOKIE_STORE, TEST_ID } from "../../config/index.js";
 import type { CommonFailedResponse, EmptyObject } from "../../typings.js";
+import { middleware } from "../../utils/index.js";
 import type { AuthCaptchaResponse } from "../captcha.js";
 import { getAuthCaptcha } from "../captcha.js";
 import {
@@ -17,7 +13,7 @@ import {
   SALT_REGEXP,
 } from "../utils.js";
 
-export type AuthInitInfoSuccessResult = {
+export type AuthInitInfoSuccessResponse = {
   success: true;
   cookieStore: CookieStore;
   /** 盐值 */
@@ -29,11 +25,11 @@ export type AuthInitInfoSuccessResult = {
   | { needCaptcha: false; captcha: null }
 );
 
-export type AuthInitInfoResult =
-  | AuthInitInfoSuccessResult
+export type AuthInitInfoResponse =
+  | AuthInitInfoSuccessResponse
   | CommonFailedResponse;
 
-export const TEST_AUTH_INIT_INFO: AuthInitInfoSuccessResult = {
+export const TEST_AUTH_INIT_INFO: AuthInitInfoSuccessResponse = {
   success: true,
   cookieStore: TEST_COOKIE_STORE,
   salt: "test",
@@ -47,7 +43,7 @@ export const TEST_AUTH_INIT_INFO: AuthInitInfoSuccessResult = {
 export const getAuthInitInfo = async (
   id: string,
   cookieStore = new CookieStore(),
-): Promise<AuthInitInfoResult> => {
+): Promise<AuthInitInfoResponse> => {
   const loginPageResponse = await fetch(AUTH_LOGIN_URL, {
     headers: {
       Cookie: cookieStore.getHeader(AUTH_SERVER),
@@ -104,46 +100,35 @@ export const getAuthInitInfo = async (
       _eventId: "submit",
       rememberMe: "true",
     },
-  } as AuthInitInfoSuccessResult;
+  } as AuthInitInfoSuccessResponse;
 };
 
-export const authInitInfoHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
+export const authInitInfoHandler = middleware<
+  AuthInitInfoResponse,
   EmptyObject,
   { id: string }
-> = async (req, res) => {
-  try {
-    const id = req.query.id;
+>(async (req, res) => {
+  const id = req.query.id;
 
-    const result =
-      // Note: Return fake result for testing
-      id === TEST_ID ? TEST_AUTH_INIT_INFO : await getAuthInitInfo(id);
+  const result =
+    // Note: Return fake result for testing
+    id === TEST_ID ? TEST_AUTH_INIT_INFO : await getAuthInitInfo(id);
 
-    if (result.success) {
-      const cookies = result.cookieStore
-        .getAllCookies()
-        .map((item) => item.toJSON());
+  if (!result.success) return res.json(result);
 
-      cookies.forEach(({ name, value, ...rest }) => {
-        res.cookie(name, value, rest);
-      });
+  const cookies = result.cookieStore
+    .getAllCookies()
+    .map((item) => item.toJSON());
 
-      return res.json({
-        success: true,
-        needCaptcha: result.needCaptcha,
-        captcha: result.captcha,
-        params: result.params,
-        salt: result.salt,
-      } as AuthInitInfoSuccessResult);
-    }
+  cookies.forEach(({ name, value, ...rest }) => {
+    res.cookie(name, value, rest);
+  });
 
-    return res.json(result);
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
-};
+  return res.json({
+    success: true,
+    needCaptcha: result.needCaptcha,
+    captcha: result.captcha,
+    params: result.params,
+    salt: result.salt,
+  } as AuthInitInfoSuccessResponse);
+});
