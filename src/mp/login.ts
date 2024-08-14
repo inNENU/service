@@ -4,7 +4,6 @@ import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 import {
   DatabaseErrorResponse,
   MissingArgResponse,
-  UnknownResponse,
   appIDInfo,
 } from "../config/index.js";
 import type { CommonFailedResponse, EmptyObject } from "../typings.js";
@@ -39,18 +38,21 @@ export const mpLoginHandler: RequestHandler<
   EmptyObject,
   MPLoginCodeOptions | MPLoginOpenidOptions
 > = async (req, res) => {
+  let connection: PoolConnection | null = null;
+
   try {
     let openid = "";
 
     if ("openid" in req.body) {
-      if (!req.body.openid) return MissingArgResponse("openid");
+      if (!req.body.openid) return res.json(MissingArgResponse("openid"));
+
       ({ openid } = req.body);
     } else {
       const { env, appID, code } = req.body;
 
-      if (!env) return MissingArgResponse("env");
-      if (!appID) return MissingArgResponse("appID");
-      if (!code) return MissingArgResponse("code");
+      if (!env) return res.json(MissingArgResponse("env"));
+      if (!appID) return res.json(MissingArgResponse("appID"));
+      if (!code) return res.json(MissingArgResponse("code"));
 
       const url = `https://api.${
         env === "qq" ? "q" : "weixin"
@@ -62,7 +64,6 @@ export const mpLoginHandler: RequestHandler<
       ({ openid } = (await response.json()) as { openid: string });
     }
 
-    let connection: PoolConnection | null = null;
     let inBlacklist = false;
     let isAdmin = false;
 
@@ -86,8 +87,6 @@ export const mpLoginHandler: RequestHandler<
       console.error(`Querying with openid ${openid}`, err);
 
       return res.json(DatabaseErrorResponse((err as Error).message));
-    } finally {
-      releaseConnection(connection);
     }
 
     return res.json({
@@ -95,11 +94,7 @@ export const mpLoginHandler: RequestHandler<
       inBlacklist,
       isAdmin,
     } as MPloginSuccessResponse);
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
+  } finally {
+    releaseConnection(connection);
   }
 };
