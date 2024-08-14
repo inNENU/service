@@ -7,7 +7,7 @@ import type {
   CommonListSuccessResponse,
   LoginOptions,
 } from "../typings.js";
-import { middleware } from "../utils/handler.js";
+import { middleware } from "../utils/index.js";
 
 const NOTICE_LIST_QUERY_URL = `${ACTION_SERVER}/page/queryList`;
 

@@ -1,14 +1,14 @@
 import type { RichTextNode } from "@mptool/parser";
 import { getRichTextNodes } from "@mptool/parser";
-import type { RequestHandler } from "express";
 
 import { OFFICIAL_URL, getOfficialPageView } from "./utils.js";
+import type { ActionFailType } from "../config/index.js";
 import { MissingArgResponse, UnknownResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
-  EmptyObject,
 } from "../typings.js";
+import { middleware } from "../utils/index.js";
 
 const INFO_REGEXP =
   /<div class="ar_tit">\s*<h3>([^>]+)<\/h3>\s*<h6>([^]+?)<\/h6>/;
@@ -47,85 +47,77 @@ export type OfficialInfoDetailSuccessResponse =
 
 export type OfficialInfoDetailResponse =
   | OfficialInfoDetailSuccessResponse
-  | CommonFailedResponse;
+  | CommonFailedResponse<ActionFailType.MissingArg | ActionFailType.Unknown>;
 
-export const officialInfoDetailHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  EmptyObject,
-  OfficialInfoDetailOptions
-> = async (req, res) => {
-  try {
-    const { url } = req.query;
+export const getOfficialInfoDetail = async (
+  url: string,
+): Promise<OfficialInfoDetailResponse> => {
+  if (!url) return MissingArgResponse("url");
 
-    if (!url) return res.json(MissingArgResponse("url"));
+  const response = await fetch(`${OFFICIAL_URL}/${url}`);
 
-    const response = await fetch(`${OFFICIAL_URL}/${url}`);
+  if (response.status !== 200) return UnknownResponse("请求失败");
 
-    if (response.status !== 200) throw new Error("请求失败");
+  const text = await response.text();
 
-    const text = await response.text();
+  const [, title, info] = INFO_REGEXP.exec(text)!;
 
-    const [, title, info] = INFO_REGEXP.exec(text)!;
+  const time = TIME_REGEXP.exec(info)![1];
+  const from = FROM_REGEXP.exec(info)?.[1];
+  const author = AUTHOR_REGEXP.exec(info)?.[1];
+  const editor = EDITOR_REGEXP.exec(info)?.[1];
+  const [, owner, id] = PAGEVIEW_PARAMS_REGEXP.exec(info)!;
+  const content = CONTENT_REGEXP.exec(text)![1];
 
-    const time = TIME_REGEXP.exec(info)![1];
-    const from = FROM_REGEXP.exec(info)?.[1];
-    const author = AUTHOR_REGEXP.exec(info)?.[1];
-    const editor = EDITOR_REGEXP.exec(info)?.[1];
-    const [, owner, id] = PAGEVIEW_PARAMS_REGEXP.exec(info)!;
-    const content = CONTENT_REGEXP.exec(text)![1];
+  const data = {
+    title,
+    time,
+    from,
+    author,
+    editor,
+    pageView: await getOfficialPageView(id, owner),
+    content: await getRichTextNodes(content, {
+      transform: {
+        // trim text node in p
+        p: (node) => {
+          if (node.children?.length === 1 && node.children[0].type === "text") {
+            node.children[0].text = node.children[0].text.trim();
+          }
 
-    const data = {
-      title,
-      time,
-      from,
-      author,
-      editor,
-      pageView: await getOfficialPageView(id, owner),
-      content: await getRichTextNodes(content, {
-        transform: {
-          // trim text node in p
-          p: (node) => {
-            if (
-              node.children?.length === 1 &&
-              node.children[0].type === "text"
-            ) {
-              node.children[0].text = node.children[0].text.trim();
-            }
-
-            return node;
-          },
-          img: (node) => {
-            const { src = "" } = (node.attrs ??= {});
-
-            if (src.includes("/fileTypeImages/")) return null;
-
-            if (src.startsWith("/")) node.attrs.src = `${OFFICIAL_URL}${src}`;
-
-            delete node.attrs.width;
-            delete node.attrs.height;
-            delete node.attrs.style;
-
-            return node;
-          },
-          td: (node) => {
-            delete node.attrs?.style;
-
-            return node;
-          },
+          return node;
         },
-      }),
-    };
+        img: (node) => {
+          const { src = "" } = (node.attrs ??= {});
 
-    return res.json({
-      success: true,
-      data,
-    } as OfficialInfoDetailResponse);
-  } catch (err) {
-    const { message } = err as Error;
+          if (src.includes("/fileTypeImages/")) return null;
 
-    console.error(err);
+          if (src.startsWith("/")) node.attrs.src = `${OFFICIAL_URL}${src}`;
 
-    return res.json(UnknownResponse(message));
-  }
+          delete node.attrs.width;
+          delete node.attrs.height;
+          delete node.attrs.style;
+
+          return node;
+        },
+        td: (node) => {
+          delete node.attrs?.style;
+
+          return node;
+        },
+      },
+    }),
+  };
+
+  return {
+    success: true,
+    data,
+  };
 };
+
+export const officialInfoDetailHandler = middleware<
+  OfficialInfoDetailResponse,
+  OfficialInfoDetailOptions,
+  OfficialInfoDetailOptions
+>(async (req, res) => {
+  return res.json(await getOfficialInfoDetail(req.body.url || req.query.url));
+});

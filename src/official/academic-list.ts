@@ -1,12 +1,10 @@
-import type { RequestHandler } from "express";
-
 import { OFFICIAL_URL, getOfficialPageView } from "./utils.js";
 import { UnknownResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonListSuccessResponse,
-  EmptyObject,
 } from "../typings.js";
+import { middleware } from "../utils/index.js";
 
 const LIST_REGEXP = /<ul class=".*? xsyg">([^]+?)<\/ul>/;
 const ITEM_REGEXP =
@@ -39,54 +37,53 @@ export type OfficialAcademicListResponse =
 
 let totalPageState = 0;
 
-export const officialAcademicListHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  OfficialAcademicListOptions
-> = async (req, res) => {
-  try {
-    const { current = 1, total = totalPageState || 0 } = req.body;
+export const getAcademicList = async ({
+  current = 1,
+  total = totalPageState || 0,
+}: OfficialAcademicListOptions): Promise<OfficialAcademicListResponse> => {
+  const response = await fetch(
+    total && current !== 1
+      ? `${OFFICIAL_URL}/xsyj/xsyg/${total - current + 1}.htm`
+      : `${OFFICIAL_URL}/xsyj/xsyg.htm`,
+  );
 
-    const response = await fetch(
-      total && current !== 1
-        ? `${OFFICIAL_URL}/xsyj/xsyg/${total - current + 1}.htm`
-        : `${OFFICIAL_URL}/xsyj/xsyg.htm`,
-    );
+  if (response.status !== 200) return UnknownResponse("请求失败");
 
-    if (response.status !== 200) throw new Error("请求失败");
+  const content = await response.text();
 
-    const content = await response.text();
+  totalPageState = Math.ceil(Number(TOTAL_REGEXP.exec(content)![1]) / 10);
 
-    totalPageState = Math.ceil(Number(TOTAL_REGEXP.exec(content)![1]) / 10);
+  const [, pageIds, owner] = PAGEVIEW_PARAMS_REGEXP.exec(content)!;
 
-    const [, pageIds, owner] = PAGEVIEW_PARAMS_REGEXP.exec(content)!;
+  const pageViews = await Promise.all(
+    pageIds.split(/,\s*/).map((id) => getOfficialPageView(id, owner)),
+  );
 
-    const pageViews = await Promise.all(
-      pageIds.split(/,\s*/).map((id) => getOfficialPageView(id, owner)),
-    );
+  const data = Array.from(
+    LIST_REGEXP.exec(content)![1].matchAll(ITEM_REGEXP),
+  ).map(([, url, subject, person, time, location], index) => ({
+    subject,
+    person,
+    time,
+    location,
+    pageView: pageViews[index],
+    url,
+  }));
 
-    const data = Array.from(
-      LIST_REGEXP.exec(content)![1].matchAll(ITEM_REGEXP),
-    ).map(([, url, subject, person, time, location], index) => ({
-      subject,
-      person,
-      time,
-      location,
-      pageView: pageViews[index],
-      url,
-    }));
-
-    return res.json({
-      success: true,
-      data,
-      current,
-      total: totalPageState,
-    } as OfficialAcademicListResponse);
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
+  return {
+    success: true,
+    data,
+    current,
+    total: totalPageState,
+  };
 };
+
+export const officialAcademicListHandler = middleware<
+  OfficialAcademicListResponse,
+  OfficialAcademicListOptions,
+  OfficialAcademicListOptions
+>(async (req, res) => {
+  return res.json(
+    await getAcademicList(req.method === "GET" ? req.query : req.body),
+  );
+});

@@ -1,12 +1,10 @@
-import type { RequestHandler } from "express";
-
 import { OFFICIAL_URL } from "./utils.js";
 import { UnknownResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
-  EmptyObject,
 } from "../typings.js";
+import { middleware } from "../utils/index.js";
 
 const UNDER_MAJOR_PLAN_URL = `${OFFICIAL_URL}/jyjx/bksjy/rcpyfa.htm`;
 
@@ -21,38 +19,32 @@ export type UnderMajorPlanResponse =
   | UnderMajorPlanSuccessResponse
   | CommonFailedResponse;
 
-export const underMajorPlanHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  EmptyObject
-> = async (_, res) => {
-  try {
-    const response = await fetch(UNDER_MAJOR_PLAN_URL);
+export const getUnderMajorPlan = async (): Promise<UnderMajorPlanResponse> => {
+  const response = await fetch(UNDER_MAJOR_PLAN_URL);
 
-    if (response.status !== 200) throw new Error("请求失败");
+  if (response.status !== 200) return UnknownResponse("请求失败");
 
-    const html = await response.text();
+  const html = await response.text();
 
-    const listContent = MAJOR_PLAN_LIST_REGEXP.exec(html)?.[1];
+  const listContent = MAJOR_PLAN_LIST_REGEXP.exec(html)?.[1];
 
-    if (!listContent) throw new Error("未找到列表");
+  if (!listContent) return UnknownResponse("未找到列表");
 
-    const list = Array.from(listContent.matchAll(MAJOR_PLAN_ITEM_REGEXP)).map(
-      ([, url, name]) => ({
-        name,
-        url: `${OFFICIAL_URL}${url}`,
-      }),
-    );
+  const list = Array.from(listContent.matchAll(MAJOR_PLAN_ITEM_REGEXP)).map(
+    ([, url, name]) => ({
+      name,
+      url: `${OFFICIAL_URL}${url}`,
+    }),
+  );
 
-    return res.json({
-      success: true,
-      data: list,
-    } as UnderMajorPlanSuccessResponse);
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
+  return {
+    success: true,
+    data: list,
+  };
 };
+
+export const underMajorPlanHandler = middleware<UnderMajorPlanResponse>(
+  async (_, res) => {
+    return res.json(await getUnderMajorPlan());
+  },
+);

@@ -1,7 +1,7 @@
 import type { BorrowBooksResponse } from "./provider.js";
 import { getBorrowBooks } from "./provider.js";
 import { BORROW_BOOKS_TEST_RESPONSE } from "./test-data.js";
-import { middleware } from "../../utils/handler.js";
+import { middleware } from "../../utils/index.js";
 
 export const borrowBooksHandler = middleware<BorrowBooksResponse>(
   async (req, res) => {

@@ -50,15 +50,7 @@ import {
   myInfoHandler,
   myLoginHandler,
 } from "./my/index.js";
-import {
-  officialAcademicDetailHandler,
-  officialAcademicListHandler,
-  officialInfoDetailHandler,
-  officialInfoListHandler,
-  officialNoticeDetailHandler,
-  officialNoticeListHandler,
-  underMajorPlanHandler,
-} from "./official/index.js";
+import { officialRouter } from "./official/index.js";
 import {
   test301Handler,
   test302Handler,
@@ -160,6 +152,7 @@ app.get("/", (_req, res) => {
 
 app.use("/action", actionRouter);
 registerAuthRoutes(app);
+app.use("/official", officialRouter);
 
 app.post("/auth-center/check", authCenterCheckHandler);
 app.post("/auth-center/login", authCenterLoginHandler);
@@ -211,17 +204,6 @@ app.post("/grad-old-system/login", gradOldSystemLoginHandler);
 app.post("/grad-old-system/check", gradOldSystemCheckHandler);
 app.post("/grad-old-system/course-table", gradOldCourseTableHandler);
 app.post("/grad-old-system/grade-list", gradOldGradeListHandler);
-
-/*  ------------ 官网相关 ------------ */
-
-app.get("/official/academic-detail", officialAcademicDetailHandler);
-app.post("/official/academic-list", officialAcademicListHandler);
-app.get("/official/info-detail", officialInfoDetailHandler);
-app.post("/official/info-list", officialInfoListHandler);
-app.get("/official/notice-detail", officialNoticeDetailHandler);
-app.post("/official/notice-list", officialNoticeListHandler);
-app.get("/official/under-major-plan", underMajorPlanHandler);
-app.post("/official/under-major-plan", underMajorPlanHandler);
 
 /*  ------------ 招生相关 ------------ */
 
@@ -283,11 +265,11 @@ setInterval(() => {
   const { rss, heapTotal, heapUsed, arrayBuffers } = process.memoryUsage();
 
   console.log(
-    `rss: ${Math.round((rss / 1024 / 1024) * 100) / 100} MB, heap: ${Math.round(
-      heapUsed / 1024 / 1024,
+    `rss: ${Math.round((rss / 1024 / 1024 / 100) * 100)} MB, heap: ${Math.round(
+      (heapUsed / 1024 / 1024 / 100) * 100,
     )} / ${Math.round(
-      heapTotal / 1024 / 1024,
-    )} MB, arrayBuffers: ${Math.round(arrayBuffers / 1024 / 1024)} MB`,
+      (heapTotal / 1024 / 1024 / 100) * 100,
+    )} MB, arrayBuffers: ${Math.round((arrayBuffers / 1024 / 1024 / 100) * 100)} MB`,
   );
 }, /** 5 min */ 300000);
 
