@@ -16,12 +16,7 @@ import { morganMiddleware } from "./middlewire/index.js";
 import { mpRouter } from "./mp/index.js";
 import { myRouter } from "./my/index.js";
 import { officialRouter } from "./official/index.js";
-import {
-  test301Handler,
-  test302Handler,
-  testGetHandler,
-  testPostHandler,
-} from "./test/index.js";
+import { testRouter } from "./test/index.js";
 import {
   underStudyCheckHandler,
   underStudyCourseCommentaryHandler,
@@ -124,6 +119,7 @@ app.use("/grad-system", gradRouter);
 app.use("/library", libraryRouter);
 app.use("/mp", mpRouter);
 app.use("/my", myRouter);
+app.use("/test", testRouter);
 app.use("/vpn", vpnRouter);
 
 /*  ------------ 本科教务系统 ------------ */
@@ -156,13 +152,6 @@ app.post("/under-system/test-query", underTestQueryHandler);
 /*  ------------ 天气 ------------ */
 
 app.get("/weather", weatherHandler);
-
-/*  ------------ 测试 API ------------ */
-
-app.get("/test/get", testGetHandler);
-app.post("/test/post", testPostHandler);
-app.post("/test/301", test301Handler);
-app.post("/test/302", test302Handler);
 
 // @ts-expect-error: Express type issue
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -1,6 +1,6 @@
-import type { RequestHandler } from "express";
+import { middleware } from "../utils/index.js";
 
-export const test301Handler: RequestHandler = (req, res) => {
+export const test301Handler = middleware((req, res) => {
   console.log(req.headers);
   console.log(req.query);
   console.log(req.path);
@@ -11,4 +11,4 @@ export const test301Handler: RequestHandler = (req, res) => {
   res.header("Location", "https://service.innenu.com");
   res.status(301);
   res.end();
-};
+});

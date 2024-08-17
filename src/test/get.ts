@@ -1,6 +1,6 @@
-import type { RequestHandler } from "express";
+import { middleware } from "../utils/index.js";
 
-export const testGetHandler: RequestHandler = (req, res) => {
+export const testGetHandler = middleware((req, res) => {
   console.log(req.headers);
   console.log(req.query);
   console.log(req.path);
@@ -12,9 +12,8 @@ export const testGetHandler: RequestHandler = (req, res) => {
     success: true,
     msg: "test",
     headers: req.headers,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     body: req.body,
     path: req.path,
     query: req.query,
   });
-};
+});
