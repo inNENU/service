@@ -7,11 +7,7 @@ import express from "express";
 
 import { actionRouter } from "./action/index.js";
 import { authRouter } from "./auth/index.js";
-import {
-  authCenterCheckHandler,
-  authCenterLoginHandler,
-  avatarHandler,
-} from "./auth-center/index.js";
+import { authCenterRouter } from "./auth-center/index.js";
 import { UnknownResponse } from "./config/index.js";
 import { enrollRouter } from "./enroll/index.js";
 import { gradRouter } from "./grad-system/index.js";
@@ -127,15 +123,12 @@ app.get("/", (_req, res) => {
 
 app.use("/action", actionRouter);
 app.use("/auth", authRouter);
+app.use("/auth-center", authCenterRouter);
 app.use("/enroll", enrollRouter);
 app.use("/official", officialRouter);
 app.use("/grad-system", gradRouter);
 app.use("/library", libraryRouter);
 app.use("/mp", mpRouter);
-
-app.post("/auth-center/check", authCenterCheckHandler);
-app.post("/auth-center/login", authCenterLoginHandler);
-app.post("/auth-center/avatar", avatarHandler);
 
 /*  ------------ 服务大厅 ------------ */
 
