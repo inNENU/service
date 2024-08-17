@@ -1,7 +1,7 @@
 import type { RawUnderCourseCommentaryFailResult } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
 import type { ActionFailType } from "../../config/index.js";
-import { ExpiredResponse } from "../../config/index.js";
+import { ExpiredResponse, UnknownResponse } from "../../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
@@ -192,7 +192,7 @@ export const listUnderCourseCommentary = async (
   if ("code" in data) {
     if (data.message === "尚未登录，请先登录") return ExpiredResponse;
 
-    throw new Error(data.message);
+    return UnknownResponse(data.message);
   }
 
   return {

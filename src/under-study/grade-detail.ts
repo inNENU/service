@@ -165,7 +165,7 @@ export const getUnderGradeDetail = async (
   if (data.code !== 0) {
     if (data.message === "尚未登录，请先登录") return ExpiredResponse;
 
-    throw new Error(data.message);
+    return UnknownResponse(data.message);
   }
 
   const gradeDetail = getGradeDetail(

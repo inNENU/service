@@ -1,8 +1,8 @@
-import type { RequestHandler } from "express";
-
-import { UnknownResponse } from "../config/index.js";
-import type { EmptyObject } from "../typings.js";
-import { splitWords } from "../utils/index.js";
+import type {
+  CommonFailedResponse,
+  CommonSuccessResponse,
+} from "../typings.js";
+import { middleware, splitWords } from "../utils/index.js";
 
 export type SearchType = "all" | "guide" | "intro" | "function";
 
@@ -405,12 +405,12 @@ export const getSearchResult = async (
   return results.sort((a, b) => b.weight - a.weight);
 };
 
-export const mpSearchHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  SearchOptions
-> = async (req, res) => {
-  try {
+export type SearchResponse =
+  // TODO: Improve types
+  CommonSuccessResponse<unknown[]> | CommonFailedResponse;
+
+export const mpSearchHandler = middleware<SearchResponse, SearchOptions>(
+  async (req, res) => {
     const { scope = "all", type = "result", word } = req.body;
 
     if (!word) return res.json({ success: true, data: [] });
@@ -424,9 +424,5 @@ export const mpSearchHandler: RequestHandler<
       success: true,
       data: result,
     });
-  } catch (err) {
-    console.error(err);
-
-    res.status(500).json(UnknownResponse("搜索失败"));
-  }
-};
+  },
+);

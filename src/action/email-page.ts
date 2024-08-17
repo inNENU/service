@@ -1,7 +1,7 @@
 import { ACTION_MAIN_PAGE, ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
 import type { ActionFailType } from "../config/index.js";
-import { ExpiredResponse } from "../config/index.js";
+import { ExpiredResponse, UnknownResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
@@ -61,7 +61,7 @@ export const getEmailPage = async (
 
   const result = (await response.json()) as RawEmailPageResponse;
 
-  if (!result.success) throw new Error("获取邮件页面失败");
+  if (!result.success) return UnknownResponse("获取邮件页面失败");
 
   return {
     success: true,

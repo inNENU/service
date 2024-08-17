@@ -17,16 +17,7 @@ import { enrollRouter } from "./enroll/index.js";
 import { gradRouter } from "./grad-system/index.js";
 import { libraryRouter } from "./library/index.js";
 import { morganMiddleware } from "./middlewire/index.js";
-import {
-  checkIdCodeHandler,
-  generateIdCodeHandler,
-  mpLoginHandler,
-  mpQrCodeHandler,
-  mpReceiveHandler,
-  mpRemoveHandler,
-  mpReportHandler,
-  mpSearchHandler,
-} from "./mp/index.js";
+import { mpRouter } from "./mp/index.js";
 import {
   emailHandler,
   myCheckHandler,
@@ -140,6 +131,7 @@ app.use("/enroll", enrollRouter);
 app.use("/official", officialRouter);
 app.use("/grad-system", gradRouter);
 app.use("/library", libraryRouter);
+app.use("/mp", mpRouter);
 
 app.post("/auth-center/check", authCenterCheckHandler);
 app.post("/auth-center/login", authCenterLoginHandler);
@@ -184,18 +176,6 @@ app.post("/under-system/test-query", underTestQueryHandler);
 
 app.post("/vpn/cas-login", vpnCASLoginHandler);
 app.post("/vpn/login", vpnLoginHandler);
-
-/*  ------------ 小程序 ------------ */
-
-app.post("/mp/login", mpLoginHandler);
-app.post("/mp/check-id-code", checkIdCodeHandler);
-app.post("/mp/generate-id-code", generateIdCodeHandler);
-app.get("/mp/qrcode", mpQrCodeHandler);
-app.get("/mp/receive", mpReceiveHandler);
-app.post("/mp/receive", mpReceiveHandler);
-app.post("/mp/remove", mpRemoveHandler);
-app.post("/mp/report", mpReportHandler);
-app.post("/mp/search", mpSearchHandler);
 
 /*  ------------ 天气 ------------ */
 

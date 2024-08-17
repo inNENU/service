@@ -1,4 +1,3 @@
-import type { RequestHandler } from "express";
 import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 
 import type { IDCodeData } from "./utils.js";
@@ -15,11 +14,11 @@ import type { MyInfo } from "../../my/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
-  EmptyObject,
 } from "../../typings.js";
 import {
   getConnection,
   getWechatMPCode,
+  middleware,
   releaseConnection,
 } from "../../utils/index.js";
 
@@ -241,16 +240,9 @@ export const checkIDCode = async ({
   }
 };
 
-export const checkIdCodeHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
+export const checkIdCodeHandler = middleware<
+  CheckIDCodeInfoResponse,
   CheckIDCodeOptions
-> = async (req, res) => {
-  try {
-    return res.json(await checkIDCode(req.body));
-  } catch (err) {
-    console.error(err);
-
-    return res.json(UnknownResponse((err as Error).message));
-  }
-};
+>(async (req, res) => {
+  return res.json(await checkIDCode(req.body));
+});

@@ -238,7 +238,7 @@ export const getUnderGradeList = async (
   if ("code" in data) {
     if (data.message === "尚未登录，请先登录") return ExpiredResponse;
 
-    throw new Error(data.message);
+    return UnknownResponse(data.message);
   }
 
   const gradeList = getGradeLists(data.rows);

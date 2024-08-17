@@ -6,7 +6,10 @@ import {
   MissingArgResponse,
   appIDInfo,
 } from "../config/index.js";
-import type { CommonFailedResponse } from "../typings.js";
+import type {
+  CommonFailedResponse,
+  CommonSuccessResponse,
+} from "../typings.js";
 import {
   getConnection,
   middleware,
@@ -26,8 +29,13 @@ export interface MPLoginOpenidOptions {
   openid: string;
 }
 
-export interface MPloginSuccessResponse {
-  success: true;
+// FIXME: Use StandardResponse
+export interface MPLoginSuccessResponse
+  extends CommonSuccessResponse<{
+    openid: string;
+    inBlacklist: boolean;
+    isAdmin: boolean;
+  }> {
   openid: string;
   inBlacklist: boolean;
   isAdmin: boolean;
@@ -39,70 +47,75 @@ export type MPloginFailResponse = CommonFailedResponse<
   | ActionFailType.Unknown
 >;
 
-export type MPLoginResponse = MPloginSuccessResponse | MPloginFailResponse;
+export type MPLoginOptions = MPLoginCodeOptions | MPLoginOpenidOptions;
+export type MPLoginResponse = MPLoginSuccessResponse | MPloginFailResponse;
 
-export const mpLoginHandler = middleware<
-  MPLoginResponse,
-  MPLoginCodeOptions | MPLoginOpenidOptions
->(async (req, res) => {
-  let connection: PoolConnection | null = null;
-
-  try {
-    let openid = "";
-
-    if ("openid" in req.body) {
-      if (!req.body.openid) return res.json(MissingArgResponse("openid"));
-
-      ({ openid } = req.body);
-    } else {
-      const { env, appID, code } = req.body;
-
-      if (!env) return res.json(MissingArgResponse("env"));
-      if (!appID) return res.json(MissingArgResponse("appID"));
-      if (!code) return res.json(MissingArgResponse("code"));
-
-      const url = `https://api.${
-        env === "qq" ? "q" : "weixin"
-      }.qq.com/sns/jscode2session?appid=${appID}&secret=${
-        appIDInfo[appID]
-      }&js_code=${code}&grant_type=authorization_code`;
-      const response = await fetch(url);
-
-      ({ openid } = (await response.json()) as { openid: string });
-    }
-
-    let inBlacklist = false;
-    let isAdmin = false;
+export const mpLoginHandler = middleware<MPLoginResponse, MPLoginOptions>(
+  async (req, res) => {
+    let connection: PoolConnection | null = null;
 
     try {
-      connection = await getConnection();
+      let openid = "";
 
-      const [openidRows] = await connection.execute<RowDataPacket[]>(
-        "SELECT * FROM `openid_blacklist` WHERE `openid` = ?",
-        [openid],
-      );
-      const [adminRows] = await connection.execute<RowDataPacket[]>(
-        "SELECT * FROM `admin` WHERE `openid` = ?",
-        [openid],
-      );
+      if ("openid" in req.body) {
+        if (!req.body.openid) return res.json(MissingArgResponse("openid"));
 
-      inBlacklist = openidRows.length > 0;
-      isAdmin = adminRows.length > 0;
+        ({ openid } = req.body);
+      } else {
+        const { env, appID, code } = req.body;
 
-      if (inBlacklist) console.info(`Blocking user ${openid}`);
-    } catch (err) {
-      console.error(`Querying with openid ${openid}`, err);
+        if (!env) return res.json(MissingArgResponse("env"));
+        if (!appID) return res.json(MissingArgResponse("appID"));
+        if (!code) return res.json(MissingArgResponse("code"));
 
-      return res.json(DatabaseErrorResponse((err as Error).message));
+        const url = `https://api.${
+          env === "qq" ? "q" : "weixin"
+        }.qq.com/sns/jscode2session?appid=${appID}&secret=${
+          appIDInfo[appID]
+        }&js_code=${code}&grant_type=authorization_code`;
+        const response = await fetch(url);
+
+        ({ openid } = (await response.json()) as { openid: string });
+      }
+
+      let inBlacklist = false;
+      let isAdmin = false;
+
+      try {
+        connection = await getConnection();
+
+        const [openidRows] = await connection.execute<RowDataPacket[]>(
+          "SELECT * FROM `openid_blacklist` WHERE `openid` = ?",
+          [openid],
+        );
+        const [adminRows] = await connection.execute<RowDataPacket[]>(
+          "SELECT * FROM `admin` WHERE `openid` = ?",
+          [openid],
+        );
+
+        inBlacklist = openidRows.length > 0;
+        isAdmin = adminRows.length > 0;
+
+        if (inBlacklist) console.info(`Blocking user ${openid}`);
+      } catch (err) {
+        console.error(`Querying with openid ${openid}`, err);
+
+        return res.json(DatabaseErrorResponse((err as Error).message));
+      }
+
+      return res.json({
+        success: true,
+        data: {
+          openid,
+          inBlacklist,
+          isAdmin,
+        },
+        openid,
+        inBlacklist,
+        isAdmin,
+      });
+    } finally {
+      releaseConnection(connection);
     }
-
-    return res.json({
-      success: true,
-      openid,
-      inBlacklist,
-      isAdmin,
-    });
-  } finally {
-    releaseConnection(connection);
-  }
-});
+  },
+);

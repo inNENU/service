@@ -1,13 +1,13 @@
-import type { RequestHandler } from "express";
 import { toBuffer } from "qrcode";
 
+import type { ActionFailType } from "../config/index.js";
 import {
-  InvalidArgResponse,
+  MissingArgResponse,
   UnknownResponse,
   appIDInfo,
 } from "../config/index.js";
 import type { CommonFailedResponse } from "../typings.js";
-import { getWechatMPCode } from "../utils/index.js";
+import { getWechatMPCode, middleware } from "../utils/index.js";
 
 export interface WechatMpCodeOptions {
   appID: "wx33acb831ee1831a5" | "wx2550e3fd373b79a8";
@@ -27,56 +27,52 @@ export interface MpCodeSuccessResponse {
   image: string;
 }
 
-export type MpCodeResponse = MpCodeSuccessResponse | CommonFailedResponse;
+export type MpCodeResponse =
+  | MpCodeSuccessResponse
+  | CommonFailedResponse<ActionFailType.MissingArg | ActionFailType.Unknown>;
 
 const getQQMpCode = async (appID: number, page: string): Promise<Buffer> =>
   toBuffer(`https://m.q.qq.com/a/p/${appID}?s=${encodeURI(page)}`);
 
-export const mpQrCodeHandler: RequestHandler<
-  Record<never, never>,
-  Record<never, never>,
-  Record<never, never>,
+export const mpQrCodeHandler = middleware<
+  MpCodeResponse,
+  MpCodeOptions,
   MpCodeOptions
-> = async (req, res) => {
-  try {
-    console.info("Requesting MP QRCode with", req.query);
+>(async (req, res) => {
+  const options = req.method === "GET" ? req.query : req.body;
 
-    const { appID, page } = req.query;
+  console.info("Requesting MP QRCode with", options);
 
-    if (!appIDInfo[appID]) return res.json(InvalidArgResponse("appID"));
+  const { appID, page } = options;
 
-    if (Number.isNaN(Number(appID))) {
-      const image = await getWechatMPCode(
-        appID,
-        page,
-        (req.query as WechatMpCodeOptions).scene,
-      );
+  if (!appIDInfo[appID]) return res.json(MissingArgResponse("appID"));
 
-      if (image instanceof Buffer) {
-        res.set({
-          "Content-Disposition": "qrcode.png",
-          "Content-Type": "image/png",
-        });
+  // This is a Wechat Mini Program
+  if (Number.isNaN(Number(appID))) {
+    const image = await getWechatMPCode(
+      appID,
+      page,
+      (req.query as WechatMpCodeOptions).scene,
+    );
 
-        return res.end(image);
-      }
+    if (image instanceof Buffer) {
+      res.set({
+        "Content-Disposition": "qrcode.png",
+        "Content-Type": "image/png",
+      });
 
-      return res.json(UnknownResponse(image.errmsg));
+      return res.end(image);
     }
 
-    const image = await getQQMpCode(Number(appID), page);
-
-    res.set({
-      "Content-Disposition": `qrcode.png`,
-      "Content-Type": "image/png",
-    });
-
-    return res.end(image);
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    res.json(UnknownResponse(message));
+    return res.json(UnknownResponse(image.errmsg));
   }
-};
+
+  const image = await getQQMpCode(Number(appID), page);
+
+  res.set({
+    "Content-Disposition": `qrcode.png`,
+    "Content-Type": "image/png",
+  });
+
+  return res.end(image);
+});

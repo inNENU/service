@@ -1,11 +1,12 @@
-import type { RequestHandler } from "express";
 import { sha1 } from "js-sha1";
 import type { PoolConnection } from "mysql2/promise";
 import { v7 } from "uuid";
 
-import { UnknownResponse } from "../config/index.js";
-import type { EmptyObject } from "../typings.js";
-import { getConnection, releaseConnection } from "../utils/index.js";
+import {
+  getConnection,
+  middleware,
+  releaseConnection,
+} from "../utils/index.js";
 import "../config/loadEnv.js";
 
 interface BaseMessage {
@@ -47,11 +48,11 @@ interface EnterEvent {
   SessionFrom: string;
 }
 
-export const mpReceiveHandler: RequestHandler<
-  { signature: string; timestamp: string; nonce: string; echostr: string },
-  EmptyObject,
-  ContactMessage | EnterEvent
-> = async (req, res) => {
+export const mpReceiveHandler = middleware<
+  unknown,
+  ContactMessage | EnterEvent,
+  { signature: string; timestamp: string; nonce: string; echostr: string }
+>(async (req, res) => {
   let connection: PoolConnection | null = null;
 
   try {
@@ -60,11 +61,11 @@ export const mpReceiveHandler: RequestHandler<
     if (
       sha1([process.env.TOKEN, timestamp, nonce].sort().join("")) !== signature
     ) {
-      return res.status(403).end("Invalid signature");
+      return res.status(403).send("Invalid signature");
     }
 
     if (req.method === "GET") {
-      return res.end(req.query.echostr);
+      return res.send(req.query.echostr);
     }
 
     const { ToUserName, FromUserName, CreateTime, MsgType } = req.body;
@@ -127,12 +128,8 @@ export const mpReceiveHandler: RequestHandler<
       });
     }
 
-    return res.end("success");
-  } catch (err) {
-    console.error(err);
-
-    return res.json(UnknownResponse((err as Error).message));
+    return res.send("success");
   } finally {
     releaseConnection(connection);
   }
-};
+});

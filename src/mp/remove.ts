@@ -1,24 +1,37 @@
-import type { RequestHandler } from "express";
 import type {
   PoolConnection,
   ResultSetHeader,
   RowDataPacket,
 } from "mysql2/promise";
 
+import type { ActionFailType } from "../config/index.js";
 import {
+  DatabaseErrorResponse,
   MissingArgResponse,
   MissingCredentialResponse,
-  UnknownResponse,
   WrongPasswordResponse,
 } from "../config/index.js";
-import type { EmptyObject } from "../typings.js";
-import { getConnection, releaseConnection } from "../utils/index.js";
+import type { CommonFailedResponse } from "../typings.js";
+import {
+  getConnection,
+  middleware,
+  releaseConnection,
+} from "../utils/index.js";
 
-export const mpRemoveHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
+export type MpRemoveResponse =
+  | { success: true }
+  | CommonFailedResponse<
+      | ActionFailType.DatabaseError
+      | ActionFailType.MissingArg
+      | ActionFailType.MissingCredential
+      | ActionFailType.WrongPassword
+      | ActionFailType.Unknown
+    >;
+
+export const mpRemoveHandler = middleware<
+  MpRemoveResponse,
   { id: string; authToken: string; appID: string }
-> = async (req, res) => {
+>(async (req, res) => {
   let connection: PoolConnection | null = null;
 
   try {
@@ -37,21 +50,23 @@ export const mpRemoveHandler: RequestHandler<
     if (!tokenResults.length) return res.json(WrongPasswordResponse);
 
     // remove info from database
-    await connection.execute<ResultSetHeader>(
-      "DELETE * FROM `student_info` WHERE `id` = ?",
-      [id],
-    );
-    await connection.execute<ResultSetHeader>(
-      "DELETE * FROM `student_avatar` WHERE `id` = ?",
-      [id],
-    );
+    try {
+      await connection.execute<ResultSetHeader>(
+        "DELETE * FROM `student_info` WHERE `id` = ?",
+        [id],
+      );
+      await connection.execute<ResultSetHeader>(
+        "DELETE * FROM `student_avatar` WHERE `id` = ?",
+        [id],
+      );
+    } catch (err) {
+      console.error(err);
+
+      return res.json(DatabaseErrorResponse((err as Error).message));
+    }
 
     return res.json({ success: true });
-  } catch (err) {
-    console.error(err);
-
-    return res.json(UnknownResponse((err as Error).message));
   } finally {
     releaseConnection(connection);
   }
-};
+});

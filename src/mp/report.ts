@@ -1,32 +1,42 @@
-import type { RequestHandler } from "express";
 import type { PoolConnection } from "mysql2/promise";
 import { v7 } from "uuid";
 
+import type { ActionFailType } from "../config/index.js";
 import { DatabaseErrorResponse } from "../config/index.js";
-import type { EmptyObject } from "../typings.js";
-import { getConnection, releaseConnection } from "../utils/index.js";
+import type { CommonFailedResponse } from "../typings.js";
+import {
+  getConnection,
+  middleware,
+  releaseConnection,
+} from "../utils/index.js";
 
-export const mpReportHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  Record<string, unknown>
-> = async (req, res) => {
-  let connection: PoolConnection | null = null;
+export interface MpReportOptions extends Record<string, unknown> {
+  type?: string;
+}
 
-  try {
-    connection = await getConnection();
+export type MpReportResponse =
+  | { success: true }
+  | CommonFailedResponse<ActionFailType.DatabaseError | ActionFailType.Unknown>;
 
-    await connection.execute(
-      "INSERT INTO `log` (`uuid`, `type`, `content`, `createTime`) VALUES (?, ?, ?, NOW())",
-      [v7(), req.body.type ?? null, JSON.stringify(req.body)],
-    );
+export const mpReportHandler = middleware<MpReportResponse, MpReportOptions>(
+  async (req, res) => {
+    let connection: PoolConnection | null = null;
 
-    return res.send({ success: true });
-  } catch (err) {
-    console.error(err);
+    try {
+      connection = await getConnection();
 
-    return DatabaseErrorResponse((err as Error).message);
-  } finally {
-    releaseConnection(connection);
-  }
-};
+      await connection.execute(
+        "INSERT INTO `log` (`uuid`, `type`, `content`, `createTime`) VALUES (?, ?, ?, NOW())",
+        [v7(), req.body.type ?? null, JSON.stringify(req.body)],
+      );
+
+      return res.send({ success: true });
+    } catch (err) {
+      console.error(err);
+
+      return DatabaseErrorResponse((err as Error).message);
+    } finally {
+      releaseConnection(connection);
+    }
+  },
+);

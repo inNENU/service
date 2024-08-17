@@ -1,7 +1,7 @@
 import type { ActionLoginResponse } from "./login.js";
 import { ACTION_SERVER } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
-import { ExpiredResponse } from "../config/index.js";
+import { ExpiredResponse, UnknownResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonListSuccessResponse,
@@ -130,7 +130,9 @@ export const getNoticeList = async (
     (await response.json()) as RawNoticeListData;
 
   if (!data.length)
-    throw new Error(`获取公告列表失败: ${JSON.stringify(data, null, 2)}`);
+    return UnknownResponse(
+      `获取公告列表失败: ${JSON.stringify(data, null, 2)}`,
+    );
 
   return {
     success: true,
@@ -139,7 +141,7 @@ export const getNoticeList = async (
     size: pageSize,
     current: pageIndex,
     total: totalPage,
-  } as NoticeListSuccessResponse;
+  };
 };
 
 export const noticeListHandler = middleware<

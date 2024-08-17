@@ -1,7 +1,7 @@
 import { ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type { ActionFailType } from "../config/index.js";
-import { ExpiredResponse } from "../config/index.js";
+import { ExpiredResponse, UnknownResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
@@ -56,7 +56,7 @@ export const getCardBalance = async (
 
   const data = (await response.json()) as RawCardBalanceData;
 
-  if (!data.success) throw new Error(JSON.stringify(data));
+  if (!data.success) return UnknownResponse(JSON.stringify(data));
 
   const balanceList = data.demo.items.item;
 
