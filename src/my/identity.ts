@@ -4,7 +4,7 @@ import { MY_SERVER } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
 import { MissingCredentialResponse, UnknownResponse } from "../config/index.js";
 import type { AccountInfo, CommonFailedResponse } from "../typings.js";
-import { middleware } from "../utils/handler.js";
+import { middleware } from "../utils/index.js";
 
 interface RAWIdentityInfo {
   success: true;

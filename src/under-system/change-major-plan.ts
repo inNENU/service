@@ -17,11 +17,11 @@ import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { MissingCredentialResponse, UnknownResponse } from "../config/index.js";
 import type { AccountInfo, EmptyObject, LoginOptions } from "../typings.js";
 import { IE_8_USER_AGENT, getIETimeStamp } from "../utils/index.js";
-import type { VPNLoginFailedResponse } from "../vpn/login.js";
+import type { VPNLoginFailedResponse } from "../vpn/index.js";
 
-const headerRegExp = /<title>(.*)<\/title>/;
+const HEADER_REGEXP = /<title>(.*)<\/title>/;
 
-const planRegExp =
+const PLAN_REGEXP =
   /<tr[^>]*><td[^>]*>.*?<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<\/tr>/g;
 
 const DEFAULT_TABLE_FIELD =
@@ -56,7 +56,7 @@ export interface ChangeMajorPlan {
 }
 
 const getPlans = (content: string): ChangeMajorPlan[] =>
-  Array.from(content.matchAll(planRegExp)).map(
+  Array.from(content.matchAll(PLAN_REGEXP)).map(
     ([
       ,
       ,
@@ -202,7 +202,7 @@ export const getUnderChangeMajorPlan = async (
   });
 
   const content = await response.text();
-  const header = headerRegExp.exec(content)![1].trim();
+  const header = HEADER_REGEXP.exec(content)![1].trim();
 
   return {
     success: true,

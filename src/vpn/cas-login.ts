@@ -5,7 +5,7 @@ import { LOGIN_URL, UPDATE_KEY_URL, VPN_DOMAIN, VPN_SERVER } from "./utils.js";
 import { authLogin } from "../auth/login.js";
 import { ActionFailType } from "../config/index.js";
 import type { AccountInfo } from "../typings.js";
-import { middleware } from "../utils/handler.js";
+import { middleware } from "../utils/index.js";
 
 const CAS_LOGIN_URL = `${VPN_SERVER}/users/auth/cas`;
 
