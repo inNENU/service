@@ -14,6 +14,7 @@ mpRouter.post("/login", mpLoginHandler);
 mpRouter.post("/check-id-code", checkIdCodeHandler);
 mpRouter.post("/generate-id-code", generateIdCodeHandler);
 mpRouter.get("/qrcode", mpQrCodeHandler);
+mpRouter.post("/qrcode", mpQrCodeHandler);
 mpRouter.get("/receive", mpReceiveHandler);
 mpRouter.post("/receive", mpReceiveHandler);
 mpRouter.post("/remove", mpRemoveHandler);

@@ -48,12 +48,8 @@ export const mpQrCodeHandler = middleware<
   if (!appIDInfo[appID]) return res.json(MissingArgResponse("appID"));
 
   // This is a Wechat Mini Program
-  if (Number.isNaN(Number(appID))) {
-    const image = await getWechatMPCode(
-      appID,
-      page,
-      (req.query as WechatMpCodeOptions).scene,
-    );
+  if ("scene" in options) {
+    const image = await getWechatMPCode(appID, page, options.scene);
 
     if (image instanceof Buffer) {
       res.set({
