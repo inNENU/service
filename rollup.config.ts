@@ -42,6 +42,7 @@ export default [
           "crypto-js/pad-pkcs7.js",
           "dotenv",
           "express",
+          "express-rate-limit",
           "iconv-lite",
           "js-sha1",
           "morgan",
