@@ -4,7 +4,6 @@ import type { RichTextNode } from "@mptool/parser";
 import { getRichTextNodes } from "@mptool/parser";
 import type { RequestHandler } from "express";
 
-import { UnknownResponse } from "../config/index.js";
 import type { EmptyObject } from "../typings.js";
 
 const POST_RECOMMEND_PLAN_URL =
@@ -42,34 +41,11 @@ export const gradRecommendPlanHandler: RequestHandler<
   EmptyObject,
   EmptyObject
 > = async (_req, res) => {
-  try {
-    const response = await fetch(POST_RECOMMEND_PLAN_URL);
+  const response = await fetch(POST_RECOMMEND_PLAN_URL);
 
-    if (response.status !== 200) {
-      // FIXME: Should update to the new one when the website is updated
-      if (existsSync("./cache/enroll-grad-recommend-plan.json"))
-        return res.json({
-          success: true,
-          data: JSON.parse(
-            readFileSync("./cache/enroll-grad-recommend-plan.json", {
-              encoding: "utf-8",
-            }),
-          ) as GradRecommendSchoolPlan[],
-        });
-
-      throw new Error("推免计划查询已下线");
-    }
-
-    const content = await response.text();
-
-    // check cache
-    if (
-      existsSync("./cache/enroll-grad-recommend-plan.html") &&
-      content.length ===
-        readFileSync("./cache/enroll-grad-recommend-plan.html", {
-          encoding: "utf-8",
-        }).length
-    )
+  if (response.status !== 200) {
+    // FIXME: Should update to the new one when the website is updated
+    if (existsSync("./cache/enroll-grad-recommend-plan.json"))
       return res.json({
         success: true,
         data: JSON.parse(
@@ -79,86 +55,101 @@ export const gradRecommendPlanHandler: RequestHandler<
         ) as GradRecommendSchoolPlan[],
       });
 
-    const schoolInfo: GradRecommendSchoolPlan[] = await Promise.all(
-      Array.from(content.matchAll(schoolInfoRegExp)).map(
-        async ([, site, code, name, contact, phone, mail]) => {
-          const info: GradRecommendSchoolPlan = {
-            name,
-            site,
-            code,
-            contact,
-            phone,
-            mail,
-            majors: [],
-          };
-
-          const majorCodes = Array.from(
-            content.matchAll(
-              new RegExp(`cXYName\\['${name}'\\]\\.push\\('([^']+)'\\)`, "g"),
-            ),
-          );
-
-          const majorNameRegExp = Array.from(
-            content.matchAll(
-              new RegExp(`fXYName\\['${name}'\\]\\.push\\('([^']+)'\\)`, "g"),
-            ),
-          );
-
-          info.majors = await Promise.all(
-            majorCodes.map(async ([, code], index) => {
-              const [, majorName] = majorNameRegExp[index];
-
-              const lines = Array.from(
-                content.matchAll(
-                  new RegExp(
-                    `dXYName\\['${name}'\\]\\['${code}'\\]\\.push\\('(.*)'\\)`,
-                    "g",
-                  ),
-                ),
-              ).map(([, line]) => line.replace(/<\/?center>/g, ""));
-
-              return {
-                name: majorName,
-                code,
-                content: await getRichTextNodes(
-                  `<table>${TABLE_HEADER}${lines.join("\n")}</table>`,
-                ),
-              };
-            }),
-          );
-
-          return info;
-        },
-      ),
-    );
-
-    writeFile(
-      "./cache/enroll-grad-recommend-plan.html",
-      content,
-      { encoding: "utf-8" },
-      (err) => {
-        if (err) {
-          console.error(err);
-        }
-      },
-    );
-    writeFile(
-      "./cache/enroll-grad-recommend-plan.json",
-      JSON.stringify(schoolInfo),
-      { encoding: "utf-8" },
-      (err) => {
-        if (err) {
-          console.error(err);
-        }
-      },
-    );
-
-    return res.json({ success: true, data: schoolInfo });
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
+    throw new Error("推免计划查询已下线");
   }
+
+  const content = await response.text();
+
+  // check cache
+  if (
+    existsSync("./cache/enroll-grad-recommend-plan.html") &&
+    content.length ===
+      readFileSync("./cache/enroll-grad-recommend-plan.html", {
+        encoding: "utf-8",
+      }).length
+  )
+    return res.json({
+      success: true,
+      data: JSON.parse(
+        readFileSync("./cache/enroll-grad-recommend-plan.json", {
+          encoding: "utf-8",
+        }),
+      ) as GradRecommendSchoolPlan[],
+    });
+
+  const schoolInfo: GradRecommendSchoolPlan[] = await Promise.all(
+    Array.from(content.matchAll(schoolInfoRegExp)).map(
+      async ([, site, code, name, contact, phone, mail]) => {
+        const info: GradRecommendSchoolPlan = {
+          name,
+          site,
+          code,
+          contact,
+          phone,
+          mail,
+          majors: [],
+        };
+
+        const majorCodes = Array.from(
+          content.matchAll(
+            new RegExp(`cXYName\\['${name}'\\]\\.push\\('([^']+)'\\)`, "g"),
+          ),
+        );
+
+        const majorNameRegExp = Array.from(
+          content.matchAll(
+            new RegExp(`fXYName\\['${name}'\\]\\.push\\('([^']+)'\\)`, "g"),
+          ),
+        );
+
+        info.majors = await Promise.all(
+          majorCodes.map(async ([, code], index) => {
+            const [, majorName] = majorNameRegExp[index];
+
+            const lines = Array.from(
+              content.matchAll(
+                new RegExp(
+                  `dXYName\\['${name}'\\]\\['${code}'\\]\\.push\\('(.*)'\\)`,
+                  "g",
+                ),
+              ),
+            ).map(([, line]) => line.replace(/<\/?center>/g, ""));
+
+            return {
+              name: majorName,
+              code,
+              content: await getRichTextNodes(
+                `<table>${TABLE_HEADER}${lines.join("\n")}</table>`,
+              ),
+            };
+          }),
+        );
+
+        return info;
+      },
+    ),
+  );
+
+  writeFile(
+    "./cache/enroll-grad-recommend-plan.html",
+    content,
+    { encoding: "utf-8" },
+    (err) => {
+      if (err) {
+        console.error(err);
+      }
+    },
+  );
+  writeFile(
+    "./cache/enroll-grad-recommend-plan.json",
+    JSON.stringify(schoolInfo),
+    { encoding: "utf-8" },
+    (err) => {
+      if (err) {
+        console.error(err);
+      }
+    },
+  );
+
+  return res.json({ success: true, data: schoolInfo });
 };

@@ -70,7 +70,7 @@ export const actionLogin = async (
     return {
       success: true,
       cookieStore,
-    } as ActionLoginResult;
+    };
 
   return UnknownResponse("登录失败");
 };
@@ -115,34 +115,26 @@ export const loginToAction = middleware<
 
 export const actionLoginHandler = middleware<ActionLoginResponse, AccountInfo>(
   async (req, res) => {
-    try {
-      const result =
-        req.body.id === TEST_ID_NUMBER
-          ? TEST_LOGIN_RESULT
-          : await actionLogin(req.body);
+    const result =
+      req.body.id === TEST_ID_NUMBER
+        ? TEST_LOGIN_RESULT
+        : await actionLogin(req.body);
 
-      if (result.success) {
-        const cookies = result.cookieStore
-          .getAllCookies()
-          .map((item) => item.toJSON());
+    if (result.success) {
+      const cookies = result.cookieStore
+        .getAllCookies()
+        .map((item) => item.toJSON());
 
-        cookies.forEach(({ name, value, ...rest }) => {
-          res.cookie(name, value, rest);
-        });
+      cookies.forEach(({ name, value, ...rest }) => {
+        res.cookie(name, value, rest);
+      });
 
-        return res.json({
-          success: true,
-          cookies,
-        });
-      }
-
-      return res.json(result);
-    } catch (err) {
-      const { message } = err as Error;
-
-      console.error(err);
-
-      return res.json(UnknownResponse(message));
+      return res.json({
+        success: true,
+        cookies,
+      });
     }
+
+    return res.json(result);
   },
 );

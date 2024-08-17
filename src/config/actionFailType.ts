@@ -21,8 +21,8 @@ export const enum ActionFailType {
   NeedReAuth = "need-re-auth",
   /** 过于频繁 */
   TooFrequent = "too-frequent",
-  /** 弱密码 */
-  WeekPassword = "week-password",
+  /** 安全问题 */
+  SecurityError = "security-error",
 
   /** 验证码错误 */
   WrongCaptcha = "wrong-captcha",

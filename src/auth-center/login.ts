@@ -1,12 +1,8 @@
 import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
-import type { RequestHandler } from "express";
 
 import { INFO_PAGE } from "./utils.js";
-import type {
-  AuthLoginFailedResponse,
-  AuthLoginOptions,
-} from "../auth/login.js";
+import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { AUTH_SERVER } from "../auth/utils.js";
 import {
@@ -14,7 +10,8 @@ import {
   TEST_LOGIN_RESULT,
   UnknownResponse,
 } from "../config/index.js";
-import type { AccountInfo, EmptyObject } from "../typings.js";
+import type { AccountInfo } from "../typings.js";
+import { middleware } from "../utils/handler.js";
 
 export interface AuthCenterLoginSuccessResult {
   success: true;
@@ -79,39 +76,27 @@ export type AuthCenterLoginResponse =
   | AuthCenterLoginSuccessResponse
   | AuthCenterLoginFailResult;
 
-export const authCenterLoginHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  AuthLoginOptions
-> = async (req, res) => {
-  try {
-    const result =
-      // fake result for testing
-      req.body.id === TEST_ID_NUMBER
-        ? TEST_LOGIN_RESULT
-        : await authCenterLogin(req.body);
+export const authCenterLoginHandler = middleware<
+  AuthCenterLoginResponse,
+  AccountInfo
+>(async (req, res) => {
+  const result =
+    // fake result for testing
+    req.body.id === TEST_ID_NUMBER
+      ? TEST_LOGIN_RESULT
+      : await authCenterLogin(req.body);
 
-    if (result.success) {
-      const cookies = result.cookieStore
-        .getAllCookies()
-        .map((item) => item.toJSON());
+  if (result.success) {
+    const cookies = result.cookieStore
+      .getAllCookies()
+      .map((item) => item.toJSON());
 
-      cookies.forEach(({ name, value, ...rest }) => {
-        res.cookie(name, value, rest);
-      });
+    cookies.forEach(({ name, value, ...rest }) => {
+      res.cookie(name, value, rest);
+    });
 
-      return res.json({
-        success: true,
-        cookies,
-      } as AuthCenterLoginSuccessResponse);
-    }
-
-    return res.json(result);
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
+    return res.json({ success: true, cookies });
   }
-};
+
+  return res.json(result);
+});

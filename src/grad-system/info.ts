@@ -1,5 +1,3 @@
-import type { RequestHandler } from "express";
-
 import { getAction } from "./action.js";
 import { gradSystemLogin } from "./login.js";
 import { MAIN_URL, SERVER } from "./utils.js";
@@ -9,12 +7,8 @@ import {
   MissingCredentialResponse,
   UnknownResponse,
 } from "../config/index.js";
-import type {
-  AccountInfo,
-  CommonFailedResponse,
-  EmptyObject,
-  LoginOptions,
-} from "../typings.js";
+import type { AccountInfo, CommonFailedResponse } from "../typings.js";
+import { middleware } from "../utils/handler.js";
 
 const TITLE_REG_EXP = /aField\s?="(.*?)"\.split\("\t"\);/;
 const VALUE_REG_EXP = /aDataLS\s?="(.*?)"\.split\("\t"\);/;
@@ -94,23 +88,23 @@ const getInfo = (content: string): GradStudentInfo => {
   };
 };
 
-export interface InfoSuccessResponse {
+export interface GradInfoSuccessResponse {
   success: true;
   info: GradStudentInfo;
 }
 
-export type InfoResponse =
-  | InfoSuccessResponse
+export type GradInfoResponse =
+  | GradInfoSuccessResponse
   | AuthLoginFailedResponse
-  | CommonFailedResponse;
+  | CommonFailedResponse<ActionFailType.MissingCredential>;
 
 export const getGradInfo = async (
   cookieHeader: string,
-): Promise<InfoResponse> => {
+): Promise<GradInfoResponse> => {
   const result = await getAction(cookieHeader);
 
   if (result.success) {
-    const { id } = result.actions.find(
+    const { id } = result.data.actions.find(
       ({ name }) =>
         name === "显示硕士生信息采集" || name === "显示博士生信息采集",
     )!;
@@ -139,22 +133,18 @@ export const getGradInfo = async (
     return {
       success: true,
       info,
-    } as InfoSuccessResponse;
+    };
   }
 
   return UnknownResponse("获取信息失败");
 };
 
-export const gradInfoHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  LoginOptions
-> = async (req, res) => {
-  try {
+export const gradInfoHandler = middleware<GradInfoResponse, AccountInfo>(
+  async (req, res) => {
     const { id, password, authToken } = req.body;
 
     if (id && password && authToken) {
-      const result = await gradSystemLogin(req.body as AccountInfo);
+      const result = await gradSystemLogin(req.body);
 
       if (!result.success) return res.json(result);
 
@@ -164,11 +154,5 @@ export const gradInfoHandler: RequestHandler<
     }
 
     return res.json(await getGradInfo(req.headers.cookie));
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
-};
+  },
+);

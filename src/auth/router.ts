@@ -4,7 +4,6 @@ import type { Request } from "express-serve-static-core";
 
 import { activateHandler } from "./activate/index.js";
 import { authCaptchaHandler } from "./captcha.js";
-import { changePasswordHandler } from "./change-password.js";
 import { authEncryptHandler } from "./encrypt.js";
 import { authInitHandler, authInitInfoHandler } from "./init/index.js";
 import { authLoginHandler } from "./login.js";
@@ -44,8 +43,6 @@ authRouter.post("/activate", activateHandler);
 authRouter.post("/encrypt", authEncryptHandler);
 authRouter.get("/auth-captcha", authCaptchaHandler);
 authRouter.post("/auth-captcha", authCaptchaHandler);
-authRouter.post("/change-password", changePasswordHandler);
-authRouter.patch("/change-password", changePasswordHandler);
 authRouter.use("/init", loginLimiter);
 authRouter.get("/init", authInitInfoHandler);
 authRouter.post("/init", authInitHandler);

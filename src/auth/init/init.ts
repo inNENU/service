@@ -59,7 +59,7 @@ export type InitAuthFailedResponse =
       | ActionFailType.NeedCaptcha
       | ActionFailType.MissingCredential
       | ActionFailType.Unknown
-      | ActionFailType.WeekPassword
+      | ActionFailType.SecurityError
       | ActionFailType.WrongCaptcha
       | ActionFailType.WrongPassword
     >
@@ -228,8 +228,8 @@ export const initAuth = async (
 
         return {
           success: false,
-          type: ActionFailType.WeekPassword,
-          msg: result.errMsg ?? "密码太弱，请手动修改密码",
+          type: ActionFailType.SecurityError,
+          msg: result.errMsg,
         };
       }
 

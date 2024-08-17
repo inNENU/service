@@ -14,16 +14,7 @@ import {
 } from "./auth-center/index.js";
 import { UnknownResponse } from "./config/index.js";
 import { enrollRouter } from "./enroll/index.js";
-import {
-  gradOldCourseTableHandler,
-  gradOldGradeListHandler,
-  gradOldSystemCheckHandler,
-  gradOldSystemLoginHandler,
-} from "./grad-old-system/index.js";
-import {
-  gradInfoHandler,
-  gradSystemLoginHandler,
-} from "./grad-system/index.js";
+import { gradRouter } from "./grad-system/index.js";
 import { libraryPeopleHandler } from "./library/index.js";
 import { morganMiddleware } from "./middlewire/index.js";
 import {
@@ -147,6 +138,7 @@ app.use("/action", actionRouter);
 app.use("/auth", authRouter);
 app.use("/enroll", enrollRouter);
 app.use("/official", officialRouter);
+app.use("/grad-system", gradRouter);
 
 app.post("/auth-center/check", authCenterCheckHandler);
 app.post("/auth-center/login", authCenterLoginHandler);
@@ -186,18 +178,6 @@ app.post("/under-system/exam-place", underExamPlaceHandler);
 app.post("/under-system/info", underInfoHandler);
 app.post("/under-system/student-archive", underStudentArchiveHandler);
 app.post("/under-system/test-query", underTestQueryHandler);
-
-/*  ------------ 研究生教务系统 ------------ */
-
-app.post("/grad-system/login", gradSystemLoginHandler);
-app.post("/grad-system/info", gradInfoHandler);
-
-/*  ------------ 旧研究生教务系统 ------------ */
-
-app.post("/grad-old-system/login", gradOldSystemLoginHandler);
-app.post("/grad-old-system/check", gradOldSystemCheckHandler);
-app.post("/grad-old-system/course-table", gradOldCourseTableHandler);
-app.post("/grad-old-system/grade-list", gradOldGradeListHandler);
 
 /*  ------------ WebVPN ------------ */
 

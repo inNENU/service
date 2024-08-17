@@ -88,30 +88,22 @@ export const gradSystemLoginHandler: RequestHandler<
   EmptyObject,
   AccountInfo
 > = async (req, res) => {
-  try {
-    const result = await gradSystemLogin(req.body);
+  const result = await gradSystemLogin(req.body);
 
-    if (result.success) {
-      const cookies = result.cookieStore
-        .getAllCookies()
-        .map((item) => item.toJSON());
+  if (result.success) {
+    const cookies = result.cookieStore
+      .getAllCookies()
+      .map((item) => item.toJSON());
 
-      cookies.forEach(({ name, value, ...rest }) => {
-        res.cookie(name, value, rest);
-      });
+    cookies.forEach(({ name, value, ...rest }) => {
+      res.cookie(name, value, rest);
+    });
 
-      return res.json({
-        success: true,
-        cookies,
-      } as GradSystemLoginSuccessResponse);
-    }
-
-    return res.json(result);
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
+    return res.json({
+      success: true,
+      cookies,
+    } as GradSystemLoginSuccessResponse);
   }
+
+  return res.json(result);
 };

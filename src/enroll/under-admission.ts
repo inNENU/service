@@ -44,75 +44,67 @@ export const getUnderAdmission = async ({
   id,
   testId,
 }: UnderAdmissionOptions): Promise<UnderAdmissionResponse> => {
-  try {
-    const params = {
-      name,
-      id_code: id,
-      student_code: testId,
-    };
+  const params = {
+    name,
+    id_code: id,
+    student_code: testId,
+  };
 
-    const response = await fetch(QUERY_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(params),
-    });
+  const response = await fetch(QUERY_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  });
 
-    if (!response.headers.get("content-type")?.includes("application/json"))
-      return {
-        success: false,
-        type: ActionFailType.Closed,
-        msg: "查询通道已关闭",
-      };
-
-    const result = (await response.json()) as RawEnrollResult;
-
-    if (result.student === null) return UnknownResponse(result.message);
-
-    const {
-      department,
-      major,
-      mail_code: mailCode,
-      is_mailed: hasMailed,
-    } = result.student;
-
+  if (!response.headers.get("content-type")?.includes("application/json"))
     return {
-      success: true,
-      data: [
-        {
-          text: "姓名",
-          value: name,
-        },
-        {
-          text: "考生号",
-          value: testId,
-        },
-        {
-          text: "录取专业",
-          value: major,
-        },
-        {
-          text: "所在学院",
-          value: department,
-        },
-        {
-          text: "录取通知书单号",
-          value: hasMailed ? (mailCode?.String ?? "暂无") : "暂无",
-        },
-        {
-          text: "是否已寄出",
-          value: hasMailed ? "是" : "否",
-        },
-      ],
+      success: false,
+      type: ActionFailType.Closed,
+      msg: "查询通道已关闭",
     };
-  } catch (err) {
-    const { message } = err as Error;
 
-    console.error(err);
+  const result = (await response.json()) as RawEnrollResult;
 
-    return UnknownResponse(message);
-  }
+  if (result.student === null) return UnknownResponse(result.message);
+
+  const {
+    department,
+    major,
+    mail_code: mailCode,
+    is_mailed: hasMailed,
+  } = result.student;
+
+  return {
+    success: true,
+    data: [
+      {
+        text: "姓名",
+        value: name,
+      },
+      {
+        text: "考生号",
+        value: testId,
+      },
+      {
+        text: "录取专业",
+        value: major,
+      },
+      {
+        text: "所在学院",
+        value: department,
+      },
+      {
+        text: "录取通知书单号",
+        value: hasMailed ? (mailCode?.String ?? "暂无") : "暂无",
+      },
+      {
+        text: "是否已寄出",
+        value: hasMailed ? "是" : "否",
+      },
+    ],
+  };
 };
 
 export const underAdmissionHandler = middleware<

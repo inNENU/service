@@ -1,6 +1,5 @@
 import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
-import type { RequestHandler } from "express";
 
 import { authEncrypt } from "./encrypt.js";
 import {
@@ -17,12 +16,8 @@ import {
   WrongPasswordResponse,
   getRandomBlacklistHint,
 } from "../config/index.js";
-import type {
-  AccountInfo,
-  CommonFailedResponse,
-  EmptyObject,
-} from "../typings.js";
-import { isInBlackList } from "../utils/index.js";
+import type { AccountInfo, CommonFailedResponse } from "../typings.js";
+import { isInBlackList, middleware } from "../utils/index.js";
 
 export interface AuthLoginOptions extends AccountInfo {
   service?: string;
@@ -285,12 +280,8 @@ export type AuthLoginResponse =
   | AuthLoginSuccessResponse
   | AuthLoginFailedResponse;
 
-export const authLoginHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  AuthLoginOptions
-> = async (req, res) => {
-  try {
+export const authLoginHandler = middleware<AuthLoginResponse, AuthLoginOptions>(
+  async (req, res) => {
     const result = await authLogin(req.body);
 
     if (result.success) {
@@ -306,15 +297,9 @@ export const authLoginHandler: RequestHandler<
         success: true,
         cookies,
         location: result.location,
-      } as AuthLoginSuccessResponse);
+      });
     }
 
     return res.json(result);
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
-};
+  },
+);

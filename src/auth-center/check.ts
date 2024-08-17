@@ -1,22 +1,15 @@
-import type { RequestHandler } from "express";
-
 import { INFO_PAGE } from "./utils.js";
-import type {
-  CookieOptions,
-  CookieVerifyResponse,
-  EmptyObject,
-} from "../typings.js";
-import { cookies2Header } from "../utils/index.js";
+import type { CookieOptions, CookieVerifyResponse } from "../typings.js";
+import { cookies2Header, middleware } from "../utils/index.js";
 
-export const authCenterCheckHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
+export const authCenterCheckHandler = middleware<
+  CookieVerifyResponse,
   CookieOptions
-> = async (req, res) => {
+>(async (req, res) => {
   const cookieHeader = req.headers.cookie ?? cookies2Header(req.body.cookies);
 
   if (cookieHeader.includes("TEST")) {
-    return res.json({ success: true, valid: true } as CookieVerifyResponse);
+    return res.json({ success: true, valid: true });
   }
 
   const response = await fetch(INFO_PAGE, {
@@ -31,10 +24,10 @@ export const authCenterCheckHandler: RequestHandler<
     return res.json({
       success: true,
       valid: true,
-    } as CookieVerifyResponse);
+    });
 
   return res.json({
     success: true,
     valid: false,
-  } as CookieVerifyResponse);
-};
+  });
+});

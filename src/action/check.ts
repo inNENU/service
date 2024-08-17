@@ -1,18 +1,11 @@
-import type { RequestHandler } from "express";
-
 import { ACTION_SERVER } from "./utils.js";
-import type {
-  CookieOptions,
-  CookieVerifyResponse,
-  EmptyObject,
-} from "../typings.js";
-import { cookies2Header } from "../utils/index.js";
+import type { CookieOptions, CookieVerifyResponse } from "../typings.js";
+import { cookies2Header, middleware } from "../utils/index.js";
 
-export const actionCheckHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
+export const actionCheckHandler = middleware<
+  CookieVerifyResponse,
   CookieOptions
-> = async (req, res) => {
+>(async (req, res) => {
   try {
     const cookieHeader = req.headers.cookie ?? cookies2Header(req.body.cookies);
 
@@ -20,7 +13,7 @@ export const actionCheckHandler: RequestHandler<
       return res.json({
         success: true,
         valid: true,
-      } as CookieVerifyResponse);
+      });
 
     const response = await fetch(`${ACTION_SERVER}/page/getidentity`, {
       method: "POST",
@@ -35,20 +28,20 @@ export const actionCheckHandler: RequestHandler<
       return res.json({
         success: true,
         valid: false,
-      } as CookieVerifyResponse);
+      });
 
     const result = (await response.json()) as { success: boolean };
 
     return res.json({
       success: true,
       valid: result.success,
-    } as CookieVerifyResponse);
+    });
   } catch (err) {
     console.error(err);
 
     return res.json({
       success: true,
       valid: false,
-    } as CookieVerifyResponse);
+    });
   }
-};
+});

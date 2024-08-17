@@ -1,19 +1,9 @@
-import type { RequestHandler } from "express";
-
 import { authCenterLogin } from "./login.js";
 import { INFO_PREFIX } from "./utils.js";
-import type { AuthLoginOptions } from "../auth/index.js";
-import type { ActionFailType } from "../config/index.js";
-import {
-  ExpiredResponse,
-  MissingCredentialResponse,
-  UnknownResponse,
-} from "../config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-  EmptyObject,
-} from "../typings.js";
+import type { AuthLoginFailedResponse } from "../auth/index.js";
+import { ExpiredResponse, MissingCredentialResponse } from "../config/index.js";
+import type { AccountInfo, CommonSuccessResponse } from "../typings.js";
+import { middleware } from "../utils/index.js";
 
 const USER_CONF_URL = `${INFO_PREFIX}/common/getUserConf`;
 
@@ -33,7 +23,11 @@ interface RawUserConfData {
   };
 }
 
-const TEST_AVATAR_RESPONSE = {
+export type AvatarSuccessResponse = CommonSuccessResponse<{ avatar: string }>;
+
+export type AvatarResponse = AvatarSuccessResponse | AuthLoginFailedResponse;
+
+const TEST_AVATAR_RESPONSE: AvatarSuccessResponse = {
   success: true,
   data: {
     avatar:
@@ -41,47 +35,33 @@ const TEST_AVATAR_RESPONSE = {
   },
 };
 
-export type AvatarResponse =
-  | CommonSuccessResponse<{ avatar: string }>
-  | CommonFailedResponse<ActionFailType.Expired | ActionFailType.Unknown>;
-
 export const getAvatar = async (
   cookieHeader: string,
 ): Promise<AvatarResponse> => {
-  try {
-    const response = await fetch(USER_CONF_URL, {
-      method: "POST",
-      headers: {
-        Cookie: cookieHeader,
-        "Content-Type": "application/json",
-      },
-      body: "{}",
-      redirect: "manual",
-    });
+  const response = await fetch(USER_CONF_URL, {
+    method: "POST",
+    headers: {
+      Cookie: cookieHeader,
+      "Content-Type": "application/json",
+    },
+    body: "{}",
+    redirect: "manual",
+  });
 
-    if (response.status !== 200) return ExpiredResponse;
+  if (response.status !== 200) return ExpiredResponse;
 
-    const data = (await response.json()) as RawUserConfData;
+  const data = (await response.json()) as RawUserConfData;
 
-    return {
-      success: true,
-      data: {
-        avatar: `data:image/png;base64,${data.datas.headImageIcon}`,
-      },
-    };
-  } catch (err) {
-    console.error(err);
-
-    return UnknownResponse((err as Error).message);
-  }
+  return {
+    success: true,
+    data: {
+      avatar: `data:image/png;base64,${data.datas.headImageIcon}`,
+    },
+  };
 };
 
-export const avatarHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  AuthLoginOptions
-> = async (req, res) => {
-  try {
+export const avatarHandler = middleware<AvatarResponse, AccountInfo>(
+  async (req, res) => {
     const { id, password, authToken } = req.body;
 
     if (id && password && authToken) {
@@ -105,11 +85,5 @@ export const avatarHandler: RequestHandler<
     }
 
     return res.json(await getAvatar(cookieHeader));
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
-};
+  },
+);
