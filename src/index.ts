@@ -15,7 +15,7 @@ import {
 import { UnknownResponse } from "./config/index.js";
 import { enrollRouter } from "./enroll/index.js";
 import { gradRouter } from "./grad-system/index.js";
-import { libraryPeopleHandler } from "./library/index.js";
+import { libraryRouter } from "./library/index.js";
 import { morganMiddleware } from "./middlewire/index.js";
 import {
   checkIdCodeHandler,
@@ -139,6 +139,7 @@ app.use("/auth", authRouter);
 app.use("/enroll", enrollRouter);
 app.use("/official", officialRouter);
 app.use("/grad-system", gradRouter);
+app.use("/library", libraryRouter);
 
 app.post("/auth-center/check", authCenterCheckHandler);
 app.post("/auth-center/login", authCenterLoginHandler);
@@ -195,10 +196,6 @@ app.post("/mp/receive", mpReceiveHandler);
 app.post("/mp/remove", mpRemoveHandler);
 app.post("/mp/report", mpReportHandler);
 app.post("/mp/search", mpSearchHandler);
-
-/*  ------------ 图书馆 ------------ */
-
-app.get("/library/people", libraryPeopleHandler);
 
 /*  ------------ 天气 ------------ */
 

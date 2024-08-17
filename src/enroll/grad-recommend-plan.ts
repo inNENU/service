@@ -2,9 +2,13 @@ import { existsSync, mkdirSync, readFileSync, writeFile } from "node:fs";
 
 import type { RichTextNode } from "@mptool/parser";
 import { getRichTextNodes } from "@mptool/parser";
-import type { RequestHandler } from "express";
 
-import type { EmptyObject } from "../typings.js";
+import { UnknownResponse } from "../config/index.js";
+import type {
+  CommonFailedResponse,
+  CommonSuccessResponse,
+} from "../typings.js";
+import { middleware } from "../utils/index.js";
 
 const POST_RECOMMEND_PLAN_URL =
   "https://pg.nenu.edu.cn/yjsy/HData/ZSB/ZSJZ2024-TM-1.html";
@@ -29,127 +33,133 @@ export interface GradRecommendSchoolPlan {
   majors: GradRecommendPlanInfo[];
 }
 
-export interface GradRecommendSuccessResponse {
-  success: true;
-  data: GradRecommendSchoolPlan[];
-}
+export type GradRecommendPlanSuccessResponse = CommonSuccessResponse<
+  GradRecommendSchoolPlan[]
+>;
+
+export type GradRecommendPlanResponse =
+  | GradRecommendPlanSuccessResponse
+  | CommonFailedResponse;
 
 if (!existsSync("./cache")) mkdirSync("./cache");
 
-export const gradRecommendPlanHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  EmptyObject
-> = async (_req, res) => {
-  const response = await fetch(POST_RECOMMEND_PLAN_URL);
+export const getGradRecommendPlan =
+  async (): Promise<GradRecommendPlanResponse> => {
+    const response = await fetch(POST_RECOMMEND_PLAN_URL);
 
-  if (response.status !== 200) {
-    // FIXME: Should update to the new one when the website is updated
-    if (existsSync("./cache/enroll-grad-recommend-plan.json"))
-      return res.json({
+    if (response.status !== 200) {
+      // FIXME: Should update to the new one when the website is updated
+      if (existsSync("./cache/enroll-grad-recommend-plan.json"))
+        return {
+          success: true,
+          data: JSON.parse(
+            readFileSync("./cache/enroll-grad-recommend-plan.json", {
+              encoding: "utf-8",
+            }),
+          ) as GradRecommendSchoolPlan[],
+        };
+
+      return UnknownResponse("推免计划查询已下线");
+    }
+
+    const content = await response.text();
+
+    // check cache
+    if (
+      existsSync("./cache/enroll-grad-recommend-plan.html") &&
+      content.length ===
+        readFileSync("./cache/enroll-grad-recommend-plan.html", {
+          encoding: "utf-8",
+        }).length
+    )
+      return {
         success: true,
         data: JSON.parse(
           readFileSync("./cache/enroll-grad-recommend-plan.json", {
             encoding: "utf-8",
           }),
         ) as GradRecommendSchoolPlan[],
-      });
+      };
 
-    throw new Error("推免计划查询已下线");
-  }
+    const schoolInfo: GradRecommendSchoolPlan[] = await Promise.all(
+      Array.from(content.matchAll(schoolInfoRegExp)).map(
+        async ([, site, code, name, contact, phone, mail]) => {
+          const info: GradRecommendSchoolPlan = {
+            name,
+            site,
+            code,
+            contact,
+            phone,
+            mail,
+            majors: [],
+          };
 
-  const content = await response.text();
+          const majorCodes = Array.from(
+            content.matchAll(
+              new RegExp(`cXYName\\['${name}'\\]\\.push\\('([^']+)'\\)`, "g"),
+            ),
+          );
 
-  // check cache
-  if (
-    existsSync("./cache/enroll-grad-recommend-plan.html") &&
-    content.length ===
-      readFileSync("./cache/enroll-grad-recommend-plan.html", {
-        encoding: "utf-8",
-      }).length
-  )
-    return res.json({
-      success: true,
-      data: JSON.parse(
-        readFileSync("./cache/enroll-grad-recommend-plan.json", {
-          encoding: "utf-8",
-        }),
-      ) as GradRecommendSchoolPlan[],
-    });
+          const majorNameRegExp = Array.from(
+            content.matchAll(
+              new RegExp(`fXYName\\['${name}'\\]\\.push\\('([^']+)'\\)`, "g"),
+            ),
+          );
 
-  const schoolInfo: GradRecommendSchoolPlan[] = await Promise.all(
-    Array.from(content.matchAll(schoolInfoRegExp)).map(
-      async ([, site, code, name, contact, phone, mail]) => {
-        const info: GradRecommendSchoolPlan = {
-          name,
-          site,
-          code,
-          contact,
-          phone,
-          mail,
-          majors: [],
-        };
+          info.majors = await Promise.all(
+            majorCodes.map(async ([, code], index) => {
+              const [, majorName] = majorNameRegExp[index];
 
-        const majorCodes = Array.from(
-          content.matchAll(
-            new RegExp(`cXYName\\['${name}'\\]\\.push\\('([^']+)'\\)`, "g"),
-          ),
-        );
-
-        const majorNameRegExp = Array.from(
-          content.matchAll(
-            new RegExp(`fXYName\\['${name}'\\]\\.push\\('([^']+)'\\)`, "g"),
-          ),
-        );
-
-        info.majors = await Promise.all(
-          majorCodes.map(async ([, code], index) => {
-            const [, majorName] = majorNameRegExp[index];
-
-            const lines = Array.from(
-              content.matchAll(
-                new RegExp(
-                  `dXYName\\['${name}'\\]\\['${code}'\\]\\.push\\('(.*)'\\)`,
-                  "g",
+              const lines = Array.from(
+                content.matchAll(
+                  new RegExp(
+                    `dXYName\\['${name}'\\]\\['${code}'\\]\\.push\\('(.*)'\\)`,
+                    "g",
+                  ),
                 ),
-              ),
-            ).map(([, line]) => line.replace(/<\/?center>/g, ""));
+              ).map(([, line]) => line.replace(/<\/?center>/g, ""));
 
-            return {
-              name: majorName,
-              code,
-              content: await getRichTextNodes(
-                `<table>${TABLE_HEADER}${lines.join("\n")}</table>`,
-              ),
-            };
-          }),
-        );
+              return {
+                name: majorName,
+                code,
+                content: await getRichTextNodes(
+                  `<table>${TABLE_HEADER}${lines.join("\n")}</table>`,
+                ),
+              };
+            }),
+          );
 
-        return info;
+          return info;
+        },
+      ),
+    );
+
+    writeFile(
+      "./cache/enroll-grad-recommend-plan.html",
+      content,
+      { encoding: "utf-8" },
+      (err) => {
+        if (err) {
+          console.error(err);
+        }
       },
-    ),
-  );
+    );
+    writeFile(
+      "./cache/enroll-grad-recommend-plan.json",
+      JSON.stringify(schoolInfo),
+      { encoding: "utf-8" },
+      (err) => {
+        if (err) {
+          console.error(err);
+        }
+      },
+    );
 
-  writeFile(
-    "./cache/enroll-grad-recommend-plan.html",
-    content,
-    { encoding: "utf-8" },
-    (err) => {
-      if (err) {
-        console.error(err);
-      }
-    },
-  );
-  writeFile(
-    "./cache/enroll-grad-recommend-plan.json",
-    JSON.stringify(schoolInfo),
-    { encoding: "utf-8" },
-    (err) => {
-      if (err) {
-        console.error(err);
-      }
-    },
-  );
+    return { success: true, data: schoolInfo };
+  };
 
-  return res.json({ success: true, data: schoolInfo });
-};
+export const gradRecommendPlanHandler = middleware<GradRecommendPlanResponse>(
+  async (_req, res) => {
+    return res.json(await getGradRecommendPlan());
+  },
+);

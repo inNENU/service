@@ -8,7 +8,7 @@ import {
   UnknownResponse,
 } from "../config/index.js";
 import type { AccountInfo, CommonFailedResponse } from "../typings.js";
-import { middleware } from "../utils/handler.js";
+import { middleware } from "../utils/index.js";
 
 const TITLE_REG_EXP = /aField\s?="(.*?)"\.split\("\t"\);/;
 const VALUE_REG_EXP = /aDataLS\s?="(.*?)"\.split\("\t"\);/;

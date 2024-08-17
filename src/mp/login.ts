@@ -1,13 +1,17 @@
-import type { RequestHandler } from "express";
 import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 
+import type { ActionFailType } from "../config/index.js";
 import {
   DatabaseErrorResponse,
   MissingArgResponse,
   appIDInfo,
 } from "../config/index.js";
-import type { CommonFailedResponse, EmptyObject } from "../typings.js";
-import { getConnection, releaseConnection } from "../utils/index.js";
+import type { CommonFailedResponse } from "../typings.js";
+import {
+  getConnection,
+  middleware,
+  releaseConnection,
+} from "../utils/index.js";
 
 export type AppID = "wx33acb831ee1831a5" | "wx2550e3fd373b79a8" | 1109559721;
 export type Env = "qq" | "wx" | "web";
@@ -29,15 +33,18 @@ export interface MPloginSuccessResponse {
   isAdmin: boolean;
 }
 
-export type MPloginFailResponse = CommonFailedResponse;
+export type MPloginFailResponse = CommonFailedResponse<
+  | ActionFailType.MissingArg
+  | ActionFailType.DatabaseError
+  | ActionFailType.Unknown
+>;
 
 export type MPLoginResponse = MPloginSuccessResponse | MPloginFailResponse;
 
-export const mpLoginHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
+export const mpLoginHandler = middleware<
+  MPLoginResponse,
   MPLoginCodeOptions | MPLoginOpenidOptions
-> = async (req, res) => {
+>(async (req, res) => {
   let connection: PoolConnection | null = null;
 
   try {
@@ -90,11 +97,12 @@ export const mpLoginHandler: RequestHandler<
     }
 
     return res.json({
+      success: true,
       openid,
       inBlacklist,
       isAdmin,
-    } as MPloginSuccessResponse);
+    });
   } finally {
     releaseConnection(connection);
   }
-};
+});

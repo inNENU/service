@@ -2,9 +2,13 @@ import { existsSync, mkdirSync, readFileSync, writeFile } from "node:fs";
 
 import type { RichTextNode } from "@mptool/parser";
 import { getRichTextNodes } from "@mptool/parser";
-import type { RequestHandler } from "express";
 
-import type { CommonSuccessResponse, EmptyObject } from "../typings.js";
+import { UnknownResponse } from "../config/index.js";
+import type {
+  CommonFailedResponse,
+  CommonSuccessResponse,
+} from "../typings.js";
+import { middleware } from "../utils/index.js";
 
 const GRAD_ENROLL_PLAN_URL = "https://yz.nenu.edu.cn/source/ssml/2024zsml.html";
 const schoolInfoRegExp =
@@ -33,28 +37,28 @@ export type GradEnrollSuccessResponse = CommonSuccessResponse<
   GradEnrollSchoolPlan[]
 >;
 
+export type GradEnrollResponse =
+  | GradEnrollSuccessResponse
+  | CommonFailedResponse;
+
 if (!existsSync("./cache")) mkdirSync("./cache");
 
-export const gradEnrollPlanHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  EmptyObject
-> = async (_req, res) => {
+export const getGradEnrollPlan = async (): Promise<GradEnrollResponse> => {
   const response = await fetch(GRAD_ENROLL_PLAN_URL);
 
   if (response.status !== 200) {
     // FIXME: Should update to the new one when the website is updated
     if (existsSync("./cache/enroll-grad-plan.json"))
-      return res.json({
+      return {
         success: true,
         data: JSON.parse(
           readFileSync("./cache/enroll-grad-plan.json", {
             encoding: "utf-8",
           }),
         ) as GradEnrollSchoolPlan[],
-      });
+      };
 
-    throw new Error("招生计划查询已下线");
+    return UnknownResponse("招生计划查询已下线");
   }
 
   const content = await response.text();
@@ -66,14 +70,14 @@ export const gradEnrollPlanHandler: RequestHandler<
       readFileSync("./cache/enroll-grad-plan.html", { encoding: "utf-8" })
         .length
   )
-    return res.json({
+    return {
       success: true,
       data: JSON.parse(
         readFileSync("./cache/enroll-grad-plan.json", {
           encoding: "utf-8",
         }),
       ) as GradEnrollSchoolPlan[],
-    });
+    };
 
   const schoolInfo: GradEnrollSchoolPlan[] = await Promise.all(
     Array.from(content.matchAll(schoolInfoRegExp)).map(
@@ -159,5 +163,11 @@ export const gradEnrollPlanHandler: RequestHandler<
     },
   );
 
-  return res.json({ success: true, data: schoolInfo });
+  return { success: true, data: schoolInfo };
 };
+
+export const gradEnrollPlanHandler = middleware<GradEnrollResponse>(
+  async (_, res) => {
+    return res.json(await getGradEnrollPlan());
+  },
+);

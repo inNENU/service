@@ -1,9 +1,9 @@
 import AES from "crypto-js/aes.js";
 import Utf8 from "crypto-js/enc-utf8.js";
 import Pkcs7 from "crypto-js/pad-pkcs7.js";
-import type { RequestHandler } from "express";
 
-import type { EmptyObject } from "../typings.js";
+import type { CommonSuccessResponse } from "../typings.js";
+import { middleware } from "../utils/index.js";
 
 const DICT = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678";
 const DICT_LENGTH = DICT.length;
@@ -30,13 +30,12 @@ export interface AuthEncryptOptions {
   salt: string;
 }
 
-export const authEncryptHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
+export const authEncryptHandler = middleware<
+  CommonSuccessResponse<string>,
   AuthEncryptOptions
-> = (req, res) => {
+>((req, res) =>
   res.json({
     success: true,
     data: authEncrypt(req.body.password, req.body.salt),
-  });
-};
+  }),
+);

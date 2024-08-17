@@ -1,5 +1,4 @@
 import type { CookieType } from "@mptool/net";
-import type { RequestHandler } from "express";
 
 import { AUTH_CAPTCHA_URL, AUTH_LOGIN_URL, AUTH_SERVER } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
@@ -7,7 +6,8 @@ import {
   MissingArgResponse,
   MissingCredentialResponse,
 } from "../config/index.js";
-import type { CommonFailedResponse, EmptyObject } from "../typings.js";
+import type { CommonFailedResponse } from "../typings.js";
+import { middleware } from "../utils/index.js";
 
 interface RawAuthCaptchaResponse {
   smallImage: string;
@@ -16,7 +16,7 @@ interface RawAuthCaptchaResponse {
   yHeight: number;
 }
 
-interface AuthCaptchaSuccessResponse {
+interface GetAuthCaptchaSuccessResponse {
   success: true;
   data: {
     /** 滑块图片 base64 字符串 */
@@ -30,14 +30,14 @@ interface AuthCaptchaSuccessResponse {
   };
 }
 
-export type AuthCaptchaResponse =
-  | AuthCaptchaSuccessResponse
-  | CommonFailedResponse<ActionFailType.Unknown>;
+export type GetAuthCaptchaResponse =
+  | GetAuthCaptchaSuccessResponse
+  | CommonFailedResponse<ActionFailType.MissingArg | ActionFailType.Unknown>;
 
 export const getAuthCaptcha = async (
   cookieHeader: string,
   id: string,
-): Promise<AuthCaptchaResponse> => {
+): Promise<GetAuthCaptchaResponse> => {
   const response = await fetch(`${AUTH_CAPTCHA_URL}?_=${Date.now()}`, {
     method: "POST",
     headers: {
@@ -98,13 +98,13 @@ export const verifyAuthCaptcha = async (
   };
 };
 
-export interface AuthCaptchaGetOptions {
+export interface GetAuthCaptchaOptions {
   /** 学号 */
   id: string;
   cookie?: CookieType[];
 }
 
-export interface AuthCaptchaVerifyOptions {
+export interface VerifyAuthCaptchaOptions {
   /** 滑动距离 */
   distance: number;
   /** 总宽度 */
@@ -112,15 +112,23 @@ export interface AuthCaptchaVerifyOptions {
   cookie?: CookieType[];
 }
 
-export type AuthCaptchaOptions =
-  | AuthCaptchaGetOptions
-  | AuthCaptchaVerifyOptions;
+export interface VerifyAuthCaptchaResponse {
+  success: boolean;
+}
 
-export const authCaptchaHandler: RequestHandler<
-  { id?: string },
-  EmptyObject,
-  AuthCaptchaOptions
-> = async (req, res) => {
+export type AuthCaptchaOptions =
+  | GetAuthCaptchaOptions
+  | VerifyAuthCaptchaOptions;
+
+export type AuthCaptchaResponse =
+  | GetAuthCaptchaResponse
+  | VerifyAuthCaptchaResponse;
+
+export const authCaptchaHandler = middleware<
+  AuthCaptchaResponse,
+  AuthCaptchaOptions,
+  { id?: string }
+>(async (req, res) => {
   const cookieHeader = req.body.cookie
     ? req.body.cookie.map(({ name, value }) => `${name}=${value}`).join("; ")
     : req.headers.cookie;
@@ -148,4 +156,4 @@ export const authCaptchaHandler: RequestHandler<
   );
 
   return res.json(result);
-};
+});

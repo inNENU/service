@@ -1,16 +1,31 @@
-import type { RequestHandler } from "express";
-
-import type { ResetPasswordGetInfoOptions } from "./get-info.js";
+import type {
+  ResetPasswordGetInfoOptions,
+  ResetPasswordGetInfoResponse,
+} from "./get-info.js";
 import { getInfo } from "./get-info.js";
-import type { ResetPasswordSetOptions } from "./reset-password.js";
+import type {
+  ResetPasswordSetOptions,
+  ResetPasswordSetResponse,
+} from "./reset-password.js";
 import { resetPassword } from "./reset-password.js";
-import type { ResetPasswordSendCodeOptions } from "./send-code.js";
+import type {
+  ResetPasswordSendCodeOptions,
+  ResetPasswordSendCodeResponse,
+} from "./send-code.js";
 import { sendCode } from "./send-code.js";
-import type { ResetPasswordVerifyCodeOptions } from "./validate-code.js";
+import type {
+  ResetPasswordVerifyCodeOptions,
+  ResetPasswordVerifyCodeResponse,
+} from "./validate-code.js";
 import { validateCode } from "./validate-code.js";
+import type { ActionFailType } from "../../config/index.js";
 import { InvalidArgResponse } from "../../config/index.js";
-import type { EmptyObject } from "../../typings.js";
-import type { CheckPasswordOptions } from "../check-password.js";
+import type { CommonFailedResponse } from "../../typings.js";
+import { middleware } from "../../utils/index.js";
+import type {
+  CheckPasswordOptions,
+  CheckPasswordResponse,
+} from "../check-password.js";
 import { checkPassword } from "../check-password.js";
 import { getResetCaptcha } from "../reset-captcha.js";
 
@@ -21,11 +36,18 @@ export type ResetPasswordOptions =
   | ResetPasswordVerifyCodeOptions
   | ResetPasswordSetOptions;
 
-export const resetPasswordHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
+export type ResetPasswordResponse =
+  | ResetPasswordGetInfoResponse
+  | ResetPasswordSendCodeResponse
+  | CheckPasswordResponse
+  | ResetPasswordVerifyCodeResponse
+  | ResetPasswordSetResponse
+  | CommonFailedResponse<ActionFailType.InvalidArg>;
+
+export const resetPasswordHandler = middleware<
+  ResetPasswordResponse,
   ResetPasswordOptions
-> = async (req, res) => {
+>(async (req, res) => {
   if (req.method === "GET") {
     const result = await getResetCaptcha();
 
@@ -68,4 +90,4 @@ export const resetPasswordHandler: RequestHandler<
   }
 
   return res.json(InvalidArgResponse("options"));
-};
+});

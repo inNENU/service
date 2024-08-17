@@ -3,7 +3,7 @@ import { CookieStore } from "@mptool/net";
 import { TEST_COOKIE_STORE, TEST_ID } from "../../config/index.js";
 import type { CommonFailedResponse, EmptyObject } from "../../typings.js";
 import { middleware } from "../../utils/index.js";
-import type { AuthCaptchaResponse } from "../captcha.js";
+import type { GetAuthCaptchaResponse } from "../captcha.js";
 import { getAuthCaptcha } from "../captcha.js";
 import {
   AUTH_CAPTCHA_URL,
@@ -21,7 +21,7 @@ export type AuthInitInfoSuccessResponse = {
   /** 请求参数 */
   params: Record<string, string>;
 } & (
-  | { needCaptcha: true; captcha: AuthCaptchaResponse }
+  | { needCaptcha: true; captcha: GetAuthCaptchaResponse }
   | { needCaptcha: false; captcha: null }
 );
 

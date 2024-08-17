@@ -1,6 +1,4 @@
-/* eslint-disable */
-import type { RequestHandler } from "express";
-import type { EmptyObject } from "./typings.js";
+import { middleware } from "./utils/index.js";
 
 type Time = `${number}${number}:${number}${number}`;
 type Date =
@@ -20,8 +18,9 @@ interface WeatherRawData {
   };
 
   /** 天气预警 */
-  alarm: {
-    [props: number]: {
+  alarm: Record<
+    number,
+    {
       /** 城市 */
       city: string;
       /** 区域 */
@@ -44,8 +43,8 @@ interface WeatherRawData {
       update_time: string;
       /** 对应地址 */
       url: string;
-    };
-  };
+    }
+  >;
 
   forecast_1h: Record<
     `${number}`,
@@ -122,9 +121,7 @@ interface WeatherRawData {
   >;
 
   tips: {
-    observe: {
-      [props: string]: string;
-    };
+    observe: Record<string, string>;
   };
 }
 
@@ -139,7 +136,7 @@ interface WeatherRawResponse {
  * @param icon 天气代码
  * @param isDay 当前是否是白天
  */
-const getWeatherCode = (icon: string, isDay: boolean) =>
+const getWeatherCode = (icon: string, isDay: boolean): string =>
   (icon === "00" || icon === "01" || icon === "03" || icon === "13"
     ? isDay
       ? "day/"
@@ -318,7 +315,7 @@ const getWeather = ({ air, alarm, ...data }: WeatherRawData): WeatherData => {
       .filter(([id]) => id !== "time")
       .map(([id, value]) => ({
         id,
-        ...(<{ name: string; info: string; detail: string }>value),
+        ...(value as { name: string; info: string; detail: string }),
       })),
     {
       id: "tailnumber",
@@ -462,24 +459,22 @@ const getWeather = ({ air, alarm, ...data }: WeatherRawData): WeatherData => {
   };
 };
 
-export const weatherHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  WeatherOptions
-> = async (req, res) => {
-  const { province = "吉林", city = "长春", county = "南关" } = req.body;
+export const weatherHandler = middleware<WeatherData, WeatherOptions>(
+  async (req, res) => {
+    const { province = "吉林", city = "长春", county = "南关" } = req.body;
 
-  const weatherResponse = await fetch(
-    `https://wis.qq.com/weather/common?source=pc&weather_type=observe|rise|forecast_1h|forecast_24h|index|alarm|limit|tips&province=${province}&city=${city}&county=${county}`,
-  );
-  const airResponse = await fetch(
-    `https://wis.qq.com/weather/common?source=pc&weather_type=observe|rise|air|forecast_1h|forecast_24h|index|alarm|limit|tips&province=${province}&city=${city}`,
-  );
+    const weatherResponse = await fetch(
+      `https://wis.qq.com/weather/common?source=pc&weather_type=observe|rise|forecast_1h|forecast_24h|index|alarm|limit|tips&province=${province}&city=${city}&county=${county}`,
+    );
+    const airResponse = await fetch(
+      `https://wis.qq.com/weather/common?source=pc&weather_type=observe|rise|air|forecast_1h|forecast_24h|index|alarm|limit|tips&province=${province}&city=${city}`,
+    );
 
-  const rawData = {
-    ...(<WeatherRawResponse>await weatherResponse.json()).data,
-    ...(<WeatherRawResponse>await airResponse.json()).data,
-  };
+    const rawData = {
+      ...((await weatherResponse.json()) as WeatherRawResponse).data,
+      ...((await airResponse.json()) as WeatherRawResponse).data,
+    };
 
-  return res.json(getWeather(rawData));
-};
+    return res.json(getWeather(rawData));
+  },
+);

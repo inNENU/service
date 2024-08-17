@@ -1,10 +1,9 @@
-import type { RequestHandler } from "express";
-
 import { UnknownResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../typings.js";
+import { middleware } from "../utils/index.js";
 
 interface LibraryPeopleRawData {
   code: number;
@@ -32,8 +31,8 @@ export type LibraryPeopleResponse =
   | LibraryPeopleSuccessResponse
   | CommonFailedResponse;
 
-export const libraryPeopleHandler: RequestHandler = async (_, res) => {
-  try {
+export const libraryPeopleHandler = middleware<LibraryPeopleResponse>(
+  async (_, res) => {
     const response = await fetch(
       "https://www.library.nenu.edu.cn/engine2/custom/nenu/onlineUserNum",
     );
@@ -54,12 +53,6 @@ export const libraryPeopleHandler: RequestHandler = async (_, res) => {
       });
     }
 
-    throw new Error("Failed");
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
-};
+    return UnknownResponse("获取人数失败");
+  },
+);

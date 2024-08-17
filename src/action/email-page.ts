@@ -1,5 +1,3 @@
-import type { RequestHandler } from "express";
-
 import { ACTION_MAIN_PAGE, ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
 import type { ActionFailType } from "../config/index.js";
@@ -7,9 +5,9 @@ import { ExpiredResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
-  EmptyObject,
   LoginOptions,
 } from "../typings.js";
+import { middleware } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/login.js";
 
 const EMAIL_PAGE_URL = `${ACTION_SERVER}/extract/sendRedirect2Email`;
@@ -71,15 +69,14 @@ export const getEmailPage = async (
   };
 };
 
-export const actionEmailPageHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
+export const actionEmailPageHandler = middleware<
+  ActionEmailPageResponse,
   ActionEmailPageOptions,
   ActionEmailPageOptions
-> = async (req, res) => {
+>(async (req, res) => {
   const cookieHeader = req.headers.cookie!;
 
   if (cookieHeader.includes("TEST")) return res.json(TEST_EMAIL_PAGE_RESPONSE);
 
   return res.json(await getEmailPage(cookieHeader, req.body.mid));
-};
+});

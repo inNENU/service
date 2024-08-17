@@ -1,5 +1,4 @@
 import { CookieStore } from "@mptool/net";
-import type { RequestHandler } from "express";
 
 import { RESET_PREFIX } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
@@ -7,9 +6,8 @@ import { RestrictedResponse, UnknownResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
-  EmptyObject,
 } from "../typings.js";
-import { generateRandomString } from "../utils/index.js";
+import { generateRandomString, middleware } from "../utils/index.js";
 
 const CAPTCHA_URL = `${RESET_PREFIX}/generateCaptcha`;
 
@@ -75,9 +73,8 @@ export const getResetCaptcha = async (
   };
 };
 
-export const resetCaptchaHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject
-> = async (req, res) => {
-  return res.json(await getResetCaptcha(req.headers.cookie ?? ""));
-};
+export const resetCaptchaHandler = middleware<ResetCaptchaResponse>(
+  async (req, res) => {
+    return res.json(await getResetCaptcha(req.headers.cookie ?? ""));
+  },
+);

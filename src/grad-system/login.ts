@@ -1,12 +1,12 @@
 import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
-import type { RequestHandler } from "express";
 
 import { SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { ActionFailType, UnknownResponse } from "../config/index.js";
-import type { AccountInfo, EmptyObject } from "../typings.js";
+import type { AccountInfo } from "../typings.js";
+import { middleware } from "../utils/index.js";
 
 export interface GradSystemLoginSuccessResult {
   success: true;
@@ -43,6 +43,12 @@ export const gradSystemLogin = async (
   cookieStore.applyResponse(ticketResponse, result.location);
 
   if (ticketResponse.status !== 302) {
+    console.log(
+      "Failed to resolve ticket response",
+      result.location,
+      ticketResponse.status,
+    );
+
     return UnknownResponse("登录失败");
   }
 
@@ -67,7 +73,7 @@ export const gradSystemLogin = async (
     return {
       success: true,
       cookieStore,
-    } as GradSystemLoginSuccessResult;
+    };
   }
 
   return UnknownResponse("登录失败");
@@ -83,11 +89,10 @@ export type GradSystemLoginResponse =
   | GradSystemLoginSuccessResponse
   | AuthLoginFailedResponse;
 
-export const gradSystemLoginHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
+export const gradSystemLoginHandler = middleware<
+  GradSystemLoginResponse,
   AccountInfo
-> = async (req, res) => {
+>(async (req, res) => {
   const result = await gradSystemLogin(req.body);
 
   if (result.success) {
@@ -102,8 +107,8 @@ export const gradSystemLoginHandler: RequestHandler<
     return res.json({
       success: true,
       cookies,
-    } as GradSystemLoginSuccessResponse);
+    });
   }
 
   return res.json(result);
-};
+});
