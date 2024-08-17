@@ -1,14 +1,10 @@
-import type { RequestHandler } from "express";
-
 import type { MyLoginFailedResponse } from "./login.js";
 import { myLogin } from "./login.js";
 import { MY_SERVER } from "./utils.js";
+import type { ActionFailType } from "../config/index.js";
 import { MissingCredentialResponse, UnknownResponse } from "../config/index.js";
-import type {
-  AccountInfo,
-  CommonFailedResponse,
-  EmptyObject,
-} from "../typings.js";
+import type { AccountInfo, CommonFailedResponse } from "../typings.js";
+import { middleware } from "../utils/handler.js";
 
 interface RAWIdentityInfo {
   success: true;
@@ -37,45 +33,34 @@ const TEST_IDENTITY_RESULT: MyIdentitySuccessResult = {
 export const getMyIdentity = async (
   cookieHeader: string,
 ): Promise<MyIdentityResult> => {
-  try {
-    const infoResponse = await fetch(`${MY_SERVER}/hallIndex/getidentity`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json, text/javascript, */*; q=0.01",
-        Cookie: cookieHeader,
+  const infoResponse = await fetch(`${MY_SERVER}/hallIndex/getidentity`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json, text/javascript, */*; q=0.01",
+      Cookie: cookieHeader,
+    },
+  });
+
+  const identityResult = (await infoResponse.json()) as RAWIdentityInfo;
+
+  if (identityResult.success)
+    return {
+      success: true,
+      data: {
+        type: identityResult.sf,
       },
-    });
+    };
 
-    const identityResult = (await infoResponse.json()) as RAWIdentityInfo;
-
-    if (identityResult.success)
-      return {
-        success: true,
-        data: {
-          type: identityResult.sf,
-        },
-      };
-
-    return UnknownResponse("获取人员身份失败");
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return UnknownResponse(message);
-  }
+  return UnknownResponse("获取人员身份失败");
 };
 
 export type MyIdentityResponse =
   | MyIdentitySuccessResult
-  | MyLoginFailedResponse;
+  | MyLoginFailedResponse
+  | CommonFailedResponse<ActionFailType.MissingCredential>;
 
-export const myIdentityHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  AccountInfo
-> = async (req, res) => {
-  try {
+export const myIdentityHandler = middleware<MyIdentityResponse, AccountInfo>(
+  async (req, res) => {
     const { id, password, authToken } = req.body;
 
     if (id && password && authToken) {
@@ -92,11 +77,5 @@ export const myIdentityHandler: RequestHandler<
     if (cookieHeader.includes("TEST")) return res.json(TEST_IDENTITY_RESULT);
 
     return res.json(await getMyIdentity(cookieHeader));
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
-};
+  },
+);

@@ -1,6 +1,5 @@
 import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
-import type { RequestHandler } from "express";
 
 import { MY_MAIN_PAGE } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
@@ -12,10 +11,10 @@ import {
   TEST_LOGIN_RESULT,
   UnknownResponse,
 } from "../config/index.js";
-import type { AccountInfo, EmptyObject } from "../typings.js";
+import type { AccountInfo } from "../typings.js";
+import { middleware } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
-import { vpnCASLogin } from "../vpn/index.js";
-import { FORBIDDEN_URL } from "../vpn/utils.js";
+import { FORBIDDEN_URL, vpnCASLogin } from "../vpn/index.js";
 
 export interface MyLoginSuccessResult {
   success: true;
@@ -109,12 +108,8 @@ export interface MyLoginSuccessResponse {
 
 export type MyLoginResponse = MyLoginSuccessResponse | MyLoginFailedResponse;
 
-export const myLoginHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  AccountInfo
-> = async (req, res) => {
-  try {
+export const myLoginHandler = middleware<MyLoginResponse, AccountInfo>(
+  async (req, res) => {
     const result =
       // fake result for testing
       req.body.id === TEST_ID_NUMBER
@@ -130,18 +125,9 @@ export const myLoginHandler: RequestHandler<
         res.cookie(name, value, rest);
       });
 
-      return res.json({
-        success: true,
-        cookies,
-      } as MyLoginSuccessResponse);
+      return res.json({ success: true, cookies });
     }
 
     return res.json(result);
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
-};
+  },
+);

@@ -1,11 +1,11 @@
 import { CookieStore } from "@mptool/net";
-import type { RequestHandler } from "express";
 
-import type { VPNLoginResult, VPNLoginSuccessResponse } from "./login.js";
+import type { VPNLoginResponse, VPNLoginResult } from "./login.js";
 import { LOGIN_URL, UPDATE_KEY_URL, VPN_DOMAIN, VPN_SERVER } from "./utils.js";
 import { authLogin } from "../auth/login.js";
-import { ActionFailType, UnknownResponse } from "../config/index.js";
-import type { AccountInfo, EmptyObject } from "../typings.js";
+import { ActionFailType } from "../config/index.js";
+import type { AccountInfo } from "../typings.js";
+import { middleware } from "../utils/handler.js";
 
 const CAS_LOGIN_URL = `${VPN_SERVER}/users/auth/cas`;
 
@@ -89,12 +89,8 @@ export const vpnCASLogin = async (
   };
 };
 
-export const vpnCASLoginHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  AccountInfo
-> = async (req, res) => {
-  try {
+export const vpnCASLoginHandler = middleware<VPNLoginResponse, AccountInfo>(
+  async (req, res) => {
     const { id, password, authToken } = req.body;
 
     const result = await vpnCASLogin({ id, password, authToken });
@@ -108,18 +104,9 @@ export const vpnCASLoginHandler: RequestHandler<
         res.cookie(name, value, rest);
       });
 
-      return res.json({
-        success: true,
-        cookies,
-      } as VPNLoginSuccessResponse);
+      return res.json({ success: true, cookies });
     }
 
     return res.json(result);
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
-};
+  },
+);

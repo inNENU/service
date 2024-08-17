@@ -1,15 +1,11 @@
 import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
-import type { RequestHandler } from "express";
 
 import { LOGIN_URL, UPDATE_KEY_URL, VPN_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { ActionFailType, UnknownResponse } from "../config/index.js";
-import type {
-  AccountInfo,
-  CommonFailedResponse,
-  EmptyObject,
-} from "../typings.js";
+import type { AccountInfo, CommonFailedResponse } from "../typings.js";
+import { middleware } from "../utils/index.js";
 
 const AUTHENTICITY_TOKEN_REGEXP =
   /<input\s+type="hidden"\s+name="authenticity_token" value="(.*?)" \/>/;
@@ -125,12 +121,8 @@ export type VPNLoginResponse =
   | AuthLoginFailedResponse
   | VPNLoginFailedResponse;
 
-export const vpnLoginHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  AccountInfo
-> = async (req, res) => {
-  try {
+export const vpnLoginHandler = middleware<VPNLoginResponse, AccountInfo>(
+  async (req, res) => {
     const { id, password, authToken } = req.body;
 
     const result = await vpnLogin({ id, password, authToken });
@@ -144,18 +136,9 @@ export const vpnLoginHandler: RequestHandler<
         res.cookie(name, value, rest);
       });
 
-      return res.json({
-        success: true,
-        cookies,
-      } as VPNLoginSuccessResponse);
+      return res.json({ success: true, cookies });
     }
 
     return res.json(result);
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
-};
+  },
+);

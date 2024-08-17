@@ -1,20 +1,20 @@
-import type { RequestHandler } from "express";
 import type { PoolConnection } from "mysql2/promise";
 
 import type { MyLoginFailedResponse } from "./login.js";
 import { myLogin } from "./login.js";
 import { MY_SERVER } from "./utils.js";
+import type { ActionFailType } from "../config/index.js";
 import {
   MissingCredentialResponse,
   TEST_INFO,
   UnknownResponse,
 } from "../config/index.js";
-import type {
-  AccountInfo,
-  CommonFailedResponse,
-  EmptyObject,
-} from "../typings.js";
-import { getConnection, releaseConnection } from "../utils/index.js";
+import type { AccountInfo, CommonFailedResponse } from "../typings.js";
+import {
+  getConnection,
+  middleware,
+  releaseConnection,
+} from "../utils/index.js";
 
 interface RawInfo {
   success: true;
@@ -258,25 +258,18 @@ export const getMyInfo = async (
     }
 
     return UnknownResponse("获取人员信息失败");
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return UnknownResponse(message);
   } finally {
     releaseConnection(connection);
   }
 };
 
-export type MyInfoResponse = MyInfoSuccessResult | MyLoginFailedResponse;
+export type MyInfoResponse =
+  | MyInfoSuccessResult
+  | MyLoginFailedResponse
+  | CommonFailedResponse<ActionFailType.MissingCredential>;
 
-export const myInfoHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  AccountInfo
-> = async (req, res) => {
-  try {
+export const myInfoHandler = middleware<MyInfoResponse, AccountInfo>(
+  async (req, res) => {
     const { id, password, authToken } = req.body;
 
     if (id && password && authToken) {
@@ -293,11 +286,5 @@ export const myInfoHandler: RequestHandler<
     if (cookieHeader.includes("TEST")) return res.json(TEST_INFO_RESULT);
 
     return res.json(await getMyInfo(req.headers.cookie));
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
-};
+  },
+);

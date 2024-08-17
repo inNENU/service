@@ -14,13 +14,7 @@ import { gradRouter } from "./grad-system/index.js";
 import { libraryRouter } from "./library/index.js";
 import { morganMiddleware } from "./middlewire/index.js";
 import { mpRouter } from "./mp/index.js";
-import {
-  emailHandler,
-  myCheckHandler,
-  myIdentityHandler,
-  myInfoHandler,
-  myLoginHandler,
-} from "./my/index.js";
+import { myRouter } from "./my/index.js";
 import { officialRouter } from "./official/index.js";
 import {
   test301Handler,
@@ -53,7 +47,7 @@ import {
   underSystemLoginHandler,
   underTestQueryHandler,
 } from "./under-system/index.js";
-import { vpnCASLoginHandler, vpnLoginHandler } from "./vpn/index.js";
+import { vpnRouter } from "./vpn/index.js";
 import { weatherHandler } from "./weather.js";
 
 const currentDate = new Date().toLocaleDateString("zh");
@@ -129,14 +123,8 @@ app.use("/official", officialRouter);
 app.use("/grad-system", gradRouter);
 app.use("/library", libraryRouter);
 app.use("/mp", mpRouter);
-
-/*  ------------ 服务大厅 ------------ */
-
-app.post("/my/check", myCheckHandler);
-app.post("/my/email", emailHandler);
-app.post("/my/info", myInfoHandler);
-app.post("/my/login", myLoginHandler);
-app.post("/my/identity", myIdentityHandler);
+app.use("/my", myRouter);
+app.use("/vpn", vpnRouter);
 
 /*  ------------ 本科教务系统 ------------ */
 
@@ -164,11 +152,6 @@ app.post("/under-system/exam-place", underExamPlaceHandler);
 app.post("/under-system/info", underInfoHandler);
 app.post("/under-system/student-archive", underStudentArchiveHandler);
 app.post("/under-system/test-query", underTestQueryHandler);
-
-/*  ------------ WebVPN ------------ */
-
-app.post("/vpn/cas-login", vpnCASLoginHandler);
-app.post("/vpn/login", vpnLoginHandler);
 
 /*  ------------ 天气 ------------ */
 
