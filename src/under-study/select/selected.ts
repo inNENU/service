@@ -40,21 +40,17 @@ export type UnderSelectSelectedResponse =
   | AuthLoginFailedResponse
   | CommonFailedResponse<ActionFailType.MissingArg | ActionFailType.Unknown>;
 
-export const underStudySelectedCourseHandler = middleware<
-  UnderSelectSelectedResponse,
-  UnderSelectSelectedOptions
->(async (req, res) => {
-  const { link } = req.body;
-
-  if (!link) return res.json(MissingArgResponse("link"));
-
+export const getUnderSelectSelectedCourse = async (
+  link: string,
+  cookieHeader: string,
+): Promise<UnderSelectSelectedResponse> => {
   const infoUrl = `${UNDER_STUDY_SERVER}${link}/yxkc`;
 
   const response = await fetch(infoUrl, {
     method: "POST",
     headers: {
       Accept: "application/json, text/javascript, */*; q=0.01",
-      Cookie: req.headers.cookie!,
+      Cookie: cookieHeader,
       Referer: `${UNDER_STUDY_SERVER}${link}`,
       ...EDGE_USER_AGENT_HEADERS,
     },
@@ -67,12 +63,24 @@ export const underStudySelectedCourseHandler = middleware<
     redirect: "manual",
   });
 
-  if (response.status !== 200) return res.json(ExpiredResponse);
+  if (response.status !== 200) return ExpiredResponse;
 
   const data = (await response.json()) as RawUnderSelectedClassResponse;
 
-  return res.json({
+  return {
     success: true,
     data: getClasses(data.rows),
-  });
+  };
+};
+
+export const underSelectSelectedCourseHandler = middleware<
+  UnderSelectSelectedResponse,
+  UnderSelectSelectedOptions
+>(async (req, res) => {
+  const { link } = req.body;
+  const cookieHeader = req.headers.cookie!;
+
+  if (!link) return res.json(MissingArgResponse("link"));
+
+  return res.json(await getUnderSelectSelectedCourse(link, cookieHeader));
 });

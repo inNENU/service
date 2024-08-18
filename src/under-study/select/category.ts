@@ -140,10 +140,10 @@ export const getUnderSelectCategories = async (
   return {
     success: true,
     data: getSelectCategories(content),
-  } as UnderSelectCategorySuccessResponse;
+  };
 };
 
-export const underStudySelectCategoryHandler =
+export const underSelectCategoryHandler =
   middleware<UnderSelectCategoryResponse>(async (req, res) => {
     const cookieHeader = req.headers.cookie!;
 

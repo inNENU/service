@@ -78,100 +78,115 @@ export type UnderSelectProcessResponse =
       | ActionFailType.MissingCredential
     >;
 
-export const underStudyProcessCourseHandler = middleware<
+export const addUnderSelectCourse = async (
+  options: UnderSelectAddOptions,
+  cookieHeader: string,
+): Promise<UnderSelectProcessResponse> => {
+  const page = `${UNDER_STUDY_SERVER}${options.link}`;
+
+  const response = await fetch(`${page}/add`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json, text/javascript, */*; q=0.01",
+      Cookie: cookieHeader,
+      Referer: page,
+      ...EDGE_USER_AGENT_HEADERS,
+    },
+    body: new URLSearchParams({
+      kcmc: options.name ?? "",
+      kcrwdm: options.classId,
+      qz: String(options.weight ?? -1),
+      // NOTE: This is an unknown field, and currently can be omitted
+      hlct: "0",
+    }),
+    redirect: "manual",
+  });
+
+  if (response.status !== 200) return ExpiredResponse;
+
+  const data = (await response.json()) as RawUnderSelectProcessResponse;
+
+  if (data.code !== 0) {
+    if (data.code === -1) {
+      if (data.message === "当前不是选课时间")
+        return {
+          success: false,
+          type: ActionFailType.Closed,
+          msg: data.message,
+        };
+
+      if (data.message === "选课人数超出，请选其他课程") {
+        return {
+          success: false,
+          type: ActionFailType.Full,
+          msg: data.message,
+        };
+      }
+    }
+
+    throw new Error(data.message);
+  }
+
+  return { success: true };
+};
+
+export const removeUnderSelectCourse = async (
+  options: UnderSelectRemoveOptions,
+  cookieHeader: string,
+): Promise<UnderSelectProcessResponse> => {
+  const page = `${UNDER_STUDY_SERVER}${options.link}`;
+
+  const response = await fetch(`${page}/cancel`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json, text/javascript, */*; q=0.01",
+      Cookie: cookieHeader,
+      Referer: page,
+      ...EDGE_USER_AGENT_HEADERS,
+    },
+    body: new URLSearchParams({
+      jxbdm: options.classCode ?? "",
+      kcrwdm: options.classId,
+      kcmc: options.name ?? "",
+    }),
+    redirect: "manual",
+  });
+
+  if (response.status !== 200) return ExpiredResponse;
+
+  const data = (await response.json()) as RawUnderSelectProcessResponse;
+
+  if (data.code !== 0) {
+    if (data.code === -1 && data.message === "当前不是选课时间")
+      return {
+        success: false,
+        msg: data.message,
+        type: ActionFailType.Closed,
+      };
+
+    throw new Error(data.message);
+  }
+
+  return { success: true };
+};
+
+export const underSelectProcessHandler = middleware<
   UnderSelectProcessResponse,
   UnderSelectProcessOptions
 >(async (req, res) => {
-  const { link, type } = req.body;
+  const { link, type, classId } = req.body;
 
   const cookieHeader = req.headers.cookie!;
 
   if (!link) return res.json(MissingArgResponse("link"));
-
-  if (!req.body.classId) return res.json(MissingArgResponse("classId"));
-
-  const referer = `${UNDER_STUDY_SERVER}${link}`;
+  if (!classId) return res.json(MissingArgResponse("classId"));
 
   if (type === "add") {
-    const response = await fetch(`${referer}/add`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json, text/javascript, */*; q=0.01",
-        Cookie: cookieHeader,
-        Referer: referer,
-        ...EDGE_USER_AGENT_HEADERS,
-      },
-      body: new URLSearchParams({
-        kcmc: req.body.name ?? "",
-        kcrwdm: req.body.classId,
-        qz: String(req.body.weight ?? -1),
-        // NOTE: This is an unknown field, and currently can be omitted
-        hlct: "0",
-      }),
-      redirect: "manual",
-    });
-
-    if (response.status !== 200) return res.json(ExpiredResponse);
-
-    const data = (await response.json()) as RawUnderSelectProcessResponse;
-
-    if (data.code !== 0) {
-      if (data.code === -1) {
-        if (data.message === "当前不是选课时间")
-          return res.json({
-            success: false,
-            type: ActionFailType.Closed,
-            msg: data.message,
-          });
-
-        if (data.message === "选课人数超出，请选其他课程") {
-          return res.json({
-            success: false,
-            type: ActionFailType.Full,
-            msg: data.message,
-          });
-        }
-      }
-
-      throw new Error(data.message);
-    }
-
-    return res.json({ success: true });
+    return res.json(await addUnderSelectCourse(req.body, cookieHeader));
   }
 
   if (type === "remove") {
-    const response = await fetch(`${referer}/cancel`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json, text/javascript, */*; q=0.01",
-        Cookie: cookieHeader,
-        Referer: referer,
-        ...EDGE_USER_AGENT_HEADERS,
-      },
-      body: new URLSearchParams({
-        jxbdm: req.body.classCode ?? "",
-        kcrwdm: req.body.classId,
-        kcmc: req.body.name ?? "",
-      }),
-      redirect: "manual",
-    });
-
-    if (response.status !== 200) return res.json(ExpiredResponse);
-
-    const data = (await response.json()) as RawUnderSelectProcessResponse;
-
-    if (data.code !== 0) {
-      if (data.code === -1 && data.message === "当前不是选课时间")
-        return res.json({
-          success: false,
-          msg: data.message,
-          type: ActionFailType.Closed,
-        });
-
-      throw new Error(data.message);
-    }
-
-    return res.json({ success: true });
+    return res.json(await removeUnderSelectCourse(req.body, cookieHeader));
   }
 
   return res.json(InvalidArgResponse("type"));

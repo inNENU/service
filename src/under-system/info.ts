@@ -5,7 +5,6 @@ import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { ActionFailType, MissingCredentialResponse } from "../config/index.js";
 import type {
-  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
@@ -185,7 +184,7 @@ export const underInfoHandler: RequestHandler<
     const { id, password, authToken } = req.body;
 
     if (id && password && authToken) {
-      const result = await underSystemLogin(req.body as AccountInfo);
+      const result = await underSystemLogin({ id, password, authToken });
 
       if (!result.success) return res.json(result);
 

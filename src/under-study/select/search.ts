@@ -50,11 +50,8 @@ export type UnderSelectSearchResponse =
   | AuthLoginFailedResponse
   | CommonFailedResponse<ActionFailType.MissingArg | ActionFailType.Unknown>;
 
-export const underStudySearchCourseHandler = middleware<
-  UnderSelectSearchResponse,
-  UnderSelectSearchOptions
->(async (req, res) => {
-  const {
+export const searchUnderSelectCourse = async (
+  {
     link,
     name = "",
     area = "",
@@ -67,17 +64,16 @@ export const underStudySearchCourseHandler = middleware<
     teacher = "",
     place = "",
     office = "",
-  } = req.body;
-
-  if (!link) return res.json(MissingArgResponse("link"));
-
+  }: UnderSelectSearchOptions,
+  cookieHeader: string,
+): Promise<UnderSelectSearchResponse> => {
   const infoUrl = `${UNDER_STUDY_SERVER}${link}/hzkc`;
 
   const response = await fetch(infoUrl, {
     method: "POST",
     headers: {
       Accept: "application/json, text/javascript, */*; q=0.01",
-      Cookie: req.headers.cookie!,
+      Cookie: cookieHeader,
       Referer: `${UNDER_STUDY_SERVER}${link}`,
       ...EDGE_USER_AGENT_HEADERS,
     },
@@ -101,12 +97,23 @@ export const underStudySearchCourseHandler = middleware<
     redirect: "manual",
   });
 
-  if (response.status !== 200) return res.json(ExpiredResponse);
+  if (response.status !== 200) return ExpiredResponse;
 
   const data = (await response.json()) as RawUnderSearchClassResponse;
 
-  return res.json({
+  return {
     success: true,
     data: getCourses(data.rows),
-  });
+  };
+};
+
+export const underSelectSearchCourseHandler = middleware<
+  UnderSelectSearchResponse,
+  UnderSelectSearchOptions
+>(async (req, res) => {
+  const cookieHeader = req.headers.cookie!;
+
+  if (!req.body.link) return res.json(MissingArgResponse("link"));
+
+  return res.json(await searchUnderSelectCourse(req.body, cookieHeader));
 });
