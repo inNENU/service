@@ -1,6 +1,5 @@
 import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
-import type { RequestHandler } from "express";
 
 import { UNDER_STUDY_SERVER, UNDER_STUDY_VPN_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
@@ -8,6 +7,7 @@ import { authLogin } from "../auth/login.js";
 import { AUTH_SERVER, WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
 import type { ActionFailType } from "../config/index.js";
 import {
+  MissingCredentialResponse,
   RestrictedResponse,
   TEST_ID_NUMBER,
   TEST_LOGIN_RESULT,
@@ -16,9 +16,9 @@ import {
 import type {
   AccountInfo,
   CommonFailedResponse,
-  EmptyObject,
+  LoginOptions,
 } from "../typings.js";
-import { EDGE_USER_AGENT_HEADERS } from "../utils/index.js";
+import { EDGE_USER_AGENT_HEADERS, middleware } from "../utils/index.js";
 
 export interface UnderStudyLoginOptions extends AccountInfo {
   webVPN?: boolean;
@@ -98,7 +98,7 @@ export const underStudyLogin = async (
       return {
         success: true,
         cookieStore,
-      } as UnderStudyLoginSuccessResult;
+      };
   }
 
   return UnknownResponse("登录失败");
@@ -112,41 +112,53 @@ export interface UnderStudyLoginSuccessResponse {
 
 export type UnderStudyLoginResponse =
   | UnderStudyLoginSuccessResponse
-  | AuthLoginFailedResponse;
+  | AuthLoginFailedResponse
+  | CommonFailedResponse<ActionFailType.Restricted>;
 
-export const underStudyLoginHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  UnderStudyLoginOptions
-> = async (req, res) => {
-  try {
-    const result =
-      // fake result for testing
-      req.body.id === TEST_ID_NUMBER
-        ? TEST_LOGIN_RESULT
-        : await underStudyLogin(req.body);
+export const loginToUnderStudy = middleware<
+  | UnderStudyLoginResponse
+  | CommonFailedResponse<ActionFailType.MissingCredential>,
+  LoginOptions
+>(async (req, res, next) => {
+  const { id, password, authToken } = req.body;
 
-    if (result.success) {
-      const cookies = result.cookieStore
-        .getAllCookies()
-        .map((item) => item.toJSON());
+  if (id && password && authToken) {
+    const result = await underStudyLogin({ id, password, authToken });
 
-      cookies.forEach(({ name, value, ...rest }) => {
-        res.cookie(name, value, rest);
-      });
+    if (!result.success) return res.json(result);
 
-      return res.json({
-        success: true,
-        cookies,
-      } as UnderStudyLoginSuccessResponse);
-    }
-
-    return res.json(result);
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
+    req.headers.cookie = result.cookieStore.getHeader(UNDER_STUDY_SERVER);
+  } else if (!req.headers.cookie) {
+    return res.json(MissingCredentialResponse);
   }
-};
+
+  return next();
+});
+
+export const underStudyLoginHandler = middleware<
+  UnderStudyLoginResponse,
+  UnderStudyLoginOptions
+>(async (req, res) => {
+  const result =
+    // fake result for testing
+    req.body.id === TEST_ID_NUMBER
+      ? TEST_LOGIN_RESULT
+      : await underStudyLogin(req.body);
+
+  if (result.success) {
+    const cookies = result.cookieStore
+      .getAllCookies()
+      .map((item) => item.toJSON());
+
+    cookies.forEach(({ name, value, ...rest }) => {
+      res.cookie(name, value, rest);
+    });
+
+    return res.json({
+      success: true,
+      cookies,
+    });
+  }
+
+  return res.json(result);
+});

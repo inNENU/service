@@ -1,19 +1,8 @@
-import type { RequestHandler } from "express";
-
-import { underStudyLogin } from "./login.js";
 import { UNDER_STUDY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import {
-  ExpiredResponse,
-  MissingCredentialResponse,
-  UnknownResponse,
-} from "../config/index.js";
-import type {
-  CommonFailedResponse,
-  EmptyObject,
-  LoginOptions,
-} from "../typings.js";
-import { EDGE_USER_AGENT_HEADERS } from "../utils/index.js";
+import { ExpiredResponse, UnknownResponse } from "../config/index.js";
+import type { CommonFailedResponse, LoginOptions } from "../typings.js";
+import { EDGE_USER_AGENT_HEADERS, middleware } from "../utils/index.js";
 
 export interface UnderGradeListOptions extends LoginOptions {
   /** 查询时间 */
@@ -246,39 +235,18 @@ export const getUnderGradeList = async (
   return {
     success: true,
     data: gradeList,
-  } as UnderGradeListSuccessResponse;
+  };
 };
 
-export const underStudyGradeListHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
+export const underStudyGradeListHandler = middleware<
+  UnderGradeListResponse,
   UnderGradeListOptions
-> = async (req, res) => {
-  try {
-    const { id, password, authToken, time = "" } = req.body;
+>(async (req, res) => {
+  const cookieHeader = req.headers.cookie!;
 
-    if (id && password && authToken) {
-      const result = await underStudyLogin({ id, password, authToken });
-
-      if (!result.success) return res.json(result);
-
-      req.headers.cookie = result.cookieStore.getHeader(QUERY_URL);
-    } else if (!req.headers.cookie) {
-      return res.json(MissingCredentialResponse);
-    }
-
-    const cookieHeader = req.headers.cookie;
-
-    if (cookieHeader.includes("TEST")) {
-      return res.json(TEST_UNDER_GRADE_LIST_RESPONSE);
-    }
-
-    return res.json(await getUnderGradeList(cookieHeader, time));
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
+  if (cookieHeader.includes("TEST")) {
+    return res.json(TEST_UNDER_GRADE_LIST_RESPONSE);
   }
-};
+
+  return res.json(await getUnderGradeList(cookieHeader, req.body.time ?? ""));
+});

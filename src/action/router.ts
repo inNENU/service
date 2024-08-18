@@ -11,9 +11,12 @@ import { actionRecentEmailHandler } from "./recent-mail.js";
 
 const actionRouter = Router();
 
-actionRouter.use("/:path", loginToAction);
+// These are the routes that don't require login
 actionRouter.post("/login", actionLoginHandler);
 actionRouter.post("/check", actionCheckHandler);
+
+actionRouter.use("/:path", loginToAction);
+
 actionRouter.post("/borrow-books", borrowBooksHandler);
 actionRouter.post("/card-balance", cardBalanceHandler);
 actionRouter.get("/email-page", actionEmailPageHandler);

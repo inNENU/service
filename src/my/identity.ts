@@ -1,8 +1,7 @@
 import type { MyLoginFailedResponse } from "./login.js";
-import { myLogin } from "./login.js";
 import { MY_SERVER } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
-import { MissingCredentialResponse, UnknownResponse } from "../config/index.js";
+import { UnknownResponse } from "../config/index.js";
 import type { AccountInfo, CommonFailedResponse } from "../typings.js";
 import { middleware } from "../utils/index.js";
 
@@ -61,18 +60,7 @@ export type MyIdentityResponse =
 
 export const myIdentityHandler = middleware<MyIdentityResponse, AccountInfo>(
   async (req, res) => {
-    const { id, password, authToken } = req.body;
-
-    if (id && password && authToken) {
-      const result = await myLogin(req.body);
-
-      if (!result.success) return res.json(result);
-      req.headers.cookie = result.cookieStore.getHeader(MY_SERVER);
-    } else if (!req.headers.cookie) {
-      return res.json(MissingCredentialResponse);
-    }
-
-    const cookieHeader = req.headers.cookie;
+    const cookieHeader = req.headers.cookie!;
 
     if (cookieHeader.includes("TEST")) return res.json(TEST_IDENTITY_RESULT);
 

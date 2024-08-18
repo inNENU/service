@@ -1,17 +1,22 @@
 import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
 
-import { MY_MAIN_PAGE } from "./utils.js";
+import { MY_MAIN_PAGE, MY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
 import {
   ActionFailType,
+  MissingCredentialResponse,
   TEST_ID_NUMBER,
   TEST_LOGIN_RESULT,
   UnknownResponse,
 } from "../config/index.js";
-import type { AccountInfo } from "../typings.js";
+import type {
+  AccountInfo,
+  CommonFailedResponse,
+  LoginOptions,
+} from "../typings.js";
 import { middleware } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 import { FORBIDDEN_URL, vpnCASLogin } from "../vpn/index.js";
@@ -107,6 +112,25 @@ export interface MyLoginSuccessResponse {
 }
 
 export type MyLoginResponse = MyLoginSuccessResponse | MyLoginFailedResponse;
+
+export const loginToMy = middleware<
+  MyLoginResponse | CommonFailedResponse<ActionFailType.MissingCredential>,
+  LoginOptions
+>(async (req, res, next) => {
+  const { id, password, authToken } = req.body;
+
+  if (id && password && authToken) {
+    const result = await myLogin({ id, password, authToken });
+
+    if (!result.success) return res.json(result);
+
+    req.headers.cookie = result.cookieStore.getHeader(MY_SERVER);
+  } else if (!req.headers.cookie) {
+    return res.json(MissingCredentialResponse);
+  }
+
+  return next();
+});
 
 export const myLoginHandler = middleware<MyLoginResponse, AccountInfo>(
   async (req, res) => {

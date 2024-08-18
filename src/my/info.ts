@@ -1,14 +1,9 @@
 import type { PoolConnection } from "mysql2/promise";
 
 import type { MyLoginFailedResponse } from "./login.js";
-import { myLogin } from "./login.js";
 import { MY_SERVER } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
-import {
-  MissingCredentialResponse,
-  TEST_INFO,
-  UnknownResponse,
-} from "../config/index.js";
+import { TEST_INFO, UnknownResponse } from "../config/index.js";
 import type { AccountInfo, CommonFailedResponse } from "../typings.js";
 import {
   getConnection,
@@ -270,21 +265,10 @@ export type MyInfoResponse =
 
 export const myInfoHandler = middleware<MyInfoResponse, AccountInfo>(
   async (req, res) => {
-    const { id, password, authToken } = req.body;
-
-    if (id && password && authToken) {
-      const result = await myLogin(req.body);
-
-      if (!result.success) return res.json(result);
-      req.headers.cookie = result.cookieStore.getHeader(MY_SERVER);
-    } else if (!req.headers.cookie) {
-      return res.json(MissingCredentialResponse);
-    }
-
-    const cookieHeader = req.headers.cookie;
+    const cookieHeader = req.headers.cookie!;
 
     if (cookieHeader.includes("TEST")) return res.json(TEST_INFO_RESULT);
 
-    return res.json(await getMyInfo(req.headers.cookie));
+    return res.json(await getMyInfo(cookieHeader));
   },
 );

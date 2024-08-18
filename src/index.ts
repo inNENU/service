@@ -17,20 +17,7 @@ import { mpRouter } from "./mp/index.js";
 import { myRouter } from "./my/index.js";
 import { officialRouter } from "./official/index.js";
 import { testRouter } from "./test/index.js";
-import {
-  underStudyCheckHandler,
-  underStudyCourseCommentaryHandler,
-  underStudyGradeDetailHandler,
-  underStudyGradeListHandler,
-  underStudyLoginHandler,
-  underStudySearchClassHandler,
-  underStudySearchCourseHandler,
-  underStudySelectCategoryHandler,
-  underStudySelectInfoHandler,
-  underStudySelectedCourseHandler,
-  underStudySpecialExamHandler,
-} from "./under-study/index.js";
-import { underStudyProcessCourseHandler } from "./under-study/select/process.js";
+import { underStudyRouter } from "./under-study/index.js";
 import {
   underChangeMajorPlanHandler,
   underCourseTableHandler,
@@ -120,22 +107,8 @@ app.use("/library", libraryRouter);
 app.use("/mp", mpRouter);
 app.use("/my", myRouter);
 app.use("/test", testRouter);
+app.use("/under-study", underStudyRouter);
 app.use("/vpn", vpnRouter);
-
-/*  ------------ 本科教务系统 ------------ */
-
-app.post("/under-study/check", underStudyCheckHandler);
-app.post("/under-study/course-commentary", underStudyCourseCommentaryHandler);
-app.post("/under-study/grade-detail", underStudyGradeDetailHandler);
-app.post("/under-study/grade-list", underStudyGradeListHandler);
-app.post("/under-study/login", underStudyLoginHandler);
-app.post("/under-study/select/category", underStudySelectCategoryHandler);
-app.post("/under-study/select/class", underStudySearchClassHandler);
-app.post("/under-study/select/info", underStudySelectInfoHandler);
-app.post("/under-study/select/search", underStudySearchCourseHandler);
-app.post("/under-study/select/process", underStudyProcessCourseHandler);
-app.post("/under-study/select/selected", underStudySelectedCourseHandler);
-app.post("/under-study/special-exam", underStudySpecialExamHandler);
 
 /*  ------------ 旧本科教务系统 ------------ */
 

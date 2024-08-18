@@ -1,20 +1,8 @@
-import type { RequestHandler } from "express";
-
-import { underStudyLogin } from "./login.js";
 import { UNDER_STUDY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import {
-  ExpiredResponse,
-  MissingArgResponse,
-  MissingCredentialResponse,
-  UnknownResponse,
-} from "../config/index.js";
-import type {
-  CommonFailedResponse,
-  EmptyObject,
-  LoginOptions,
-} from "../typings.js";
-import { EDGE_USER_AGENT_HEADERS } from "../utils/index.js";
+import { ExpiredResponse, UnknownResponse } from "../config/index.js";
+import type { CommonFailedResponse, LoginOptions } from "../typings.js";
+import { EDGE_USER_AGENT_HEADERS, middleware } from "../utils/index.js";
 
 export interface UnderGradeDetailOptions extends LoginOptions {
   /** 成绩代码 */
@@ -178,37 +166,15 @@ export const getUnderGradeDetail = async (
   };
 };
 
-export const underStudyGradeDetailHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
+export const underStudyGradeDetailHandler = middleware<
+  UnderGradeDetailResponse,
   UnderGradeDetailOptions
-> = async (req, res) => {
-  try {
-    const { id, password, authToken, gradeCode } = req.body;
+>(async (req, res) => {
+  const { gradeCode } = req.body;
+  const cookieHeader = req.headers.cookie!;
 
-    if (!gradeCode) return res.json(MissingArgResponse("gradeCode"));
+  if (cookieHeader.includes("TEST"))
+    return res.json(UNDER_GRADE_DETAIL_RESPONSE);
 
-    if (id && password && authToken) {
-      const result = await underStudyLogin({ id, password, authToken });
-
-      if (!result.success) return res.json(result);
-
-      req.headers.cookie = result.cookieStore.getHeader(UNDER_STUDY_SERVER);
-    } else if (!req.headers.cookie) {
-      return res.json(MissingCredentialResponse);
-    }
-
-    const cookieHeader = req.headers.cookie;
-
-    if (cookieHeader.includes("TEST"))
-      return res.json(UNDER_GRADE_DETAIL_RESPONSE);
-
-    return res.json(await getUnderGradeDetail(cookieHeader, gradeCode));
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
-};
+  return res.json(await getUnderGradeDetail(cookieHeader, gradeCode));
+});

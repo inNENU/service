@@ -1,11 +1,19 @@
 import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
 
-import { SERVER } from "./utils.js";
+import { GRAD_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
-import { ActionFailType, UnknownResponse } from "../config/index.js";
-import type { AccountInfo } from "../typings.js";
+import {
+  ActionFailType,
+  MissingCredentialResponse,
+  UnknownResponse,
+} from "../config/index.js";
+import type {
+  AccountInfo,
+  CommonFailedResponse,
+  LoginOptions,
+} from "../typings.js";
 import { middleware } from "../utils/index.js";
 
 export interface GradSystemLoginSuccessResult {
@@ -23,7 +31,7 @@ export const gradSystemLogin = async (
 ): Promise<GradSystemLoginResult> => {
   const result = await authLogin({
     ...options,
-    service: `${SERVER}/HProg/yjsy/index_pc.php`,
+    service: `${GRAD_SYSTEM_SERVER}/HProg/yjsy/index_pc.php`,
     cookieStore,
   });
 
@@ -88,6 +96,26 @@ export interface GradSystemLoginSuccessResponse {
 export type GradSystemLoginResponse =
   | GradSystemLoginSuccessResponse
   | AuthLoginFailedResponse;
+
+export const loginToGradSystem = middleware<
+  | GradSystemLoginResponse
+  | CommonFailedResponse<ActionFailType.MissingCredential>,
+  LoginOptions
+>(async (req, res, next) => {
+  const { id, password, authToken } = req.body;
+
+  if (id && password && authToken) {
+    const result = await gradSystemLogin({ id, password, authToken });
+
+    if (!result.success) return res.json(result);
+
+    req.headers.cookie = result.cookieStore.getHeader(GRAD_SYSTEM_SERVER);
+  } else if (!req.headers.cookie) {
+    return res.json(MissingCredentialResponse);
+  }
+
+  return next();
+});
 
 export const gradSystemLoginHandler = middleware<
   GradSystemLoginResponse,

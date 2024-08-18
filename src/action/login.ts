@@ -14,7 +14,6 @@ import {
 import type {
   AccountInfo,
   CommonFailedResponse,
-  EmptyObject,
   LoginOptions,
 } from "../typings.js";
 import { middleware } from "../utils/index.js";
@@ -92,12 +91,8 @@ export type ActionLoginResponse =
 export const loginToAction = middleware<
   | ActionLoginFailedResponse
   | CommonFailedResponse<ActionFailType.MissingCredential>,
-  LoginOptions,
-  EmptyObject,
-  { path: string }
+  LoginOptions
 >(async (req, res, next) => {
-  if (["/check", "/login"].includes(req.params.path)) return next();
-
   const { id, password, authToken } = req.body;
 
   if (id && password && authToken) {

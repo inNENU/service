@@ -1,20 +1,11 @@
-import type { RequestHandler } from "express";
-
-import { underStudyLogin } from "./login.js";
 import { UNDER_STUDY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import {
-  ExpiredResponse,
-  MissingCredentialResponse,
-  UnknownResponse,
-} from "../config/index.js";
+import { ExpiredResponse, UnknownResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
-  EmptyObject,
-  LoginOptions,
 } from "../typings.js";
-import { EDGE_USER_AGENT_HEADERS } from "../utils/index.js";
+import { EDGE_USER_AGENT_HEADERS, middleware } from "../utils/index.js";
 
 interface RawUnderSpecialExamItem {
   /** 考试成绩 */
@@ -154,35 +145,12 @@ export const getUnderStudySpecialExam = async (
   };
 };
 
-export const underStudySpecialExamHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  LoginOptions
-> = async (req, res) => {
-  try {
-    const { id, password, authToken } = req.body;
-
-    if (id && password && authToken) {
-      const result = await underStudyLogin({ id, password, authToken });
-
-      if (!result.success) return res.json(result);
-
-      req.headers.cookie = result.cookieStore.getHeader(QUERY_URL);
-    } else if (!req.headers.cookie) {
-      return res.json(MissingCredentialResponse);
-    }
-
-    const cookieHeader = req.headers.cookie;
+export const underStudySpecialExamHandler =
+  middleware<UnderSpecialExamResponse>(async (req, res) => {
+    const cookieHeader = req.headers.cookie!;
 
     if (cookieHeader.includes("TEST"))
       return res.json(TEST_SPECIAL_EXAM_RESPONSE);
 
     return res.json(await getUnderStudySpecialExam(cookieHeader));
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
-};
+  });

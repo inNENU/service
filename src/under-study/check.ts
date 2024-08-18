@@ -1,26 +1,20 @@
-import type { RequestHandler } from "express";
-
 import { UNDER_STUDY_SERVER } from "./utils.js";
-import type {
-  CookieOptions,
-  CookieVerifyResponse,
-  EmptyObject,
-} from "../typings.js";
-import { EDGE_USER_AGENT_HEADERS, cookies2Header } from "../utils/index.js";
+import type { CookieOptions, CookieVerifyResponse } from "../typings.js";
+import {
+  EDGE_USER_AGENT_HEADERS,
+  cookies2Header,
+  middleware,
+} from "../utils/index.js";
 
-export const underStudyCheckHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
+export const underStudyCheckHandler = middleware<
+  CookieVerifyResponse,
   CookieOptions
-> = async (req, res) => {
+>(async (req, res) => {
   try {
     const cookieHeader = req.headers.cookie ?? cookies2Header(req.body.cookies);
 
     if (cookieHeader.includes("TEST"))
-      return res.json({
-        success: true,
-        valid: true,
-      } as CookieVerifyResponse);
+      return res.json({ success: true, valid: true });
 
     const response = await fetch(UNDER_STUDY_SERVER, {
       headers: {
@@ -34,20 +28,11 @@ export const underStudyCheckHandler: RequestHandler<
       const location = response.headers.get("location");
 
       if (location === `${UNDER_STUDY_SERVER}/new/welcome.page`)
-        return res.json({
-          success: true,
-          valid: true,
-        } as CookieVerifyResponse);
+        return res.json({ success: true, valid: true });
     }
 
-    return res.json({
-      success: true,
-      valid: false,
-    } as CookieVerifyResponse);
+    return res.json({ success: true, valid: false });
   } catch {
-    return res.json({
-      success: true,
-      valid: false,
-    } as CookieVerifyResponse);
+    return res.json({ success: true, valid: false });
   }
-};
+});

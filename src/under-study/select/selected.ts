@@ -1,5 +1,3 @@
-import type { RequestHandler } from "express";
-
 import type {
   RawUnderSelectClassItem,
   UnderSelectClassInfo,
@@ -7,20 +5,13 @@ import type {
 import { getClasses } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
 import type { ActionFailType } from "../../config/index.js";
-import {
-  ExpiredResponse,
-  MissingArgResponse,
-  MissingCredentialResponse,
-  UnknownResponse,
-} from "../../config/index.js";
+import { ExpiredResponse, MissingArgResponse } from "../../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
-  EmptyObject,
   LoginOptions,
 } from "../../typings.js";
-import { EDGE_USER_AGENT_HEADERS } from "../../utils/index.js";
-import { underStudyLogin } from "../login.js";
+import { EDGE_USER_AGENT_HEADERS, middleware } from "../../utils/index.js";
 import { UNDER_STUDY_SERVER } from "../utils.js";
 
 export interface UnderSelectSelectedOptions extends LoginOptions {
@@ -47,60 +38,41 @@ export type UnderSelectSelectedSuccessResponse = CommonSuccessResponse<
 export type UnderSelectSelectedResponse =
   | UnderSelectSelectedSuccessResponse
   | AuthLoginFailedResponse
-  | CommonFailedResponse<ActionFailType.Unknown>;
+  | CommonFailedResponse<ActionFailType.MissingArg | ActionFailType.Unknown>;
 
-export const underStudySelectedCourseHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
+export const underStudySelectedCourseHandler = middleware<
+  UnderSelectSelectedResponse,
   UnderSelectSelectedOptions
-> = async (req, res) => {
-  try {
-    const { id, password, authToken, link } = req.body;
+>(async (req, res) => {
+  const { link } = req.body;
 
-    if (id && password && authToken) {
-      const result = await underStudyLogin({ id, password, authToken });
+  if (!link) return res.json(MissingArgResponse("link"));
 
-      if (!result.success) return res.json(result);
+  const infoUrl = `${UNDER_STUDY_SERVER}${link}/yxkc`;
 
-      req.headers.cookie = result.cookieStore.getHeader(UNDER_STUDY_SERVER);
-    } else if (!req.headers.cookie) {
-      return res.json(MissingCredentialResponse);
-    }
+  const response = await fetch(infoUrl, {
+    method: "POST",
+    headers: {
+      Accept: "application/json, text/javascript, */*; q=0.01",
+      Cookie: req.headers.cookie!,
+      Referer: `${UNDER_STUDY_SERVER}${link}`,
+      ...EDGE_USER_AGENT_HEADERS,
+    },
+    body: new URLSearchParams({
+      page: "1",
+      row: "1000",
+      sort: "kcrwdm",
+      order: "asc",
+    }),
+    redirect: "manual",
+  });
 
-    if (!link) return res.json(MissingArgResponse("link"));
+  if (response.status !== 200) return res.json(ExpiredResponse);
 
-    const infoUrl = `${UNDER_STUDY_SERVER}${link}/yxkc`;
+  const data = (await response.json()) as RawUnderSelectedClassResponse;
 
-    const response = await fetch(infoUrl, {
-      method: "POST",
-      headers: {
-        Accept: "application/json, text/javascript, */*; q=0.01",
-        Cookie: req.headers.cookie,
-        Referer: `${UNDER_STUDY_SERVER}${link}`,
-        ...EDGE_USER_AGENT_HEADERS,
-      },
-      body: new URLSearchParams({
-        page: "1",
-        row: "1000",
-        sort: "kcrwdm",
-        order: "asc",
-      }),
-      redirect: "manual",
-    });
-
-    if (response.status !== 200) return res.json(ExpiredResponse);
-
-    const data = (await response.json()) as RawUnderSelectedClassResponse;
-
-    return res.json({
-      success: true,
-      data: getClasses(data.rows),
-    } as UnderSelectSelectedSuccessResponse);
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
-};
+  return res.json({
+    success: true,
+    data: getClasses(data.rows),
+  });
+});

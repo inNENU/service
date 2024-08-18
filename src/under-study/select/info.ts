@@ -1,5 +1,3 @@
-import type { RequestHandler } from "express";
-
 import type { SelectOptionConfig } from "./store.js";
 import { areasStore, majorsStore, officesStore, typesStore } from "./store.js";
 import { COURSE_CATEGORIES } from "./utils.js";
@@ -8,17 +6,14 @@ import {
   ActionFailType,
   ExpiredResponse,
   MissingArgResponse,
-  MissingCredentialResponse,
   UnknownResponse,
 } from "../../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
-  EmptyObject,
   LoginOptions,
 } from "../../typings.js";
-import { EDGE_USER_AGENT_HEADERS } from "../../utils/index.js";
-import { underStudyLogin } from "../login.js";
+import { EDGE_USER_AGENT_HEADERS, middleware } from "../../utils/index.js";
 import { UNDER_STUDY_SERVER } from "../utils.js";
 
 const CHECK_URL = `${UNDER_STUDY_SERVER}/new/student/xsxk/checkFinishPj`;
@@ -342,43 +337,23 @@ export const getUnderSelectInfo = async (
   return {
     success: true,
     data: getSelectInfo(content),
-  } as UnderSelectInfoSuccessResponse;
+  };
 };
 
-export const underStudySelectInfoHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
+export const underStudySelectInfoHandler = middleware<
+  UnderSelectInfoResponse,
   UnderSelectInfoOptions
-> = async (req, res) => {
-  try {
-    const { id, password, authToken, link } = req.body;
+>(async (req, res) => {
+  const { link } = req.body;
 
-    if (id && password && authToken) {
-      const result = await underStudyLogin({ id, password, authToken });
+  const cookieHeader = req.headers.cookie!;
 
-      if (!result.success) return res.json(result);
+  if (cookieHeader.includes("TEST"))
+    return res.json(
+      UnknownResponse("因子系统逻辑复杂，测试账号暂不提供选课操作模拟"),
+    );
 
-      req.headers.cookie = result.cookieStore.getHeader(UNDER_STUDY_SERVER);
-    } else if (!req.headers.cookie) {
-      return res.json(MissingCredentialResponse);
-    }
+  if (!link) return res.json(MissingArgResponse("link"));
 
-    const cookieHeader = req.headers.cookie;
-
-    if (cookieHeader.includes("TEST"))
-      return res.json({
-        success: false,
-        message: "因子系统逻辑复杂，测试账号暂不提供选课操作模拟",
-      });
-
-    if (!link) return res.json(MissingArgResponse("link"));
-
-    return res.json(await getUnderSelectInfo(cookieHeader, link));
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
-};
+  return res.json(await getUnderSelectInfo(cookieHeader, link));
+});

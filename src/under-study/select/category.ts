@@ -1,20 +1,10 @@
-import type { RequestHandler } from "express";
-
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
-import {
-  ActionFailType,
-  ExpiredResponse,
-  MissingCredentialResponse,
-  UnknownResponse,
-} from "../../config/index.js";
+import { ActionFailType, ExpiredResponse } from "../../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
-  EmptyObject,
-  LoginOptions,
 } from "../../typings.js";
-import { EDGE_USER_AGENT_HEADERS } from "../../utils/index.js";
-import { underStudyLogin } from "../login.js";
+import { EDGE_USER_AGENT_HEADERS, middleware } from "../../utils/index.js";
 import { UNDER_STUDY_SERVER } from "../utils.js";
 
 export interface UnderSelectAllowedCategoryItem {
@@ -153,35 +143,12 @@ export const getUnderSelectCategories = async (
   } as UnderSelectCategorySuccessResponse;
 };
 
-export const underStudySelectCategoryHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  LoginOptions
-> = async (req, res) => {
-  try {
-    const { id, password, authToken } = req.body;
-
-    if (id && password && authToken) {
-      const result = await underStudyLogin({ id, password, authToken });
-
-      if (!result.success) return res.json(result);
-
-      req.headers.cookie = result.cookieStore.getHeader(CATEGORY_PAGE);
-    } else if (!req.headers.cookie) {
-      return res.json(MissingCredentialResponse);
-    }
-
-    const cookieHeader = req.headers.cookie;
+export const underStudySelectCategoryHandler =
+  middleware<UnderSelectCategoryResponse>(async (req, res) => {
+    const cookieHeader = req.headers.cookie!;
 
     if (cookieHeader.includes("TEST"))
       return res.json(TEST_UNDER_SELECT_CATEGORY_RESPONSE);
 
     return res.json(await getUnderSelectCategories(cookieHeader));
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
-};
+  });

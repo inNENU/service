@@ -1,6 +1,6 @@
 import { getAction } from "./action.js";
 import { gradSystemLogin } from "./login.js";
-import { MAIN_URL, SERVER } from "./utils.js";
+import { GRAD_SYSTEM_SERVER, MAIN_URL } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import {
   ActionFailType,
@@ -110,7 +110,7 @@ export const getGradInfo = async (
     )!;
 
     const response = await fetch(
-      `${SERVER}/HProg/sys/php/MainRun.php?WorkName=&WorkCode=${id}`,
+      `${GRAD_SYSTEM_SERVER}/HProg/sys/php/MainRun.php?WorkName=&WorkCode=${id}`,
       {
         headers: {
           Cookie: cookieHeader,
@@ -148,7 +148,7 @@ export const gradInfoHandler = middleware<GradInfoResponse, AccountInfo>(
 
       if (!result.success) return res.json(result);
 
-      req.headers.cookie = result.cookieStore.getHeader(SERVER);
+      req.headers.cookie = result.cookieStore.getHeader(GRAD_SYSTEM_SERVER);
     } else if (!req.headers.cookie) {
       return res.json(MissingCredentialResponse);
     }

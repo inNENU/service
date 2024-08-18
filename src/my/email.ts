@@ -1,22 +1,11 @@
-import type { RequestHandler } from "express";
-
 import { queryMyActions } from "./actions.js";
 import type { MyInfo } from "./info.js";
 import type { MyLoginFailedResponse } from "./login.js";
-import { myLogin } from "./login.js";
 import { getProcess } from "./process.js";
 import { MY_SERVER } from "./utils.js";
-import {
-  ActionFailType,
-  MissingCredentialResponse,
-  UnknownResponse,
-} from "../config/index.js";
-import type {
-  AccountInfo,
-  CommonFailedResponse,
-  EmptyObject,
-  LoginOptions,
-} from "../typings.js";
+import { ActionFailType, UnknownResponse } from "../config/index.js";
+import type { CommonFailedResponse, LoginOptions } from "../typings.js";
+import { middleware } from "../utils/index.js";
 
 // Note: This can be inferred from app list
 const APPLY_MAIL_APP_ID = "GRYXSQ";
@@ -282,40 +271,21 @@ const activateEmail = async (
   return initInfo;
 };
 
-export const emailHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
+export const emailHandler = middleware<
+  GetEmailInfoResponse | ActivateEmailResponse,
   GetEmailInfoOptions | ActivateEmailOptions
-> = async (req, res) => {
-  try {
-    const { id, password, authToken } = req.body;
+>(async (req, res) => {
+  const { id } = req.body;
+  const cookieHeader = req.headers.cookie!;
 
-    if (id && password && authToken) {
-      const result = await myLogin(req.body as AccountInfo);
+  if (req.body.type === "set")
+    return res.json(
+      UnknownResponse("邮箱申请已移动至学校 OA 系统，正在适配中..."),
+    );
 
-      if (!result.success) return res.json(result);
-      req.headers.cookie = result.cookieStore.getHeader(MY_SERVER);
-    } else if (!req.headers.cookie) {
-      return res.json(MissingCredentialResponse);
-    }
+  // return res.json(await activateEmail(cookieHeader, req.body, info.data));
 
-    const cookieHeader = req.headers.cookie;
+  if (cookieHeader.includes("TEST")) return res.json(TEST_GET_EMAIL_RESPONSE);
 
-    if (req.body.type === "set")
-      return res.json({
-        success: false,
-        msg: "邮箱申请已移动至学校 OA 系统，正在适配中...",
-      });
-    // return res.json(await activateEmail(cookieHeader, req.body, info.data));
-
-    if (cookieHeader.includes("TEST")) return res.json(TEST_GET_EMAIL_RESPONSE);
-
-    return res.json(await getEmailInfo(cookieHeader, id!));
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
-};
+  return res.json(await getEmailInfo(cookieHeader, id!));
+});
