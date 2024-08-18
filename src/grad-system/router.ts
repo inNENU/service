@@ -9,7 +9,7 @@ const gradRouter = Router();
 gradRouter.post("/login", gradSystemLoginHandler);
 // TODO: Add /check route
 
-gradRouter.use("/:path", loginToGradSystem);
+gradRouter.use(loginToGradSystem);
 
 gradRouter.post("/info", gradInfoHandler);
 

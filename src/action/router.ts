@@ -15,7 +15,7 @@ const actionRouter = Router();
 actionRouter.post("/login", actionLoginHandler);
 actionRouter.post("/check", actionCheckHandler);
 
-actionRouter.use("/:path", loginToAction);
+actionRouter.use(loginToAction);
 
 actionRouter.post("/borrow-books", borrowBooksHandler);
 actionRouter.post("/card-balance", cardBalanceHandler);

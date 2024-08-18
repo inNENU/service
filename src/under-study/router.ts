@@ -20,7 +20,7 @@ const underStudyRouter = Router();
 underStudyRouter.post("/login", underStudyLoginHandler);
 underStudyRouter.post("/check", underStudyCheckHandler);
 
-underStudyRouter.use("/:path", loginToUnderStudy);
+underStudyRouter.use(loginToUnderStudy);
 
 underStudyRouter.post("/course-commentary", underStudyCourseCommentaryHandler);
 underStudyRouter.post("/grade-detail", underStudyGradeDetailHandler);

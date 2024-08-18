@@ -1,22 +1,12 @@
-import type { RequestHandler } from "express";
-
-import { underSystemLogin } from "./login.js";
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import {
   ActionFailType,
   ExpiredResponse,
-  MissingCredentialResponse,
-  UnknownResponse,
   semesterStartTime,
 } from "../config/index.js";
-import type {
-  AccountInfo,
-  CommonFailedResponse,
-  EmptyObject,
-  LoginOptions,
-} from "../typings.js";
-import { IE_8_USER_AGENT, getIETimeStamp } from "../utils/index.js";
+import type { CommonFailedResponse, LoginOptions } from "../typings.js";
+import { IE_8_USER_AGENT, getIETimeStamp, middleware } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/login.js";
 
 export interface ClassItem {
@@ -147,35 +137,15 @@ export const getUnderCourseTable = async (
   };
 };
 
-export const underCourseTableHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
+export const underCourseTableHandler = middleware<
+  UnderCourseTableResponse,
   UnderCourseTableOptions
-> = async (req, res) => {
-  try {
-    const { id, password, authToken, time } = req.body;
+>(async (req, res) => {
+  const { time } = req.body;
+  const cookieHeader = req.headers.cookie!;
 
-    if (id && password && authToken) {
-      const result = await underSystemLogin(req.body as AccountInfo);
+  if (cookieHeader.includes("TEST"))
+    return res.json(UNDER_COURSE_TABLE_TEST_RESPONSE);
 
-      if (!result.success) return res.json(result);
-
-      req.headers.cookie = result.cookieStore.getHeader(UNDER_SYSTEM_SERVER);
-    } else if (!req.headers.cookie) {
-      return res.json(MissingCredentialResponse);
-    }
-
-    const cookieHeader = req.headers.cookie;
-
-    if (cookieHeader.includes("TEST"))
-      return res.json(UNDER_COURSE_TABLE_TEST_RESPONSE);
-
-    return res.json(await getUnderCourseTable(cookieHeader, time));
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
-};
+  return res.json(await getUnderCourseTable(cookieHeader, time));
+});

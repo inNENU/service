@@ -1,6 +1,5 @@
 import type { RequestHandler } from "express";
 
-import { underSystemLogin } from "./login.js";
 import {
   UNDER_SYSTEM_SERVER,
   fieldRegExp,
@@ -14,8 +13,7 @@ import {
   totalPagesRegExp,
 } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { MissingCredentialResponse, UnknownResponse } from "../config/index.js";
-import type { AccountInfo, EmptyObject, LoginOptions } from "../typings.js";
+import type { EmptyObject, LoginOptions } from "../typings.js";
 import { IE_8_USER_AGENT } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/login.js";
 
@@ -166,69 +164,49 @@ export const underExamPlaceHandler: RequestHandler<
   EmptyObject,
   LoginOptions
 > = async (req, res) => {
-  try {
-    const { id, password, authToken } = req.body;
+  const cookieHeader = req.headers.cookie!;
 
-    if (id && password && authToken) {
-      const result = await underSystemLogin(req.body as AccountInfo);
-
-      if (!result.success) return res.json(result);
-
-      req.headers.cookie = result.cookieStore.getHeader(UNDER_SYSTEM_SERVER);
-    } else if (!req.headers.cookie) {
-      return res.json(MissingCredentialResponse);
-    }
-
-    const cookieHeader = req.headers.cookie;
-
-    if (cookieHeader.includes("TEST")) {
-      return res.json({
-        success: true,
-        data: [
-          {
-            name: "测试计划",
-            exams: Array.from({ length: 5 }, (_, i) => ({
-              course: `课程${i + 1}`,
-              time: `2023-01-0${i + 1}`,
-              campus: "校区",
-              building: "教学楼",
-              classroom: "考场",
-            })),
-          },
-        ],
-      } as UnderExamPlaceSuccessResponse);
-    }
-
-    const response = await fetch(INFO_URL, {
-      headers: {
-        Cookie: cookieHeader,
-        "User-Agent": IE_8_USER_AGENT,
-      },
-    });
-
-    const content = await response.text();
-    const select = selectRegExp.exec(content)![1].trim();
-
-    const options = Array.from(select.matchAll(optionRegExp)).map(
-      ([, value, name]) => ({ value, name }),
-    );
-
-    const data = await Promise.all(
-      options.map(async ({ name, value }) => ({
-        name,
-        exams: await getExamList(cookieHeader, value),
-      })),
-    );
-
+  if (cookieHeader.includes("TEST")) {
     return res.json({
       success: true,
-      data,
+      data: [
+        {
+          name: "测试计划",
+          exams: Array.from({ length: 5 }, (_, i) => ({
+            course: `课程${i + 1}`,
+            time: `2023-01-0${i + 1}`,
+            campus: "校区",
+            building: "教学楼",
+            classroom: "考场",
+          })),
+        },
+      ],
     } as UnderExamPlaceSuccessResponse);
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
   }
+
+  const response = await fetch(INFO_URL, {
+    headers: {
+      Cookie: cookieHeader,
+      "User-Agent": IE_8_USER_AGENT,
+    },
+  });
+
+  const content = await response.text();
+  const select = selectRegExp.exec(content)![1].trim();
+
+  const options = Array.from(select.matchAll(optionRegExp)).map(
+    ([, value, name]) => ({ value, name }),
+  );
+
+  const data = await Promise.all(
+    options.map(async ({ name, value }) => ({
+      name,
+      exams: await getExamList(cookieHeader, value),
+    })),
+  );
+
+  return res.json({
+    success: true,
+    data,
+  } as UnderExamPlaceSuccessResponse);
 };

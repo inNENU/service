@@ -18,17 +18,7 @@ import { myRouter } from "./my/index.js";
 import { officialRouter } from "./official/index.js";
 import { testRouter } from "./test/index.js";
 import { underStudyRouter } from "./under-study/index.js";
-import {
-  underChangeMajorPlanHandler,
-  underCourseTableHandler,
-  underCreateStudentArchiveHandler,
-  underExamPlaceHandler,
-  underInfoHandler,
-  underStudentArchiveHandler,
-  underSystemCheckHandler,
-  underSystemLoginHandler,
-  underTestQueryHandler,
-} from "./under-system/index.js";
+import { underSystemRouter } from "./under-system/index.js";
 import { vpnRouter } from "./vpn/index.js";
 import { weatherHandler } from "./weather.js";
 
@@ -108,19 +98,8 @@ app.use("/mp", mpRouter);
 app.use("/my", myRouter);
 app.use("/test", testRouter);
 app.use("/under-study", underStudyRouter);
+app.use("/under-system", underSystemRouter);
 app.use("/vpn", vpnRouter);
-
-/*  ------------ 旧本科教务系统 ------------ */
-
-app.post("/under-system/login", underSystemLoginHandler);
-app.post("/under-system/check", underSystemCheckHandler);
-app.post("/under-system/change-major-plan", underChangeMajorPlanHandler);
-app.post("/under-system/course-table", underCourseTableHandler);
-app.post("/under-system/create-archive", underCreateStudentArchiveHandler);
-app.post("/under-system/exam-place", underExamPlaceHandler);
-app.post("/under-system/info", underInfoHandler);
-app.post("/under-system/student-archive", underStudentArchiveHandler);
-app.post("/under-system/test-query", underTestQueryHandler);
 
 /*  ------------ 天气 ------------ */
 

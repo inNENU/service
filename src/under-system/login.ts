@@ -1,6 +1,5 @@
 import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
-import type { RequestHandler } from "express";
 
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
@@ -8,11 +7,16 @@ import { authLogin } from "../auth/login.js";
 import { WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
 import {
   ActionFailType,
+  MissingCredentialResponse,
   TEST_ID_NUMBER,
   TEST_LOGIN_RESULT,
 } from "../config/index.js";
-import type { AccountInfo, EmptyObject } from "../typings.js";
-import { IE_8_USER_AGENT } from "../utils/index.js";
+import type {
+  AccountInfo,
+  CommonFailedResponse,
+  LoginOptions,
+} from "../typings.js";
+import { IE_8_USER_AGENT, middleware } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 import { vpnCASLogin } from "../vpn/index.js";
 
@@ -100,7 +104,7 @@ export const underSystemLogin = async (
     return {
       success: true,
       cookieStore,
-    } as UnderSystemLoginSuccessResult;
+    };
   }
 
   return {
@@ -121,41 +125,46 @@ export type UnderSystemLoginResponse =
   | AuthLoginFailedResponse
   | VPNLoginFailedResponse;
 
-export const underSystemLoginHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  AccountInfo
-> = async (req, res) => {
-  try {
-    const result = // fake result for testing
-      req.body.id === TEST_ID_NUMBER
-        ? TEST_LOGIN_RESULT
-        : await underSystemLogin(req.body);
+export const loginToUnderSystem = middleware<
+  | UnderSystemLoginResponse
+  | CommonFailedResponse<ActionFailType.MissingCredential>,
+  LoginOptions
+>(async (req, res, next) => {
+  const { id, password, authToken } = req.body;
 
-    if (result.success) {
-      const cookies = result.cookieStore
-        .getAllCookies()
-        .map((item) => item.toJSON());
+  if (id && password && authToken) {
+    const result = await underSystemLogin({ id, password, authToken });
 
-      cookies.forEach(({ name, value, ...rest }) => {
-        res.cookie(name, value, rest);
-      });
+    if (!result.success) return res.json(result);
 
-      return res.json({
-        success: true,
-        cookies,
-      } as UnderSystemLoginSuccessResponse);
-    }
-
-    return res.json(result);
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json({
-      success: false,
-      msg: message,
-    } as AuthLoginFailedResponse);
+    req.headers.cookie = result.cookieStore.getHeader(UNDER_SYSTEM_SERVER);
+  } else if (!req.headers.cookie) {
+    return res.json(MissingCredentialResponse);
   }
-};
+
+  return next();
+});
+
+export const underSystemLoginHandler = middleware<
+  UnderSystemLoginResponse,
+  AccountInfo
+>(async (req, res) => {
+  const result = // fake result for testing
+    req.body.id === TEST_ID_NUMBER
+      ? TEST_LOGIN_RESULT
+      : await underSystemLogin(req.body);
+
+  if (result.success) {
+    const cookies = result.cookieStore
+      .getAllCookies()
+      .map((item) => item.toJSON());
+
+    cookies.forEach(({ name, value, ...rest }) => {
+      res.cookie(name, value, rest);
+    });
+
+    return res.json({ success: true, cookies });
+  }
+
+  return res.json(result);
+});

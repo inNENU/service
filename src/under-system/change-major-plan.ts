@@ -1,6 +1,3 @@
-import type { RequestHandler } from "express";
-
-import { underSystemLogin } from "./login.js";
 import {
   UNDER_SYSTEM_SERVER,
   fieldRegExp,
@@ -14,9 +11,7 @@ import {
   totalPagesRegExp,
 } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { MissingCredentialResponse, UnknownResponse } from "../config/index.js";
-import type { AccountInfo, EmptyObject, LoginOptions } from "../typings.js";
-import { IE_8_USER_AGENT, getIETimeStamp } from "../utils/index.js";
+import { IE_8_USER_AGENT, getIETimeStamp, middleware } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 
 const HEADER_REGEXP = /<title>(.*)<\/title>/;
@@ -211,35 +206,12 @@ export const getUnderChangeMajorPlan = async (
   };
 };
 
-export const underChangeMajorPlanHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
-  LoginOptions
-> = async (req, res) => {
-  try {
-    const { id, password, authToken } = req.body;
-
-    if (id && password && authToken) {
-      const result = await underSystemLogin(req.body as AccountInfo);
-
-      if (!result.success) return res.json(result);
-
-      req.headers.cookie = result.cookieStore.getHeader(UNDER_SYSTEM_SERVER);
-    } else if (!req.headers.cookie) {
-      return res.json(MissingCredentialResponse);
-    }
-
-    const cookieHeader = req.headers.cookie;
+export const underChangeMajorPlanHandler =
+  middleware<UnderChangeMajorPlanResponse>(async (req, res) => {
+    const cookieHeader = req.headers.cookie!;
 
     if (cookieHeader.includes("TEST"))
       return res.json(TEST_UNDER_CHANGE_MAJOR_PLAN_RESPONSE);
 
-    return res.json(getUnderChangeMajorPlan(cookieHeader));
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
-  }
-};
+    return res.json(await getUnderChangeMajorPlan(cookieHeader));
+  });

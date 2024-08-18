@@ -1,11 +1,9 @@
 import type { RequestHandler } from "express";
 
-import { underSystemLogin } from "./login.js";
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ActionFailType, MissingCredentialResponse } from "../config/index.js";
+import { ActionFailType, UnknownResponse } from "../config/index.js";
 import type {
-  AccountInfo,
   CommonFailedResponse,
   EmptyObject,
   LoginOptions,
@@ -586,11 +584,7 @@ export const submitUnderStudentArchiveFamily = async (
       success: true,
     };
 
-  return {
-    success: false,
-    type: ActionFailType.Unknown,
-    msg: "未知错误",
-  };
+  return UnknownResponse("未知错误");
 };
 
 export const underCreateStudentArchiveHandler: RequestHandler<
@@ -601,55 +595,29 @@ export const underCreateStudentArchiveHandler: RequestHandler<
   | UnderCreateStudentArchiveSubmitStudyOptions
   | UnderCreateStudentArchiveSubmitFamilyOptions
 > = async (req, res) => {
-  try {
-    const { id, password, authToken } = req.body;
+  const cookieHeader = req.headers.cookie!;
 
-    if (id && password && authToken) {
-      const result = await underSystemLogin(req.body as AccountInfo);
-
-      if (!result.success) return res.json(result);
-
-      req.headers.cookie = result.cookieStore.getHeader(UNDER_SYSTEM_SERVER);
-    } else if (!req.headers.cookie) {
-      return res.json(MissingCredentialResponse);
-    }
-
-    const cookieHeader = req.headers.cookie;
-
-    if (cookieHeader.includes("TEST"))
-      return res.json({
-        success: false,
-        msg: "已创建学籍",
-      });
-
-    if (req.body.type === "get-info")
-      return res.json(await getUnderStudentArchiveInfo(cookieHeader));
-
-    if (req.body.type === "submit-info")
-      return res.json(
-        await submitUnderStudentArchiveInfo(cookieHeader, req.body),
-      );
-    if (req.body.type === "submit-study")
-      return res.json(
-        await submitUnderStudentArchiveStudy(cookieHeader, req.body),
-      );
-    if (req.body.type === "submit-family")
-      return res.json(
-        await submitUnderStudentArchiveFamily(cookieHeader, req.body),
-      );
-
+  if (cookieHeader.includes("TEST"))
     return res.json({
       success: false,
-      msg: "未知操作",
+      msg: "已创建学籍",
     });
-  } catch (err) {
-    const { message } = err as Error;
 
-    console.error(err);
+  if (req.body.type === "get-info")
+    return res.json(await getUnderStudentArchiveInfo(cookieHeader));
 
-    return res.json({
-      success: false,
-      msg: message,
-    } as AuthLoginFailedResponse);
-  }
+  if (req.body.type === "submit-info")
+    return res.json(
+      await submitUnderStudentArchiveInfo(cookieHeader, req.body),
+    );
+  if (req.body.type === "submit-study")
+    return res.json(
+      await submitUnderStudentArchiveStudy(cookieHeader, req.body),
+    );
+  if (req.body.type === "submit-family")
+    return res.json(
+      await submitUnderStudentArchiveFamily(cookieHeader, req.body),
+    );
+
+  return res.json(UnknownResponse("未知操作"));
 };

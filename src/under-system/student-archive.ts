@@ -1,20 +1,8 @@
-import type { RequestHandler } from "express";
-
-import { underSystemLogin } from "./login.js";
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import {
-  ActionFailType,
-  MissingCredentialResponse,
-  UnknownResponse,
-} from "../config/index.js";
-import type {
-  AccountInfo,
-  CommonFailedResponse,
-  EmptyObject,
-  LoginOptions,
-} from "../typings.js";
-import { IE_8_USER_AGENT, getIETimeStamp } from "../utils/index.js";
+import { ActionFailType, UnknownResponse } from "../config/index.js";
+import type { CommonFailedResponse, LoginOptions } from "../typings.js";
+import { IE_8_USER_AGENT, getIETimeStamp, middleware } from "../utils/index.js";
 
 const infoRegExp =
   /<td>(\S+)<\/td>\s+<td colspan="\d">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/g;
@@ -231,7 +219,7 @@ export interface UnderRegisterStudentArchiveSuccessResponse {
 export type UnderRegisterStudentArchiveResponse =
   | UnderRegisterStudentArchiveSuccessResponse
   | AuthLoginFailedResponse
-  | CommonFailedResponse;
+  | CommonFailedResponse<ActionFailType.Existed>;
 
 export const registerStudentArchive = async (
   cookieHeader: string,
@@ -310,50 +298,26 @@ const UNDER_STUDENT_ARCHIVE_VIEW_TEST_RESPONSE: UnderGetStudentArchiveSuccessRes
     },
   };
 
-export const underStudentArchiveHandler: RequestHandler<
-  EmptyObject,
-  EmptyObject,
+export const underStudentArchiveHandler = middleware<
+  UnderGetStudentArchiveResponse | UnderRegisterStudentArchiveResponse,
   GetUnderStudentArchiveOptions | RegisterUnderStudentArchiveOptions
-> = async (req, res) => {
-  try {
-    const { id, password, authToken } = req.body;
+>(async (req, res) => {
+  const cookieHeader = req.headers.cookie!;
 
-    if (id && password && authToken) {
-      const result = await underSystemLogin(req.body as AccountInfo);
+  if (req.body.type === "register") {
+    if (cookieHeader.includes("TEST"))
+      return res.json({
+        success: false,
+        type: ActionFailType.Existed,
+        msg: "学年学籍已注册",
+      });
 
-      if (!result.success) return res.json(result);
-
-      req.headers.cookie = result.cookieStore.getHeader(
-        UNDER_STUDENT_ARCHIVE_QUERY_URL,
-      );
-    } else if (!req.headers.cookie) {
-      return res.json(MissingCredentialResponse);
-    }
-
-    const cookieHeader = req.headers.cookie;
-
-    if (req.body.type === "register") {
-      if (cookieHeader.includes("TEST"))
-        return res.json({
-          success: false,
-          msg: "学年学籍已注册",
-        });
-
-      return res.json(
-        await registerStudentArchive(cookieHeader, req.body.path),
-      );
-    }
-
-    if (cookieHeader.includes("TEST")) {
-      return res.json(UNDER_STUDENT_ARCHIVE_VIEW_TEST_RESPONSE);
-    }
-
-    return res.json(await getUnderStudentArchive(cookieHeader));
-  } catch (err) {
-    const { message } = err as Error;
-
-    console.error(err);
-
-    return res.json(UnknownResponse(message));
+    return res.json(await registerStudentArchive(cookieHeader, req.body.path));
   }
-};
+
+  if (cookieHeader.includes("TEST")) {
+    return res.json(UNDER_STUDENT_ARCHIVE_VIEW_TEST_RESPONSE);
+  }
+
+  return res.json(await getUnderStudentArchive(cookieHeader));
+});

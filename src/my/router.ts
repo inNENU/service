@@ -12,7 +12,7 @@ const myRouter = Router();
 myRouter.post("/login", myLoginHandler);
 myRouter.post("/check", myCheckHandler);
 
-myRouter.use("/:path", loginToMy);
+myRouter.use(loginToMy);
 
 myRouter.post("/email", emailHandler);
 myRouter.post("/info", myInfoHandler);
