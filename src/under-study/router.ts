@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import { underStudyCheckHandler } from "./check.js";
 import { underStudyCourseCommentaryHandler } from "./course-commentary/handler.js";
+import { underStudyCourseTableHandler } from "./course-table.js";
 import { underStudyGradeDetailHandler } from "./grade-detail.js";
 import { underStudyGradeListHandler } from "./grade-list.js";
 import { loginToUnderStudy, underStudyLoginHandler } from "./login.js";
@@ -16,7 +17,9 @@ underStudyRouter.post("/check", underStudyCheckHandler);
 underStudyRouter.use(loginToUnderStudy);
 
 underStudyRouter.use("/select", selectRouter);
+
 underStudyRouter.post("/course-commentary", underStudyCourseCommentaryHandler);
+underStudyRouter.use("/course-table", underStudyCourseTableHandler);
 underStudyRouter.post("/grade-detail", underStudyGradeDetailHandler);
 underStudyRouter.post("/grade-list", underStudyGradeListHandler);
 underStudyRouter.post("/special-exam", underStudySpecialExamHandler);
