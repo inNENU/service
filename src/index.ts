@@ -125,7 +125,7 @@ setInterval(() => {
   console.debug(
     `rss: ${Math.round((rss / 1024 / 1024 / 100) * 100)} MB, heap: ${Math.round(
       (heapUsed / 1024 / 1024 / 100) * 100,
-    )} / ${Math.round(
+    )}/${Math.round(
       (heapTotal / 1024 / 1024 / 100) * 100,
     )} MB, arrayBuffers: ${Math.round((arrayBuffers / 1024 / 1024 / 100) * 100)} MB`,
   );

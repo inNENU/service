@@ -1,13 +1,22 @@
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import {
-  ActionFailType,
-  ExpiredResponse,
-  semesterStartTime,
-} from "../config/index.js";
+import { ActionFailType, ExpiredResponse } from "../config/index.js";
 import type { CommonFailedResponse, LoginOptions } from "../typings.js";
 import { IE_8_USER_AGENT, getIETimeStamp, middleware } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/login.js";
+
+const semesterStartTime: Record<string, string> = {
+  "2023-2024-2": "2024-02-27T16:00:00Z",
+  "2023-2024-1": "2023-08-27T16:00:00Z",
+  "2022-2023-2": "2023-02-19T16:00:00Z",
+  "2022-2023-1": "2022-08-28T16:00:00Z",
+  "2021-2022-2": "2022-02-27T16:00:00Z",
+  "2021-2022-1": "2021-08-29T16:00:00Z",
+  "2020-2021-2": "2021-03-07T16:00:00Z",
+  "2020-2021-1": "2020-08-30T16:00:00Z",
+  "2019-2020-2": "2020-02-23T16:00:00Z",
+  "2019-2020-1": "2019-08-25T16:00:00Z",
+};
 
 export interface ClassItem {
   name: string;
@@ -146,6 +155,13 @@ export const underCourseTableHandler = middleware<
 
   if (cookieHeader.includes("TEST"))
     return res.json(UNDER_COURSE_TABLE_TEST_RESPONSE);
+
+  if (time.startsWith("2024"))
+    return res.json({
+      success: false,
+      type: ActionFailType.Forbidden,
+      msg: "不支持查询 2024 年之后的表",
+    });
 
   return res.json(await getUnderCourseTable(cookieHeader, time));
 });
