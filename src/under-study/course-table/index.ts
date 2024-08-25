@@ -1,6 +1,7 @@
 import type { RawUnderCourseTableItem } from "./typings.js";
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
 import {
+  ActionFailType,
   ExpiredResponse,
   UnknownResponse,
   semesterStartTime,
@@ -146,6 +147,30 @@ export const getCourseTable = (
   );
 };
 
+export const UNDER_COURSE_TABLE_TEST_RESPONSE: UnderCourseTableSuccessResponse =
+  {
+    success: true,
+    data: {
+      table: Array.from({ length: 6 }).map((_, classIndex) =>
+        Array.from({ length: 7 }).map((_, weekIndex) =>
+          Math.random() * 7 > 5
+            ? [
+                {
+                  name: `测试课程 ${weekIndex + 1}-${classIndex + 1}`,
+                  teachers: ["测试教师"],
+                  time: `星期${weekIndex + 1} 第${classIndex * 2 + 1}${classIndex * 2 + 2}节`,
+                  classIndex: [classIndex * 2 + 1, classIndex * 2 + 2],
+                  weeks: new Array(17).fill(null).map((_, i) => i + 1),
+                  locations: new Array(17).fill("测试地点"),
+                },
+              ]
+            : [],
+        ),
+      ),
+      startTime: "2020-09-01",
+    },
+  };
+
 export const getUnderCourseTable = async (
   cookieHeader: string,
   time: string,
@@ -193,10 +218,20 @@ export const underStudyCourseTableHandler = middleware<
   UnderCourseTableResponse,
   UnderCourseTableOptions
 >(async (req, res) => {
+  const { time } = req.body;
   const cookieHeader = req.headers.cookie!;
 
-  // if (cookieHeader.includes("TEST"))
-  //   return res.json(UNDER_GRADE_DETAIL_RESPONSE);
+  if (cookieHeader.includes("TEST"))
+    return res.json(UNDER_COURSE_TABLE_TEST_RESPONSE);
+
+  const year = Number(time.substring(0, 4));
+
+  if (year < 2023)
+    return res.json({
+      success: false,
+      type: ActionFailType.Forbidden,
+      msg: "该系统不支持查询 2023 年之前的课表",
+    });
 
   return res.json(await getUnderCourseTable(cookieHeader, req.body.time));
 });

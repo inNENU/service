@@ -1,7 +1,11 @@
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { ActionFailType, ExpiredResponse } from "../config/index.js";
-import type { CommonFailedResponse, LoginOptions } from "../typings.js";
+import type {
+  CommonFailedResponse,
+  CommonSuccessResponse,
+  LoginOptions,
+} from "../typings.js";
 import type { TableClassData } from "../under-study/index.js";
 import { IE_8_USER_AGENT, getIETimeStamp, middleware } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/login.js";
@@ -19,6 +23,7 @@ const semesterStartTime: Record<string, string> = {
   "2019-2020-1": "2019-08-25T16:00:00Z",
 };
 
+/** @deprecated */
 export interface LegacyTableClassData extends TableClassData {
   /** @deprecated */
   teacher: string;
@@ -26,8 +31,11 @@ export interface LegacyTableClassData extends TableClassData {
   location: string;
 }
 
+/** @deprecated */
 export type LegacyTableCellData = LegacyTableClassData[];
+/** @deprecated */
 export type LegacyTableRowData = LegacyTableCellData[];
+/** @deprecated */
 export type LegacyTableData = LegacyTableRowData[];
 
 const courseRowRegExp =
@@ -118,50 +126,55 @@ const getCourses = (content: string): LegacyTableData =>
     }),
   );
 
-export interface UnderCourseTableOptions extends LoginOptions {
+/** @deprecated */
+export interface LegacyUnderCourseTableOptions extends LoginOptions {
   /** 查询时间 */
   time: string;
 }
 
-export interface UnderCourseTableSuccessResponse {
-  success: true;
-  data: LegacyTableData;
+/** @deprecated */
+export type LegacyUnderCourseTableSuccessResponse = CommonSuccessResponse<{
+  table: LegacyTableData;
   startTime: string;
-}
+}>;
 
-export type UnderCourseTableFailedResponse =
+/** @deprecated */
+export type LegacyUnderCourseTableFailedResponse =
   | AuthLoginFailedResponse
   | VPNLoginFailedResponse
   | CommonFailedResponse<
       ActionFailType.MissingCommentary | ActionFailType.Unknown
     >;
 
+/** @deprecated */
 export type UnderCourseTableResponse =
-  | UnderCourseTableSuccessResponse
-  | UnderCourseTableFailedResponse;
+  | LegacyUnderCourseTableSuccessResponse
+  | LegacyUnderCourseTableFailedResponse;
 
-export const UNDER_COURSE_TABLE_TEST_RESPONSE: UnderCourseTableSuccessResponse =
+export const LEGACY_UNDER_COURSE_TABLE_TEST_RESPONSE: LegacyUnderCourseTableSuccessResponse =
   {
     success: true,
-    data: Array.from({ length: 6 }).map((_, classIndex) =>
-      Array.from({ length: 7 }).map((_, weekIndex) =>
-        Math.random() * 7 > 5
-          ? [
-              {
-                name: `测试课程 ${weekIndex + 1}-${classIndex + 1}`,
-                teachers: ["测试教师"],
-                time: `星期${weekIndex + 1} 第${classIndex * 2 + 1}${classIndex * 2 + 2}节`,
-                classIndex: [classIndex * 2 + 1, classIndex * 2 + 2],
-                weeks: new Array(17).fill(null).map((_, i) => i + 1),
-                locations: new Array(17).fill("测试地点"),
-                teacher: "测试教师",
-                location: "测试地点",
-              },
-            ]
-          : [],
+    data: {
+      table: Array.from({ length: 6 }).map((_, classIndex) =>
+        Array.from({ length: 7 }).map((_, weekIndex) =>
+          Math.random() * 7 > 5
+            ? [
+                {
+                  name: `测试课程 ${weekIndex + 1}-${classIndex + 1}`,
+                  teachers: ["测试教师"],
+                  time: `星期${weekIndex + 1} 第${classIndex * 2 + 1}${classIndex * 2 + 2}节`,
+                  classIndex: [classIndex * 2 + 1, classIndex * 2 + 2],
+                  weeks: new Array(17).fill(null).map((_, i) => i + 1),
+                  locations: new Array(17).fill("测试地点"),
+                  teacher: "测试教师",
+                  location: "测试地点",
+                },
+              ]
+            : [],
+        ),
       ),
-    ),
-    startTime: "2020-09-01",
+      startTime: "2020-09-01",
+    },
   };
 
 export const getUnderCourseTable = async (
@@ -197,30 +210,32 @@ export const getUnderCourseTable = async (
       msg: "上学期评教未完成，不能查看本学期课表",
     };
 
-  const tableData = getCourses(content);
-
   return {
     success: true,
-    data: tableData,
-    startTime: semesterStartTime[time],
+    data: {
+      table: getCourses(content),
+      startTime: semesterStartTime[time],
+    },
   };
 };
 
 export const underCourseTableHandler = middleware<
   UnderCourseTableResponse,
-  UnderCourseTableOptions
+  LegacyUnderCourseTableOptions
 >(async (req, res) => {
   const { time } = req.body;
   const cookieHeader = req.headers.cookie!;
 
   if (cookieHeader.includes("TEST"))
-    return res.json(UNDER_COURSE_TABLE_TEST_RESPONSE);
+    return res.json(LEGACY_UNDER_COURSE_TABLE_TEST_RESPONSE);
 
-  if (time.startsWith("2024"))
+  const year = Number(time.substring(0, 4));
+
+  if (year >= 2024)
     return res.json({
       success: false,
       type: ActionFailType.Forbidden,
-      msg: "不支持查询 2024 年之后的课表",
+      msg: "该系统不支持查询 2024 年之后的课表",
     });
 
   return res.json(await getUnderCourseTable(cookieHeader, time));
