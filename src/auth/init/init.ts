@@ -161,6 +161,20 @@ export const initAuth = async (
           msg: "该帐号未激活，请先完成帐号激活再登录",
         };
 
+      if (resultContent.includes("图形动态码错误"))
+        return {
+          success: false,
+          type: ActionFailType.WrongCaptcha,
+          msg: "图形动态码错误，请重试",
+        };
+
+      if (resultContent.includes("该帐号已经被禁用"))
+        return {
+          success: false,
+          type: ActionFailType.Forbidden,
+          msg: "该帐号已经被禁用",
+        };
+
       const lockedResult = /<span>账号已冻结，预计解冻时间：(.*?)<\/span>/.exec(
         resultContent,
       );
