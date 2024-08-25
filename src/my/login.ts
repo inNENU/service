@@ -76,7 +76,7 @@ export const myLogin = async (
     const mainResponse = await fetch(sessionLocation, {
       headers: {
         Cookie: cookieStore.getHeader(ticketUrl),
-        Referer: WEB_VPN_AUTH_SERVER,
+        Referer: MY_SERVER,
       },
       redirect: "manual",
     });
