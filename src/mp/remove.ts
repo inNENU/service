@@ -43,7 +43,7 @@ export const mpRemoveHandler = middleware<
     connection = await getConnection();
 
     const [tokenResults] = await connection.execute<RowDataPacket[]>(
-      "SELECT * FROM `token` WHERE `appId` = ? AND `id` = ? AND `token` = ?",
+      "SELECT * FROM `token` WHERE `appId` = ? AND `id` = ? AND `authToken` = ?",
       [appID, id, authToken],
     );
 
