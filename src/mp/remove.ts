@@ -52,11 +52,11 @@ export const mpRemoveHandler = middleware<
     // remove info from database
     try {
       await connection.execute<ResultSetHeader>(
-        "DELETE * FROM `student_info` WHERE `id` = ?",
+        "DELETE FROM `student_info` WHERE `id` = ?",
         [id],
       );
       await connection.execute<ResultSetHeader>(
-        "DELETE * FROM `student_avatar` WHERE `id` = ?",
+        "DELETE FROM `student_avatar` WHERE `id` = ?",
         [id],
       );
     } catch (err) {
