@@ -2,6 +2,7 @@ import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { ActionFailType, ExpiredResponse } from "../config/index.js";
 import type { CommonFailedResponse, LoginOptions } from "../typings.js";
+import type { TableClassData } from "../under-study/index.js";
 import { IE_8_USER_AGENT, getIETimeStamp, middleware } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/login.js";
 
@@ -18,16 +19,16 @@ const semesterStartTime: Record<string, string> = {
   "2019-2020-1": "2019-08-25T16:00:00Z",
 };
 
-export interface ClassItem {
-  name: string;
+export interface LegacyTableClassData extends TableClassData {
+  /** @deprecated */
   teacher: string;
-  time: string;
+  /** @deprecated */
   location: string;
 }
 
-export type CellItem = ClassItem[];
-export type RowItem = CellItem[];
-export type TableItem = RowItem[];
+export type LegacyTableCellData = LegacyTableClassData[];
+export type LegacyTableRowData = LegacyTableCellData[];
+export type LegacyTableData = LegacyTableRowData[];
 
 const courseRowRegExp =
   /<tr>\s+<td[^>]*>\s+\d+\s+<\/td>\s+((?:<td[^>]*>[^]+?<\/td>\s*?)+)\s+<\/tr>/g;
@@ -37,28 +38,83 @@ const courseCellRegExp =
 const classRegExp =
   /<a[^>]*?>(.+?)\s*<br>(.+?)<br>\s*<nobr>\s*(\S+?)<nobr><br>(.+?)<br><br>\s*<\/a>/g;
 
-const getCourses = (content: string): TableItem =>
+const getWeekRange = (timeText: string): number[] => {
+  const match = Array.from(timeText.matchAll(/([\d,-]+)[^\d]*周/g));
+
+  return match
+    .map(([, time]) =>
+      time.split(",").map((item) => {
+        const range = item.split("-").map(Number);
+
+        if (range.length === 1) return range;
+
+        return Array.from(
+          { length: range[1] - range[0] + 1 },
+          (_, index) => index + range[0],
+        );
+      }),
+    )
+    .flat(2);
+};
+
+const getClassIndex = (timeText: string): [number, number] => {
+  const match = Array.from(timeText.matchAll(/\[(\d+)-(\d+)节\]/g));
+
+  return match
+    .map(([, startIndex, endIndex]) => [Number(startIndex), Number(endIndex)])
+    .flat(2) as [number, number];
+};
+
+const getCourses = (content: string): LegacyTableData =>
   [...content.matchAll(courseRowRegExp)].map(([, rowContent]) =>
     [...rowContent.matchAll(courseCellRegExp)].map(([, cell]) => {
-      const classMap: Record<string, ClassItem[]> = {};
+      const result: (Omit<
+        LegacyTableClassData,
+        "teacher" | "location" | "locations"
+      > & {
+        locations: Record<string, string>;
+      })[] = [];
 
-      [...cell.matchAll(classRegExp)]
-        .map(([, name, teacher, time, location]) => ({
-          name,
-          teacher,
-          time,
-          location,
-        }))
-        .forEach((item) => {
-          (classMap[item.name] ??= []).push(item);
-        });
+      [...cell.matchAll(classRegExp)].forEach(
+        ([, name, teacher, time, location]) => {
+          const weeks = getWeekRange(time);
+          const locations = Object.fromEntries(
+            new Array(weeks.length)
+              .fill(null)
+              .map((_, i) => [weeks[i].toString(), location]),
+          );
+          const existingClass = result.find((item) => item.name === name);
 
-      return Object.values(classMap).map((classes) => ({
-        name: classes[0].name,
-        location: classes[0].location,
-        teacher: classes.map((item) => item.teacher).join("、"),
-        time: classes.map((item) => item.time).join("、"),
-      }));
+          if (existingClass) {
+            existingClass.weeks.push(...weeks);
+            existingClass.locations = {
+              ...existingClass.locations,
+              ...locations,
+            };
+          }
+
+          result.push({
+            name,
+            teachers: [teacher],
+            time,
+            locations,
+            weeks: getWeekRange(time),
+            classIndex: getClassIndex(time),
+          });
+        },
+      );
+
+      return result.map(({ weeks, ...item }) => {
+        const locations = weeks.map((week) => item.locations[week.toString()]);
+
+        return {
+          ...item,
+          teacher: item.teachers.join("，"),
+          weeks: weeks.sort((a, b) => a - b),
+          locations,
+          location: Array.from(new Set(locations)).join("，"),
+        };
+      });
     }),
   );
 
@@ -69,7 +125,7 @@ export interface UnderCourseTableOptions extends LoginOptions {
 
 export interface UnderCourseTableSuccessResponse {
   success: true;
-  data: TableItem;
+  data: LegacyTableData;
   startTime: string;
 }
 
@@ -93,8 +149,12 @@ export const UNDER_COURSE_TABLE_TEST_RESPONSE: UnderCourseTableSuccessResponse =
           ? [
               {
                 name: `测试课程 ${weekIndex + 1}-${classIndex + 1}`,
-                teacher: "测试教师",
+                teachers: ["测试教师"],
                 time: `星期${weekIndex + 1} 第${classIndex * 2 + 1}${classIndex * 2 + 2}节`,
+                classIndex: [classIndex * 2 + 1, classIndex * 2 + 2],
+                weeks: new Array(17).fill(null).map((_, i) => i + 1),
+                locations: new Array(17).fill("测试地点"),
+                teacher: "测试教师",
                 location: "测试地点",
               },
             ]
@@ -160,7 +220,7 @@ export const underCourseTableHandler = middleware<
     return res.json({
       success: false,
       type: ActionFailType.Forbidden,
-      msg: "不支持查询 2024 年之后的表",
+      msg: "不支持查询 2024 年之后的课表",
     });
 
   return res.json(await getUnderCourseTable(cookieHeader, time));
