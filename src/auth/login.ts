@@ -229,7 +229,7 @@ export const authLogin = async ({
         return {
           success: false,
           type: ActionFailType.Expired,
-          msg: "会话已过期，请重新登陆",
+          msg: "会话已过期，请重新登录",
         };
 
       if (resultContent.includes("当前账户已在其他PC端登录会话。"))

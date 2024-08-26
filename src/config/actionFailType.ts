@@ -33,7 +33,7 @@ export const enum ActionFailType {
   /** 用户名错误 */
   WrongUserName = "wrong-username",
 
-  /** 登陆过期 */
+  /** 登录过期 */
   Expired = "expired",
 
   /** 直接访问受限，需要 webVPN */
