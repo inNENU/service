@@ -1,3 +1,4 @@
+export * from "./blacklist.js";
 export * from "./login.js";
 export * from "./id-code/index.js";
 export * from "./qrcode.js";
