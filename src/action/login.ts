@@ -1,7 +1,7 @@
 import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
 
-import { ACTION_SERVER } from "./utils.js";
+import { ACTION_MAIN_PAGE, ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { WEB_VPN_AUTH_SERVER, authLogin } from "../auth/index.js";
 import type { ActionFailType } from "../config/index.js";
@@ -40,7 +40,7 @@ export const actionLogin = async (
 
   const result = await authLogin({
     ...options,
-    service: `${ACTION_SERVER}/portal_main/toPortalPage`,
+    service: ACTION_MAIN_PAGE,
     webVPN: true,
     cookieStore,
   });
@@ -65,7 +65,7 @@ export const actionLogin = async (
 
   const finalLocation = ticketResponse.headers.get("Location");
 
-  if (finalLocation?.startsWith(`${ACTION_SERVER}/portal_main/toPortalPage`))
+  if (finalLocation?.startsWith(ACTION_MAIN_PAGE))
     return {
       success: true,
       cookieStore,
