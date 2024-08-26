@@ -243,7 +243,7 @@ export const initAuth = async (
         return {
           success: false,
           type: ActionFailType.SecurityError,
-          msg: result.errMsg,
+          msg: `信息化办公室提示: ${result.errMsg}`,
         };
       }
 
