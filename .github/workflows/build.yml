@@ -65,6 +65,5 @@ jobs:
 
       - name: Deploy
         run: |
-          ssh git@mister-hope.com "git config --global --add safe.directory '*'"
           git push -f git@mister-hope.com:/www/wwwroot/innenu-service deploy
           ssh git@mister-hope.com "cd /www/wwwroot/innenu-service && git reset --hard HEAD"
