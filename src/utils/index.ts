@@ -2,7 +2,7 @@ export * from "./blackList.js";
 export * from "./content.js";
 export * from "./cookies2Header.js";
 export * from "./generateRandomString.js";
-export * from "./handler.js";
+export * from "./middleware.js";
 export * from "./helpers.js";
 export * from "./ie.js";
 export * from "./memory.js";

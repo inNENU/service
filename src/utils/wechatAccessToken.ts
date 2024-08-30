@@ -1,4 +1,5 @@
 import { appIDInfo } from "../config/index.js";
+import type { AppID } from "../mp/login.js";
 
 const currentAccessToken: Record<string, { token: string; timeStamp: number }> =
   {};
@@ -13,7 +14,7 @@ export const getWechatAccessToken = async (appid: string): Promise<string> => {
 
   const response = await fetch(
     `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${appid}&secret=${appIDInfo[
-      appid
+      appid as AppID
     ]!}`,
   );
 
