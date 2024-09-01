@@ -137,11 +137,11 @@ interface WeatherRawResponse {
  * @param isDay 当前是否是白天
  */
 const getWeatherCode = (icon: string, isDay: boolean): string =>
-  (icon === "00" || icon === "01" || icon === "03" || icon === "13"
+  icon === "00" || icon === "01" || icon === "03" || icon === "13"
     ? isDay
-      ? "day/"
-      : "night/"
-    : "") + icon;
+      ? `${icon}-day`
+      : `${icon}-night`
+    : icon;
 
 const getWindDirection = (direction: string): string =>
   direction === "8"
