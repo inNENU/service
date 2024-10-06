@@ -15,7 +15,6 @@ export const middleware =
   ): RequestHandler<Params, ResBody, ReqBody, ReqQuery, Locals> =>
   async (req, res, next) => {
     try {
-      // eslint-disable-next-line @typescript-eslint/await-thenable
       return await handler(req, res, next);
     } catch (err) {
       next(err);
