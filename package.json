@@ -23,12 +23,12 @@
   "dependencies": {
     "@alicloud/alinlp20200629": "3.1.0",
     "@alicloud/openapi-client": "0.4.12",
-    "@mptool/net": "0.10.8",
-    "@mptool/parser": "0.10.3",
+    "@mptool/net": "0.10.10",
+    "@mptool/parser": "0.10.10",
     "body-parser": "2.0.1",
     "cheerio": "1.0.0",
     "compression": "1.7.4",
-    "cookie-parser": "1.4.6",
+    "cookie-parser": "1.4.7",
     "cors": "2.8.5",
     "crypto-js": "4.2.0",
     "dotenv": "16.4.5",
@@ -55,15 +55,15 @@
     "@types/express": "5.0.0",
     "@types/express-serve-static-core": "5.0.0",
     "@types/morgan": "1.9.9",
-    "@types/node": "22.7.4",
+    "@types/node": "22.7.5",
     "@types/qrcode": "1.5.5",
     "@types/uuid": "10.0.0",
     "cross-env": "7.0.3",
-    "cz-git": "1.10.0",
+    "cz-git": "1.10.1",
     "domhandler": "^5.0.3",
     "esbuild": "0.24.0",
     "eslint": "9.12.0",
-    "eslint-config-mister-hope": "0.2.3",
+    "eslint-config-mister-hope": "0.3.0",
     "express-rate-limit": "7.4.1",
     "husky": "9.1.6",
     "nano-staged": "0.8.0",
@@ -72,9 +72,9 @@
     "rollup-plugin-dts": "6.1.1",
     "rollup-plugin-esbuild": "6.1.1",
     "tsx": "4.19.1",
-    "typescript": "5.6.2"
+    "typescript": "5.6.3"
   },
-  "packageManager": "pnpm@9.12.0",
+  "packageManager": "pnpm@9.12.1",
   "engines": {
     "node": ">= 20"
   }

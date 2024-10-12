@@ -1,9 +1,9 @@
 import type { IncomingMessage, ServerResponse } from "http";
 
-import morgan from "morgan";
+import morgan, { token } from "morgan";
 import picocolors from "picocolors";
 
-morgan.token(
+token(
   "success",
   (
     _req,
@@ -18,7 +18,7 @@ morgan.token(
       : picocolors.gray("-"),
 );
 
-morgan.token("status-code", (_req, res) => {
+token("status-code", (_req, res) => {
   const { statusCode } = res;
 
   return statusCode >= 200 && statusCode < 300

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import rateLimit from "express-rate-limit";
+import { rateLimit } from "express-rate-limit";
 import type { Request } from "express-serve-static-core";
 
 import { activateHandler } from "./activate/index.js";
