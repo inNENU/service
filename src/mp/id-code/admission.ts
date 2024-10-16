@@ -98,8 +98,6 @@ export const storeStoreAdmissionInfo = async ({
       appID,
       "pkg/user/pages/account/login",
       `verify:${uuid}`,
-      // FIXME: issues in release version
-      "trial",
     );
 
     if (result instanceof Buffer) {
