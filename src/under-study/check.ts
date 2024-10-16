@@ -3,10 +3,10 @@ import type { CookieOptions, CookieVerifyResponse } from "../typings.js";
 import {
   EDGE_USER_AGENT_HEADERS,
   cookies2Header,
-  middleware,
+  request,
 } from "../utils/index.js";
 
-export const underStudyCheckHandler = middleware<
+export const underStudyCheckHandler = request<
   CookieVerifyResponse,
   CookieOptions
 >(async (req, res) => {

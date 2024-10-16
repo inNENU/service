@@ -18,8 +18,8 @@ import type {
 import {
   getConnection,
   getWechatMPCode,
-  middleware,
   releaseConnection,
+  request,
 } from "../../utils/index.js";
 
 export interface CheckIDCodeOptions {
@@ -240,7 +240,7 @@ export const checkIDCode = async ({
   }
 };
 
-export const checkIdCodeHandler = middleware<
+export const checkIdCodeHandler = request<
   CheckIDCodeInfoResponse,
   CheckIDCodeOptions
 >(async (req, res) => {

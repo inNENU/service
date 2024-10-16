@@ -8,7 +8,7 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 
 const POST_RECOMMEND_PLAN_URL =
   "https://pg.nenu.edu.cn/yjsy/HData/ZSB/ZSJZ2024-TM-1.html";
@@ -158,7 +158,7 @@ export const getGradRecommendPlan =
     return { success: true, data: schoolInfo };
   };
 
-export const gradRecommendPlanHandler = middleware<GradRecommendPlanResponse>(
+export const gradRecommendPlanHandler = request<GradRecommendPlanResponse>(
   async (_req, res) => {
     return res.json(await getGradRecommendPlan());
   },

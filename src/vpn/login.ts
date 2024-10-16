@@ -5,7 +5,7 @@ import { LOGIN_URL, UPDATE_KEY_URL, VPN_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { ActionFailType, UnknownResponse } from "../config/index.js";
 import type { AccountInfo, CommonFailedResponse } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 
 const AUTHENTICITY_TOKEN_REGEXP =
   /<input\s+type="hidden"\s+name="authenticity_token" value="(.*?)" \/>/;
@@ -121,7 +121,7 @@ export type VPNLoginResponse =
   | AuthLoginFailedResponse
   | VPNLoginFailedResponse;
 
-export const vpnLoginHandler = middleware<VPNLoginResponse, AccountInfo>(
+export const vpnLoginHandler = request<VPNLoginResponse, AccountInfo>(
   async (req, res) => {
     const { id, password, authToken } = req.body;
 

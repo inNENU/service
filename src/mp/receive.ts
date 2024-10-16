@@ -2,11 +2,7 @@ import { sha1 } from "js-sha1";
 import type { PoolConnection } from "mysql2/promise";
 import { v7 } from "uuid";
 
-import {
-  getConnection,
-  middleware,
-  releaseConnection,
-} from "../utils/index.js";
+import { getConnection, releaseConnection, request } from "../utils/index.js";
 import "../config/loadEnv.js";
 
 interface BaseMessage {
@@ -48,7 +44,7 @@ interface EnterEvent {
   SessionFrom: string;
 }
 
-export const mpReceiveHandler = middleware<
+export const mpReceiveHandler = request<
   unknown,
   ContactMessage | EnterEvent,
   { signature: string; timestamp: string; nonce: string; echostr: string }

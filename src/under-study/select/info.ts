@@ -13,7 +13,7 @@ import type {
   CommonSuccessResponse,
   LoginOptions,
 } from "../../typings.js";
-import { EDGE_USER_AGENT_HEADERS, middleware } from "../../utils/index.js";
+import { EDGE_USER_AGENT_HEADERS, request } from "../../utils/index.js";
 import { UNDER_STUDY_SERVER } from "../utils.js";
 
 const CHECK_URL = `${UNDER_STUDY_SERVER}/new/student/xsxk/checkFinishPj`;
@@ -340,7 +340,7 @@ export const getUnderSelectInfo = async (
   };
 };
 
-export const underStudySelectInfoHandler = middleware<
+export const underStudySelectInfoHandler = request<
   UnderSelectInfoResponse,
   UnderSelectInfoOptions
 >(async (req, res) => {

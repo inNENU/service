@@ -2,7 +2,7 @@ import type { OALoginFailedResponse } from "./login.js";
 import { OA_WEB_VPN_SERVER } from "./utils.js";
 import { UnknownResponse } from "../config/index.js";
 import type { CommonSuccessResponse } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 
 interface RawOAInfoData {
   /** 学号 */
@@ -92,7 +92,7 @@ export const getOAInfo = async (
   };
 };
 
-export const oaInfoHandler = middleware<OAInfoResponse>(async (req, res) => {
+export const oaInfoHandler = request<OAInfoResponse>(async (req, res) => {
   const cookieHeader = req.headers.cookie!;
 
   if (cookieHeader.includes("TEST")) return res.json(TEST_OA_INFO);

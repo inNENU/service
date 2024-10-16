@@ -8,7 +8,7 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 
 const INFO_REGEXP =
   /<div class="ar_tit">\s*<h3>([^>]+)<\/h3>\s*<h6>([^]+?)<\/h6>/;
@@ -89,7 +89,7 @@ export const getAcademicDetail = async (
   };
 };
 
-export const officialAcademicDetailHandler = middleware<
+export const officialAcademicDetailHandler = request<
   OfficialAcademicDetailResponse,
   OfficialAcademicDetailOptions,
   OfficialAcademicDetailOptions

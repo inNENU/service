@@ -5,7 +5,7 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/login.js";
 
 const EMAIL_INFO_URL = `${ACTION_SERVER}/extract/getEmailInfo`;
@@ -164,7 +164,7 @@ export const getRecentEmails = async (
   };
 };
 
-export const actionRecentEmailHandler = middleware<ActionRecentMailResponse>(
+export const actionRecentEmailHandler = request<ActionRecentMailResponse>(
   async (req, res) => {
     const cookieHeader = req.headers.cookie!;
 

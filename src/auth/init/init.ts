@@ -19,8 +19,8 @@ import type { AccountInfo, CommonFailedResponse } from "../../typings.js";
 import {
   getConnection,
   isInBlackList,
-  middleware,
   releaseConnection,
+  request,
 } from "../../utils/index.js";
 import { vpnLogin } from "../../vpn/login.js";
 import { authEncrypt } from "../encrypt.js";
@@ -431,7 +431,7 @@ export const initAuth = async (
   }
 };
 
-export const authInitHandler = middleware<
+export const authInitHandler = request<
   InitAuthResponse,
   InitAuthOptions,
   { id: string }

@@ -2,7 +2,7 @@ import { CookieStore } from "@mptool/net";
 
 import { TEST_COOKIE_STORE, TEST_ID } from "../../config/index.js";
 import type { CommonFailedResponse, EmptyObject } from "../../typings.js";
-import { middleware } from "../../utils/index.js";
+import { request } from "../../utils/index.js";
 import type { GetAuthCaptchaResponse } from "../captcha.js";
 import { getAuthCaptcha } from "../captcha.js";
 import {
@@ -103,7 +103,7 @@ export const getAuthInitInfo = async (
   } as AuthInitInfoSuccessResponse;
 };
 
-export const authInitInfoHandler = middleware<
+export const authInitInfoHandler = request<
   AuthInitInfoResponse,
   EmptyObject,
   { id: string }

@@ -4,7 +4,7 @@ import type {
   CommonFailedResponse,
   CommonListSuccessResponse,
 } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 
 const LIST_REGEXP = /<ul class=".*? xsyg">([^]+?)<\/ul>/;
 const ITEM_REGEXP =
@@ -78,7 +78,7 @@ export const getAcademicList = async ({
   };
 };
 
-export const officialAcademicListHandler = middleware<
+export const officialAcademicListHandler = request<
   OfficialAcademicListResponse,
   OfficialAcademicListOptions,
   OfficialAcademicListOptions

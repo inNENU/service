@@ -1,8 +1,8 @@
 import { OA_WEB_VPN_SERVER } from "./utils.js";
 import type { CookieOptions, CookieVerifyResponse } from "../typings.js";
-import { cookies2Header, middleware } from "../utils/index.js";
+import { cookies2Header, request } from "../utils/index.js";
 
-export const oaCheckHandler = middleware<CookieVerifyResponse, CookieOptions>(
+export const oaCheckHandler = request<CookieVerifyResponse, CookieOptions>(
   async (req, res) => {
     const cookieHeader = req.headers.cookie ?? cookies2Header(req.body.cookies);
 

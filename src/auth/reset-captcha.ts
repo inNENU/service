@@ -7,7 +7,7 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../typings.js";
-import { generateRandomString, middleware } from "../utils/index.js";
+import { generateRandomString, request } from "../utils/index.js";
 
 const CAPTCHA_URL = `${RESET_PREFIX}/generateCaptcha`;
 
@@ -73,7 +73,7 @@ export const getResetCaptcha = async (
   };
 };
 
-export const resetCaptchaHandler = middleware<ResetCaptchaResponse>(
+export const resetCaptchaHandler = request<ResetCaptchaResponse>(
   async (req, res) => {
     return res.json(await getResetCaptcha(req.headers.cookie ?? ""));
   },

@@ -11,7 +11,7 @@ import {
   totalPagesRegExp,
 } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { IE_8_USER_AGENT, getIETimeStamp, middleware } from "../utils/index.js";
+import { IE_8_USER_AGENT, getIETimeStamp, request } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 
 const HEADER_REGEXP = /<title>(.*)<\/title>/;
@@ -207,7 +207,7 @@ export const getUnderChangeMajorPlan = async (
 };
 
 export const underChangeMajorPlanHandler =
-  middleware<UnderChangeMajorPlanResponse>(async (req, res) => {
+  request<UnderChangeMajorPlanResponse>(async (req, res) => {
     const cookieHeader = req.headers.cookie!;
 
     if (cookieHeader.includes("TEST"))

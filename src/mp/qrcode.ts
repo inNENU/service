@@ -7,7 +7,7 @@ import {
   appIDInfo,
 } from "../config/index.js";
 import type { CommonFailedResponse } from "../typings.js";
-import { getWechatMPCode, middleware } from "../utils/index.js";
+import { getWechatMPCode, request } from "../utils/index.js";
 
 export interface WechatMpCodeOptions {
   appID: "wx33acb831ee1831a5" | "wx2550e3fd373b79a8";
@@ -34,7 +34,7 @@ export type MpCodeResponse =
 const getQQMpCode = async (appID: number, page: string): Promise<Buffer> =>
   toBuffer(`https://m.q.qq.com/a/p/${appID}?s=${encodeURI(page)}`);
 
-export const mpQrCodeHandler = middleware<
+export const mpQrCodeHandler = request<
   MpCodeResponse,
   MpCodeOptions,
   MpCodeOptions

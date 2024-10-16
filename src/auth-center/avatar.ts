@@ -3,7 +3,7 @@ import { INFO_PREFIX } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { ExpiredResponse, MissingCredentialResponse } from "../config/index.js";
 import type { AccountInfo, CommonSuccessResponse } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 
 const USER_CONF_URL = `${INFO_PREFIX}/common/getUserConf`;
 
@@ -60,7 +60,7 @@ export const getAvatar = async (
   };
 };
 
-export const avatarHandler = middleware<AvatarResponse, AccountInfo>(
+export const avatarHandler = request<AvatarResponse, AccountInfo>(
   async (req, res) => {
     const { id, password, authToken } = req.body;
 

@@ -11,7 +11,7 @@ import type {
   CommonSuccessResponse,
   LoginOptions,
 } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/login.js";
 
 const TITLE_REGEXP = /var title = '(.*?)';/;
@@ -138,7 +138,7 @@ export const getNoticeDetail = async (
   };
 };
 
-export const noticeHandler = middleware<NoticeResponse, NoticeOptions>(
+export const noticeHandler = request<NoticeResponse, NoticeOptions>(
   async (req, res) => {
     const { noticeID } = req.body;
 

@@ -6,7 +6,7 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/login.js";
 
 const CARD_BALANCE_URL = `${ACTION_SERVER}/soapBasic/postSoap`;
@@ -68,7 +68,7 @@ export const getCardBalance = async (
   };
 };
 
-export const cardBalanceHandler = middleware<CardBalanceResponse>(
+export const cardBalanceHandler = request<CardBalanceResponse>(
   async (req, res) => {
     const cookieHeader = req.headers.cookie!;
 

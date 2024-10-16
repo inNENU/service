@@ -4,7 +4,7 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 
 export interface UnderHistoryScoreInfoOptions {
   type: "info";
@@ -201,7 +201,7 @@ export type UnderHistoryScoreResponse =
   | UnderHistoryScoreQueryResponse
   | CommonFailedResponse<ActionFailType.InvalidArg>;
 
-export const underHistoryScoreHandler = middleware<
+export const underHistoryScoreHandler = request<
   UnderHistoryScoreResponse,
   UnderHistoryScoreOptions
 >(async (req, res) => {

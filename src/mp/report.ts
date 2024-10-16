@@ -4,11 +4,7 @@ import { v7 } from "uuid";
 import type { ActionFailType } from "../config/index.js";
 import { DatabaseErrorResponse } from "../config/index.js";
 import type { CommonFailedResponse } from "../typings.js";
-import {
-  getConnection,
-  middleware,
-  releaseConnection,
-} from "../utils/index.js";
+import { getConnection, releaseConnection, request } from "../utils/index.js";
 
 export interface MpReportOptions extends Record<string, unknown> {
   type?: string;
@@ -18,7 +14,7 @@ export type MpReportResponse =
   | { success: true }
   | CommonFailedResponse<ActionFailType.DatabaseError | ActionFailType.Unknown>;
 
-export const mpReportHandler = middleware<MpReportResponse, MpReportOptions>(
+export const mpReportHandler = request<MpReportResponse, MpReportOptions>(
   async (req, res) => {
     let connection: PoolConnection | null = null;
 

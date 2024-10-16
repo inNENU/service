@@ -17,7 +17,7 @@ import {
   getRandomBlacklistHint,
 } from "../config/index.js";
 import type { AccountInfo, CommonFailedResponse } from "../typings.js";
-import { isInBlackList, middleware } from "../utils/index.js";
+import { isInBlackList, request } from "../utils/index.js";
 
 export interface AuthLoginOptions extends AccountInfo {
   service?: string;
@@ -295,7 +295,7 @@ export type AuthLoginResponse =
   | AuthLoginSuccessResponse
   | AuthLoginFailedResponse;
 
-export const authLoginHandler = middleware<AuthLoginResponse, AuthLoginOptions>(
+export const authLoginHandler = request<AuthLoginResponse, AuthLoginOptions>(
   async (req, res) => {
     const result = await authLogin(req.body);
 

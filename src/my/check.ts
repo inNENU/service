@@ -1,8 +1,8 @@
 import { MY_SERVER } from "./utils.js";
 import type { CookieOptions, CookieVerifyResponse } from "../typings.js";
-import { cookies2Header, middleware } from "../utils/index.js";
+import { cookies2Header, request } from "../utils/index.js";
 
-export const myCheckHandler = middleware<CookieVerifyResponse, CookieOptions>(
+export const myCheckHandler = request<CookieVerifyResponse, CookieOptions>(
   async (req, res) => {
     const cookieHeader = req.headers.cookie ?? cookies2Header(req.body.cookies);
 

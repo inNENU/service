@@ -16,7 +16,7 @@ import type {
   CommonFailedResponse,
   LoginOptions,
 } from "../typings.js";
-import { IE_8_USER_AGENT, middleware } from "../utils/index.js";
+import { IE_8_USER_AGENT, request } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 import { vpnCASLogin } from "../vpn/index.js";
 
@@ -125,7 +125,7 @@ export type UnderSystemLoginResponse =
   | AuthLoginFailedResponse
   | VPNLoginFailedResponse;
 
-export const loginToUnderSystem = middleware<
+export const loginToUnderSystem = request<
   | UnderSystemLoginResponse
   | CommonFailedResponse<ActionFailType.MissingCredential>,
   LoginOptions
@@ -145,7 +145,7 @@ export const loginToUnderSystem = middleware<
   return next();
 });
 
-export const underSystemLoginHandler = middleware<
+export const underSystemLoginHandler = request<
   UnderSystemLoginResponse,
   AccountInfo
 >(async (req, res) => {

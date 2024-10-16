@@ -8,7 +8,7 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 
 const GRAD_ENROLL_PLAN_URL = "https://yz.nenu.edu.cn/source/ssml/2024zsml.html";
 const schoolInfoRegExp =
@@ -166,7 +166,7 @@ export const getGradEnrollPlan = async (): Promise<GradEnrollResponse> => {
   return { success: true, data: schoolInfo };
 };
 
-export const gradEnrollPlanHandler = middleware<GradEnrollResponse>(
+export const gradEnrollPlanHandler = request<GradEnrollResponse>(
   async (_, res) => {
     return res.json(await getGradEnrollPlan());
   },

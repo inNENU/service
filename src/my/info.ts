@@ -5,11 +5,7 @@ import { MY_SERVER } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
 import { TEST_INFO, UnknownResponse } from "../config/index.js";
 import type { AccountInfo, CommonFailedResponse } from "../typings.js";
-import {
-  getConnection,
-  middleware,
-  releaseConnection,
-} from "../utils/index.js";
+import { getConnection, releaseConnection, request } from "../utils/index.js";
 
 interface RawInfo {
   success: true;
@@ -263,7 +259,7 @@ export type MyInfoResponse =
   | MyLoginFailedResponse
   | CommonFailedResponse<ActionFailType.MissingCredential>;
 
-export const myInfoHandler = middleware<MyInfoResponse, AccountInfo>(
+export const myInfoHandler = request<MyInfoResponse, AccountInfo>(
   async (req, res) => {
     const cookieHeader = req.headers.cookie!;
 

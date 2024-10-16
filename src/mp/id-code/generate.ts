@@ -16,8 +16,8 @@ import {
   getConnection,
   getShortUUID,
   getWechatMPCode,
-  middleware,
   releaseConnection,
+  request,
 } from "../../utils/index.js";
 
 export interface GenerateIdCodeOptions {
@@ -136,7 +136,7 @@ export const generateIdCode = async ({
   }
 };
 
-export const generateIdCodeHandler = middleware<
+export const generateIdCodeHandler = request<
   GenerateIdCodeResponse,
   GenerateIdCodeOptions
 >(async (req, res) => {

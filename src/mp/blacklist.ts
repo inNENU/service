@@ -1,5 +1,5 @@
 import type { CommonSuccessResponse } from "../typings.js";
-import { isInBlackList, middleware } from "../utils/index.js";
+import { isInBlackList, request } from "../utils/index.js";
 
 export interface BlacklistOptions {
   id: number;
@@ -15,7 +15,7 @@ export type BlacklistResponse = CommonSuccessResponse<{
   inBlacklist: boolean;
 }>;
 
-export const mpBlacklistHandler = middleware<
+export const mpBlacklistHandler = request<
   BlacklistResponse,
   BlacklistOptions,
   BlacklistQuery

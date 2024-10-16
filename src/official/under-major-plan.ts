@@ -4,7 +4,7 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 
 const UNDER_MAJOR_PLAN_URL = `${OFFICIAL_URL}/jyjx/bksjy/rcpyfa.htm`;
 
@@ -43,7 +43,7 @@ export const getUnderMajorPlan = async (): Promise<UnderMajorPlanResponse> => {
   };
 };
 
-export const underMajorPlanHandler = middleware<UnderMajorPlanResponse>(
+export const underMajorPlanHandler = request<UnderMajorPlanResponse>(
   async (_, res) => {
     return res.json(await getUnderMajorPlan());
   },

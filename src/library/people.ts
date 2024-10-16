@@ -3,7 +3,7 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 
 interface LibraryPeopleRawData {
   code: number;
@@ -31,7 +31,7 @@ export type LibraryPeopleResponse =
   | LibraryPeopleSuccessResponse
   | CommonFailedResponse;
 
-export const libraryPeopleHandler = middleware<LibraryPeopleResponse>(
+export const libraryPeopleHandler = request<LibraryPeopleResponse>(
   async (_, res) => {
     const response = await fetch(
       "https://www.library.nenu.edu.cn/engine2/custom/nenu/onlineUserNum",

@@ -1,9 +1,28 @@
-import type { RequestHandler } from "express";
-import type { ParamsDictionary, Query } from "express-serve-static-core";
+import type {
+  NextFunction,
+  ParamsDictionary,
+  Query,
+  Request,
+  RequestHandler,
+  Response,
+} from "express-serve-static-core";
+import type { ParsedQs } from "qs";
 
 import type { EmptyObject } from "../typings.js";
 
-export const middleware =
+export type CustomRequestHandler<
+  P = ParamsDictionary,
+  ResBody = unknown,
+  ReqBody = unknown,
+  ReqQuery = ParsedQs,
+  LocalsObj extends Record<string, unknown> = Record<string, unknown>,
+> = (
+  req: Request<P, ResBody, ReqBody, ReqQuery, LocalsObj>,
+  res: Response<ResBody, LocalsObj>,
+  next: NextFunction,
+) => unknown;
+
+export const request =
   <
     ResBody = unknown,
     ReqBody = EmptyObject,
@@ -11,11 +30,13 @@ export const middleware =
     Params = ParamsDictionary,
     Locals extends Record<string, unknown> = EmptyObject,
   >(
-    handler: RequestHandler<Params, ResBody, ReqBody, ReqQuery, Locals>,
+    handler: CustomRequestHandler<Params, ResBody, ReqBody, ReqQuery, Locals>,
   ): RequestHandler<Params, ResBody, ReqBody, ReqQuery, Locals> =>
   async (req, res, next) => {
     try {
-      return await handler(req, res, next);
+      await handler(req, res, next);
+
+      return;
     } catch (err) {
       next(err);
     }

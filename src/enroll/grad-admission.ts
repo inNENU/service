@@ -5,7 +5,7 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 
 export interface GradAdmissionOptions {
   name: string;
@@ -147,7 +147,7 @@ const getInfo = async ({
   };
 };
 
-export const gradAdmissionHandler = middleware<
+export const gradAdmissionHandler = request<
   GradAdmissionResponse,
   GradAdmissionOptions
 >(async (req, res) => {

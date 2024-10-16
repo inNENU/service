@@ -6,7 +6,7 @@ import type {
   CommonSuccessResponse,
   LoginOptions,
 } from "../typings.js";
-import { EDGE_USER_AGENT_HEADERS, middleware } from "../utils/index.js";
+import { EDGE_USER_AGENT_HEADERS, request } from "../utils/index.js";
 
 export interface UnderGradeDetailOptions extends LoginOptions {
   /** 成绩代码 */
@@ -169,7 +169,7 @@ export const getUnderGradeDetail = async (
   };
 };
 
-export const underStudyGradeDetailHandler = middleware<
+export const underStudyGradeDetailHandler = request<
   UnderGradeDetailResponse,
   UnderGradeDetailOptions
 >(async (req, res) => {

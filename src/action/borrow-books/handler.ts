@@ -1,9 +1,9 @@
 import type { BorrowBooksResponse } from "./provider.js";
 import { getBorrowBooks } from "./provider.js";
 import { BORROW_BOOKS_TEST_RESPONSE } from "./test-data.js";
-import { middleware } from "../../utils/index.js";
+import { request } from "../../utils/index.js";
 
-export const borrowBooksHandler = middleware<BorrowBooksResponse>(
+export const borrowBooksHandler = request<BorrowBooksResponse>(
   async (req, res) => {
     const cookieHeader = req.headers.cookie!;
 

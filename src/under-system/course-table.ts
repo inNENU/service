@@ -7,7 +7,7 @@ import type {
   LoginOptions,
 } from "../typings.js";
 import type { TableClassData } from "../under-study/index.js";
-import { IE_8_USER_AGENT, getIETimeStamp, middleware } from "../utils/index.js";
+import { IE_8_USER_AGENT, getIETimeStamp, request } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/login.js";
 
 const semesterStartTime: Record<string, string> = {
@@ -219,7 +219,7 @@ export const getUnderCourseTable = async (
   };
 };
 
-export const underCourseTableHandler = middleware<
+export const underCourseTableHandler = request<
   UnderCourseTableResponse,
   LegacyUnderCourseTableOptions
 >(async (req, res) => {

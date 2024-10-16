@@ -1,8 +1,8 @@
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { CookieOptions, CookieVerifyResponse } from "../typings.js";
-import { IE_8_USER_AGENT, cookies2Header, middleware } from "../utils/index.js";
+import { IE_8_USER_AGENT, cookies2Header, request } from "../utils/index.js";
 
-export const underSystemCheckHandler = middleware<
+export const underSystemCheckHandler = request<
   CookieVerifyResponse,
   CookieOptions
 >(async (req, res) => {

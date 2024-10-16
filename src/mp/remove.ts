@@ -12,11 +12,7 @@ import {
   WrongPasswordResponse,
 } from "../config/index.js";
 import type { CommonFailedResponse } from "../typings.js";
-import {
-  getConnection,
-  middleware,
-  releaseConnection,
-} from "../utils/index.js";
+import { getConnection, releaseConnection, request } from "../utils/index.js";
 
 export type MpRemoveResponse =
   | { success: true }
@@ -28,7 +24,7 @@ export type MpRemoveResponse =
       | ActionFailType.Unknown
     >;
 
-export const mpRemoveHandler = middleware<
+export const mpRemoveHandler = request<
   MpRemoveResponse,
   { id: string; authToken: string; appID: string }
 >(async (req, res) => {

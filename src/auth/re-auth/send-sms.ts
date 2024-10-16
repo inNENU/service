@@ -9,7 +9,7 @@ import type {
   CommonSuccessResponse,
   EmptyObject,
 } from "../../typings.js";
-import { middleware } from "../../utils/index.js";
+import { request } from "../../utils/index.js";
 import { AUTH_SERVER, RE_AUTH_URL } from "../utils.js";
 
 const RE_AUTH_SMS_URL = `${AUTH_SERVER}/authserver/dynamicCode/getDynamicCodeByReauth.do`;
@@ -94,7 +94,7 @@ export const sendReAuthSMS = async (
   };
 };
 
-export const startReAuthHandler = middleware<
+export const startReAuthHandler = request<
   ReAuthSMSResponse,
   EmptyObject,
   { id: string }

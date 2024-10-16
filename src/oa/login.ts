@@ -17,7 +17,7 @@ import type {
   CommonFailedResponse,
   LoginOptions,
 } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 import { vpnCASLogin } from "../vpn/index.js";
 
@@ -117,7 +117,7 @@ export interface OALoginSuccessResponse {
 
 export type OALoginResponse = OALoginSuccessResponse | OALoginFailedResponse;
 
-export const loginToOA = middleware<
+export const loginToOA = request<
   OALoginResponse | CommonFailedResponse<ActionFailType.MissingCredential>,
   LoginOptions
 >(async (req, res, next) => {
@@ -136,7 +136,7 @@ export const loginToOA = middleware<
   return next();
 });
 
-export const oaLoginHandler = middleware<OALoginResponse, AccountInfo>(
+export const oaLoginHandler = request<OALoginResponse, AccountInfo>(
   async (req, res) => {
     const result =
       // fake result for testing

@@ -11,7 +11,7 @@ import {
   UnknownResponse,
 } from "../config/index.js";
 import type { AccountInfo } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 
 export interface AuthCenterLoginSuccessResult {
   success: true;
@@ -76,7 +76,7 @@ export type AuthCenterLoginResponse =
   | AuthCenterLoginSuccessResponse
   | AuthCenterLoginFailResult;
 
-export const authCenterLoginHandler = middleware<
+export const authCenterLoginHandler = request<
   AuthCenterLoginResponse,
   AccountInfo
 >(async (req, res) => {

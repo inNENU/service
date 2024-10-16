@@ -4,7 +4,7 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 
 export interface UnderEnrollPlanInfoOptions {
   type: "info";
@@ -171,7 +171,7 @@ export type UnderEnrollPlanResponse =
   | UnderEnrollPlanQueryResponse
   | CommonFailedResponse<ActionFailType.InvalidArg>;
 
-export const underEnrollPlanHandler = middleware<
+export const underEnrollPlanHandler = request<
   UnderEnrollPlanResponse,
   UnderEnrollPlanOptions
 >(async (req, res) => {

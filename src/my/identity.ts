@@ -3,7 +3,7 @@ import { MY_SERVER } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
 import { UnknownResponse } from "../config/index.js";
 import type { AccountInfo, CommonFailedResponse } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 
 interface RAWIdentityInfo {
   success: true;
@@ -58,7 +58,7 @@ export type MyIdentityResponse =
   | MyLoginFailedResponse
   | CommonFailedResponse<ActionFailType.MissingCredential>;
 
-export const myIdentityHandler = middleware<MyIdentityResponse, AccountInfo>(
+export const myIdentityHandler = request<MyIdentityResponse, AccountInfo>(
   async (req, res) => {
     const cookieHeader = req.headers.cookie!;
 

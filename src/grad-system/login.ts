@@ -14,7 +14,7 @@ import type {
   CommonFailedResponse,
   LoginOptions,
 } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 
 export interface GradSystemLoginSuccessResult {
   success: true;
@@ -97,7 +97,7 @@ export type GradSystemLoginResponse =
   | GradSystemLoginSuccessResponse
   | AuthLoginFailedResponse;
 
-export const loginToGradSystem = middleware<
+export const loginToGradSystem = request<
   | GradSystemLoginResponse
   | CommonFailedResponse<ActionFailType.MissingCredential>,
   LoginOptions
@@ -117,7 +117,7 @@ export const loginToGradSystem = middleware<
   return next();
 });
 
-export const gradSystemLoginHandler = middleware<
+export const gradSystemLoginHandler = request<
   GradSystemLoginResponse,
   AccountInfo
 >(async (req, res) => {

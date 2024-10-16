@@ -4,7 +4,7 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../../typings.js";
-import { EDGE_USER_AGENT_HEADERS, middleware } from "../../utils/index.js";
+import { EDGE_USER_AGENT_HEADERS, request } from "../../utils/index.js";
 import { UNDER_STUDY_SERVER } from "../utils.js";
 
 export interface UnderSelectAllowedCategoryItem {
@@ -143,12 +143,13 @@ export const getUnderSelectCategories = async (
   };
 };
 
-export const underSelectCategoryHandler =
-  middleware<UnderSelectCategoryResponse>(async (req, res) => {
+export const underSelectCategoryHandler = request<UnderSelectCategoryResponse>(
+  async (req, res) => {
     const cookieHeader = req.headers.cookie!;
 
     if (cookieHeader.includes("TEST"))
       return res.json(TEST_UNDER_SELECT_CATEGORY_RESPONSE);
 
     return res.json(await getUnderSelectCategories(cookieHeader));
-  });
+  },
+);

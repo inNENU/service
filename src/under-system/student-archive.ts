@@ -2,7 +2,7 @@ import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { ActionFailType, UnknownResponse } from "../config/index.js";
 import type { CommonFailedResponse, LoginOptions } from "../typings.js";
-import { IE_8_USER_AGENT, getIETimeStamp, middleware } from "../utils/index.js";
+import { IE_8_USER_AGENT, getIETimeStamp, request } from "../utils/index.js";
 
 const infoRegExp =
   /<td>(\S+)<\/td>\s+<td colspan="\d">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/g;
@@ -298,7 +298,7 @@ const UNDER_STUDENT_ARCHIVE_VIEW_TEST_RESPONSE: UnderGetStudentArchiveSuccessRes
     },
   };
 
-export const underStudentArchiveHandler = middleware<
+export const underStudentArchiveHandler = request<
   UnderGetStudentArchiveResponse | UnderRegisterStudentArchiveResponse,
   GetUnderStudentArchiveOptions | RegisterUnderStudentArchiveOptions
 >(async (req, res) => {

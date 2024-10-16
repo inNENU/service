@@ -8,7 +8,7 @@ import {
   UnknownResponse,
 } from "../config/index.js";
 import type { AccountInfo, CommonFailedResponse } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 
 const TITLE_REG_EXP = /aField\s?="(.*?)"\.split\("\t"\);/;
 const VALUE_REG_EXP = /aDataLS\s?="(.*?)"\.split\("\t"\);/;
@@ -139,7 +139,7 @@ export const getGradInfo = async (
   return UnknownResponse("获取信息失败");
 };
 
-export const gradInfoHandler = middleware<GradInfoResponse, AccountInfo>(
+export const gradInfoHandler = request<GradInfoResponse, AccountInfo>(
   async (req, res) => {
     const { id, password, authToken } = req.body;
 

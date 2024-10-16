@@ -8,7 +8,7 @@ import type {
   CommonSuccessResponse,
   LoginOptions,
 } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 
 interface RawCheckEmailSuccessData {
   result: "0";
@@ -97,7 +97,7 @@ export const checkEmail = async (
   };
 };
 
-export const emailApplyHandler = middleware<
+export const emailApplyHandler = request<
   CheckEmailResponse | CommonFailedResponse<ActionFailType.InvalidArg>,
   CheckEmailOptions
 >(async (req, res) => {

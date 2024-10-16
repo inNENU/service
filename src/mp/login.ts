@@ -10,11 +10,7 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../typings.js";
-import {
-  getConnection,
-  middleware,
-  releaseConnection,
-} from "../utils/index.js";
+import { getConnection, releaseConnection, request } from "../utils/index.js";
 
 export type AppID = "wx33acb831ee1831a5" | "wx2550e3fd373b79a8" | 1109559721;
 export type Env = "qq" | "wx" | "web";
@@ -50,7 +46,7 @@ export type MPloginFailResponse = CommonFailedResponse<
 export type MPLoginOptions = MPLoginCodeOptions | MPLoginOpenidOptions;
 export type MPLoginResponse = MPLoginSuccessResponse | MPloginFailResponse;
 
-export const mpLoginHandler = middleware<MPLoginResponse, MPLoginOptions>(
+export const mpLoginHandler = request<MPLoginResponse, MPLoginOptions>(
   async (req, res) => {
     let connection: PoolConnection | null = null;
 

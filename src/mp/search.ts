@@ -2,7 +2,7 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../typings.js";
-import { middleware, splitWords } from "../utils/index.js";
+import { request, splitWords } from "../utils/index.js";
 
 export type SearchType = "all" | "guide" | "intro" | "function";
 
@@ -409,7 +409,7 @@ export type SearchResponse =
   // TODO: Improve types
   CommonSuccessResponse<unknown[]> | CommonFailedResponse;
 
-export const mpSearchHandler = middleware<SearchResponse, SearchOptions>(
+export const mpSearchHandler = request<SearchResponse, SearchOptions>(
   async (req, res) => {
     const { scope = "all", type = "result", word } = req.body;
 

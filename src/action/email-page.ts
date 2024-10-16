@@ -7,7 +7,7 @@ import type {
   CommonSuccessResponse,
   LoginOptions,
 } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/login.js";
 
 const EMAIL_PAGE_URL = `${ACTION_SERVER}/extract/sendRedirect2Email`;
@@ -69,7 +69,7 @@ export const getEmailPage = async (
   };
 };
 
-export const actionEmailPageHandler = middleware<
+export const actionEmailPageHandler = request<
   ActionEmailPageResponse,
   ActionEmailPageOptions,
   ActionEmailPageOptions

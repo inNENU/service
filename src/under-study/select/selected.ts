@@ -11,7 +11,7 @@ import type {
   CommonSuccessResponse,
   LoginOptions,
 } from "../../typings.js";
-import { EDGE_USER_AGENT_HEADERS, middleware } from "../../utils/index.js";
+import { EDGE_USER_AGENT_HEADERS, request } from "../../utils/index.js";
 import { UNDER_STUDY_SERVER } from "../utils.js";
 
 export interface UnderSelectSelectedOptions extends LoginOptions {
@@ -73,7 +73,7 @@ export const getUnderSelectSelectedCourse = async (
   };
 };
 
-export const underSelectSelectedCourseHandler = middleware<
+export const underSelectSelectedCourseHandler = request<
   UnderSelectSelectedResponse,
   UnderSelectSelectedOptions
 >(async (req, res) => {

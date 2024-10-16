@@ -3,7 +3,7 @@ import Utf8 from "crypto-js/enc-utf8.js";
 import Pkcs7 from "crypto-js/pad-pkcs7.js";
 
 import type { CommonSuccessResponse } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 
 const DICT = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678";
 const DICT_LENGTH = DICT.length;
@@ -30,7 +30,7 @@ export interface AuthEncryptOptions {
   salt: string;
 }
 
-export const authEncryptHandler = middleware<
+export const authEncryptHandler = request<
   CommonSuccessResponse<string>,
   AuthEncryptOptions
 >((req, res) =>

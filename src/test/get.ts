@@ -1,6 +1,6 @@
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 
-export const testGetHandler = middleware((req, res) => {
+export const testGetHandler = request((req, res) => {
   console.log(req.headers);
   console.log(req.query);
   console.log(req.path);

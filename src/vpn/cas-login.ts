@@ -5,7 +5,7 @@ import { LOGIN_URL, UPDATE_KEY_URL, VPN_DOMAIN, VPN_SERVER } from "./utils.js";
 import { authLogin } from "../auth/login.js";
 import { ActionFailType } from "../config/index.js";
 import type { AccountInfo } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 
 const CAS_LOGIN_URL = `${VPN_SERVER}/users/auth/cas`;
 
@@ -89,7 +89,7 @@ export const vpnCASLogin = async (
   };
 };
 
-export const vpnCASLoginHandler = middleware<VPNLoginResponse, AccountInfo>(
+export const vpnCASLoginHandler = request<VPNLoginResponse, AccountInfo>(
   async (req, res) => {
     const { id, password, authToken } = req.body;
 

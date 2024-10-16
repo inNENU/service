@@ -7,7 +7,7 @@ import type {
   CommonListSuccessResponse,
   LoginOptions,
 } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 
 const NOTICE_LIST_QUERY_URL = `${ACTION_SERVER}/page/queryList`;
 
@@ -144,15 +144,14 @@ export const getNoticeList = async (
   };
 };
 
-export const noticeListHandler = middleware<
-  NoticeListResponse,
-  NoticeListOptions
->(async (req, res) => {
-  const { type = "notice", size = 20, current = 1 } = req.body;
+export const noticeListHandler = request<NoticeListResponse, NoticeListOptions>(
+  async (req, res) => {
+    const { type = "notice", size = 20, current = 1 } = req.body;
 
-  const cookieHeader = req.headers.cookie!;
+    const cookieHeader = req.headers.cookie!;
 
-  if (cookieHeader.includes("TEST")) return res.json(TEST_NOTICE_LIST);
+    if (cookieHeader.includes("TEST")) return res.json(TEST_NOTICE_LIST);
 
-  return res.json(await getNoticeList(cookieHeader, type, size, current));
-});
+    return res.json(await getNoticeList(cookieHeader, type, size, current));
+  },
+);

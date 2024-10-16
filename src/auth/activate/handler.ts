@@ -24,7 +24,7 @@ import {
   InvalidArgResponse,
   MissingCredentialResponse,
 } from "../../config/index.js";
-import { middleware } from "../../utils/index.js";
+import { request } from "../../utils/index.js";
 import type {
   CheckPasswordOptions,
   CheckPasswordResponse,
@@ -46,7 +46,7 @@ export type ActivateResponse =
   | ActivateSetPasswordResponse
   | CheckPasswordResponse;
 
-export const activateHandler = middleware<ActivateResponse, ActivateOptions>(
+export const activateHandler = request<ActivateResponse, ActivateOptions>(
   async (req, res) => {
     if (req.method === "GET") {
       const response = await getActivateInfo();

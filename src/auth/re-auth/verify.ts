@@ -8,7 +8,7 @@ import {
   UnknownResponse,
 } from "../../config/index.js";
 import type { CommonFailedResponse } from "../../typings.js";
-import { middleware } from "../../utils/index.js";
+import { request } from "../../utils/index.js";
 import { AUTH_SERVER, RE_AUTH_URL } from "../utils.js";
 
 const RE_AUTH_VERIFY_URL = `${AUTH_SERVER}/authserver/reAuthCheck/reAuthSubmit.do`;
@@ -87,7 +87,7 @@ export interface ReAuthVerifyOptions {
   smsCode: string;
 }
 
-export const verifyReAuthHandler = middleware<
+export const verifyReAuthHandler = request<
   VerifyReAuthCaptchaResponse,
   ReAuthVerifyOptions
 >(async (req, res) => {

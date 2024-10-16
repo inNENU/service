@@ -18,7 +18,7 @@ import type {
   CommonFailedResponse,
   LoginOptions,
 } from "../typings.js";
-import { EDGE_USER_AGENT_HEADERS, middleware } from "../utils/index.js";
+import { EDGE_USER_AGENT_HEADERS, request } from "../utils/index.js";
 
 export interface UnderStudyLoginOptions extends AccountInfo {
   webVPN?: boolean;
@@ -115,7 +115,7 @@ export type UnderStudyLoginResponse =
   | AuthLoginFailedResponse
   | CommonFailedResponse<ActionFailType.Restricted>;
 
-export const loginToUnderStudy = middleware<
+export const loginToUnderStudy = request<
   | UnderStudyLoginResponse
   | CommonFailedResponse<ActionFailType.MissingCredential>,
   LoginOptions
@@ -135,7 +135,7 @@ export const loginToUnderStudy = middleware<
   return next();
 });
 
-export const underStudyLoginHandler = middleware<
+export const underStudyLoginHandler = request<
   UnderStudyLoginResponse,
   UnderStudyLoginOptions
 >(async (req, res) => {

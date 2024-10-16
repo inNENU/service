@@ -1,6 +1,6 @@
 import { ActionFailType, UnknownResponse } from "../config/index.js";
 import type { CommonFailedResponse } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 
 const QUERY_URL = "https://gkcx.nenu.edu.cn/api/user/admissionQuery";
 
@@ -107,7 +107,7 @@ export const getUnderAdmission = async ({
   };
 };
 
-export const underAdmissionHandler = middleware<
+export const underAdmissionHandler = request<
   UnderAdmissionResponse,
   UnderAdmissionOptions
 >(async (req, res) => {

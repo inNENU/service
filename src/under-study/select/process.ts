@@ -6,7 +6,7 @@ import {
   MissingArgResponse,
 } from "../../config/index.js";
 import type { CommonFailedResponse, LoginOptions } from "../../typings.js";
-import { EDGE_USER_AGENT_HEADERS, middleware } from "../../utils/index.js";
+import { EDGE_USER_AGENT_HEADERS, request } from "../../utils/index.js";
 import { UNDER_STUDY_SERVER } from "../utils.js";
 
 export interface UnderSelectAddOptions extends LoginOptions {
@@ -170,7 +170,7 @@ export const removeUnderSelectCourse = async (
   return { success: true };
 };
 
-export const underSelectProcessHandler = middleware<
+export const underSelectProcessHandler = request<
   UnderSelectProcessResponse,
   UnderSelectProcessOptions
 >(async (req, res) => {

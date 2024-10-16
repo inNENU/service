@@ -5,7 +5,7 @@ import type {
   CommonFailedResponse,
   CommonListSuccessResponse,
 } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 
 const LIST_REGEXP = /<ul class=".*? dsyw">([^]+?)<\/ul>/;
 const ITEM_REGEXP =
@@ -101,7 +101,7 @@ export const getOfficialInfoList = async ({
   };
 };
 
-export const officialInfoListHandler = middleware<
+export const officialInfoListHandler = request<
   OfficialInfoListResponse,
   OfficialInfoListOptions,
   OfficialInfoListOptions

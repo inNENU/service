@@ -21,7 +21,7 @@ import { validateCode } from "./validate-code.js";
 import type { ActionFailType } from "../../config/index.js";
 import { InvalidArgResponse } from "../../config/index.js";
 import type { CommonFailedResponse } from "../../typings.js";
-import { middleware } from "../../utils/index.js";
+import { request } from "../../utils/index.js";
 import type {
   CheckPasswordOptions,
   CheckPasswordResponse,
@@ -44,7 +44,7 @@ export type ResetPasswordResponse =
   | ResetPasswordSetResponse
   | CommonFailedResponse<ActionFailType.InvalidArg>;
 
-export const resetPasswordHandler = middleware<
+export const resetPasswordHandler = request<
   ResetPasswordResponse,
   ResetPasswordOptions
 >(async (req, res) => {

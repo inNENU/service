@@ -7,7 +7,7 @@ import {
   MissingCredentialResponse,
 } from "../config/index.js";
 import type { CommonFailedResponse } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 
 interface RawAuthCaptchaResponse {
   smallImage: string;
@@ -124,7 +124,7 @@ export type AuthCaptchaResponse =
   | GetAuthCaptchaResponse
   | VerifyAuthCaptchaResponse;
 
-export const authCaptchaHandler = middleware<
+export const authCaptchaHandler = request<
   AuthCaptchaResponse,
   AuthCaptchaOptions,
   { id?: string }

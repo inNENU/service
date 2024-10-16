@@ -16,7 +16,7 @@ import type {
   CommonFailedResponse,
   LoginOptions,
 } from "../typings.js";
-import { middleware } from "../utils/index.js";
+import { request } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 import { vpnCASLogin } from "../vpn/index.js";
 
@@ -88,7 +88,7 @@ export type ActionLoginResponse =
   | ActionLoginSuccessResponse
   | ActionLoginFailedResponse;
 
-export const loginToAction = middleware<
+export const loginToAction = request<
   | ActionLoginFailedResponse
   | CommonFailedResponse<ActionFailType.MissingCredential>,
   LoginOptions
@@ -108,7 +108,7 @@ export const loginToAction = middleware<
   return next();
 });
 
-export const actionLoginHandler = middleware<ActionLoginResponse, AccountInfo>(
+export const actionLoginHandler = request<ActionLoginResponse, AccountInfo>(
   async (req, res) => {
     const result =
       req.body.id === TEST_ID_NUMBER

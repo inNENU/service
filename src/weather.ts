@@ -1,4 +1,4 @@
-import { middleware } from "./utils/index.js";
+import { request } from "./utils/index.js";
 
 type Time = `${number}${number}:${number}${number}`;
 type Date =
@@ -459,7 +459,7 @@ const getWeather = ({ air, alarm, ...data }: WeatherRawData): WeatherData => {
   };
 };
 
-export const weatherHandler = middleware<WeatherData, WeatherOptions>(
+export const weatherHandler = request<WeatherData, WeatherOptions>(
   async (req, res) => {
     const { province = "吉林", city = "长春", county = "南关" } = req.body;
 

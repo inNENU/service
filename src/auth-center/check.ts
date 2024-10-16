@@ -1,8 +1,8 @@
 import { INFO_PAGE } from "./utils.js";
 import type { CookieOptions, CookieVerifyResponse } from "../typings.js";
-import { cookies2Header, middleware } from "../utils/index.js";
+import { cookies2Header, request } from "../utils/index.js";
 
-export const authCenterCheckHandler = middleware<
+export const authCenterCheckHandler = request<
   CookieVerifyResponse,
   CookieOptions
 >(async (req, res) => {

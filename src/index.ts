@@ -71,8 +71,7 @@ app.use(morganMiddleware);
 
 app.get("/", (_req, res) => {
   res.header("Content-Type", "text/html");
-
-  return res.send(`\
+  res.send(`\
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
