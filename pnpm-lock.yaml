@@ -111,6 +111,9 @@ importers:
       '@types/qrcode':
         specifier: 1.5.5
         version: 1.5.5
+      '@types/qs':
+        specifier: 6.9.16
+        version: 6.9.16
       '@types/uuid':
         specifier: 10.0.0
         version: 10.0.0

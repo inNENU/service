@@ -57,6 +57,7 @@
     "@types/morgan": "1.9.9",
     "@types/node": "22.7.5",
     "@types/qrcode": "1.5.5",
+    "@types/qs": "6.9.16",
     "@types/uuid": "10.0.0",
     "cross-env": "7.0.3",
     "cz-git": "1.10.1",
