@@ -282,11 +282,6 @@ export const authLogin = async ({
 
 export interface AuthLoginSuccessResponse {
   success: true;
-  /**
-   * @deprecated
-   *
-   * For future web app only
-   */
   cookies: CookieType[];
   location: string;
 }

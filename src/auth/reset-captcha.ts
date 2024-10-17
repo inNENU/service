@@ -1,12 +1,10 @@
+import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
 
 import { RESET_PREFIX } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
 import { RestrictedResponse, UnknownResponse } from "../config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-} from "../typings.js";
+import type { CommonFailedResponse } from "../typings.js";
 import { generateRandomString, request } from "../utils/index.js";
 
 const CAPTCHA_URL = `${RESET_PREFIX}/generateCaptcha`;
@@ -18,19 +16,20 @@ export interface ResetCaptchaInfo {
   captchaId: string;
 }
 
-export type ResetCaptchaSuccessResponse =
-  CommonSuccessResponse<ResetCaptchaInfo> & {
-    cookieStore: CookieStore;
-  };
+export interface ResetCaptchaSuccessResult {
+  success: true;
+  cookieStore: CookieStore;
+  data: ResetCaptchaInfo;
+}
 
-export type ResetCaptchaResponse =
-  | ResetCaptchaSuccessResponse
+export type ResetCaptchaResult =
+  | ResetCaptchaSuccessResult
   | CommonFailedResponse<ActionFailType.Restricted | ActionFailType.Unknown>;
 
 export const getResetCaptcha = async (
   cookieHeaderOrStore?: string | CookieStore,
   referer = "",
-): Promise<ResetCaptchaResponse> => {
+): Promise<ResetCaptchaResult> => {
   const cookieStore =
     cookieHeaderOrStore instanceof CookieStore
       ? cookieHeaderOrStore
@@ -73,8 +72,37 @@ export const getResetCaptcha = async (
   };
 };
 
+export interface ResetCaptchaSuccessResponse {
+  success: true;
+  cookies: CookieType[];
+  data: ResetCaptchaInfo;
+}
+
+export type ResetCaptchaResponse =
+  | ResetCaptchaSuccessResponse
+  | CommonFailedResponse<ActionFailType.Restricted | ActionFailType.Unknown>;
+
 export const resetCaptchaHandler = request<ResetCaptchaResponse>(
   async (req, res) => {
-    return res.json(await getResetCaptcha(req.headers.cookie ?? ""));
+    const result = await getResetCaptcha(req.headers.cookie ?? "");
+
+    if (!result.success) return result;
+
+    const { cookieStore, data } = result;
+
+    const cookies = cookieStore.getAllCookies().map((item) => item.toJSON());
+
+    cookies.forEach(({ name, value, ...rest }) => {
+      res.cookie(name, value, rest);
+    });
+
+    return res.json({
+      success: true,
+      cookies,
+      data: {
+        captcha: data.captcha,
+        captchaId: data.captchaId,
+      },
+    });
   },
 );

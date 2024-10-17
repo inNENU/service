@@ -76,7 +76,6 @@ export const actionLogin = async (
 
 export interface ActionLoginSuccessResponse {
   success: true;
-  /** @deprecated */
   cookies: CookieType[];
 }
 
