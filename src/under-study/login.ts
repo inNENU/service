@@ -106,7 +106,6 @@ export const underStudyLogin = async (
 
 export interface UnderStudyLoginSuccessResponse {
   success: true;
-  /** @deprecated */
   cookies: CookieType[];
 }
 

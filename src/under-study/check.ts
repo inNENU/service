@@ -11,7 +11,8 @@ export const underStudyCheckHandler = request<
   CookieOptions
 >(async (req, res) => {
   try {
-    const cookieHeader = req.headers.cookie ?? cookies2Header(req.body.cookies);
+    const cookieHeader =
+      cookies2Header(req.body.cookies) ?? req.headers.cookie ?? "";
 
     if (cookieHeader.includes("TEST"))
       return res.json({ success: true, valid: true });

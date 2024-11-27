@@ -112,7 +112,6 @@ export const vpnLogin = async (
 
 export interface VPNLoginSuccessResponse {
   success: true;
-  /** @deprecated */
   cookies: CookieType[];
 }
 

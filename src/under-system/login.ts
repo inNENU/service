@@ -116,7 +116,6 @@ export const underSystemLogin = async (
 
 export interface UnderSystemLoginSuccessResponse {
   success: true;
-  /** @deprecated */
   cookies: CookieType[];
 }
 

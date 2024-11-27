@@ -12,6 +12,7 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../../typings.js";
+import type { WechatMpCodeError } from "../../utils/index.js";
 import {
   getConnection,
   getShortUUID,
@@ -130,7 +131,7 @@ export const generateIdCode = async ({
       };
     }
 
-    return UnknownResponse(result.errmsg);
+    return UnknownResponse((result as WechatMpCodeError).errmsg);
   } finally {
     releaseConnection(connection);
   }

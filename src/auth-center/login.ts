@@ -68,7 +68,6 @@ export const authCenterLogin = async (
 
 export interface AuthCenterLoginSuccessResponse {
   success: true;
-  /** @deprecated */
   cookies: CookieType[];
 }
 

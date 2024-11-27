@@ -15,6 +15,7 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../../typings.js";
+import type { WechatMpCodeError } from "../../utils/index.js";
 import {
   getConnection,
   getWechatMPCode,
@@ -159,7 +160,7 @@ export const checkIDCode = async ({
         };
       }
 
-      return UnknownResponse(result.errmsg);
+      return UnknownResponse((result as WechatMpCodeError).errmsg);
     }
 
     // check whether uuid is valid

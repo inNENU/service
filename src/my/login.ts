@@ -107,7 +107,6 @@ export const myLogin = async (
 
 export interface MyLoginSuccessResponse {
   success: true;
-  /** @deprecated */
   cookies: CookieType[];
 }
 

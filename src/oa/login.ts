@@ -111,7 +111,6 @@ export const oaLogin = async (
 
 export interface OALoginSuccessResponse {
   success: true;
-  /** @deprecated */
   cookies: CookieType[];
 }
 

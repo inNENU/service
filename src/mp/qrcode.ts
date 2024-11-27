@@ -7,6 +7,7 @@ import {
   appIDInfo,
 } from "../config/index.js";
 import type { CommonFailedResponse } from "../typings.js";
+import type { WechatMpCodeError } from "../utils/index.js";
 import { getWechatMPCode, request } from "../utils/index.js";
 
 export interface WechatMpCodeOptions {
@@ -60,7 +61,7 @@ export const mpQrCodeHandler = request<
       return res.end(image);
     }
 
-    return res.json(UnknownResponse(image.errmsg));
+    return res.json(UnknownResponse((image as WechatMpCodeError).errmsg));
   }
 
   const image = await getQQMpCode(Number(appID), page);

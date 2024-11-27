@@ -15,7 +15,7 @@ export interface AccountInfo {
 export type LoginOptions = Partial<AccountInfo>;
 
 export interface CookieOptions {
-  cookies: CookieType[];
+  cookies?: CookieType[];
 }
 
 export interface CommonSuccessResponse<T = EmptyObject> {

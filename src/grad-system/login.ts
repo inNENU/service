@@ -89,7 +89,6 @@ export const gradSystemLogin = async (
 
 export interface GradSystemLoginSuccessResponse {
   success: true;
-  /** @deprecated */
   cookies: CookieType[];
 }
 
