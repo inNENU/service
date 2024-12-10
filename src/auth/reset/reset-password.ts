@@ -42,9 +42,7 @@ export interface ResetPasswordSetOptions {
   sign: string;
 }
 
-export type ResetPasswordSetResponse =
-  | { success: true }
-  | CommonFailedResponse<ActionFailType.Unknown>;
+export type ResetPasswordSetResponse = { success: true } | CommonFailedResponse;
 
 export const resetPassword = async (
   {

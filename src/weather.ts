@@ -418,7 +418,7 @@ const getWeather = ({ air, alarm, ...data }: WeatherRawData): WeatherData => {
       }),
     );
 
-  const tips = Object.values(data.tips.observe || {});
+  const tips = Object.values(data.tips.observe);
 
   return {
     air: {

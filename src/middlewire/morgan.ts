@@ -1,4 +1,4 @@
-import type { IncomingMessage, ServerResponse } from "http";
+import type { ServerResponse } from "http";
 
 import morgan, { token } from "morgan";
 import picocolors from "picocolors";
@@ -7,7 +7,7 @@ token(
   "success",
   (
     _req,
-    res: ServerResponse<IncomingMessage> & {
+    res: ServerResponse & {
       body: string | Record<string, unknown>;
     },
   ) =>

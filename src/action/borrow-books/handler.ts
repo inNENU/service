@@ -7,7 +7,7 @@ export const borrowBooksHandler = request<BorrowBooksResponse>(
   async (req, res) => {
     const cookieHeader = req.headers.cookie!;
 
-    if (cookieHeader?.includes("TEST"))
+    if (cookieHeader.includes("TEST"))
       return res.json(BORROW_BOOKS_TEST_RESPONSE);
 
     return res.json(await getBorrowBooks(cookieHeader));

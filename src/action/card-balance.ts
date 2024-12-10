@@ -62,9 +62,7 @@ export const getCardBalance = async (
 
   return {
     success: true,
-    data: /\d+/.exec(balanceList[0]?.kye)
-      ? Number(balanceList[0].kye) / 100
-      : 0,
+    data: /\d+/.exec(balanceList[0].kye) ? Number(balanceList[0].kye) / 100 : 0,
   };
 };
 

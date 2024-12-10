@@ -71,7 +71,7 @@ export const getOAInfo = async (
     _data: { _user: RawOAInfoData } | Record<never, never>;
   };
 
-  if (ecodeData.status === false || !("_user" in ecodeData._data)) {
+  if (!ecodeData.status || !("_user" in ecodeData._data)) {
     console.error("获取 OA 信息失败", ecodeData);
 
     return UnknownResponse("获取 OA 信息失败");

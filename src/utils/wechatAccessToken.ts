@@ -6,7 +6,7 @@ const currentAccessToken: Record<string, { token: string; timeStamp: number }> =
 
 export const getWechatAccessToken = async (appid: string): Promise<string> => {
   if (
-    currentAccessToken[appid] &&
+    appid in currentAccessToken &&
     Date.now() < currentAccessToken[appid].timeStamp
   ) {
     return Promise.resolve(currentAccessToken[appid].token);

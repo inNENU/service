@@ -17,7 +17,7 @@ export const getConnection = (): Promise<PoolConnection> =>
   pool
     .getConnection()
     .then((connection) => connection)
-    .catch((error) => {
+    .catch((error: unknown) => {
       console.error("Error connecting to MySQL:", error);
 
       throw error;

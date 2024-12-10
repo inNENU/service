@@ -614,6 +614,7 @@ export const underCreateStudentArchiveHandler: RequestHandler<
     return res.json(
       await submitUnderStudentArchiveStudy(cookieHeader, req.body),
     );
+
   if (req.body.type === "submit-family")
     return res.json(
       await submitUnderStudentArchiveFamily(cookieHeader, req.body),

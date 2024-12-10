@@ -48,7 +48,7 @@ type ReAuthSMSSuccessResponse = CommonSuccessResponse<{
 export type ReAuthSMSResponse =
   | ReAuthSMSSuccessResponse
   | (CommonFailedResponse<ActionFailType.TooFrequent> & { codeTime: number })
-  | CommonFailedResponse<ActionFailType.Unknown>;
+  | CommonFailedResponse;
 
 export const sendReAuthSMS = async (
   cookieHeader: string,

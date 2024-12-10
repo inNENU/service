@@ -7,52 +7,54 @@ import { TEST_INFO, UnknownResponse } from "../config/index.js";
 import type { AccountInfo, CommonFailedResponse } from "../typings.js";
 import { getConnection, releaseConnection, request } from "../utils/index.js";
 
-interface RawInfo {
-  success: true;
-  data: {
-    execResponse: {
-      return: {
-        Body: {
-          code: "200";
-          flag: "1";
-          msg: "sueccess";
-          rows: "1";
-          total: "1";
-          items: {
-            item: [
-              {
-                uid: string;
-                name: string;
-                idcard: string;
-                orgdn: string;
-                mzdm: string;
-                mzmc: string;
-                xbdm: string;
-                xbmc: string;
-                csrq: string;
-                orgname: string;
-                zydm: string;
-                zymc: string;
-                rxnf: string;
-                xznj: string;
-                lb: "bks" | "yjs" | "lxs" | "jzg";
-                zzmm: string;
-                wf_dhhm: string;
-                dhhm: string;
-                wf_wx: string;
-                wf_qq: string;
-                wf_email: string;
-                status: string;
-                pycc: string;
-                ryfldm: string;
-              },
-            ];
+type RawInfo =
+  | {
+      success: true;
+      data: {
+        execResponse: {
+          return: {
+            Body?: {
+              code: "200";
+              flag: "1";
+              msg: "sueccess";
+              rows: "1";
+              total: "1";
+              items: {
+                item: [
+                  {
+                    uid: string;
+                    name: string;
+                    idcard: string;
+                    orgdn: string;
+                    mzdm: string;
+                    mzmc: string;
+                    xbdm: string;
+                    xbmc: string;
+                    csrq: string;
+                    orgname: string;
+                    zydm: string;
+                    zymc: string;
+                    rxnf: string;
+                    xznj: string;
+                    lb: "bks" | "yjs" | "lxs" | "jzg";
+                    zzmm: string;
+                    wf_dhhm: string;
+                    dhhm: string;
+                    wf_wx: string;
+                    wf_qq: string;
+                    wf_email: string;
+                    status: string;
+                    pycc: string;
+                    ryfldm: string;
+                  },
+                ];
+              };
+            };
           };
         };
       };
-    };
-  };
-}
+    }
+  | { success: false; data: { msg: string } };
 
 export interface MyInfo {
   /** 用户学号 */

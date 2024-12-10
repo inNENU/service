@@ -52,9 +52,7 @@ export const InvalidArgResponse = (
   msg: `${name}参数非法`,
 });
 
-export const UnknownResponse = (
-  msg: string,
-): CommonFailedResponse<ActionFailType.Unknown> => ({
+export const UnknownResponse = (msg: string): CommonFailedResponse => ({
   success: false,
   type: ActionFailType.Unknown,
   msg,

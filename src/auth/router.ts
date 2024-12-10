@@ -18,10 +18,10 @@ const loginLimiter = rateLimit({
   max: 3,
   legacyHeaders: false,
   standardHeaders: true,
-  keyGenerator: (req: Request<EmptyObject, { id: number }, { id: number }>) =>
+  keyGenerator: (req: Request<EmptyObject, { id?: number }, { id?: number }>) =>
     (req.method === "GET"
       ? (req.query.id as string)
-      : req.body.id?.toString()) ?? req.ip,
+      : req.body.id?.toString()) ?? req.ip!,
   message: (req: Request<EmptyObject, { id: number }, { id: number }>) => {
     console.log(
       "Hitting rate limit:",

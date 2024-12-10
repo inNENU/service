@@ -4,4 +4,4 @@ import type { AnyNode } from "domhandler";
 const $ = load("");
 
 export const parseHTML = (content: string): AnyNode[] =>
-  $.parseHTML(content) || [];
+  $.parseHTML(content) ?? [];
