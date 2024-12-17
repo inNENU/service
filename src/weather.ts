@@ -418,8 +418,6 @@ const getWeather = ({ air, alarm, ...data }: WeatherRawData): WeatherData => {
       }),
     );
 
-  const tips = Object.values(data.tips.observe);
-
   return {
     air: {
       aqi,
@@ -455,13 +453,14 @@ const getWeather = ({ air, alarm, ...data }: WeatherRawData): WeatherData => {
       updateTime,
     },
     rise,
-    tips,
+    // FIXME: Tip is changed
+    tips: [],
   };
 };
 
 export const weatherHandler = request<WeatherData, WeatherOptions>(
   async (req, res) => {
-    const { province = "吉林", city = "长春", county = "南关" } = req.body;
+    const { province = "吉林", city = "长春", county = "南关" } = req.params;
 
     const weatherResponse = await fetch(
       `https://wis.qq.com/weather/common?source=pc&weather_type=observe|rise|forecast_1h|forecast_24h|index|alarm|limit|tips&province=${province}&city=${city}&county=${county}`,
