@@ -1,7 +1,7 @@
 import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
 
-import { LOGIN_URL, UPDATE_KEY_URL, VPN_DOMAIN, VPN_SERVER } from "./utils.js";
+import { UPDATE_KEY_URL, VPN_DOMAIN, VPN_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { AUTH_SERVER, isReAuthPage } from "../auth/utils.js";
@@ -77,13 +77,6 @@ export const vpnCASLogin = async (
 
     if (callbackResponse.status === 302) {
       const location = callbackResponse.headers.get("Location");
-
-      if (location === LOGIN_URL)
-        return {
-          success: false,
-          type: ActionFailType.AccountLocked,
-          msg: "短时间内登录失败过多，账户已锁定。请 10 分钟后重试",
-        };
 
       if (location === UPDATE_KEY_URL) {
         const keyResponse = await fetch(UPDATE_KEY_URL, {
