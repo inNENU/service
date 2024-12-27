@@ -67,7 +67,16 @@ export const getUnderAdmission = async ({
 
   const result = (await response.json()) as RawEnrollResult;
 
-  if (result.student === null) return UnknownResponse(result.message);
+  if (result.student === null) {
+    if (result.message === "Admission query is not available")
+      return {
+        success: false,
+        type: ActionFailType.Closed,
+        msg: "查询通道已关闭",
+      };
+
+    return UnknownResponse(result.message);
+  }
 
   const {
     department,
