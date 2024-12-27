@@ -13,7 +13,7 @@ import { request } from "../utils/index.js";
 const INFO_REGEXP =
   /<div class="ar_tit">\s*<h3>([^>]+)<\/h3>\s*<h6>([^]+?)<\/h6>/;
 const CONTENT_REGEXP =
-  /<div class="v_news_content">([^]+?)<\/div><\/div><div id="div_vote_id">/;
+  /<div class="v_news_content">([^]+?)<\/div>[^]+?<\/div>\s*<div id="div_vote_id">/;
 
 const TIME_REGEXP = /<span>发布时间：([^<]*)<\/span>/;
 const FROM_REGEXP = /<span>供稿单位：([^<]*)<\/span>/;
@@ -119,5 +119,5 @@ export const officialInfoDetailHandler = request<
   OfficialInfoDetailOptions,
   OfficialInfoDetailOptions
 >(async (req, res) => {
-  return res.json(await getOfficialInfoDetail(req.body.url || req.query.url));
+  return res.json(await getOfficialInfoDetail(req.query.url || req.body.url));
 });
