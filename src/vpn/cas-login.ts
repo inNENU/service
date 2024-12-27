@@ -1,13 +1,32 @@
+import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
 
-import type { VPNLoginResponse, VPNLoginResult } from "./login.js";
 import { LOGIN_URL, UPDATE_KEY_URL, VPN_DOMAIN, VPN_SERVER } from "./utils.js";
+import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
+import { AUTH_SERVER, isReAuthPage } from "../auth/utils.js";
 import { ActionFailType } from "../config/index.js";
-import type { AccountInfo } from "../typings.js";
+import type { AccountInfo, CommonFailedResponse } from "../typings.js";
 import { request } from "../utils/index.js";
 
 const CAS_LOGIN_URL = `${VPN_SERVER}/users/auth/cas`;
+
+export interface VPNLoginSuccessResult {
+  success: true;
+  cookieStore: CookieStore;
+}
+
+export type VPNLoginFailedResponse = CommonFailedResponse<
+  | ActionFailType.AccountLocked
+  | ActionFailType.WrongPassword
+  | ActionFailType.Error
+  | ActionFailType.Unknown
+>;
+
+export type VPNLoginResult =
+  | VPNLoginSuccessResult
+  | AuthLoginFailedResponse
+  | VPNLoginFailedResponse;
 
 export const vpnCASLogin = async (
   { id, password, authToken }: AccountInfo,
@@ -32,6 +51,14 @@ export const vpnCASLogin = async (
 
     if (!authResult.success) return authResult;
 
+    if (isReAuthPage(AUTH_SERVER, authResult.location)) {
+      return {
+        success: false,
+        type: ActionFailType.NeedReAuth,
+        msg: "需要二次认证，请重新登录",
+      };
+    }
+
     const callbackResponse = await fetch(authResult.location, {
       headers: {
         Cookie: cookieStore.getHeader(authResult.location),
@@ -48,9 +75,9 @@ export const vpnCASLogin = async (
 
     cookieStore.applyResponse(callbackResponse, authResult.location);
 
-    const location = callbackResponse.headers.get("Location");
-
     if (callbackResponse.status === 302) {
+      const location = callbackResponse.headers.get("Location");
+
       if (location === LOGIN_URL)
         return {
           success: false,
@@ -88,6 +115,16 @@ export const vpnCASLogin = async (
     msg: "未知错误",
   };
 };
+
+export interface VPNLoginSuccessResponse {
+  success: true;
+  cookies: CookieType[];
+}
+
+export type VPNLoginResponse =
+  | VPNLoginSuccessResponse
+  | AuthLoginFailedResponse
+  | VPNLoginFailedResponse;
 
 export const vpnCASLoginHandler = request<VPNLoginResponse, AccountInfo>(
   async (req, res) => {

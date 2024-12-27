@@ -9,6 +9,7 @@ import {
   SALT_REGEXP,
   WEB_VPN_AUTH_DOMAIN,
   WEB_VPN_AUTH_SERVER,
+  isReAuthPage,
 } from "./utils.js";
 import {
   ActionFailType,
@@ -88,17 +89,10 @@ export const authLogin = async ({
 
   cookieStore.applyResponse(loginPageResponse, server);
 
-  const location = loginPageResponse.headers.get("Location");
-
   if (loginPageResponse.status === 302) {
-    if (
-      location?.startsWith(
-        `${server}/authserver/reAuthCheck/reAuthSubmit.do`,
-      ) ||
-      location?.startsWith(
-        `${server}/authserver/reAuthCheck/reAuthLoginView.do`,
-      )
-    )
+    const location = loginPageResponse.headers.get("Location");
+
+    if (isReAuthPage(server, location))
       return {
         success: false,
         type: ActionFailType.NeedReAuth,

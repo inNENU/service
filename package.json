@@ -6,7 +6,7 @@
     "build": "rollup -c rollup.config.ts --configPlugin esbuild",
     "bundle:encrypt": "rollup -c scripts/encrypt.ts --configPlugin esbuild",
     "debug": "cross-env NODE_ENV=development pnpm build && cross-env NODE_ENV=development node dist/index.js --expose-gc",
-    "dev": "cross-env NODE_ENV=development tsx src/index.ts",
+    "dev": "cross-env NODE_ENV=development tsx watch src/index.ts",
     "lint": "eslint --fix . && prettier --check --write .",
     "lint:check": "eslint . && prettier --check .",
     "prepare": "husky"

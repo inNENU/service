@@ -22,7 +22,6 @@ import {
   releaseConnection,
   request,
 } from "../../utils/index.js";
-import { vpnLogin } from "../../vpn/login.js";
 import { authEncrypt } from "../encrypt.js";
 import {
   AUTH_LOGIN_URL,
@@ -302,18 +301,7 @@ export const initAuth = async (
           "type" in loginResult &&
           loginResult.type === ActionFailType.Forbidden
         ) {
-          // Activate VPN by login
-          const vpnLoginResult = await vpnLogin(
-            { id, password, authToken },
-            cookieStore,
-          );
-
-          if (vpnLoginResult.success)
-            loginResult = await myLogin(
-              { id, password, authToken },
-              cookieStore,
-            );
-          else console.error("VPN login failed", vpnLoginResult);
+          loginResult = await myLogin({ id, password, authToken }, cookieStore);
         }
 
         // 获得信息
