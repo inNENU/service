@@ -3,7 +3,11 @@ import type { PoolConnection } from "mysql2/promise";
 import type { MyLoginFailedResponse } from "./login.js";
 import { MY_SERVER } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
-import { TEST_INFO, UnknownResponse } from "../config/index.js";
+import {
+  ExpiredResponse,
+  TEST_INFO,
+  UnknownResponse,
+} from "../config/index.js";
 import type { AccountInfo, CommonFailedResponse } from "../typings.js";
 import { getConnection, releaseConnection, request } from "../utils/index.js";
 
@@ -102,7 +106,9 @@ export interface MyInfoSuccessResult {
   data: MyInfo;
 }
 
-export type MyInfoResult = MyInfoSuccessResult | CommonFailedResponse;
+export type MyInfoResult =
+  | MyInfoSuccessResult
+  | CommonFailedResponse<ActionFailType.Expired | ActionFailType.Unknown>;
 
 const TEST_INFO_RESULT: MyInfoSuccessResult = {
   success: true,
@@ -123,7 +129,10 @@ export const getMyInfo = async (
         Cookie: cookieHeader,
       },
       body: "serviceAddress=dataCenter2.0%2Fsoap%2F00001_00036_01_02_20170918192121",
+      redirect: "manual",
     });
+
+    if (infoResponse.status === 302) return ExpiredResponse;
 
     const infoResult = (await infoResponse.json()) as RawInfo;
 
