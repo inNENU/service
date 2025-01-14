@@ -9,7 +9,7 @@ import type {
 } from "../typings.js";
 import type { TableClassData } from "../under-study/index.js";
 import { IE_8_USER_AGENT, getIETimeStamp, request } from "../utils/index.js";
-import type { VPNLoginFailedResponse } from "../vpn/login.js";
+import type { VPNLoginFailedResponse } from "../vpn/index.js";
 
 const semesterStartTime: Record<string, string> = {
   "2023-2024-2": "2024-02-27T16:00:00Z",

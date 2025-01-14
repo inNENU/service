@@ -6,7 +6,7 @@ import type {
   CommonSuccessResponse,
 } from "../typings.js";
 import { request } from "../utils/index.js";
-import type { VPNLoginFailedResponse } from "../vpn/login.js";
+import type { VPNLoginFailedResponse } from "../vpn/cas-login.js";
 
 const EMAIL_INFO_URL = `${ACTION_SERVER}/extract/getEmailInfo`;
 

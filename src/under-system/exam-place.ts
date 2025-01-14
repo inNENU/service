@@ -15,7 +15,7 @@ import {
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type { EmptyObject, LoginOptions } from "../typings.js";
 import { IE_8_USER_AGENT } from "../utils/index.js";
-import type { VPNLoginFailedResponse } from "../vpn/login.js";
+import type { VPNLoginFailedResponse } from "../vpn/index.js";
 
 const selectRegExp =
   /<select\s+name="kskzid"\s+id="kskzid"[^>]*><option value="">---请选择---<\/option>([^]*?)<\/select>/;

@@ -7,7 +7,7 @@ import type {
   CommonSuccessResponse,
 } from "../typings.js";
 import { request } from "../utils/index.js";
-import type { VPNLoginFailedResponse } from "../vpn/login.js";
+import type { VPNLoginFailedResponse } from "../vpn/index.js";
 
 const CARD_BALANCE_URL = `${ACTION_SERVER}/soapBasic/postSoap`;
 const CARD_BALANCE_PARAMS =

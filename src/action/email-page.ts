@@ -8,7 +8,7 @@ import type {
   LoginOptions,
 } from "../typings.js";
 import { request } from "../utils/index.js";
-import type { VPNLoginFailedResponse } from "../vpn/login.js";
+import type { VPNLoginFailedResponse } from "../vpn/index.js";
 
 const EMAIL_PAGE_URL = `${ACTION_SERVER}/extract/sendRedirect2Email`;
 const EMAIL_URL = `${ACTION_SERVER}/extract/sendRedirect2EmailPage`;

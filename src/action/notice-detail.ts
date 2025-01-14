@@ -12,7 +12,7 @@ import type {
   LoginOptions,
 } from "../typings.js";
 import { request } from "../utils/index.js";
-import type { VPNLoginFailedResponse } from "../vpn/login.js";
+import type { VPNLoginFailedResponse } from "../vpn/index.js";
 
 const TITLE_REGEXP = /var title = '(.*?)';/;
 const FROM_REGEXP = /var ly = '(.*?)'/;

@@ -7,7 +7,7 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../../typings.js";
-import type { VPNLoginFailedResponse } from "../../vpn/login.js";
+import type { VPNLoginFailedResponse } from "../../vpn/index.js";
 import { ACTION_SERVER } from "../utils.js";
 
 const BORROW_BOOKS_URL = `${ACTION_SERVER}/basicInfo/getBookBorrow`;
