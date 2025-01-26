@@ -1,7 +1,3 @@
-import bodyParser from "body-parser";
-import compression from "compression";
-import cookieParser from "cookie-parser";
-import cors from "cors";
 import type { Response } from "express";
 import express from "express";
 
@@ -12,7 +8,7 @@ import { UnknownResponse } from "./config/index.js";
 import { enrollRouter } from "./enroll/index.js";
 import { gradRouter } from "./grad-system/index.js";
 import { libraryRouter } from "./library/index.js";
-import { morganMiddleware } from "./middlewire/index.js";
+import { applyMiddleware } from "./middlewire/index.js";
 import { mpRouter } from "./mp/index.js";
 import { myRouter } from "./my/index.js";
 import { oaRouter } from "./oa/index.js";
@@ -38,36 +34,7 @@ global.fetch = async (url, options): Promise<globalThis.Response> => {
   return response;
 };
 
-app.use(
-  cors({
-    origin: [
-      "https://servicewechat.com",
-      /^https:\/\/.*\.innenu\.com$/,
-      "https://innenu.com",
-    ],
-  }),
-);
-app.use(cookieParser());
-app.use(compression());
-app.use(bodyParser.json());
-
-// store the response body to res.body
-app.use((_req, res, next) => {
-  const originalSend = res.json;
-
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  res.json = function (body) {
-    // @ts-expect-error: Express type issue
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    res.body = body;
-
-    // @ts-expect-error: Express type issue
-    // eslint-disable-next-line
-    return originalSend.apply(this, arguments);
-  };
-  next();
-});
-app.use(morganMiddleware);
+applyMiddleware(app);
 
 app.get("/", (_req, res) => {
   res.header("Content-Type", "text/html");
