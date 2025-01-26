@@ -7,6 +7,7 @@ import { authCenterRouter } from "./auth-center/index.js";
 import { UnknownResponse } from "./config/index.js";
 import { enrollRouter } from "./enroll/index.js";
 import { gradRouter } from "./grad-system/index.js";
+import { homeHandler } from "./home.js";
 import { libraryRouter } from "./library/index.js";
 import { applyMiddleware } from "./middlewire/index.js";
 import { mpRouter } from "./mp/index.js";
@@ -18,8 +19,6 @@ import { underStudyRouter } from "./under-study/index.js";
 import { underSystemRouter } from "./under-system/index.js";
 import { vpnRouter } from "./vpn/index.js";
 import { weatherHandler } from "./weather.js";
-
-const currentDate = new Date().toLocaleDateString("zh");
 
 const app = express();
 const port = process.env.PORT ? Number(process.env.PORT) : 8080;
@@ -36,24 +35,7 @@ global.fetch = async (url, options): Promise<globalThis.Response> => {
 
 applyMiddleware(app);
 
-app.get("/", (_req, res) => {
-  res.header("Content-Type", "text/html");
-  res.send(`\
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>inNENU 服务</title>
-</head>
-<body>
-  当前版本: ${currentDate}
-  <h1><a href="https://innenu.com">访问网页版 inNENU</a></h1>
-</body>
-</html>\
-`);
-});
-
+app.get("/", homeHandler);
 app.use("/action", actionRouter);
 app.use("/auth", authRouter);
 app.use("/auth-center", authCenterRouter);
