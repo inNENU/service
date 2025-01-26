@@ -17,6 +17,7 @@ import { officialRouter } from "./official/index.js";
 import { testRouter } from "./test/index.js";
 import { underStudyRouter } from "./under-study/index.js";
 import { underSystemRouter } from "./under-system/index.js";
+import { reportMemoryUsage } from "./utils/index.js";
 import { vpnRouter } from "./vpn/index.js";
 import { weatherHandler } from "./weather.js";
 
@@ -67,19 +68,7 @@ app.listen(port, () => {
   console.info(`Service is started on port ${port}`);
 });
 
-setInterval(() => {
-  global.gc?.();
-
-  const { rss, heapTotal, heapUsed, arrayBuffers } = process.memoryUsage();
-
-  console.debug(
-    `rss: ${Math.round((rss / 1024 / 1024 / 100) * 100)} MB, heap: ${Math.round(
-      (heapUsed / 1024 / 1024 / 100) * 100,
-    )}/${Math.round(
-      (heapTotal / 1024 / 1024 / 100) * 100,
-    )} MB, arrayBuffers: ${Math.round((arrayBuffers / 1024 / 1024 / 100) * 100)} MB`,
-  );
-}, /** 5 min */ 300000);
+reportMemoryUsage();
 
 process.on("uncaughtException", (err) => {
   console.error("Uncaught Exception:", err);

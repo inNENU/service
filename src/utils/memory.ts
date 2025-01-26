@@ -6,3 +6,15 @@ export const getMemoryUsage = (): Record<string, number> =>
       return [key, memory];
     }),
   );
+
+export const reportMemoryUsage = (interval = /** 5 min */ 300000): void => {
+  setInterval(() => {
+    global.gc?.();
+
+    const { rss, heapTotal, heapUsed, arrayBuffers } = getMemoryUsage();
+
+    console.debug(
+      `rss: ${rss} MB, heap: ${heapUsed}/${heapTotal} MB, arrayBuffers: ${arrayBuffers} MB`,
+    );
+  }, interval);
+};
