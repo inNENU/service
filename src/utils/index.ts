@@ -3,7 +3,7 @@ export * from "./captureError.js";
 export * from "./content.js";
 export * from "./cookies2Header.js";
 export * from "./generateRandomString.js";
-export * from "./middleware.js";
+export * from "./request.js";
 export * from "./helpers.js";
 export * from "./ie.js";
 export * from "./memory.js";
