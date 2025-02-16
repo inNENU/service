@@ -17,22 +17,16 @@ import { officialRouter } from "./official/index.js";
 import { testRouter } from "./test/index.js";
 import { underStudyRouter } from "./under-study/index.js";
 import { underSystemRouter } from "./under-system/index.js";
-import { reportMemoryUsage } from "./utils/index.js";
+import { captureError, patchFetch, reportMemoryUsage } from "./utils/index.js";
 import { vpnRouter } from "./vpn/index.js";
 import { weatherHandler } from "./weather.js";
 
 const app = express();
 const port = process.env.PORT ? Number(process.env.PORT) : 8080;
 
-const originalFetch = fetch;
-
-global.fetch = async (url, options): Promise<globalThis.Response> => {
-  const response = await originalFetch(url, options);
-
-  console.debug("Fetching", url, `with ${response.status}`);
-
-  return response;
-};
+patchFetch();
+reportMemoryUsage();
+captureError();
 
 applyMiddleware(app);
 
@@ -66,14 +60,4 @@ app.use((err: Error, _req: Request, res: Response, _next: () => void) => {
 
 app.listen(port, () => {
   console.info(`Service is started on port ${port}`);
-});
-
-reportMemoryUsage();
-
-process.on("uncaughtException", (err) => {
-  console.error("Uncaught Exception:", err);
-});
-
-process.on("unhandledRejection", (reason, promise) => {
-  console.error("Unhandled Rejection at:", promise, "reason:", reason);
 });
