@@ -1,5 +1,5 @@
 import { ACTION_MAIN_PAGE, ACTION_SERVER } from "./utils.js";
-import type { AuthLoginFailedResponse } from "../auth/login.js";
+import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type { ActionFailType } from "../config/index.js";
 import { ExpiredResponse, UnknownResponse } from "../config/index.js";
 import type {

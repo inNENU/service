@@ -18,10 +18,10 @@ const config = new Config({
 });
 
 // @ts-expect-error: Type Error
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const client: Client = Client.default
   ? // @ts-expect-error: Type Error
-    // eslint-disable-next-line
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     new Client.default(config)
   : new Client(config);
 

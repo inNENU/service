@@ -1,8 +1,9 @@
 import { request } from "./utils/index.js";
 
-type Time = `${number}${number}:${number}${number}`;
-type Date =
-  `${number}${number}${number}${number}${number}${number}${number}${number}`;
+type SingleNumber = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9";
+type Time = `${"0" | "1" | "2"}${SingleNumber}:${SingleNumber}${SingleNumber}`;
+type Date = string;
+type DateWithMinus = string;
 
 interface WeatherRawData {
   air: {
@@ -19,7 +20,7 @@ interface WeatherRawData {
 
   /** 天气预警 */
   alarm: Record<
-    number,
+    `${number}`,
     {
       /** 城市 */
       city: string;
@@ -54,6 +55,7 @@ interface WeatherRawData {
       weather: string;
       weather_code: string;
       weather_short: string;
+      weather_url: "";
       wind_direction: string;
       wind_power: string;
     }
@@ -62,6 +64,9 @@ interface WeatherRawData {
   forecast_24h: Record<
     `${number}`,
     {
+      aqi_level: number;
+      aqi_name: "";
+      aqi_url: "";
       day_weather: string;
       day_weather_code: string;
       day_weather_short: string;
@@ -78,41 +83,45 @@ interface WeatherRawData {
       night_wind_direction_code: string;
       night_wind_power: string;
       night_wind_power_code: string;
-      time: string;
+      time: DateWithMinus;
     }
   >;
 
-  index: {
-    time: string;
-    [type: string]:
-      | {
-          detail: string;
-          info: string;
-          name: string;
-        }
-      | string;
-  };
+  index: Record<
+    string,
+    {
+      detail: string;
+      info: string;
+      name: string;
+    }
+  > & { time: string };
 
   limit: {
     tail_number: string;
-    time: string;
+    time: Date;
   };
 
   observe: {
-    degree: string;
-    humidity: string;
-    precipitation: string;
-    pressure: string;
-    update_time: string;
+    degree: `${number}`;
+    humidity: `${number}`;
+    precipitation: `${number}`;
+    pressure: `${number}`;
+    update_time: `${number}`;
     weather: string;
-    weather_code: string;
-    weather_short: "多云";
-    wind_direction: string;
+    weather_bg_pag: "";
+    weather_color: null;
+    weather_first: "";
+    weather_pag: "";
+    weather_code: "";
+    weather_short: string;
+    weather_url: "";
+    wind_direction: `${number}`;
+    wind_direction_name: string;
     wind_power: string;
   };
 
   rise: Record<
-    number,
+    `${number}`,
     {
       sunrise: Time;
       sunset: Time;
@@ -121,7 +130,8 @@ interface WeatherRawData {
   >;
 
   tips: {
-    observe: Record<string, string>;
+    // FIXME: type this
+    forecast_24h: unknown;
   };
 }
 
@@ -277,7 +287,6 @@ export interface WeatherData {
   observe: WeatherObserveInfo;
   /** 日出日落时间 */
   rise: WeatherRiseInfo[];
-  tips: string[];
   hints: WeatherHint[];
 }
 
@@ -453,8 +462,6 @@ const getWeather = ({ air, alarm, ...data }: WeatherRawData): WeatherData => {
       updateTime,
     },
     rise,
-    // FIXME: Tip is changed
-    tips: [],
   };
 };
 
@@ -462,17 +469,11 @@ export const weatherHandler = request<WeatherData, WeatherOptions>(
   async (req, res) => {
     const { province = "吉林", city = "长春", county = "南关" } = req.params;
 
-    const weatherResponse = await fetch(
-      `https://wis.qq.com/weather/common?source=pc&weather_type=observe|rise|forecast_1h|forecast_24h|index|alarm|limit|tips&province=${province}&city=${city}&county=${county}`,
-    );
-    const airResponse = await fetch(
-      `https://wis.qq.com/weather/common?source=pc&weather_type=observe|rise|air|forecast_1h|forecast_24h|index|alarm|limit|tips&province=${province}&city=${city}`,
+    const weather = await fetch(
+      `https://wis.qq.com/weather/common?source=pc&weather_type=observe|rise|air|forecast_1h|forecast_24h|index|alarm|limit|tips&province=${province}&city=${city}&county=${county}`,
     );
 
-    const rawData = {
-      ...((await weatherResponse.json()) as WeatherRawResponse).data,
-      ...((await airResponse.json()) as WeatherRawResponse).data,
-    };
+    const rawData = ((await weather.json()) as WeatherRawResponse).data;
 
     return res.json(getWeather(rawData));
   },

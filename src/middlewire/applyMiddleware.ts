@@ -22,7 +22,7 @@ export const applyMiddleware = (app: Express): void => {
 
   // store the response body to res.body
   app.use((_req, res, next) => {
-    const originalSend = res.json;
+    const originalJson = res.json;
 
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     res.json = function (body) {
@@ -31,8 +31,8 @@ export const applyMiddleware = (app: Express): void => {
       res.body = body;
 
       // @ts-expect-error: Express type issue
-      // eslint-disable-next-line
-      return originalSend.apply(this, arguments);
+      // eslint-disable-next-line prefer-rest-params
+      return originalJson.apply(this, arguments);
     };
     next();
   });

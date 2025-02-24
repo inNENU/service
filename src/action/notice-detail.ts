@@ -5,7 +5,7 @@ import { ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type { ActionFailType } from "../config/index.js";
 import { ExpiredResponse, MissingArgResponse } from "../config/index.js";
-import { MY_SERVER } from "../my/utils.js";
+import { MY_SERVER } from "../my/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,

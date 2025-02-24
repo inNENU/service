@@ -1,10 +1,9 @@
 import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
 
-import { INFO_PAGE } from "./utils.js";
-import type { AuthLoginFailedResponse } from "../auth/login.js";
-import { authLogin } from "../auth/login.js";
-import { AUTH_SERVER } from "../auth/utils.js";
+import { AUTH_INFO_PAGE } from "./utils.js";
+import type { AuthLoginFailedResponse } from "../auth/index.js";
+import { AUTH_SERVER, authLogin } from "../auth/index.js";
 import {
   TEST_ID_NUMBER,
   TEST_LOGIN_RESULT,
@@ -30,7 +29,7 @@ export const authCenterLogin = async (
 ): Promise<AuthCenterLoginResult> => {
   const result = await authLogin({
     ...options,
-    service: INFO_PAGE,
+    service: AUTH_INFO_PAGE,
     cookieStore,
   });
 
@@ -56,7 +55,7 @@ export const authCenterLogin = async (
 
   const finalLocation = ticketResponse.headers.get("Location");
 
-  if (finalLocation === INFO_PAGE) {
+  if (finalLocation === AUTH_INFO_PAGE) {
     return {
       success: true,
       cookieStore,

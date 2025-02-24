@@ -86,25 +86,29 @@ let versionInfo: Record<string, number> = {
 let guideIndex: SearchMap;
 let introIndex: SearchMap;
 let functionIndex: SearchMap;
-let allIndex: SearchMap;
 
 const getIndex = (type: SearchType): SearchMap => {
   switch (type) {
-    case "all":
-      return allIndex;
     case "guide":
       return guideIndex;
     case "intro":
       return introIndex;
     case "function":
       return functionIndex;
+    case "all":
+      return {
+        ...guideIndex,
+        ...introIndex,
+        ...functionIndex,
+      };
   }
 };
 
+const VERSION_URL = "https://mp.innenu.com/service/version.php";
+const SEARCH_DATA_URL = "https://mp.innenu.com/service/search-data.php";
+
 const updateIndex = async (): Promise<void> => {
-  const versionResponse = await fetch(
-    "https://mp.innenu.com/service/version.php",
-  );
+  const versionResponse = await fetch(VERSION_URL);
 
   let changed = false;
 
@@ -114,15 +118,12 @@ const updateIndex = async (): Promise<void> => {
     versionInfo.guide !== version.guide ||
     versionInfo.newcomer !== version.newcomer
   ) {
-    const guideResponse = await fetch(
-      "https://mp.innenu.com/service/search-data.php",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          type: "guide",
-        }),
-      },
-    );
+    const guideResponse = await fetch(SEARCH_DATA_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        type: "guide",
+      }),
+    });
 
     guideIndex = (await guideResponse.json()) as SearchMap;
     changed = true;
@@ -133,15 +134,12 @@ const updateIndex = async (): Promise<void> => {
     versionInfo.intro !== version.intro ||
     versionInfo.school !== version.school
   ) {
-    const introResponse = await fetch(
-      "https://mp.innenu.com/service/search-data.php",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          type: "intro",
-        }),
-      },
-    );
+    const introResponse = await fetch(SEARCH_DATA_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        type: "intro",
+      }),
+    });
 
     introIndex = (await introResponse.json()) as SearchMap;
 
@@ -149,15 +147,12 @@ const updateIndex = async (): Promise<void> => {
   }
 
   if (versionInfo.function !== version.function) {
-    const functionResponse = await fetch(
-      "https://mp.innenu.com/service/search-data.php",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          type: "function",
-        }),
-      },
-    );
+    const functionResponse = await fetch(SEARCH_DATA_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        type: "function",
+      }),
+    });
 
     functionIndex = (await functionResponse.json()) as SearchMap;
 
@@ -166,11 +161,6 @@ const updateIndex = async (): Promise<void> => {
 
   if (changed) {
     versionInfo = version;
-    allIndex = {
-      ...guideIndex,
-      ...introIndex,
-      ...functionIndex,
-    };
   }
 };
 

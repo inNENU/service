@@ -1,11 +1,11 @@
 import { authCenterLogin } from "./login.js";
-import { INFO_PREFIX } from "./utils.js";
+import { AUTH_INFO_PREFIX } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { ExpiredResponse, MissingCredentialResponse } from "../config/index.js";
 import type { AccountInfo, CommonSuccessResponse } from "../typings.js";
 import { request } from "../utils/index.js";
 
-const USER_CONF_URL = `${INFO_PREFIX}/common/getUserConf`;
+const USER_CONF_URL = `${AUTH_INFO_PREFIX}/common/getUserConf`;
 
 interface RawUserConfData {
   code: "0";
@@ -73,7 +73,7 @@ export const avatarHandler = request<AvatarResponse, AccountInfo>(
 
       if (!result.success) return res.json(result);
 
-      req.headers.cookie = result.cookieStore.getHeader(INFO_PREFIX);
+      req.headers.cookie = result.cookieStore.getHeader(AUTH_INFO_PREFIX);
     } else if (!req.headers.cookie) {
       return MissingCredentialResponse;
     }

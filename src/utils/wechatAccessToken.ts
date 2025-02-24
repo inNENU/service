@@ -1,5 +1,5 @@
 import { appIDInfo } from "../config/index.js";
-import type { AppID } from "../mp/login.js";
+import type { AppID } from "../mp/index.js";
 
 const currentAccessToken: Record<string, { token: string; timeStamp: number }> =
   {};

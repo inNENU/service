@@ -2,9 +2,8 @@ import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
 
 import { MY_MAIN_PAGE, MY_SERVER } from "./utils.js";
-import type { AuthLoginFailedResponse } from "../auth/login.js";
-import { authLogin } from "../auth/login.js";
-import { WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
+import type { AuthLoginFailedResponse } from "../auth/index.js";
+import { WEB_VPN_AUTH_SERVER, authLogin } from "../auth/index.js";
 import {
   ActionFailType,
   MissingCredentialResponse,

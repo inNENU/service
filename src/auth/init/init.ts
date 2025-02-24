@@ -1,8 +1,11 @@
 import { CookieStore } from "@mptool/net";
 import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 
-import { authCenterLogin, getAvatar } from "../../auth-center/index.js";
-import { INFO_PREFIX } from "../../auth-center/utils.js";
+import {
+  AUTH_INFO_PREFIX,
+  authCenterLogin,
+  getAvatar,
+} from "../../auth-center/index.js";
 import {
   ActionFailType,
   MissingCredentialResponse,
@@ -13,8 +16,7 @@ import {
   getRandomBlacklistHint,
 } from "../../config/index.js";
 import type { MyInfo } from "../../my/index.js";
-import { getMyInfo, myLogin } from "../../my/index.js";
-import { MY_SERVER } from "../../my/utils.js";
+import { MY_SERVER, getMyInfo, myLogin } from "../../my/index.js";
 import type { AccountInfo, CommonFailedResponse } from "../../typings.js";
 import {
   getConnection,
@@ -318,7 +320,7 @@ export const initAuth = async (
 
             if (authCenterResult.success) {
               const avatarInfo = await getAvatar(
-                cookieStore.getHeader(INFO_PREFIX),
+                cookieStore.getHeader(AUTH_INFO_PREFIX),
               );
 
               if (avatarInfo.success) {

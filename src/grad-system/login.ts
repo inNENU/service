@@ -2,8 +2,8 @@ import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
 
 import { GRAD_SYSTEM_SERVER } from "./utils.js";
-import type { AuthLoginFailedResponse } from "../auth/login.js";
-import { authLogin } from "../auth/login.js";
+import type { AuthLoginFailedResponse } from "../auth/index.js";
+import { authLogin } from "../auth/index.js";
 import {
   ActionFailType,
   MissingCredentialResponse,

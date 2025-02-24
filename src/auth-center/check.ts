@@ -1,4 +1,4 @@
-import { INFO_PAGE } from "./utils.js";
+import { AUTH_INFO_PAGE } from "./utils.js";
 import type { CookieOptions, CookieVerifyResponse } from "../typings.js";
 import { cookies2Header, request } from "../utils/index.js";
 
@@ -12,7 +12,7 @@ export const authCenterCheckHandler = request<
     return res.json({ success: true, valid: true });
   }
 
-  const response = await fetch(INFO_PAGE, {
+  const response = await fetch(AUTH_INFO_PAGE, {
     headers: {
       "Cache-Control": "no-cache",
       Cookie: cookieHeader,
