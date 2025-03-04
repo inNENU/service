@@ -1,4 +1,8 @@
-import type { RawUnderCourseTableItem } from "./typings.js";
+import type {
+  RawUnderCourseTableItem,
+  TableClassData,
+  TableData,
+} from "./typings.js";
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
 import {
   ActionFailType,
@@ -34,19 +38,6 @@ interface RawUnderCourseTableFailResult {
 type RawUnderCourseTableResult =
   | RawUnderCourseTableSuccessResult
   | RawUnderCourseTableFailResult;
-
-export interface TableClassData {
-  name: string;
-  teachers: string[];
-  time: string;
-  weeks: number[];
-  locations: string[];
-  classIndex: [number, number];
-}
-
-export type TableCellData = TableClassData[];
-export type TableRowData = TableCellData[];
-export type TableData = TableRowData[];
 
 export type UnderCourseTableSuccessResponse = CommonSuccessResponse<{
   table: TableData;

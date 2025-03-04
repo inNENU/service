@@ -141,3 +141,16 @@ export interface RawUnderCourseTableItem {
   pkrdm: "";
   bgcolor: "#009688";
 }
+
+export interface TableClassData {
+  name: string;
+  teachers: string[];
+  time: string;
+  weeks: number[];
+  locations: string[];
+  classIndex: [number, number];
+}
+
+export type TableCellData = TableClassData[];
+export type TableRowData = TableCellData[];
+export type TableData = TableRowData[];
