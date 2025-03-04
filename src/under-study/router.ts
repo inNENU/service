@@ -1,7 +1,7 @@
 import { Router } from "express";
 
 import { underStudyCheckHandler } from "./check.js";
-import { underStudyCourseCommentaryHandler } from "./course-commentary/handler.js";
+import { underStudyCourseCommentaryHandler } from "./course-commentary/index.js";
 import { underStudyCourseTableHandler } from "./course-table/index.js";
 import { underStudyGradeDetailHandler } from "./grade-detail.js";
 import { underStudyGradeListHandler } from "./grade-list.js";
