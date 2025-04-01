@@ -1,8 +1,4 @@
-import type {
-  PoolConnection,
-  ResultSetHeader,
-  RowDataPacket,
-} from "mysql2/promise";
+import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 
 import type { ActionFailType } from "../config/index.js";
 import {
@@ -54,11 +50,10 @@ export const mpRemoveHandler = request<MpRemoveResponse, MpRemoveOptions>(
 
       // remove info from database
       try {
-        await connection.execute<ResultSetHeader>(
-          "DELETE FROM `student_info` WHERE `id` = ?",
-          [id],
-        );
-        await connection.execute<ResultSetHeader>(
+        await connection.execute("DELETE FROM `student_info` WHERE `id` = ?", [
+          id,
+        ]);
+        await connection.execute(
           "DELETE FROM `student_avatar` WHERE `id` = ?",
           [id],
         );

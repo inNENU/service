@@ -273,10 +273,9 @@ export const initAuth = async (
       try {
         connection = await getConnection();
 
-        const [infoRows] = await connection.execute<RowDataPacket[]>(
-          "SELECT * FROM `student_info` WHERE `id` = ?",
-          [id],
-        );
+        const [infoRows] = await connection.execute<
+          (RowDataPacket & Omit<MyInfo, "avatar">)[]
+        >("SELECT * FROM `student_info` WHERE `id` = ?", [id]);
 
         if (infoRows.length > 0) {
           const infoData = infoRows[0];
@@ -290,13 +289,12 @@ export const initAuth = async (
             delete infoData.createTime;
             delete infoData.updateTime;
 
-            const [avatarRows] = await connection.execute<RowDataPacket[]>(
-              "SELECT * FROM `student_avatar` WHERE `id` = ?",
-              [id],
-            );
+            const [avatarRows] = await connection.execute<
+              (RowDataPacket & { avatar: string })[]
+            >("SELECT * FROM `student_avatar` WHERE `id` = ?", [id]);
 
             info = {
-              avatar: (avatarRows[0]?.avatar as string) ?? "",
+              avatar: avatarRows[0]?.avatar ?? "",
               ...(infoData as MyInfo),
             };
           }
