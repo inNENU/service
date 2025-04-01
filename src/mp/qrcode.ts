@@ -4,20 +4,24 @@ import type { ActionFailType } from "../config/index.js";
 import {
   MissingArgResponse,
   UnknownResponse,
-  appIDInfo,
+  appIdInfo,
 } from "../config/index.js";
 import type { CommonFailedResponse } from "../typings.js";
 import type { WechatMpCodeError } from "../utils/index.js";
 import { getWechatMPCode, request } from "../utils/index.js";
 
 export interface WechatMpCodeOptions {
+  appId: "wx33acb831ee1831a5" | "wx2550e3fd373b79a8";
+  /** @deprecated */
   appID: "wx33acb831ee1831a5" | "wx2550e3fd373b79a8";
   page: string;
   scene: string;
 }
 
 export interface QQMpCodeOptions {
-  appID: "1109559721";
+  appId: 1109559721;
+  /** @deprecated */
+  appID: 1109559721;
   page: string;
 }
 
@@ -32,8 +36,8 @@ export type MpCodeResponse =
   | MpCodeSuccessResponse
   | CommonFailedResponse<ActionFailType.MissingArg | ActionFailType.Unknown>;
 
-const getQQMpCode = async (appID: number, page: string): Promise<Buffer> =>
-  toBuffer(`https://m.q.qq.com/a/p/${appID}?s=${encodeURI(page)}`);
+const getQQMpCode = async (appId: number, page: string): Promise<Buffer> =>
+  toBuffer(`https://m.q.qq.com/a/p/${appId}?s=${encodeURI(page)}`);
 
 export const mpQrCodeHandler = request<
   MpCodeResponse,
@@ -44,13 +48,14 @@ export const mpQrCodeHandler = request<
 
   console.info("Requesting MP QRCode with", options);
 
-  const { appID, page } = options;
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
+  const { appID, appId = appID, page } = options;
 
-  if (!appIDInfo[appID]) return res.json(MissingArgResponse("appID"));
+  if (!appIdInfo[appId]) return res.json(MissingArgResponse("appId"));
 
   // This is a Wechat Mini Program
   if ("scene" in options) {
-    const image = await getWechatMPCode(appID, page, options.scene);
+    const image = await getWechatMPCode(appId as string, page, options.scene);
 
     if (image instanceof Buffer) {
       res.set({
@@ -64,7 +69,7 @@ export const mpQrCodeHandler = request<
     return res.json(UnknownResponse((image as WechatMpCodeError).errmsg));
   }
 
-  const image = await getQQMpCode(Number(appID), page);
+  const image = await getQQMpCode(appId as number, page);
 
   res.set({
     "Content-Disposition": `qrcode.png`,

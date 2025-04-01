@@ -22,6 +22,8 @@ import {
 export interface StoreAdmissionInfoOptions extends UnderAdmissionOptions {
   remark: string;
   openid?: string | null;
+  appId?: string;
+  /** @deprecated */
   appID?: string;
 }
 
@@ -48,7 +50,9 @@ export const storeStoreAdmissionInfo = async ({
   testId,
   openid = null,
   remark,
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   appID,
+  appId = appID,
 }: StoreAdmissionInfoOptions): Promise<StoreAdmissionInfoResponse> => {
   if (testId.length < 14)
     return {
@@ -94,9 +98,9 @@ export const storeStoreAdmissionInfo = async ({
     releaseConnection(connection);
   }
 
-  if (appID) {
+  if (appId) {
     const result = await getWechatMPCode(
-      appID,
+      appId,
       "pkg/user/pages/account/login",
       `verify:${uuid}`,
     );

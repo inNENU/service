@@ -1,20 +1,20 @@
-import { appIDInfo } from "../config/index.js";
+import { appIdInfo } from "../config/index.js";
 import type { AppID } from "../mp/index.js";
 
 const currentAccessToken: Record<string, { token: string; timeStamp: number }> =
   {};
 
-export const getWechatAccessToken = async (appid: string): Promise<string> => {
+export const getWechatAccessToken = async (appId: string): Promise<string> => {
   if (
-    appid in currentAccessToken &&
-    Date.now() < currentAccessToken[appid].timeStamp
+    appId in currentAccessToken &&
+    Date.now() < currentAccessToken[appId].timeStamp
   ) {
-    return Promise.resolve(currentAccessToken[appid].token);
+    return Promise.resolve(currentAccessToken[appId].token);
   }
 
   const response = await fetch(
-    `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${appid}&secret=${appIDInfo[
-      appid as AppID
+    `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${appId}&secret=${appIdInfo[
+      appId as AppID
     ]!}`,
   );
 
@@ -24,7 +24,7 @@ export const getWechatAccessToken = async (appid: string): Promise<string> => {
       expires_in: number;
     };
 
-  currentAccessToken[appid] = {
+  currentAccessToken[appId] = {
     token: accessToken,
     timeStamp: Date.now() + (expiresIn - 10) * 1000,
   };

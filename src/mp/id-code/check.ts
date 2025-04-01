@@ -26,10 +26,12 @@ import {
 export interface CheckIDCodeOptions {
   id: number;
   authToken: string;
-  appID: string;
+  appId: string;
   openid: string;
   uuid?: string;
   remark?: string;
+  /** @deprecated */
+  appID: string;
 }
 
 export interface IdCodeInfo {
@@ -71,7 +73,9 @@ export type CheckIDCodeInfoResponse =
 export const checkIDCode = async ({
   id,
   authToken,
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   appID,
+  appId = appID,
   uuid,
   openid,
   remark,
@@ -83,7 +87,7 @@ export const checkIDCode = async ({
       return UnknownResponse("不支持为测试账号生成身份码");
 
     if (!authToken || !id) return MissingCredentialResponse;
-    if (!appID) return MissingArgResponse("appID");
+    if (!appId) return MissingArgResponse("appId");
     if (!openid) return MissingArgResponse("openid");
 
     connection = await getConnection();
@@ -144,7 +148,7 @@ export const checkIDCode = async ({
         };
 
       const result = await getWechatMPCode(
-        appID,
+        appId,
         "pkg/user/pages/account/login",
         `verify:${row.uuid}`,
       );

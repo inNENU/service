@@ -4,7 +4,7 @@ import type { ActionFailType } from "../config/index.js";
 import {
   DatabaseErrorResponse,
   MissingArgResponse,
-  appIDInfo,
+  appIdInfo,
 } from "../config/index.js";
 import type {
   CommonFailedResponse,
@@ -16,6 +16,8 @@ export type AppID = "wx33acb831ee1831a5" | "wx2550e3fd373b79a8" | 1109559721;
 export type Env = "qq" | "wx" | "web";
 
 export interface MPLoginCodeOptions {
+  appId: AppID;
+  /** @deprecated */
   appID: AppID;
   env: string;
   code: string;
@@ -25,17 +27,11 @@ export interface MPLoginOpenidOptions {
   openid: string;
 }
 
-// FIXME: Use StandardResponse
-export interface MPLoginSuccessResponse
-  extends CommonSuccessResponse<{
-    openid: string;
-    inBlacklist: boolean;
-    isAdmin: boolean;
-  }> {
+export type MPLoginSuccessResponse = CommonSuccessResponse<{
   openid: string;
   inBlacklist: boolean;
   isAdmin: boolean;
-}
+}>;
 
 export type MPloginFailResponse = CommonFailedResponse<
   | ActionFailType.MissingArg
@@ -58,16 +54,17 @@ export const mpLoginHandler = request<MPLoginResponse, MPLoginOptions>(
 
         ({ openid } = req.body);
       } else {
-        const { env, appID, code } = req.body;
+        // eslint-disable-next-line @typescript-eslint/no-deprecated
+        const { env, appID, appId = appID, code } = req.body;
 
         if (!env) return res.json(MissingArgResponse("env"));
-        if (!appID) return res.json(MissingArgResponse("appID"));
+        if (!appId) return res.json(MissingArgResponse("appId"));
         if (!code) return res.json(MissingArgResponse("code"));
 
         const url = `https://api.${
           env === "qq" ? "q" : "weixin"
-        }.qq.com/sns/jscode2session?appid=${appID}&secret=${
-          appIDInfo[appID]
+        }.qq.com/sns/jscode2session?appid=${appId}&secret=${
+          appIdInfo[appId]
         }&js_code=${code}&grant_type=authorization_code`;
         const response = await fetch(url);
 
@@ -106,9 +103,6 @@ export const mpLoginHandler = request<MPLoginResponse, MPLoginOptions>(
           inBlacklist,
           isAdmin,
         },
-        openid,
-        inBlacklist,
-        isAdmin,
       });
     } finally {
       releaseConnection(connection);

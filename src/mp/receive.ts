@@ -89,33 +89,6 @@ export const mpReceiveHandler = request<
       MsgType === "image" ||
       MsgType === "miniprogrampage"
     ) {
-      //   const response = await fetch(
-      //     `https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=${await getWechatAccessToken(rawID2appID[ToUserName])}`,
-      //     {
-      //       method: "POST",
-      //       headers: {
-      //         "Content-Type": "application/json",
-      //       },
-      //       body: JSON.stringify({
-      //         touser: FromUserName,
-      //         msgtype: "text",
-      //         text: {
-      //           content:
-      //             "当前消息已通知给 Mr.Hope，您可继续留言完整阐述您的问题。待 Mr.Hope 接入后会向您解答。",
-      //         },
-      //       }),
-      //     },
-      //   );
-
-      // const data = (await response.json()) as {
-      //   errcode: number;
-      //   errmsg: string;
-      // };
-
-      // if (data.errcode) {
-      //   console.error("Failed to send message to user:", data);
-      // }
-
       return res.json({
         ToUserName: FromUserName,
         FromUserName: ToUserName,

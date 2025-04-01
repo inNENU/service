@@ -6,13 +6,13 @@ export interface WechatMpCodeError {
 }
 
 export const getWechatMPCode = async (
-  appID: string,
+  appId: string,
   page: string,
   scene: string,
   env: "release" | "trial" | "develop" = "release",
 ): Promise<Buffer | WechatMpCodeError> => {
   const accessToken = await getWechatAccessToken(
-    appID as "wx33acb831ee1831a5" | "wx2550e3fd373b79a8",
+    appId as "wx33acb831ee1831a5" | "wx2550e3fd373b79a8",
   );
 
   const response = await fetch(

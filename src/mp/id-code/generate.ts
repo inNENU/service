@@ -25,8 +25,10 @@ export interface GenerateIdCodeOptions {
   id: number;
   authToken: string;
   remark: string;
-  appID: string;
+  appId: string;
   force?: boolean;
+  /** @deprecated */
+  appID: string;
 }
 
 export type GenerateIdCodeCodeSuccessResponse = CommonSuccessResponse<{
@@ -46,10 +48,12 @@ export type GenerateIdCodeResponse =
     >;
 
 export const generateIdCode = async ({
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
+  appID,
   id,
   authToken,
   remark,
-  appID,
+  appId = appID,
   force = false,
 }: GenerateIdCodeOptions): Promise<GenerateIdCodeResponse> => {
   let connection: PoolConnection | null = null;
@@ -59,7 +63,7 @@ export const generateIdCode = async ({
       return UnknownResponse("不支持为测试账号生成身份码");
 
     if (!authToken || !id) return MissingCredentialResponse;
-    if (!appID) return MissingArgResponse("appID");
+    if (!appId) return MissingArgResponse("appId");
 
     let existed = false;
     let uuid: string | null = null;
@@ -116,7 +120,7 @@ export const generateIdCode = async ({
     }
 
     const result = await getWechatMPCode(
-      appID,
+      appId,
       "pkg/user/pages/account/login",
       `verify:${uuid}`,
     );

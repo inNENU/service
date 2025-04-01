@@ -37,7 +37,9 @@ export interface InitAuthOptions extends AccountInfo {
   params: Record<string, string>;
   /** 盐值 */
   salt: string;
-  /** Appid */
+  /** App ID */
+  appId: string;
+  /** @deprecated */
   appID: string;
   /** 用户 OpenID */
   openid: string;
@@ -110,7 +112,17 @@ const SQL_STRING = `INSERT INTO \`student_info\` (${DATABASE_FIELDS.map(
   .join(", ")}`;
 
 export const initAuth = async (
-  { id, password, authToken, salt, params, appID, openid }: InitAuthOptions,
+  {
+    id,
+    password,
+    authToken,
+    salt,
+    params,
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
+    appID,
+    appId = appID,
+    openid,
+  }: InitAuthOptions,
   cookieHeader: string,
 ): Promise<InitAuthResponse> => {
   let connection: PoolConnection | null = null;
@@ -383,13 +395,13 @@ export const initAuth = async (
       }
 
       // store authToken in database for auth
-      if (appID)
+      if (appId)
         try {
           connection ??= await getConnection();
 
           await connection.execute(
             "INSERT INTO `token` (`authToken`, `id`, `appId`, `openId`, `updateTime`) VALUES (?, ?, ?, ?, NOW()) ON DUPLICATE KEY UPDATE `appId` = VALUES(`appId`), `openId` = VALUES(`openId`), `updateTime` = VALUES(`updateTime`)",
-            [authToken, id, appID, openid ?? null],
+            [authToken, id, appId, openid ?? null],
           );
         } catch (err) {
           console.error("Database error", err);
