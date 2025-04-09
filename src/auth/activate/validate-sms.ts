@@ -1,5 +1,6 @@
-import { ActionFailType } from "../../config/index.js";
-import type { CommonSuccessResponse } from "../../typings.js";
+import { ActionFailType } from "@/config/index.js";
+import type { CommonSuccessResponse } from "@/typings.js";
+
 import { getPasswordRule } from "../get-password-rule.js";
 import { RESET_PREFIX } from "../utils.js";
 

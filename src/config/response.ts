@@ -1,5 +1,5 @@
-import { ActionFailType } from "./actionFailType.js";
 import type { CommonFailedResponse } from "../typings.js";
+import { ActionFailType } from "./actionFailType.js";
 
 export const MissingCredentialResponse: CommonFailedResponse<ActionFailType.MissingCredential> =
   {

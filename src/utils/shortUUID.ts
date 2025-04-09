@@ -5,7 +5,7 @@ const CUSTOM_CHARS =
 
 export const getShortUUID = (uuid?: string): string => {
   // Generate a random UUID if not provided
-  if (!uuid) uuid = v7();
+  uuid ??= v7();
 
   // Remove dashes from UUID
   const hex = uuid.replace(/-/g, "");

@@ -1,10 +1,11 @@
-import type { ActionFailType } from "../../config/index.js";
+import type { ActionFailType } from "@/config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
   LoginOptions,
-} from "../../typings.js";
-import { EDGE_USER_AGENT_HEADERS } from "../../utils/index.js";
+} from "@/typings.js";
+import { EDGE_USER_AGENT_HEADERS } from "@/utils/index.js";
+
 import { UNDER_STUDY_SERVER } from "../utils.js";
 
 export interface GetUnderCourseCommentaryOptions extends LoginOptions {

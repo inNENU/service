@@ -1,5 +1,5 @@
-import { ACTION_SERVER } from "./utils.js";
 import type { CookieOptions, CookieVerifyResponse } from "../typings.js";
+import { ACTION_SERVER } from "./utils.js";
 import { cookies2Header, request } from "../utils/index.js";
 
 export const actionCheckHandler = request<CookieVerifyResponse, CookieOptions>(

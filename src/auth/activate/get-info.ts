@@ -2,8 +2,9 @@ import { CookieStore } from "@mptool/net";
 import type { RichTextNode } from "@mptool/parser";
 import { getRichTextNodes } from "@mptool/parser";
 
-import type { ActionFailType } from "../../config/index.js";
-import type { CommonFailedResponse } from "../../typings.js";
+import type { ActionFailType } from "@/config/index.js";
+import type { CommonFailedResponse } from "@/typings.js";
+
 import type { ResetCaptchaInfo } from "../reset-captcha.js";
 import { getResetCaptcha } from "../reset-captcha.js";
 

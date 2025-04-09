@@ -1,5 +1,5 @@
-import { AUTH_INFO_PAGE } from "./utils.js";
 import type { CookieOptions, CookieVerifyResponse } from "../typings.js";
+import { AUTH_INFO_PAGE } from "./utils.js";
 import { cookies2Header, request } from "../utils/index.js";
 
 export const authCenterCheckHandler = request<

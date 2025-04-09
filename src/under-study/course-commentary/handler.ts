@@ -1,5 +1,8 @@
 import type { RequestHandler } from "express";
 
+import { InvalidArgResponse, MissingArgResponse } from "@/config/index.js";
+import type { EmptyObject } from "@/typings.js";
+
 import type { GetUnderCourseCommentaryOptions } from "./get.js";
 import { getUnderCommentary } from "./get.js";
 import type { ListUnderCourseCommentaryOptions } from "./list.js";
@@ -14,8 +17,6 @@ import {
   UNDER_COURSE_COMMENTARY_VIEW_TEST_RESPONSE,
   viewUnderCourseCommentary,
 } from "./view.js";
-import { InvalidArgResponse, MissingArgResponse } from "../../config/index.js";
-import type { EmptyObject } from "../../typings.js";
 
 type UnderCourseCommentaryOptions =
   | ListUnderCourseCommentaryOptions

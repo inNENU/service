@@ -1,9 +1,17 @@
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+import alias from "@rollup/plugin-alias";
 import commonjs from "@rollup/plugin-commonjs";
 import json from "@rollup/plugin-json";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 import esbuild from "rollup-plugin-esbuild";
 
 const isDev = process.env.NODE_ENV === "development";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+const sourceDir = resolve(__dirname, "./src");
 
 export default [
   {
@@ -16,8 +24,26 @@ export default [
       },
     ],
     plugins: [
-      ...(isDev ? [] : [commonjs(), nodeResolve()]),
       json(),
+      alias({
+        customResolver: async function (source) {
+          if (source.startsWith(sourceDir) && source.endsWith(".js")) {
+            try {
+              const moduleInfo = await this.load({
+                id: source.replace(/(?:\.js)?$/, ".ts"),
+              });
+
+              return moduleInfo.id;
+            } catch {
+              // do nothing
+            }
+          }
+
+          return null;
+        },
+        entries: [{ find: /^@/, replacement: sourceDir }],
+      }),
+      ...(isDev ? [] : [commonjs(), nodeResolve()]),
       esbuild({
         charset: "utf8",
         minify: !isDev,

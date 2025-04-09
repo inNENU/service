@@ -3,13 +3,14 @@ import {
   MissingArgResponse,
   MissingCredentialResponse,
   UnknownResponse,
-} from "../../config/index.js";
+} from "@/config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
   EmptyObject,
-} from "../../typings.js";
-import { request } from "../../utils/index.js";
+} from "@/typings.js";
+import { request } from "@/utils/index.js";
+
 import { AUTH_SERVER, RE_AUTH_URL } from "../utils.js";
 
 const RE_AUTH_SMS_URL = `${AUTH_SERVER}/authserver/dynamicCode/getDynamicCodeByReauth.do`;

@@ -2,11 +2,6 @@ import { CookieStore } from "@mptool/net";
 import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 
 import {
-  AUTH_INFO_PREFIX,
-  authCenterLogin,
-  getAvatar,
-} from "../../auth-center/index.js";
-import {
   ActionFailType,
   MissingCredentialResponse,
   TEST_COOKIE_STORE,
@@ -14,16 +9,22 @@ import {
   UnknownResponse,
   WrongPasswordResponse,
   getRandomBlacklistHint,
-} from "../../config/index.js";
-import type { MyInfo } from "../../my/index.js";
-import { MY_SERVER, getMyInfo, myLogin } from "../../my/index.js";
-import type { AccountInfo, CommonFailedResponse } from "../../typings.js";
+} from "@/config/index.js";
+import type { AccountInfo, CommonFailedResponse } from "@/typings.js";
 import {
   getConnection,
   isInBlackList,
   releaseConnection,
   request,
-} from "../../utils/index.js";
+} from "@/utils/index.js";
+
+import {
+  AUTH_INFO_PREFIX,
+  authCenterLogin,
+  getAvatar,
+} from "../../auth-center/index.js";
+import type { MyInfo } from "../../my/index.js";
+import { MY_SERVER, getMyInfo, myLogin } from "../../my/index.js";
 import { authEncrypt } from "../encrypt.js";
 import {
   AUTH_LOGIN_URL,

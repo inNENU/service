@@ -1,6 +1,7 @@
+import { ActionFailType } from "@/config/index.js";
+import type { CommonFailedResponse } from "@/typings.js";
+
 import { RESET_PAGE_URL } from "./utils.js";
-import { ActionFailType } from "../../config/index.js";
-import type { CommonFailedResponse } from "../../typings.js";
 import { authEncrypt } from "../encrypt.js";
 import { RESET_PREFIX, RESET_SALT } from "../utils.js";
 

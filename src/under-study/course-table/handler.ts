@@ -1,21 +1,22 @@
+import {
+  ActionFailType,
+  ExpiredResponse,
+  UnknownResponse,
+  semesterStartTime,
+} from "@/config/index.js";
+import type {
+  CommonFailedResponse,
+  CommonSuccessResponse,
+  LoginOptions,
+} from "@/typings.js";
+import { EDGE_USER_AGENT_HEADERS, request } from "@/utils/index.js";
+
 import type {
   RawUnderCourseTableItem,
   TableClassData,
   TableData,
 } from "./typings.js";
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
-import {
-  ActionFailType,
-  ExpiredResponse,
-  UnknownResponse,
-  semesterStartTime,
-} from "../../config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-  LoginOptions,
-} from "../../typings.js";
-import { EDGE_USER_AGENT_HEADERS, request } from "../../utils/index.js";
 import { UNDER_STUDY_SERVER } from "../utils.js";
 
 export interface UnderCourseTableOptions extends LoginOptions {

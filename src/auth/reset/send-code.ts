@@ -1,9 +1,7 @@
+import { ActionFailType } from "@/config/index.js";
+import type { CommonFailedResponse, CommonSuccessResponse } from "@/typings.js";
+
 import { RESET_PAGE_URL } from "./utils.js";
-import { ActionFailType } from "../../config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-} from "../../typings.js";
 import { authEncrypt } from "../encrypt.js";
 import type { ResetCaptchaInfo } from "../reset-captcha.js";
 import { getResetCaptcha } from "../reset-captcha.js";

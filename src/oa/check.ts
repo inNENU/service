@@ -1,5 +1,5 @@
-import { OA_WEB_VPN_SERVER } from "./utils.js";
 import type { CookieOptions, CookieVerifyResponse } from "../typings.js";
+import { OA_WEB_VPN_SERVER } from "./utils.js";
 import { cookies2Header, request } from "../utils/index.js";
 
 export const oaCheckHandler = request<CookieVerifyResponse, CookieOptions>(

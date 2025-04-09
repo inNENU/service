@@ -1,25 +1,23 @@
 import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 
-import type { IDCodeData } from "./utils.js";
 import {
   ActionFailType,
   MissingArgResponse,
   MissingCredentialResponse,
   TEST_ID,
   UnknownResponse,
-} from "../../config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-} from "../../typings.js";
-import type { WechatMpCodeError } from "../../utils/index.js";
+} from "@/config/index.js";
+import type { CommonFailedResponse, CommonSuccessResponse } from "@/typings.js";
+import type { WechatMpCodeError } from "@/utils/index.js";
 import {
   getConnection,
   getShortUUID,
   getWechatMPCode,
   releaseConnection,
   request,
-} from "../../utils/index.js";
+} from "@/utils/index.js";
+
+import type { IDCodeData } from "./utils.js";
 
 export interface GenerateIdCodeOptions {
   id: number;

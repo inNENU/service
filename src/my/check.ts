@@ -1,5 +1,5 @@
-import { MY_SERVER } from "./utils.js";
 import type { CookieOptions, CookieVerifyResponse } from "../typings.js";
+import { MY_SERVER } from "./utils.js";
 import { cookies2Header, request } from "../utils/index.js";
 
 export const myCheckHandler = request<CookieVerifyResponse, CookieOptions>(

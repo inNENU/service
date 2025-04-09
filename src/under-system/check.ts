@@ -1,5 +1,5 @@
-import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { CookieOptions, CookieVerifyResponse } from "../typings.js";
+import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import { IE_8_USER_AGENT, cookies2Header, request } from "../utils/index.js";
 
 export const underSystemCheckHandler = request<

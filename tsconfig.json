@@ -1,18 +1,22 @@
 {
   "compilerOptions": {
     "useDefineForClassFields": true,
+    "forceConsistentCasingInFileNames": true,
     "module": "ESNext",
     "lib": ["ESNext", "DOM"],
     "target": "ES2022",
     "skipLibCheck": true,
 
     /* Bundler mode */
-    "moduleResolution": "Bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "moduleResolution": "Bundler",
     "noEmit": true,
     "verbatimModuleSyntax": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    },
 
     /* Linting */
     "strict": true,

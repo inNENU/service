@@ -1,11 +1,12 @@
-import type { AuthLoginFailedResponse } from "../../auth/index.js";
-import type { ActionFailType } from "../../config/index.js";
+import type { ActionFailType } from "@/config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
   LoginOptions,
-} from "../../typings.js";
-import { EDGE_USER_AGENT_HEADERS } from "../../utils/index.js";
+} from "@/typings.js";
+import { EDGE_USER_AGENT_HEADERS } from "@/utils/index.js";
+
+import type { AuthLoginFailedResponse } from "../../auth/index.js";
 import { UNDER_STUDY_SERVER } from "../utils.js";
 
 const VIEW_URL = `${UNDER_STUDY_SERVER}/new/student/teapj/viewPjData`;

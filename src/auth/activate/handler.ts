@@ -1,3 +1,9 @@
+import {
+  InvalidArgResponse,
+  MissingCredentialResponse,
+} from "@/config/index.js";
+import { request } from "@/utils/index.js";
+
 import type { ActivateInfoResponse } from "./get-info.js";
 import { getActivateInfo } from "./get-info.js";
 import type {
@@ -9,6 +15,10 @@ import type {
   ActivateSetPasswordOptions,
   ActivateSetPasswordResponse,
 } from "./set-password.js";
+import type {
+  CheckPasswordOptions,
+  CheckPasswordResponse,
+} from "../check-password.js";
 import { setPassword } from "./set-password.js";
 import type {
   ActivateValidationOptions,
@@ -20,15 +30,6 @@ import type {
   ActivateValidSmsResponse,
 } from "./validate-sms.js";
 import { validateActivateSms } from "./validate-sms.js";
-import {
-  InvalidArgResponse,
-  MissingCredentialResponse,
-} from "../../config/index.js";
-import { request } from "../../utils/index.js";
-import type {
-  CheckPasswordOptions,
-  CheckPasswordResponse,
-} from "../check-password.js";
 import { checkPassword } from "../check-password.js";
 
 export type ActivateOptions =

@@ -4,20 +4,18 @@ import {
   ActionFailType,
   DatabaseErrorResponse,
   UnknownResponse,
-} from "../../config/index.js";
-import type { UnderAdmissionOptions } from "../../enroll/index.js";
-import { getUnderAdmission } from "../../enroll/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-} from "../../typings.js";
-import type { WechatMpCodeError } from "../../utils/index.js";
+} from "@/config/index.js";
+import type { CommonFailedResponse, CommonSuccessResponse } from "@/typings.js";
+import type { WechatMpCodeError } from "@/utils/index.js";
 import {
   getConnection,
   getShortUUID,
   getWechatMPCode,
   releaseConnection,
-} from "../../utils/index.js";
+} from "@/utils/index.js";
+
+import type { UnderAdmissionOptions } from "../../enroll/index.js";
+import { getUnderAdmission } from "../../enroll/index.js";
 
 export interface StoreAdmissionInfoOptions extends UnderAdmissionOptions {
   remark: string;

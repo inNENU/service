@@ -1,12 +1,13 @@
-import type { AuthLoginFailedResponse } from "../../auth/index.js";
 import {
   ActionFailType,
   ExpiredResponse,
   InvalidArgResponse,
   MissingArgResponse,
-} from "../../config/index.js";
-import type { CommonFailedResponse, LoginOptions } from "../../typings.js";
-import { EDGE_USER_AGENT_HEADERS, request } from "../../utils/index.js";
+} from "@/config/index.js";
+import type { CommonFailedResponse, LoginOptions } from "@/typings.js";
+import { EDGE_USER_AGENT_HEADERS, request } from "@/utils/index.js";
+
+import type { AuthLoginFailedResponse } from "../../auth/index.js";
 import { UNDER_STUDY_SERVER } from "../utils.js";
 
 export interface UnderSelectAddOptions extends LoginOptions {

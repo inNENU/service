@@ -1,5 +1,5 @@
-import { UNDER_STUDY_SERVER } from "./utils.js";
 import type { CookieOptions, CookieVerifyResponse } from "../typings.js";
+import { UNDER_STUDY_SERVER } from "./utils.js";
 import {
   EDGE_USER_AGENT_HEADERS,
   cookies2Header,

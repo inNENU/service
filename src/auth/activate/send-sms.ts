@@ -1,8 +1,6 @@
-import { ActionFailType, UnknownResponse } from "../../config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-} from "../../typings.js";
+import { ActionFailType, UnknownResponse } from "@/config/index.js";
+import type { CommonFailedResponse, CommonSuccessResponse } from "@/typings.js";
+
 import { authEncrypt } from "../encrypt.js";
 import type { ResetCaptchaInfo } from "../reset-captcha.js";
 import { getResetCaptcha } from "../reset-captcha.js";

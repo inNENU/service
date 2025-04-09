@@ -1,13 +1,14 @@
-import type { UnderCourseCommentaryInfo } from "./get.js";
-import type { RawUnderCourseCommentaryFailResult } from "./utils.js";
-import type { ActionFailType } from "../../config/index.js";
-import { ExpiredResponse, UnknownResponse } from "../../config/index.js";
+import type { ActionFailType } from "@/config/index.js";
+import { ExpiredResponse, UnknownResponse } from "@/config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
   LoginOptions,
-} from "../../typings.js";
-import { EDGE_USER_AGENT_HEADERS } from "../../utils/index.js";
+} from "@/typings.js";
+import { EDGE_USER_AGENT_HEADERS } from "@/utils/index.js";
+
+import type { UnderCourseCommentaryInfo } from "./get.js";
+import type { RawUnderCourseCommentaryFailResult } from "./utils.js";
 import { UNDER_STUDY_SERVER } from "../utils.js";
 
 interface RawUnderCourseCommentarySubmitSuccessResult {

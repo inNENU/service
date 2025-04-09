@@ -6,9 +6,10 @@ import {
   InvalidArgResponse,
   MissingCredentialResponse,
   UnknownResponse,
-} from "../../config/index.js";
-import type { CommonFailedResponse } from "../../typings.js";
-import { request } from "../../utils/index.js";
+} from "@/config/index.js";
+import type { CommonFailedResponse } from "@/typings.js";
+import { request } from "@/utils/index.js";
+
 import { AUTH_SERVER, RE_AUTH_URL } from "../utils.js";
 
 const RE_AUTH_VERIFY_URL = `${AUTH_SERVER}/authserver/reAuthCheck/reAuthSubmit.do`;

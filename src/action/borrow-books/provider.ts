@@ -1,12 +1,10 @@
+import type { ActionFailType } from "@/config/index.js";
+import { ExpiredResponse } from "@/config/index.js";
+import type { CommonFailedResponse, CommonSuccessResponse } from "@/typings.js";
+
 import type { BorrowBookData, RawBorrowBooksData } from "./converter.js";
 import { getBorrowBookData } from "./converter.js";
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
-import type { ActionFailType } from "../../config/index.js";
-import { ExpiredResponse } from "../../config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-} from "../../typings.js";
 import type { VPNLoginFailedResponse } from "../../vpn/index.js";
 import { ACTION_SERVER } from "../utils.js";
 

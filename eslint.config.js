@@ -42,6 +42,11 @@ export default hope(
       "@typescript-eslint/prefer-nullish-coalescing": "warn",
       "no-console": "off",
     },
+    tsImport: {
+      settings: {
+        "import-x/internal-regex": "^@/",
+      },
+    },
   },
 
   {

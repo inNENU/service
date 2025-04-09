@@ -1,8 +1,8 @@
-import { MAIN_ACTIONS_URL, MAIN_URL } from "./utils.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../typings.js";
+import { MAIN_ACTIONS_URL, MAIN_URL } from "./utils.js";
 
 const ACTION_REG_EXP = /xPageIDs\s*=\s*'(.*?)';[^]+xPageAbc\s*=\s*'(.*?)';/;
 

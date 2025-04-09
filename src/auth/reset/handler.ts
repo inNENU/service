@@ -1,3 +1,8 @@
+import type { ActionFailType } from "@/config/index.js";
+import { InvalidArgResponse } from "@/config/index.js";
+import type { CommonFailedResponse } from "@/typings.js";
+import { request } from "@/utils/index.js";
+
 import type {
   ResetPasswordGetInfoOptions,
   ResetPasswordGetInfoResponse,
@@ -17,15 +22,11 @@ import type {
   ResetPasswordVerifyCodeOptions,
   ResetPasswordVerifyCodeResponse,
 } from "./validate-code.js";
-import { validateCode } from "./validate-code.js";
-import type { ActionFailType } from "../../config/index.js";
-import { InvalidArgResponse } from "../../config/index.js";
-import type { CommonFailedResponse } from "../../typings.js";
-import { request } from "../../utils/index.js";
 import type {
   CheckPasswordOptions,
   CheckPasswordResponse,
 } from "../check-password.js";
+import { validateCode } from "./validate-code.js";
 import { checkPassword } from "../check-password.js";
 import { getResetCaptcha } from "../reset-captcha.js";
 
@@ -70,23 +71,23 @@ export const resetPasswordHandler = request<
   const options = req.body;
 
   if (options.type === "get-info") {
-    return res.json(await getInfo(options, req.headers.cookie!));
+    return res.json(await getInfo(options, req.headers.cookie));
   }
 
   if (options.type === "send-code") {
-    return res.json(await sendCode(options, req.headers.cookie!));
+    return res.json(await sendCode(options, req.headers.cookie));
   }
 
   if (options.type === "validate-code") {
-    return res.json(await validateCode(options, req.headers.cookie!));
+    return res.json(await validateCode(options, req.headers.cookie));
   }
 
   if (options.type === "check-password") {
-    return res.json(await checkPassword(options, req.headers.cookie!, 1));
+    return res.json(await checkPassword(options, req.headers.cookie, 1));
   }
 
   if (options.type === "reset-password") {
-    return res.json(await resetPassword(options, req.headers.cookie!));
+    return res.json(await resetPassword(options, req.headers.cookie));
   }
 
   return res.json(InvalidArgResponse("options"));

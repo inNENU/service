@@ -1,7 +1,8 @@
+import { request } from "@/utils/index.js";
+
 import type { BorrowBooksResponse } from "./provider.js";
 import { getBorrowBooks } from "./provider.js";
 import { BORROW_BOOKS_TEST_RESPONSE } from "./test-data.js";
-import { request } from "../../utils/index.js";
 
 export const borrowBooksHandler = request<BorrowBooksResponse>(
   async (req, res) => {
