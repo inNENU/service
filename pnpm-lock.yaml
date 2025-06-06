@@ -97,8 +97,8 @@ importers:
         specifier: 1.4.8
         version: 1.4.8(@types/express@5.0.2)
       '@types/cors':
-        specifier: 2.8.17
-        version: 2.8.17
+        specifier: 2.8.18
+        version: 2.8.18
       '@types/crypto-js':
         specifier: 4.2.2
         version: 4.2.2
@@ -705,8 +705,8 @@ packages:
     peerDependencies:
       '@types/express': '*'
 
-  '@types/cors@2.8.17':
-    resolution: {integrity: sha512-8CGDvrBj1zgo2qE+oS3pOCyYNqCPryMWY2bGfwA0dcfopWGgxs+78df0Rs3rc9THP4JkOhLsAa+15VdpAqkcUA==}
+  '@types/cors@2.8.18':
+    resolution: {integrity: sha512-nX3d0sxJW41CqQvfOzVG1NCTXfFDrDWIghCZncpHeWlVFd81zxB/DLhg7avFg6eHLCRX7ckBmoIIcqa++upvJA==}
 
   '@types/crypto-js@4.2.2':
     resolution: {integrity: sha512-sDOLlVbHhXpAUAL0YHDUUwDZf3iN4Bwi4W6a0W0b+QcAezUbRtH4FVb+9J4h+XFPW7l/gQ9F8qC7P+Ec4k8QVQ==}
@@ -2775,7 +2775,7 @@ snapshots:
     dependencies:
       '@types/express': 5.0.2
 
-  '@types/cors@2.8.17':
+  '@types/cors@2.8.18':
     dependencies:
       '@types/node': 22.14.0
 
