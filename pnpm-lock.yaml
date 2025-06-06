@@ -15,8 +15,8 @@ importers:
         specifier: 0.4.14
         version: 0.4.14
       '@mptool/net':
-        specifier: 0.10.14
-        version: 0.10.14(miniprogram-api-typings@4.0.5)
+        specifier: 0.11.0
+        version: 0.11.0(miniprogram-api-typings@4.0.5)
       '@mptool/parser':
         specifier: 0.11.1
         version: 0.11.1(miniprogram-api-typings@4.0.5)
@@ -504,18 +504,13 @@ packages:
   '@jridgewell/sourcemap-codec@1.5.0':
     resolution: {integrity: sha512-gv3ZRaISU3fjPAgNsriBRqGWQL6quFx04YMPW/zD8XMLsU32mhCCbfbO6KZFLjvYpCZ8zyDEgqsgf+PwPaM7GQ==}
 
-  '@mptool/net@0.10.14':
-    resolution: {integrity: sha512-JRM3utVFxyXIBHfXmou0utt6Igmo/UuGWOTCN4u7pBfeXlhwHTGvjdyYir0+1rYojm56R14TE2DA03BMv4q3XQ==}
+  '@mptool/net@0.11.0':
+    resolution: {integrity: sha512-Zqa530wANnKQrgLh/X8ZPqACu+pBZQMP2efhUhGiXjcckymks7GQAyQlb+whRGYZ7VysJUsdVCoJw0hWH159/g==}
     peerDependencies:
       miniprogram-api-typings: ^4.0.2
 
   '@mptool/parser@0.11.1':
     resolution: {integrity: sha512-KyLfffCHbzhV4nb6tKPXWH5oR+L4uhWsvVUnjkWt/G+8hAuWFcA17CUeQW2fvFPgPuJWkOVKNR02I2J/RDx3iA==}
-    peerDependencies:
-      miniprogram-api-typings: ^4.0.2
-
-  '@mptool/shared@0.10.14':
-    resolution: {integrity: sha512-fhQyrIt8o3MYqfH1lZQ81YMEqGiJREb2Eex6ce3pGG6yxBC2GfCJSmyj7XLbuN36HBQGQQQLuEeQlx99m4C+LA==}
     peerDependencies:
       miniprogram-api-typings: ^4.0.2
 
@@ -2680,9 +2675,9 @@ snapshots:
 
   '@jridgewell/sourcemap-codec@1.5.0': {}
 
-  '@mptool/net@0.10.14(miniprogram-api-typings@4.0.5)':
+  '@mptool/net@0.11.0(miniprogram-api-typings@4.0.5)':
     dependencies:
-      '@mptool/shared': 0.10.14(miniprogram-api-typings@4.0.5)
+      '@mptool/shared': 0.11.0(miniprogram-api-typings@4.0.5)
       miniprogram-api-typings: 4.0.5
 
   '@mptool/parser@0.11.1(miniprogram-api-typings@4.0.5)':
@@ -2690,10 +2685,6 @@ snapshots:
       '@mptool/shared': 0.11.0(miniprogram-api-typings@4.0.5)
       cheerio: 1.0.0
       domhandler: 5.0.3
-      miniprogram-api-typings: 4.0.5
-
-  '@mptool/shared@0.10.14(miniprogram-api-typings@4.0.5)':
-    dependencies:
       miniprogram-api-typings: 4.0.5
 
   '@mptool/shared@0.11.0(miniprogram-api-typings@4.0.5)':
