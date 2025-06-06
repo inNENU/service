@@ -12,8 +12,8 @@ importers:
         specifier: 3.1.0
         version: 3.1.0
       '@alicloud/openapi-client':
-        specifier: 0.4.13
-        version: 0.4.13
+        specifier: 0.4.14
+        version: 0.4.14
       '@mptool/net':
         specifier: 0.10.14
         version: 0.10.14(miniprogram-api-typings@4.0.5)
@@ -174,8 +174,8 @@ packages:
   '@alicloud/gateway-spi@0.0.8':
     resolution: {integrity: sha512-KM7fu5asjxZPmrz9sJGHJeSU+cNQNOxW+SFmgmAIrITui5hXL2LB+KNRuzWmlwPjnuA2X3/keq9h6++S9jcV5g==}
 
-  '@alicloud/openapi-client@0.4.13':
-    resolution: {integrity: sha512-APi5NwzY6IMxGxM3bTehCzfFVsvY11ljbERhuO2Q4Lfemo4yF23ph38nXLmpv92exDmc4Xe93qKDhnVYMVEdiQ==}
+  '@alicloud/openapi-client@0.4.14':
+    resolution: {integrity: sha512-NiMDBszCyiH5HI9vHbkDhhDbFF3gMEJDHuPc2cAP0queLtrjPfU+d6/uhGVt44B9oC0q6f6vaJgptQ99fxxfnQ==}
 
   '@alicloud/openapi-util@0.3.2':
     resolution: {integrity: sha512-EC2JvxdcOgMlBAEG0+joOh2IB1um8CPz9EdYuRfTfd1uP8Yc9D8QRUWVGjP6scnj6fWSOaHFlit9H6PrJSyFow==}
@@ -2242,7 +2242,7 @@ snapshots:
   '@alicloud/alinlp20200629@3.1.0':
     dependencies:
       '@alicloud/endpoint-util': 0.0.1
-      '@alicloud/openapi-client': 0.4.13
+      '@alicloud/openapi-client': 0.4.14
       '@alicloud/openapi-util': 0.3.2
       '@alicloud/tea-typescript': 1.8.0
       '@alicloud/tea-util': 1.4.10
@@ -2272,7 +2272,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@alicloud/openapi-client@0.4.13':
+  '@alicloud/openapi-client@0.4.14':
     dependencies:
       '@alicloud/credentials': 2.4.2
       '@alicloud/gateway-spi': 0.0.8
