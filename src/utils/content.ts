@@ -1,4 +1,3 @@
-// eslint-disable-next-line import-x/default
 import iconv from "iconv-lite";
 
 export const readResponseContent = async (
