@@ -104,8 +104,8 @@ const getIndex = (type: SearchType): SearchMap => {
   }
 };
 
-const VERSION_URL = "https://mp.innenu.com/service/version.php";
-const SEARCH_DATA_URL = "https://mp.innenu.com/service/search-data.php";
+const VERSION_URL = "https://res.innenu.com/service/version.php";
+const SEARCH_DATA_URL = "https://res.innenu.com/service/search-data.php";
 
 const updateIndex = async (): Promise<void> => {
   const versionResponse = await fetch(VERSION_URL);
