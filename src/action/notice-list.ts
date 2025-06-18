@@ -1,5 +1,5 @@
 import type { ActionLoginResponse } from "./login.js";
-import { ACTION_SERVER } from "./utils.js";
+import { ACTION_SERVER, INFO_BASE_SERVER } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
 import { ExpiredResponse, UnknownResponse } from "../config/index.js";
 import type {
@@ -34,14 +34,21 @@ export interface NoticeListOptions extends LoginOptions {
 
 interface RawNoticeItem {
   LLCS: number;
+  /** time */
   FBSJ: string;
+  /** title */
   KEYWORDS_: string;
+  /** id */
   ID__: string;
   SFZD: string;
   FLAG: string;
+  /** index */
   RN: number;
+  /** from */
   CJBM: string;
-  TYPE: "notice";
+  TYPE: "notice" | "news";
+  /** url */
+  URL: string;
 }
 
 interface RawNoticeListData {
@@ -56,19 +63,19 @@ export interface NoticeInfo {
   title: string;
   from: string;
   time: string;
-  id: string;
+  url: string;
 }
 
 const getNoticeItem = ({
-  ID__: id,
   CJBM: from,
   KEYWORDS_: title,
   FBSJ: time,
+  URL: url,
 }: RawNoticeItem): NoticeInfo => ({
-  id,
   title,
   from,
   time,
+  url: url.slice(INFO_BASE_SERVER.length), // Remove the base URL
 });
 
 export interface NoticeListSuccessResponse
@@ -92,7 +99,7 @@ const TEST_NOTICE_LIST: NoticeListSuccessResponse = {
       title: `测试通知标题${i + 1}`,
       from: `来源${i + 1}`,
       time: `${new Date().getFullYear()}/${i + 1}/${i + 1}`,
-      id: "test",
+      url: "test",
     })),
   count: 10,
   size: 20,

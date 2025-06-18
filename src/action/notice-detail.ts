@@ -1,7 +1,7 @@
 import type { RichTextNode } from "@mptool/parser";
 import { getRichTextNodes } from "@mptool/parser";
 
-import { ACTION_SERVER } from "./utils.js";
+import { ACTION_SERVER, INFO_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type { ActionFailType } from "../config/index.js";
 import { ExpiredResponse, MissingArgResponse } from "../config/index.js";
@@ -14,25 +14,21 @@ import type {
 import { request } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 
-const TITLE_REGEXP = /var title = '(.*?)';/;
-const FROM_REGEXP = /var ly = '(.*?)'/;
-const AUTHOR_REGEXP = /var wz = '(.*?)'/;
-const TIME_REGEXP =
-  /<span style="margin: 0 10px;font-size: 13px;color: #787878;font-family: 'Microsoft YaHei';">\s+时间：(.*?)(?:&nbsp;)*?\s+<\/span>/;
-const PAGEVIEW_REGEXP =
-  /<span style="margin: 0 10px;font-size: 13px;color: #787878;font-family: 'Microsoft YaHei';">\s+阅览：(\d+)\s+<\/span>/;
+const TITLE_REGEXP = /name="pageTitle" content="(.*)"/;
+const FROM_REGEXP = /<span>(?:发布单位|供稿单位)：(.*)<\/span>/;
+const TIME_REGEXP = /<span>发布时间：(.*)<\/span>/;
+const PAGEVIEW_REGEXP = /_showDynClicks\("wbnews", (\d+), (\d+)\)/;
 const CONTENT_REGEXP =
-  /<div class="read" id="WBNR">\s+([^]*?)\s+<\/div>\s+<p id="zrbj"/;
+  /<div id="vsb_content.*?>([^]*?)\s*<\/div>\s*<div id="div_vote_id"/;
 
 export interface NoticeOptions extends LoginOptions {
-  noticeID: string;
+  noticeUrl: string;
 }
 
 export interface NoticeData {
   title: string;
-  author: string;
-  time: string;
   from: string;
+  time: string;
   pageView: number;
   content: RichTextNode[];
 }
@@ -53,7 +49,6 @@ const TEST_NOTICE_DETAIL: NoticeSuccessResponse = {
   success: true,
   data: {
     title: "测试标题",
-    author: "测试作者",
     time: `${new Date().getFullYear()}-01-01`,
     from: "测试来源",
     pageView: 123,
@@ -84,11 +79,9 @@ const TEST_NOTICE_DETAIL: NoticeSuccessResponse = {
 
 export const getNoticeDetail = async (
   cookieHeader: string,
-  noticeID: string,
+  noticeUrl: string,
 ): Promise<NoticeResponse> => {
-  const url = `${ACTION_SERVER}/page/viewNews?ID=${noticeID}`;
-
-  const response = await fetch(url, {
+  const response = await fetch(`${INFO_SERVER}${noticeUrl}`, {
     headers: {
       Cookie: cookieHeader,
     },
@@ -100,18 +93,26 @@ export const getNoticeDetail = async (
   const text = await response.text();
 
   const title = TITLE_REGEXP.exec(text)![1];
-  const author = AUTHOR_REGEXP.exec(text)![1];
   const time = TIME_REGEXP.exec(text)![1];
   const from = FROM_REGEXP.exec(text)![1];
-  const pageView = PAGEVIEW_REGEXP.exec(text)![1];
+  const [, owner, clickId] = PAGEVIEW_REGEXP.exec(text)!;
   const content = CONTENT_REGEXP.exec(text)![1];
+
+  const pageviews = await fetch(
+    `${INFO_SERVER}/system/resource/code/news/click/dynclicks.jsp?clickid=${clickId}&owner=${owner}&clicktype=wbnews`,
+    {
+      headers: {
+        Cookie: cookieHeader,
+      },
+      redirect: "manual",
+    },
+  );
 
   const data = {
     title,
-    author,
     from,
     time,
-    pageView: Number(pageView),
+    pageView: Number(await pageviews.text()),
     content: await getRichTextNodes(content, {
       transform: {
         a: (node) => {
@@ -120,14 +121,37 @@ export const getNoticeDetail = async (
           if (
             href &&
             !href.startsWith(ACTION_SERVER) &&
+            !href.startsWith(INFO_SERVER) &&
             !href.startsWith(MY_SERVER)
           )
             node.children?.push({ type: "text", text: ` (${href})` });
 
           return node;
         },
-        // TODO: Support image
-        img: () => null,
+        img: async (node) => {
+          const src = node.attrs?.src;
+
+          // convert to base64
+          if (src?.startsWith("/")) {
+            const imageResponse = await fetch(`${INFO_SERVER}${src}`, {
+              headers: {
+                Cookie: cookieHeader,
+              },
+            });
+
+            if (imageResponse.ok) {
+              const buffer = await imageResponse.arrayBuffer();
+
+              node.attrs!.src = `data:${imageResponse.headers.get(
+                "content-type",
+              )};base64,${Buffer.from(buffer).toString("base64")}`;
+
+              return node;
+            }
+          }
+
+          return node;
+        },
       },
     }),
   };
@@ -140,14 +164,14 @@ export const getNoticeDetail = async (
 
 export const noticeHandler = request<NoticeResponse, NoticeOptions>(
   async (req, res) => {
-    const { noticeID } = req.body;
+    const { noticeUrl } = req.body;
 
-    if (!noticeID) return res.json(MissingArgResponse("公告 ID"));
+    if (!noticeUrl) return res.json(MissingArgResponse("公告链接"));
 
     const cookieHeader = req.headers.cookie!;
 
     if (cookieHeader.includes("TEST")) return res.json(TEST_NOTICE_DETAIL);
 
-    return res.json(await getNoticeDetail(cookieHeader, noticeID));
+    return res.json(await getNoticeDetail(cookieHeader, noticeUrl));
   },
 );
