@@ -399,7 +399,7 @@ export const initAuth = async (
           connection ??= await getConnection();
 
           await connection.execute(
-            "INSERT INTO `token` (`authToken`, `id`, `appId`, `openId`, `updateTime`) VALUES (?, ?, ?, ?, NOW()) ON DUPLICATE KEY UPDATE `appId` = VALUES(`appId`), `openId` = VALUES(`openId`), `updateTime` = VALUES(`updateTime`)",
+            "INSERT INTO `token` (`authToken`, `id`, `appId`, `openId`, `updateTime`) VALUES (?, ?, ?, ?, NOW()) ON DUPLICATE KEY UPDATE `authToken` = VALUES(`authToken`), `updateTime` = VALUES(`updateTime`)",
             [authToken, id, appId, openid ?? null],
           );
         } catch (err) {
