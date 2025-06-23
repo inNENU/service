@@ -260,7 +260,10 @@ export const authLogin = async ({
         msg: "需要验证码，请重新登录。",
       };
 
-    if (resultContent.includes("不允许使用认证服务来认证您访问的目标应用。")) {
+    if (
+      resultContent.includes("不允许使用认证服务来认证您访问的目标应用。") ||
+      resultContent.includes("应用没有权限")
+    ) {
       console.error("Forbidden service", service, "for id", id);
 
       return {
