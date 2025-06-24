@@ -85,6 +85,7 @@ export const authLogin = async ({
       Cookie: cookieStore.getHeader(server),
       "User-Agent": "inNENU service",
     },
+    signal: AbortSignal.timeout(5000),
   });
 
   cookieStore.applyResponse(loginPageResponse, server);

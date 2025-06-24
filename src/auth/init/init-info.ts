@@ -50,6 +50,7 @@ export const getAuthInitInfo = async (
       Cookie: cookieStore.getHeader(AUTH_SERVER),
       "User-Agent": "inNENU service",
     },
+    signal: AbortSignal.timeout(5000),
   });
 
   cookieStore.applyResponse(loginPageResponse, AUTH_SERVER);
@@ -73,6 +74,7 @@ export const getAuthInitInfo = async (
       Referer: AUTH_LOGIN_URL,
       "User-Agent": "inNENU service",
     },
+    signal: AbortSignal.timeout(5000),
   });
 
   cookieStore.applyResponse(captchaCheckResponse, AUTH_SERVER);

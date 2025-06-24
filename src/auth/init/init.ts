@@ -153,6 +153,7 @@ export const initAuth = async (
         ...params,
         password: authEncrypt(password, salt),
       }),
+      signal: AbortSignal.timeout(5000),
       redirect: "manual",
     });
 
