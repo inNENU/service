@@ -1,6 +1,6 @@
 import { CookieStore } from "@mptool/net";
 
-import { TEST_COOKIE_STORE, TEST_ID } from "@/config/index.js";
+import { TEST_COOKIE_STORE, TEST_ID, UnknownResponse } from "@/config/index.js";
 import type { CommonFailedResponse, EmptyObject } from "@/typings.js";
 import { request } from "@/utils/index.js";
 
@@ -45,6 +45,9 @@ export const getAuthInitInfo = async (
   id: string,
   cookieStore = new CookieStore(),
 ): Promise<AuthInitInfoResponse> => {
+  // FIXME:
+  return UnknownResponse("由于教育部网络安全演练，目前小程序功能暂不可用");
+
   const loginPageResponse = await fetch(AUTH_LOGIN_URL, {
     headers: {
       Cookie: cookieStore.getHeader(AUTH_SERVER),

@@ -64,6 +64,9 @@ export const authLogin = async ({
       msg: getRandomBlacklistHint(),
     };
 
+  // FIXME:
+  return UnknownResponse("由于教育部网络安全演练，目前小程序功能暂不可用");
+
   const domain = webVPN ? WEB_VPN_AUTH_DOMAIN : AUTH_DOMAIN;
   const server = webVPN ? WEB_VPN_AUTH_SERVER : AUTH_SERVER;
 
