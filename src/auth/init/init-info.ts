@@ -46,7 +46,9 @@ export const getAuthInitInfo = async (
   cookieStore = new CookieStore(),
 ): Promise<AuthInitInfoResponse> => {
   // FIXME:
-  return UnknownResponse("由于教育部网络安全演练，目前小程序功能暂不可用");
+  return UnknownResponse(
+    "教育部网络安全演练期间，小程序账号功能暂不可用。预计持续两周",
+  );
 
   const loginPageResponse = await fetch(AUTH_LOGIN_URL, {
     headers: {

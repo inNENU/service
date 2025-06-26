@@ -65,7 +65,9 @@ export const authLogin = async ({
     };
 
   // FIXME:
-  return UnknownResponse("由于教育部网络安全演练，目前小程序功能暂不可用");
+  return UnknownResponse(
+    "教育部网络安全演练期间，小程序账号功能暂不可用。预计持续两周",
+  );
 
   const domain = webVPN ? WEB_VPN_AUTH_DOMAIN : AUTH_DOMAIN;
   const server = webVPN ? WEB_VPN_AUTH_SERVER : AUTH_SERVER;
