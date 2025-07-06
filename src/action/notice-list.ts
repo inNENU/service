@@ -78,7 +78,9 @@ const getNoticeItem = ({
   title,
   from,
   time,
-  url: url?.slice(INFO_BASE_SERVER.length) ?? null, // Remove the base URL
+  ...(url
+    ? { url: url.slice(INFO_BASE_SERVER.length) } // Remove the base URL
+    : {}),
 });
 
 export interface NoticeListSuccessResponse
