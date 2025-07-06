@@ -74,6 +74,7 @@ export type UnderSelectProcessResponse =
   | CommonFailedResponse<
       | ActionFailType.Closed
       | ActionFailType.Full
+      | ActionFailType.Conflict
       | ActionFailType.InvalidArg
       | ActionFailType.MissingArg
       | ActionFailType.MissingCredential
@@ -123,6 +124,22 @@ export const addUnderSelectCourse = async (
           msg: data.message,
         };
       }
+
+      if (data.message === "您不在限选范围内") {
+        return {
+          success: false,
+          type: ActionFailType.Forbidden,
+          msg: data.message,
+        };
+      }
+
+      if (data.message.includes("上课时间有冲突")) {
+        return {
+          success: false,
+          type: ActionFailType.Conflict,
+          msg: data.message,
+        };
+      }
     }
 
     throw new Error(data.message);
@@ -165,7 +182,13 @@ export const removeUnderSelectCourse = async (
         type: ActionFailType.Closed,
       };
 
-    throw new Error(data.message);
+    console.error("不能识别", data.message);
+
+    return {
+      success: false,
+      type: ActionFailType.Unknown,
+      msg: data.message,
+    };
   }
 
   return { success: true };
