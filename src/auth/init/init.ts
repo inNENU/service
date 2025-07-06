@@ -153,6 +153,7 @@ export const initAuth = async (
         ...params,
         password: authEncrypt(password, salt),
       }),
+      signal: AbortSignal.timeout(5000),
       redirect: "manual",
     });
 
@@ -167,20 +168,6 @@ export const initAuth = async (
         resultContent.includes("您提供的用户名或者密码有误")
       )
         return WrongPasswordResponse;
-
-      if (resultContent.includes("该帐号未激活，请先完成帐号激活再登录"))
-        return {
-          success: false,
-          type: ActionFailType.AccountLocked,
-          msg: "该帐号未激活，请先完成帐号激活再登录",
-        };
-
-      if (resultContent.includes("图形动态码错误"))
-        return {
-          success: false,
-          type: ActionFailType.WrongCaptcha,
-          msg: "图形动态码错误，请重试",
-        };
 
       if (resultContent.includes("该帐号已经被禁用"))
         return {
@@ -200,13 +187,19 @@ export const initAuth = async (
           msg: `账号已冻结，预计解冻时间：${lockedResult[1]}`,
         };
 
-      console.error(
-        "Unknown login response: ",
-        loginResponse.status,
-        resultContent,
-      );
+      if (resultContent.includes("该帐号未激活，请先完成帐号激活再登录"))
+        return {
+          success: false,
+          type: ActionFailType.AccountLocked,
+          msg: "该帐号未激活，请先完成帐号激活再登录",
+        };
 
-      return UnknownResponse("未知错误");
+      if (resultContent.includes("图形动态码错误"))
+        return {
+          success: false,
+          type: ActionFailType.WrongCaptcha,
+          msg: "图形动态码错误，请重试",
+        };
     }
 
     if (loginResponse.status === 200) {
@@ -239,194 +232,190 @@ export const initAuth = async (
         };
     }
 
-    if (loginResponse.status === 302) {
-      if (location?.startsWith(AUTH_LOGIN_URL)) return WrongPasswordResponse;
+    if (loginResponse.status !== 302) {
+      console.error(
+        "Unknown login response: ",
+        loginResponse.status,
+        resultContent,
+      );
 
-      if (location?.startsWith(IMPROVE_INFO_URL)) {
-        const response = await fetch(UPDATE_INFO_URL, {
-          method: "POST",
-          headers: {
-            Accept: "application/json, text/javascript, */*; q=0.01",
-            Cookie: cookieHeader + ";" + cookieStore.getHeader(UPDATE_INFO_URL),
-            "User-Agent": "inNENU",
-          },
-        });
+      return UnknownResponse("登录失败");
+    }
 
-        const result = (await response.json()) as { errMsg: string };
+    if (location?.startsWith(AUTH_LOGIN_URL)) return WrongPasswordResponse;
 
-        return {
-          success: false,
-          type: ActionFailType.SecurityError,
-          msg: `信息化办公室提示: ${result.errMsg}`,
-        };
+    if (location?.startsWith(IMPROVE_INFO_URL)) {
+      const response = await fetch(UPDATE_INFO_URL, {
+        method: "POST",
+        headers: {
+          Accept: "application/json, text/javascript, */*; q=0.01",
+          Cookie: cookieHeader + ";" + cookieStore.getHeader(UPDATE_INFO_URL),
+          "User-Agent": "inNENU",
+        },
+      });
+
+      const result = (await response.json()) as { errMsg: string };
+
+      return {
+        success: false,
+        type: ActionFailType.SecurityError,
+        msg: `信息化办公室提示: ${result.errMsg}`,
+      };
+    }
+
+    if (location?.startsWith(RE_AUTH_URL))
+      return {
+        success: false,
+        type: ActionFailType.NeedReAuth,
+        msg: "需要二次认证",
+        cookieStore,
+      };
+
+    let info: (MyInfo & { avatar: string }) | null = null;
+
+    try {
+      connection = await getConnection();
+
+      const [infoRows] = await connection.execute<
+        (RowDataPacket & Omit<MyInfo, "avatar">)[]
+      >("SELECT * FROM `student_info` WHERE `id` = ?", [id]);
+
+      if (infoRows.length > 0) {
+        const infoData = infoRows[0];
+
+        // 90 天内更新过信息
+        if (
+          Date.parse(infoData.updateTime as string) + 1000 * 60 * 60 * 24 * 90 >
+          Date.now()
+        ) {
+          delete infoData.createTime;
+          delete infoData.updateTime;
+
+          const [avatarRows] = await connection.execute<
+            (RowDataPacket & { avatar: string })[]
+          >("SELECT * FROM `student_avatar` WHERE `id` = ?", [id]);
+
+          info = {
+            avatar: avatarRows[0]?.avatar ?? "",
+            ...(infoData as MyInfo),
+          };
+        }
+      }
+    } catch (err) {
+      console.error("Database error", err);
+    }
+
+    if (!info) {
+      let loginResult = await myLogin({ id, password, authToken }, cookieStore);
+
+      if (
+        "type" in loginResult &&
+        loginResult.type === ActionFailType.Forbidden
+      ) {
+        loginResult = await myLogin({ id, password, authToken }, cookieStore);
       }
 
-      if (location?.startsWith(RE_AUTH_URL))
-        return {
-          success: false,
-          type: ActionFailType.NeedReAuth,
-          msg: "需要二次认证",
-          cookieStore,
-        };
+      // 获得信息
+      if (loginResult.success) {
+        const studentInfo = await getMyInfo(cookieStore.getHeader(MY_SERVER));
 
-      let info: (MyInfo & { avatar: string }) | null = null;
+        if (studentInfo.success) {
+          let avatar = "";
 
-      try {
-        connection = await getConnection();
+          const authCenterResult = await authCenterLogin(
+            { id, password, authToken },
+            cookieStore,
+          );
 
-        const [infoRows] = await connection.execute<
-          (RowDataPacket & Omit<MyInfo, "avatar">)[]
-        >("SELECT * FROM `student_info` WHERE `id` = ?", [id]);
+          if (authCenterResult.success) {
+            const avatarInfo = await getAvatar(
+              cookieStore.getHeader(AUTH_INFO_PREFIX),
+            );
 
-        if (infoRows.length > 0) {
-          const infoData = infoRows[0];
+            if (avatarInfo.success) {
+              avatar = avatarInfo.data.avatar;
 
-          // 90 天内更新过信息
-          if (
-            Date.parse(infoData.updateTime as string) +
-              1000 * 60 * 60 * 24 * 90 >
-            Date.now()
-          ) {
-            delete infoData.createTime;
-            delete infoData.updateTime;
+              try {
+                connection ??= await getConnection();
 
-            const [avatarRows] = await connection.execute<
-              (RowDataPacket & { avatar: string })[]
-            >("SELECT * FROM `student_avatar` WHERE `id` = ?", [id]);
+                await connection.execute(
+                  "REPLACE INTO `student_avatar` (`id`, `avatar`) VALUES (?, ?)",
+                  [id, avatar],
+                );
+              } catch (err) {
+                console.error("Database error", err);
+              }
+            } else {
+              console.error("Get avatar failed", avatarInfo);
+            }
+          }
 
-            info = {
-              avatar: avatarRows[0]?.avatar ?? "",
-              ...(infoData as MyInfo),
-            };
+          info = {
+            avatar,
+            ...studentInfo.data,
+          };
+
+          try {
+            connection ??= await getConnection();
+
+            await connection.execute(SQL_STRING, [
+              info.id,
+              info.name,
+              info.org,
+              info.orgId,
+              info.major,
+              info.majorId,
+              info.inYear,
+              info.grade,
+              info.type,
+              info.typeId,
+              info.code,
+              info.politicalStatus,
+              info.people,
+              info.peopleId,
+              info.gender,
+              info.genderId,
+              info.birth,
+              info.location,
+            ]);
+          } catch (err) {
+            console.error("Database error", err);
           }
         }
+      } else if (loginResult.type === ActionFailType.Forbidden) {
+        return {
+          success: false,
+          type: ActionFailType.Forbidden,
+          msg: "当前时段服务大厅暂未开放，无法获取个人信息",
+        };
+      }
+    }
+
+    // store authToken in database for auth
+    if (appId)
+      try {
+        connection ??= await getConnection();
+
+        await connection.execute(
+          "INSERT INTO `token` (`authToken`, `id`, `appId`, `openId`, `updateTime`) VALUES (?, ?, ?, ?, NOW()) ON DUPLICATE KEY UPDATE `authToken` = VALUES(`authToken`), `updateTime` = VALUES(`updateTime`)",
+          [authToken, id, appId, openid ?? null],
+        );
       } catch (err) {
         console.error("Database error", err);
       }
 
-      if (!info) {
-        let loginResult = await myLogin(
-          { id, password, authToken },
-          cookieStore,
-        );
-
-        if (
-          "type" in loginResult &&
-          loginResult.type === ActionFailType.Forbidden
-        ) {
-          loginResult = await myLogin({ id, password, authToken }, cookieStore);
-        }
-
-        // 获得信息
-        if (loginResult.success) {
-          const studentInfo = await getMyInfo(cookieStore.getHeader(MY_SERVER));
-
-          if (studentInfo.success) {
-            let avatar = "";
-
-            const authCenterResult = await authCenterLogin(
-              { id, password, authToken },
-              cookieStore,
-            );
-
-            if (authCenterResult.success) {
-              const avatarInfo = await getAvatar(
-                cookieStore.getHeader(AUTH_INFO_PREFIX),
-              );
-
-              if (avatarInfo.success) {
-                avatar = avatarInfo.data.avatar;
-
-                try {
-                  connection ??= await getConnection();
-
-                  await connection.execute(
-                    "REPLACE INTO `student_avatar` (`id`, `avatar`) VALUES (?, ?)",
-                    [id, avatar],
-                  );
-                } catch (err) {
-                  console.error("Database error", err);
-                }
-              } else {
-                console.error("Get avatar failed", avatarInfo);
-              }
-            }
-
-            info = {
-              avatar,
-              ...studentInfo.data,
-            };
-
-            try {
-              connection ??= await getConnection();
-
-              await connection.execute(SQL_STRING, [
-                info.id,
-                info.name,
-                info.org,
-                info.orgId,
-                info.major,
-                info.majorId,
-                info.inYear,
-                info.grade,
-                info.type,
-                info.typeId,
-                info.code,
-                info.politicalStatus,
-                info.people,
-                info.peopleId,
-                info.gender,
-                info.genderId,
-                info.birth,
-                info.location,
-              ]);
-            } catch (err) {
-              console.error("Database error", err);
-            }
-          }
-        } else if (loginResult.type === ActionFailType.Forbidden) {
-          return {
-            success: false,
-            type: ActionFailType.Forbidden,
-            msg: "当前时段服务大厅暂未开放，无法获取个人信息",
-          };
-        }
-      }
-
-      // store authToken in database for auth
-      if (appId)
-        try {
-          connection ??= await getConnection();
-
-          await connection.execute(
-            "INSERT INTO `token` (`authToken`, `id`, `appId`, `openId`, `updateTime`) VALUES (?, ?, ?, ?, NOW()) ON DUPLICATE KEY UPDATE `appId` = VALUES(`appId`), `openId` = VALUES(`openId`), `updateTime` = VALUES(`updateTime`)",
-            [authToken, id, appId, openid ?? null],
-          );
-        } catch (err) {
-          console.error("Database error", err);
-        }
-
-      if (await isInBlackList(id, openid, info))
-        return {
-          success: false,
-          type: ActionFailType.BlackList,
-          msg: getRandomBlacklistHint(),
-        };
-
+    if (await isInBlackList(id, openid, info))
       return {
-        success: true,
-        info,
-        cookieStore,
+        success: false,
+        type: ActionFailType.BlackList,
+        msg: getRandomBlacklistHint(),
       };
-    }
 
-    console.error(
-      "Unknown login response: ",
-      loginResponse.status,
-      resultContent,
-    );
-
-    return UnknownResponse("登录失败");
+    return {
+      success: true,
+      info,
+      cookieStore,
+    };
   } finally {
     releaseConnection(connection);
   }

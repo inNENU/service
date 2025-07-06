@@ -92,6 +92,8 @@ export const loginToAction = request<
   | CommonFailedResponse<ActionFailType.MissingCredential>,
   LoginOptions
 >(async (req, res, next) => {
+  if (!req.body) return res.json(MissingCredentialResponse);
+
   const { id, password, authToken } = req.body;
 
   if (id && password && authToken) {
