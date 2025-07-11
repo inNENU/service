@@ -1,6 +1,6 @@
 import { CookieStore } from "@mptool/net";
 
-import { TEST_COOKIE_STORE, TEST_ID, UnknownResponse } from "@/config/index.js";
+import { TEST_COOKIE_STORE, TEST_ID } from "@/config/index.js";
 import type { CommonFailedResponse, EmptyObject } from "@/typings.js";
 import { request } from "@/utils/index.js";
 
@@ -46,9 +46,9 @@ export const getAuthInitInfo = async (
   cookieStore = new CookieStore(),
 ): Promise<AuthInitInfoResponse> => {
   // FIXME:
-  return UnknownResponse(
-    "教育部网络安全演练期间，小程序账号功能暂不可用。预计持续两周",
-  );
+  // return UnknownResponse(
+  //   "教育部网络安全演练期间，小程序账号功能暂不可用。预计持续两周",
+  // );
 
   const loginPageResponse = await fetch(AUTH_LOGIN_URL, {
     headers: {
