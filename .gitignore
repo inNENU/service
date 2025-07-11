@@ -12,3 +12,5 @@ temp/
 
 blacklist
 data
+
+.DS_Store
