@@ -55,7 +55,7 @@
     "@types/cors": "2.8.19",
     "@types/crypto-js": "4.2.2",
     "@types/express": "5.0.3",
-    "@types/express-serve-static-core": "5.0.6",
+    "@types/express-serve-static-core": "5.0.7",
     "@types/morgan": "1.9.10",
     "@types/node": "24.0.10",
     "@types/qrcode": "1.5.5",
