@@ -25,8 +25,6 @@ export interface GenerateIdCodeOptions {
   remark: string;
   appId: string;
   force?: boolean;
-  /** @deprecated */
-  appID: string;
 }
 
 export type GenerateIdCodeCodeSuccessResponse = CommonSuccessResponse<{
@@ -46,12 +44,10 @@ export type GenerateIdCodeResponse =
     >;
 
 export const generateIdCode = async ({
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  appID,
   id,
   authToken,
   remark,
-  appId = appID,
+  appId,
   force = false,
 }: GenerateIdCodeOptions): Promise<GenerateIdCodeResponse> => {
   let connection: PoolConnection | null = null;

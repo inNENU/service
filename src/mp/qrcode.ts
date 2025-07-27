@@ -12,16 +12,12 @@ import { getWechatMPCode, request } from "../utils/index.js";
 
 export interface WechatMpCodeOptions {
   appId: "wx33acb831ee1831a5" | "wx2550e3fd373b79a8";
-  /** @deprecated */
-  appID: "wx33acb831ee1831a5" | "wx2550e3fd373b79a8";
   page: string;
   scene: string;
 }
 
 export interface QQMpCodeOptions {
   appId: 1109559721;
-  /** @deprecated */
-  appID: 1109559721;
   page: string;
 }
 
@@ -48,8 +44,8 @@ export const mpQrCodeHandler = request<
 
   console.info("Requesting MP QRCode with", options);
 
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  const { appID, appId = appID, page } = options;
+   
+  const { appId, page } = options;
 
   if (!appIdInfo[appId]) return res.json(MissingArgResponse("appId"));
 

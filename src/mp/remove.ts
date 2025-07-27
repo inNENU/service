@@ -12,8 +12,6 @@ import { getConnection, releaseConnection, request } from "../utils/index.js";
 
 export interface MpRemoveOptions {
   appId: string;
-  /** @deprecated */
-  appID: string;
   id: string;
   authToken: string;
 }
@@ -33,8 +31,8 @@ export const mpRemoveHandler = request<MpRemoveResponse, MpRemoveOptions>(
     let connection: PoolConnection | null = null;
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-deprecated
-      const { appID, appId = appID, id, authToken } = req.body;
+       
+      const { appId, id, authToken } = req.body;
 
       if (!authToken || !id) return res.json(MissingCredentialResponse);
       if (!appId) return res.json(MissingArgResponse("appId"));

@@ -28,8 +28,6 @@ export interface CheckIDCodeOptions {
   openid: string;
   uuid?: string;
   remark?: string;
-  /** @deprecated */
-  appID: string;
 }
 
 export interface IdCodeInfo {
@@ -71,9 +69,7 @@ export type CheckIDCodeInfoResponse =
 export const checkIDCode = async ({
   id,
   authToken,
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  appID,
-  appId = appID,
+  appId,
   uuid,
   openid,
   remark,

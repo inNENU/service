@@ -17,8 +17,6 @@ export type Env = "qq" | "wx" | "web";
 
 export interface MPLoginCodeOptions {
   appId: AppID;
-  /** @deprecated */
-  appID: AppID;
   env: string;
   code: string;
 }
@@ -54,8 +52,8 @@ export const mpLoginHandler = request<MPLoginResponse, MPLoginOptions>(
 
         ({ openid } = req.body);
       } else {
-        // eslint-disable-next-line @typescript-eslint/no-deprecated
-        const { env, appID, appId = appID, code } = req.body;
+         
+        const { env, appId, code } = req.body;
 
         if (!env) return res.json(MissingArgResponse("env"));
         if (!appId) return res.json(MissingArgResponse("appId"));

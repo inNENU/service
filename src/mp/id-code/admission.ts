@@ -21,8 +21,6 @@ export interface StoreAdmissionInfoOptions extends UnderAdmissionOptions {
   remark: string;
   openid?: string | null;
   appId?: string;
-  /** @deprecated */
-  appID?: string;
 }
 
 export type StoreAdmissionInfoCodeSuccessResponse = CommonSuccessResponse<{
@@ -48,9 +46,7 @@ export const storeStoreAdmissionInfo = async ({
   testId,
   openid = null,
   remark,
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  appID,
-  appId = appID,
+  appId,
 }: StoreAdmissionInfoOptions): Promise<StoreAdmissionInfoResponse> => {
   if (testId.length < 14)
     return {
