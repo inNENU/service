@@ -44,7 +44,7 @@ export const getAuthCaptcha = async (
       "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
       Cookie: cookieHeader,
       Referer: AUTH_LOGIN_URL,
-      "User-Agent": "inNENU",
+      "User-Agent": "inNENU service",
     },
     body: `userName=${id}&authCodeTypeName=reAuthDynamicCodeType`,
   });
@@ -86,7 +86,7 @@ export const verifyAuthCaptcha = async (
       "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
       Cookie: cookieHeader,
       Referer: AUTH_LOGIN_URL,
-      "User-Agent": "inNENU",
+      "User-Agent": "inNENU service",
     },
     body: `canvasLength=${width}&moveLength=${distance}`,
   });

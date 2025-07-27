@@ -58,7 +58,7 @@ export const sendReAuthSMS = async (
   await fetch(RE_AUTH_URL, {
     headers: {
       Cookie: cookieHeader,
-      "User-Agent": "inNENU",
+      "User-Agent": "inNENU service",
     },
     redirect: "manual",
   });
@@ -69,7 +69,7 @@ export const sendReAuthSMS = async (
       "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
       Cookie: cookieHeader,
       Referer: RE_AUTH_URL,
-      "User-Agent": "inNENU",
+      "User-Agent": "inNENU service",
     },
     body: `userName=${id}&authCodeTypeName=reAuthDynamicCodeType`,
   });
