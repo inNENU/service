@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { rateLimit } from "express-rate-limit";
+import { ipKeyGenerator, rateLimit } from "express-rate-limit";
 import type { Request } from "express-serve-static-core";
 
 import { activateHandler } from "./activate/index.js";
@@ -21,7 +21,7 @@ const loginLimiter = rateLimit({
   keyGenerator: (req: Request<EmptyObject, { id?: number }, { id?: number }>) =>
     (req.method === "GET"
       ? (req.query.id as string)
-      : req.body.id?.toString()) ?? req.ip!,
+      : req.body.id?.toString()) ?? ipKeyGenerator(req.ip!),
   message: (req: Request<EmptyObject, { id: number }, { id: number }>) => {
     console.log(
       "Hitting rate limit:",
