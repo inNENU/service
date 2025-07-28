@@ -19,7 +19,7 @@ export const authEncrypt = (password: string, key: string): string => {
   const SECRET_KEY = Utf8.parse(key);
   const SECRET_IV = Utf8.parse(getRandomString(16));
 
-  return AES.encrypt(CONTENT, SECRET_KEY, {
+  return AES.encrypt(CONTENT.trim(), SECRET_KEY, {
     iv: SECRET_IV,
     padding: Pkcs7,
   }).toString();
