@@ -52,7 +52,6 @@ export const mpLoginHandler = request<MPLoginResponse, MPLoginOptions>(
 
         ({ openid } = req.body);
       } else {
-         
         const { env, appId, code } = req.body;
 
         if (!env) return res.json(MissingArgResponse("env"));

@@ -31,7 +31,6 @@ export const mpRemoveHandler = request<MpRemoveResponse, MpRemoveOptions>(
     let connection: PoolConnection | null = null;
 
     try {
-       
       const { appId, id, authToken } = req.body;
 
       if (!authToken || !id) return res.json(MissingCredentialResponse);

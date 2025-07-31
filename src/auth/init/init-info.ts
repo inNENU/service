@@ -1,6 +1,11 @@
 import { CookieStore } from "@mptool/net";
 
-import { TEST_COOKIE_STORE, TEST_ID } from "@/config/index.js";
+import type { ActionFailType } from "@/config/index.js";
+import {
+  MissingArgResponse,
+  TEST_COOKIE_STORE,
+  TEST_ID,
+} from "@/config/index.js";
 import type { CommonFailedResponse, EmptyObject } from "@/typings.js";
 import { request } from "@/utils/index.js";
 
@@ -28,7 +33,11 @@ export type AuthInitInfoSuccessResponse = {
 
 export type AuthInitInfoResponse =
   | AuthInitInfoSuccessResponse
-  | CommonFailedResponse;
+  | CommonFailedResponse<
+      | ActionFailType.MissingArg
+      | ActionFailType.TooFrequent
+      | ActionFailType.Unknown
+    >;
 
 export const TEST_AUTH_INIT_INFO: AuthInitInfoSuccessResponse = {
   success: true,
@@ -117,7 +126,9 @@ export const authInitInfoHandler = request<
   EmptyObject,
   { id: string }
 >(async (req, res) => {
-  const id = req.query.id;
+  const { id } = req.query;
+
+  if (!id) return res.json(MissingArgResponse("id"));
 
   const result =
     // Note: Return fake result for testing

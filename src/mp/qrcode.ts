@@ -44,7 +44,6 @@ export const mpQrCodeHandler = request<
 
   console.info("Requesting MP QRCode with", options);
 
-   
   const { appId, page } = options;
 
   if (!appIdInfo[appId]) return res.json(MissingArgResponse("appId"));
