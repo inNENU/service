@@ -6,7 +6,7 @@ import "../config/loadEnv.js";
 const pool = createPool({
   host: process.env.MYSQL_HOST ?? "localhost",
   port: process.env.MYSQL_PORT ? Number(process.env.MYSQL_PORT) : 3306,
-  database: "innenu-service",
+  database: process.env.MYSQL_DATABASE ?? "innenu-service",
   user: process.env.MYSQL_USER ?? "innenu",
   password: process.env.MYSQL_PASSWORD,
   connectTimeout: 5000,
@@ -14,14 +14,11 @@ const pool = createPool({
 });
 
 export const getConnection = (): Promise<PoolConnection> =>
-  pool
-    .getConnection()
-    .then((connection) => connection)
-    .catch((error: unknown) => {
-      console.error("Error connecting to MySQL:", error);
+  pool.getConnection().catch((error: unknown) => {
+    console.error("Error connecting to MySQL:", error);
 
-      throw error;
-    });
+    throw error;
+  });
 
 export const releaseConnection = (connection?: PoolConnection | null): void => {
   if (connection) {
