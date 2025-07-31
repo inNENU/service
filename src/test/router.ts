@@ -8,6 +8,7 @@ import { testPostHandler } from "./post.js";
 
 const testRouter = Router();
 
+testRouter.get("/connect", testConnectHandler);
 testRouter.post("/connect", testConnectHandler);
 testRouter.get("/get", testGetHandler);
 testRouter.post("/post", testPostHandler);
