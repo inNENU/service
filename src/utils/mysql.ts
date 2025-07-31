@@ -25,3 +25,14 @@ export const releaseConnection = (connection?: PoolConnection | null): void => {
     pool.releaseConnection(connection);
   }
 };
+
+// test connect locally once
+try {
+  const connection = await getConnection();
+
+  console.log("Connected to MySQL successfully.");
+
+  releaseConnection(connection);
+} catch (error) {
+  console.error("Error connecting to MySQL:", error);
+}
