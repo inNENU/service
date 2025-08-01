@@ -1,13 +1,26 @@
 import type { CookieType } from "@mptool/net";
 
+import { authEncrypt } from "./encrypt.js";
 import { AUTH_CAPTCHA_URL, AUTH_LOGIN_URL, AUTH_SERVER } from "./utils.js";
-import type { ActionFailType } from "../config/index.js";
 import {
+  ActionFailType,
   MissingArgResponse,
   MissingCredentialResponse,
 } from "../config/index.js";
 import type { CommonFailedResponse } from "../typings.js";
 import { request } from "../utils/index.js";
+
+/**
+ * 滑块轨迹点接口
+ */
+export interface SliderTrackPoint {
+  /** 滑块的水平位置（距离） */
+  a: number;
+  /** 滑块的垂直偏移量 */
+  b: number;
+  /** 时间差（毫秒） */
+  c: number;
+}
 
 interface RawAuthCaptchaResponse {
   smallImage: string;
@@ -27,6 +40,8 @@ interface GetAuthCaptchaSuccessResponse {
     sliderWidth: number;
     /** 滑块垂直偏移量 */
     offsetY: number;
+    /** 安全值（从图片中提取） */
+    safeValue: string;
   };
 }
 
@@ -38,32 +53,56 @@ export const getAuthCaptcha = async (
   cookieHeader: string,
   id: string,
 ): Promise<GetAuthCaptchaResponse> => {
-  const response = await fetch(`${AUTH_CAPTCHA_URL}?_=${Date.now()}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-      Cookie: cookieHeader,
-      Referer: AUTH_LOGIN_URL,
-      "User-Agent": "inNENU service",
-    },
-    body: `userName=${id}&authCodeTypeName=reAuthDynamicCodeType`,
-  });
+  try {
+    const response = await fetch(`${AUTH_CAPTCHA_URL}?_=${Date.now()}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        Cookie: cookieHeader,
+        Referer: AUTH_LOGIN_URL,
+        "User-Agent": "inNENU service",
+      },
+      body: `userName=${id}&authCodeTypeName=reAuthDynamicCodeType`,
+    });
 
-  const { bigImage, smallImage, tagWidth, yHeight } =
-    (await response.json()) as RawAuthCaptchaResponse;
+    const { bigImage, smallImage, tagWidth, yHeight } =
+      (await response.json()) as RawAuthCaptchaResponse;
 
-  return {
-    success: true,
-    data: {
-      slider: `data:image/png;base64,${smallImage}`,
-      bg: `data:image/png;base64,${bigImage}`,
-      offsetY: yHeight,
-      sliderWidth: tagWidth,
-    },
-  };
+    // Extract safeValue from smallImage
+    let safeValue = "";
+
+    // Use Buffer to decode base64 (Node.js environment)
+    const imageBuffer = Buffer.from(smallImage, "base64");
+    const dataLength = imageBuffer.length;
+
+    // Extract last 16 bytes as safeValue
+    for (let i = dataLength - 16; i < dataLength; i++) {
+      safeValue += String.fromCharCode(imageBuffer[i]);
+    }
+
+    return {
+      success: true,
+      data: {
+        slider: `data:image/png;base64,${smallImage}`,
+        bg: `data:image/png;base64,${bigImage}`,
+        offsetY: yHeight,
+        sliderWidth: tagWidth,
+        safeValue,
+      },
+    };
+  } catch (error) {
+    console.error(error);
+
+    return {
+      success: false,
+      type: ActionFailType.Unknown,
+      msg: "获取验证码失败",
+    };
+  }
 };
 
 const VERIFY_CAPTCHA_URL = `${AUTH_SERVER}/authserver/common/verifySliderCaptcha.htl`;
+const CAPTCHA_CANVAS_WIDTH = 295;
 
 type RawVerifyAuthCaptchaResponse =
   | {
@@ -77,9 +116,16 @@ type RawVerifyAuthCaptchaResponse =
 
 export const verifyAuthCaptcha = async (
   cookieHeader: string,
-  distance: number,
-  width: number,
+  moveLength: number,
+  tracks: SliderTrackPoint[],
+  safeValue: string,
 ): Promise<{ success: boolean }> => {
+  // Prepare the verification data
+  const sign = authEncrypt(
+    JSON.stringify({ canvasLength: CAPTCHA_CANVAS_WIDTH, moveLength, tracks }),
+    safeValue,
+  );
+
   const response = await fetch(VERIFY_CAPTCHA_URL, {
     method: "POST",
     headers: {
@@ -88,7 +134,7 @@ export const verifyAuthCaptcha = async (
       Referer: AUTH_LOGIN_URL,
       "User-Agent": "inNENU service",
     },
-    body: `canvasLength=${width}&moveLength=${distance}`,
+    body: `sign=${encodeURIComponent(sign)}`,
   });
 
   const result = (await response.json()) as RawVerifyAuthCaptchaResponse;
@@ -106,9 +152,11 @@ export interface GetAuthCaptchaOptions {
 
 export interface VerifyAuthCaptchaOptions {
   /** 滑动距离 */
-  distance: number;
-  /** 总宽度 */
-  width?: number;
+  moveLength: number;
+  /** 滑块轨迹数组 */
+  tracks: SliderTrackPoint[];
+  /** 安全值 */
+  safeValue: string;
   cookie?: CookieType[];
 }
 
@@ -147,12 +195,15 @@ export const authCaptchaHandler = request<
     return res.json(await getAuthCaptcha(cookieHeader, req.body.id));
   }
 
-  if (!req.body.distance) return res.json(MissingArgResponse("id or distance"));
+  if (!req.body.moveLength || !req.body.tracks || !req.body.safeValue) {
+    return res.json(MissingArgResponse("moveLength, tracks, and safeValue"));
+  }
 
   const result = await verifyAuthCaptcha(
     cookieHeader,
-    req.body.distance,
-    req.body.width ?? 295,
+    req.body.moveLength,
+    req.body.tracks,
+    req.body.safeValue,
   );
 
   return res.json(result);
