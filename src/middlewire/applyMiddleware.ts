@@ -3,6 +3,7 @@ import compression from "compression";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import type { Express } from "express";
+import { static as staticMiddleware } from "express";
 
 import { morganMiddleware } from "./morgan.js";
 
@@ -19,6 +20,7 @@ export const applyMiddleware = (app: Express): void => {
   app.use(cookieParser());
   app.use(compression());
   app.use(bodyParser.json());
+  app.use(staticMiddleware("public"));
 
   // store the response body to res.body
   app.use((_req, res, next) => {

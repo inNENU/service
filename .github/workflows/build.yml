@@ -37,6 +37,7 @@ jobs:
           cache/
           data" > ./.gitignore
           echo '{"name":"innenu-private","type":"module"}' > ./package.json
+          cp -r ../public .
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
