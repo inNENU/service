@@ -7,7 +7,7 @@ import { mpQrCodeHandler } from "./qrcode.js";
 import { mpReceiveHandler } from "./receive.js";
 import { mpRemoveHandler } from "./remove.js";
 import { mpReportHandler } from "./report.js";
-import { mpSearchHandler } from "./search.js";
+import { mpSearchHandler, mpSuggestionsHandler } from "./search.js";
 
 const mpRouter = Router();
 
@@ -23,5 +23,6 @@ mpRouter.post("/receive", mpReceiveHandler);
 mpRouter.post("/remove", mpRemoveHandler);
 mpRouter.post("/report", mpReportHandler);
 mpRouter.post("/search", mpSearchHandler);
+mpRouter.post("/suggestions", mpSuggestionsHandler);
 
 export { mpRouter };
