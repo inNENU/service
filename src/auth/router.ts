@@ -21,7 +21,7 @@ const loginLimiter = rateLimit({
   keyGenerator: (
     req: Request<EmptyObject, EmptyObject, { id?: number }, { id?: number }>,
   ) =>
-    (req.method === "GET" ? req.query.id : req.body.id)?.toString() ??
+    (req.method === "GET" ? req.query?.id : req.body.id)?.toString() ??
     ipKeyGenerator(req.ip!),
   message: (req: Request<EmptyObject, { id: number }, { id: number }>) => {
     console.log(
