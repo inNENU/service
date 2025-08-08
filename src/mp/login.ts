@@ -1,7 +1,7 @@
 import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 
-import type { ActionFailType } from "../config/index.js";
 import {
+  ActionFailType,
   DatabaseErrorResponse,
   MissingArgResponse,
   appIdInfo,
@@ -12,12 +12,12 @@ import type {
 } from "../typings.js";
 import { getConnection, releaseConnection, request } from "../utils/index.js";
 
-export type AppID = "wx33acb831ee1831a5" | "wx2550e3fd373b79a8" | 1109559721;
-export type Env = "qq" | "wx" | "web";
+export type AppID = "wx33acb831ee1831a5" | "wx2550e3fd373b79a8";
+export type Env = "wx";
 
 export interface MPLoginCodeOptions {
   appId: AppID;
-  env: string;
+  env: Env;
   code: string;
 }
 
@@ -58,12 +58,13 @@ export const mpLoginHandler = request<MPLoginResponse, MPLoginOptions>(
         if (!appId) return res.json(MissingArgResponse("appId"));
         if (!code) return res.json(MissingArgResponse("code"));
 
-        const url = `https://api.${
-          env === "qq" ? "q" : "weixin"
-        }.qq.com/sns/jscode2session?appid=${appId}&secret=${
+        const url = `https://api.weixin.qq.com/sns/jscode2session?appid=${appId}&secret=${
           appIdInfo[appId]
         }&js_code=${code}&grant_type=authorization_code`;
-        const response = await fetch(url);
+
+        const response = await fetch(url, {
+          signal: AbortSignal.timeout(5000),
+        });
 
         ({ openid } = (await response.json()) as { openid: string });
       }
@@ -100,6 +101,14 @@ export const mpLoginHandler = request<MPLoginResponse, MPLoginOptions>(
           inBlacklist,
           isAdmin,
         },
+      });
+    } catch (err) {
+      console.error(err);
+
+      return res.json({
+        success: false,
+        type: ActionFailType.Unknown,
+        msg: `小程序登录失败: ${(err as Error).message}`,
       });
     } finally {
       releaseConnection(connection);
