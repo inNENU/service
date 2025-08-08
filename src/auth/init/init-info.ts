@@ -110,7 +110,7 @@ export const getAuthInitInfo = async (
     cookieStore,
     salt,
     params: {
-      username: id.toString(),
+      username: id,
       lt: "",
       cllt: "usernameLogin",
       dllt: "generalLogin",
