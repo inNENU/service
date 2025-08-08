@@ -1,4 +1,4 @@
-import { ActionFailType } from "@/config/index.js";
+import { ActionFailType, UnknownResponse } from "@/config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse } from "@/typings.js";
 
 import type { ResetCaptchaInfo } from "../reset-captcha.js";
@@ -102,11 +102,7 @@ export const getInfo = async (
       };
     }
 
-    return {
-      success: false,
-      type: ActionFailType.Unknown,
-      msg: data.message,
-    };
+    return UnknownResponse(data.message);
   }
 
   const captchaResponse = await getResetCaptcha(cookieHeader, RESET_PAGE_URL);

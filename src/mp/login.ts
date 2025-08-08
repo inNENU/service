@@ -1,9 +1,10 @@
 import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 
+import type { ActionFailType } from "../config/index.js";
 import {
-  ActionFailType,
   DatabaseErrorResponse,
   MissingArgResponse,
+  UnknownResponse,
   appIdInfo,
 } from "../config/index.js";
 import type {
@@ -66,7 +67,20 @@ export const mpLoginHandler = request<MPLoginResponse, MPLoginOptions>(
           signal: AbortSignal.timeout(5000),
         });
 
-        ({ openid } = (await response.json()) as { openid: string });
+        const result = (await response.json()) as {
+          openid: string;
+          session_key: string;
+          errcode: number;
+          errmsg: string;
+        };
+
+        if (result.errcode) {
+          console.error("小程序登录失败", result);
+
+          return res.json(UnknownResponse(result.errmsg));
+        }
+
+        ({ openid } = result);
       }
 
       let inBlacklist = false;
@@ -105,11 +119,9 @@ export const mpLoginHandler = request<MPLoginResponse, MPLoginOptions>(
     } catch (err) {
       console.error(err);
 
-      return res.json({
-        success: false,
-        type: ActionFailType.Unknown,
-        msg: `小程序登录失败: ${(err as Error).message}`,
-      });
+      return res.json(
+        UnknownResponse(`小程序登录失败: ${(err as Error).message}`),
+      );
     } finally {
       releaseConnection(connection);
     }

@@ -2,10 +2,11 @@ import type { CookieType } from "@mptool/net";
 
 import { authEncrypt } from "./encrypt.js";
 import { AUTH_CAPTCHA_URL, AUTH_LOGIN_URL, AUTH_SERVER } from "./utils.js";
+import type { ActionFailType } from "../config/index.js";
 import {
-  ActionFailType,
   MissingArgResponse,
   MissingCredentialResponse,
+  UnknownResponse,
 } from "../config/index.js";
 import type { CommonFailedResponse } from "../typings.js";
 import { request } from "../utils/index.js";
@@ -93,11 +94,7 @@ export const getAuthCaptcha = async (
   } catch (error) {
     console.error(error);
 
-    return {
-      success: false,
-      type: ActionFailType.Unknown,
-      msg: "获取验证码失败",
-    };
+    return UnknownResponse("获取验证码失败");
   }
 };
 

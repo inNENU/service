@@ -1,6 +1,6 @@
 import { authEncrypt } from "./encrypt.js";
 import { RESET_PREFIX, RESET_SALT } from "./utils.js";
-import { ActionFailType, UnknownResponse } from "../config/index.js";
+import { UnknownResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
@@ -63,11 +63,7 @@ export const checkPassword = async (
     .map(([key]) => key);
 
   if (warnings.length > 0)
-    return {
-      success: false,
-      type: ActionFailType.Unknown,
-      msg: `密码不满足要求: ${warnings.join(", ")}`,
-    };
+    return UnknownResponse(`密码不满足要求: ${warnings.join(", ")}`);
 
   return {
     success: true,
