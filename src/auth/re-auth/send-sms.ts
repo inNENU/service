@@ -84,7 +84,11 @@ export const sendReAuthSMS = async (
       codeTime: result.codeTime,
     };
 
-  if (result.res !== "success") return UnknownResponse(result.returnMessage);
+  if (result.res !== "success") {
+    console.error("二次认证验证码失败: ", result);
+
+    return UnknownResponse(result.returnMessage);
+  }
 
   return {
     success: true,

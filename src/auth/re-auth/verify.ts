@@ -98,6 +98,8 @@ export const verifyReAuthCaptcha = async (
         };
       }
 
+      console.error("二次认证失败: ", reAuthResult);
+
       return UnknownResponse(reAuthResult.msg);
     }
 
