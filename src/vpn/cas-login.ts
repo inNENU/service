@@ -4,7 +4,7 @@ import { CookieStore } from "@mptool/net";
 import { UPDATE_KEY_URL, VPN_DOMAIN, VPN_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { AUTH_SERVER, authLogin, isReAuthPage } from "../auth/index.js";
-import { ActionFailType } from "../config/index.js";
+import { ActionFailType, UnknownResponse } from "../config/index.js";
 import type { AccountInfo, CommonFailedResponse } from "../typings.js";
 import { request } from "../utils/index.js";
 
@@ -101,11 +101,9 @@ export const vpnCASLogin = async (
       msg: "学校 WebVPN 服务崩溃，请稍后重试。",
     };
 
-  return {
-    success: false,
-    type: ActionFailType.Unknown,
-    msg: "未知错误",
-  };
+  console.error("VPN 服务未知错误", casResponse, await casResponse.text());
+
+  return UnknownResponse("未知错误");
 };
 
 export interface VPNLoginSuccessResponse {

@@ -198,11 +198,7 @@ export const getUnderStudentArchive = async (
     } as UnderGetStudentArchiveSuccessResponse;
   }
 
-  return {
-    success: false,
-    type: ActionFailType.Unknown,
-    msg: "获取学籍信息失败",
-  };
+  return UnknownResponse("获取学籍信息失败");
 };
 
 const alertRegExp = /window.alert\('(.+?)'\)/;

@@ -10,6 +10,7 @@ import {
   MissingCredentialResponse,
   TEST_ID_NUMBER,
   TEST_LOGIN_RESULT,
+  UnknownResponse,
 } from "../config/index.js";
 import type {
   AccountInfo,
@@ -72,11 +73,7 @@ export const underSystemLogin = async (
   cookieStore.applyResponse(ticketResponse, result.location);
 
   if (ticketResponse.status !== 302) {
-    return {
-      success: false,
-      type: ActionFailType.Unknown,
-      msg: "登录失败",
-    };
+    return UnknownResponse("登录失败");
   }
 
   const finalLocation = ticketResponse.headers.get("Location");
@@ -107,11 +104,7 @@ export const underSystemLogin = async (
     };
   }
 
-  return {
-    success: false,
-    type: ActionFailType.Unknown,
-    msg: "登录失败",
-  };
+  return UnknownResponse("登录失败");
 };
 
 export interface UnderSystemLoginSuccessResponse {

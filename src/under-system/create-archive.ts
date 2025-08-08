@@ -119,12 +119,7 @@ export const getUnderStudentArchiveInfo = async (
 
   const link = nextLinkRegExp.exec(welcomePageContent)?.[1];
 
-  if (!link)
-    return {
-      success: false,
-      type: ActionFailType.Unknown,
-      msg: "未找到注册学籍链接",
-    };
+  if (!link) return UnknownResponse("未找到注册学籍链接");
 
   const infoResponse = await fetch(`${UNDER_SYSTEM_SERVER}${link}`, {
     headers: {

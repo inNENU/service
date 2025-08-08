@@ -1,4 +1,4 @@
-import { ActionFailType } from "@/config/index.js";
+import { ActionFailType, UnknownResponse } from "@/config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse } from "@/typings.js";
 
 import { RESET_PAGE_URL } from "./utils.js";
@@ -120,11 +120,7 @@ export const sendCode = async (
       };
     }
 
-    return {
-      success: false,
-      type: ActionFailType.Unknown,
-      msg: data.message,
-    };
+    return UnknownResponse(data.message);
   }
 
   return {

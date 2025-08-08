@@ -3,6 +3,7 @@ import {
   ExpiredResponse,
   InvalidArgResponse,
   MissingArgResponse,
+  UnknownResponse,
 } from "@/config/index.js";
 import type { CommonFailedResponse, LoginOptions } from "@/typings.js";
 import { EDGE_USER_AGENT_HEADERS, request } from "@/utils/index.js";
@@ -184,11 +185,7 @@ export const removeUnderSelectCourse = async (
 
     console.error("不能识别", data.message);
 
-    return {
-      success: false,
-      type: ActionFailType.Unknown,
-      msg: data.message,
-    };
+    return UnknownResponse(data.message);
   }
 
   return { success: true };

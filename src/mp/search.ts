@@ -1,4 +1,4 @@
-import { ActionFailType } from "@/config/index.js";
+import { UnknownResponse } from "@/config/index.js";
 
 import type {
   CommonFailedResponse,
@@ -24,11 +24,7 @@ export const mpSearchHandler = request<SearchResponse, SearchOptions>(
 
     if (!word || type === "word") return res.json({ success: true, data: [] });
 
-    return res.json({
-      success: false,
-      type: ActionFailType.Unknown,
-      msg: "旧版搜索已下线",
-    });
+    return res.json(UnknownResponse("旧版搜索已下线，请等待小程序新版本"));
   },
 );
 

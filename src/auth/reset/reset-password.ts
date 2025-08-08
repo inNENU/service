@@ -1,4 +1,4 @@
-import { ActionFailType } from "@/config/index.js";
+import { UnknownResponse } from "@/config/index.js";
 import type { CommonFailedResponse } from "@/typings.js";
 
 import { RESET_PAGE_URL } from "./utils.js";
@@ -91,11 +91,7 @@ export const resetPassword = async (
   const data = (await verifyResponse.json()) as RawResetPasswordSetData;
 
   if (data.code !== "0") {
-    return {
-      success: false,
-      type: ActionFailType.Unknown,
-      msg: data.message,
-    };
+    return UnknownResponse(data.message);
   }
 
   return {
