@@ -64,7 +64,7 @@ export const mpLoginHandler = request<MPLoginResponse, MPLoginOptions>(
         }&js_code=${code}&grant_type=authorization_code`;
 
         const response = await fetch(url, {
-          signal: AbortSignal.timeout(5000),
+          signal: AbortSignal.timeout(1500),
         });
 
         const result = (await response.json()) as {
@@ -118,6 +118,10 @@ export const mpLoginHandler = request<MPLoginResponse, MPLoginOptions>(
       });
     } catch (err) {
       console.error(err);
+
+      if ((err as Error).name === "TimeoutError") {
+        return res.json(UnknownResponse("小程序登录失败: 微信服务器响应超时"));
+      }
 
       return res.json(
         UnknownResponse(`小程序登录失败: ${(err as Error).message}`),
