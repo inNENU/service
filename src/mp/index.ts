@@ -6,4 +6,4 @@ export * from "./receive.js";
 export * from "./remove.js";
 export * from "./report.js";
 export * from "./router.js";
-export * from "./search.js";
+export * from "./suggestions.js";
