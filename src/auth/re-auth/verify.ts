@@ -154,13 +154,12 @@ export const verifyReAuthHandler = request<
   ReAuthVerifyOptions
 >(async (req, res) => {
   const cookieHeader = req.headers.cookie;
-  const { smsCode, id, password, openid, appId } = req.body;
+  const { smsCode, id, password, appId } = req.body;
 
   if (!cookieHeader) return res.json(MissingCredentialResponse);
   if (!smsCode) return res.json(MissingArgResponse("smsCode"));
   if (!id) return res.json(MissingArgResponse("id"));
   if (!password) return res.json(MissingArgResponse("password"));
-  if (!openid) return res.json(MissingArgResponse("openid"));
   if (!appId) return res.json(MissingArgResponse("appId"));
 
   const result = await verifyReAuthCaptcha(req.body, cookieHeader);
