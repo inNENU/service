@@ -106,7 +106,7 @@ export const getAuthInfo = async (
       }
 
     try {
-      connection = await getConnection();
+      connection ??= await getConnection();
 
       const [infoRows] = await connection.execute<
         (RowDataPacket & Omit<MyInfo, "avatar">)[]
