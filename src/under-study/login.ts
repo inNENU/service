@@ -66,6 +66,7 @@ export const underStudyLogin = async (
         Referer: webVPN ? WEB_VPN_AUTH_SERVER : AUTH_SERVER,
       },
       redirect: "manual",
+      signal: AbortSignal.timeout(10000),
     },
   );
 
@@ -89,6 +90,7 @@ export const underStudyLogin = async (
         ...EDGE_USER_AGENT_HEADERS,
       },
       redirect: "manual",
+      signal: AbortSignal.timeout(10000),
     });
 
     if (

@@ -240,18 +240,17 @@ export const authLogin = async ({
         type: ActionFailType.AccountLocked,
         msg: `账号已冻结，预计解冻时间：${lockedResult[1]}`,
       };
-
-    console.error("Unknown login response: ", response.status, resultContent);
-
-    return UnknownResponse("未知错误");
   }
 
   if (response.status === 200) {
-    if (resultContent.includes("会话已失效，请刷新页面再登录"))
+    if (
+      resultContent.includes("会话已失效，请刷新页面再登录") ||
+      resultContent.includes("当前登录会话已失效，请重新登录！")
+    )
       return {
         success: false,
         type: ActionFailType.Expired,
-        msg: "会话已过期，请重新登录",
+        msg: "由于操作超时或在其他地方操作，会话已过期。请重新登录",
       };
 
     if (resultContent.includes("当前账户已在其他PC端登录会话。"))

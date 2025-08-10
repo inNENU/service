@@ -87,6 +87,11 @@ export const sendReAuthSMS = async (
   if (result.res !== "success") {
     console.error("二次认证验证码失败: ", result);
 
+    if (result.returnMessage === "发送验证码失败，请联系管理员！")
+      return UnknownResponse(
+        "二次认证验证码发送失败，请联系信息化办公室 0431-85099005",
+      );
+
     return UnknownResponse(result.returnMessage);
   }
 

@@ -65,6 +65,7 @@ export const getAuthCaptcha = async (
         "User-Agent": "inNENU service",
       },
       body: `userName=${id}&authCodeTypeName=reAuthDynamicCodeType`,
+      signal: AbortSignal.timeout(10000),
     });
 
     const { bigImage, smallImage, tagWidth, yHeight } =

@@ -230,6 +230,7 @@ const checkCourseCommentary = async (
       "X-Requested-With": "XMLHttpRequest",
       ...EDGE_USER_AGENT_HEADERS,
     },
+    signal: AbortSignal.timeout(10000),
   });
 
   if (response.status !== 200) throw new Error(`status: ${response.status}`);
