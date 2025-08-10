@@ -6,6 +6,7 @@ import {
   MissingArgResponse,
   UnknownResponse,
   appIdInfo,
+  donutAppIdInfo,
 } from "../config/index.js";
 import type {
   CommonFailedResponse,
@@ -13,8 +14,12 @@ import type {
 } from "../typings.js";
 import { getConnection, releaseConnection, request } from "../utils/index.js";
 
-export type AppID = "wx33acb831ee1831a5" | "wx2550e3fd373b79a8";
-export type Env = "wx";
+export type AppID =
+  | "wx33acb831ee1831a5"
+  | "wx2550e3fd373b79a8"
+  | "wx0009f7cdfeefa3da";
+
+export type Env = "wx" | "donut";
 
 export interface MPLoginCodeOptions {
   appId: AppID;
@@ -41,6 +46,26 @@ export type MPloginFailResponse = CommonFailedResponse<
 export type MPLoginOptions = MPLoginCodeOptions | MPLoginOpenidOptions;
 export type MPLoginResponse = MPLoginSuccessResponse | MPloginFailResponse;
 
+interface WechatErrorResponse {
+  errcode: number;
+  errmsg: string;
+}
+
+type MiniProgramLoginResponse =
+  | { openid: string; session_key: string }
+  | WechatErrorResponse;
+
+type WechatOAuthLoginResponse =
+  | {
+      scope: "snsapi_userinfo";
+      access_token: string;
+      expires_in: 7200;
+      refresh_token: string;
+      openid: string;
+      unionid?: string;
+    }
+  | WechatErrorResponse;
+
 export const mpLoginHandler = request<MPLoginResponse, MPLoginOptions>(
   async (req, res) => {
     let connection: PoolConnection | null = null;
@@ -59,28 +84,45 @@ export const mpLoginHandler = request<MPLoginResponse, MPLoginOptions>(
         if (!appId) return res.json(MissingArgResponse("appId"));
         if (!code) return res.json(MissingArgResponse("code"));
 
-        const url = `https://api.weixin.qq.com/sns/jscode2session?appid=${appId}&secret=${
-          appIdInfo[appId]
-        }&js_code=${code}&grant_type=authorization_code`;
+        if (env === "wx") {
+          const url = `https://api.weixin.qq.com/sns/jscode2session?appid=${appId}&secret=${
+            appIdInfo[appId]
+          }&js_code=${code}&grant_type=authorization_code`;
 
-        const response = await fetch(url, {
-          signal: AbortSignal.timeout(1500),
-        });
+          const response = await fetch(url, {
+            signal: AbortSignal.timeout(1500),
+          });
 
-        const result = (await response.json()) as {
-          openid: string;
-          session_key: string;
-          errcode: number;
-          errmsg: string;
-        };
+          const result = (await response.json()) as MiniProgramLoginResponse;
 
-        if (result.errcode) {
-          console.error("小程序登录失败", result);
+          if ("errcode" in result) {
+            console.error("小程序登录失败", result);
 
-          return res.json(UnknownResponse(result.errmsg));
+            return res.json(UnknownResponse(result.errmsg));
+          }
+
+          ({ openid } = result);
         }
 
-        ({ openid } = result);
+        if (env === "donut") {
+          const url = `https://api.weixin.qq.com/sns/oauth2/access_token?appid=${donutAppIdInfo[appId as keyof typeof donutAppIdInfo]}&secret=${
+            appIdInfo[appId]
+          }&code=${code}&grant_type=authorization_code`;
+
+          const response = await fetch(url, {
+            signal: AbortSignal.timeout(1500),
+          });
+
+          const result = (await response.json()) as WechatOAuthLoginResponse;
+
+          if ("errcode" in result) {
+            console.error("App 登录失败", result);
+
+            return res.json(UnknownResponse(result.errmsg));
+          }
+
+          ({ openid } = result);
+        }
       }
 
       let inBlacklist = false;
@@ -120,12 +162,10 @@ export const mpLoginHandler = request<MPLoginResponse, MPLoginOptions>(
       console.error(err);
 
       if ((err as Error).name === "TimeoutError") {
-        return res.json(UnknownResponse("小程序登录失败: 微信服务器响应超时"));
+        return res.json(UnknownResponse("登录失败: 微信服务器响应超时"));
       }
 
-      return res.json(
-        UnknownResponse(`小程序登录失败: ${(err as Error).message}`),
-      );
+      return res.json(UnknownResponse(`登录失败: ${(err as Error).message}`));
     } finally {
       releaseConnection(connection);
     }
