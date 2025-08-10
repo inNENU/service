@@ -51,6 +51,7 @@ export type VerifyReAuthCaptchaResponse =
   | VerifyReAuthCaptchaSuccessResponse
   | CommonFailedResponse<
       | ActionFailType.BlackList
+      | ActionFailType.Expired
       | ActionFailType.Forbidden
       | ActionFailType.MissingArg
       | ActionFailType.MissingCredential
@@ -84,7 +85,20 @@ export const verifyReAuthCaptcha = async (
         skipTmpReAuth: "true",
       }),
       signal: AbortSignal.timeout(5000),
+      redirect: "manual",
     });
+
+    if (reAuthResponse.status >= 300) {
+      // TODO: Some logic shall be checked here
+      console.error("二次认证失败", reAuthResponse.status, reAuthResponse);
+      // 当前登录会话已失效，请重新登录！
+
+      return {
+        success: false,
+        type: ActionFailType.Expired,
+        msg: "由于在别处操作或发起登录时间过久，会话已失效。请重新登录",
+      };
+    }
 
     const reAuthResult =
       (await reAuthResponse.json()) as RawVerifyReAuthCaptchaResponse;
