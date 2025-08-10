@@ -175,34 +175,41 @@ export const authCaptchaHandler = request<
   AuthCaptchaOptions,
   { id?: string }
 >(async (req, res) => {
-  const cookieHeader = req.body.cookie
-    ? req.body.cookie.map(({ name, value }) => `${name}=${value}`).join("; ")
-    : req.headers.cookie;
+  try {
+    if (req.method === "GET") {
+      const id = req.params.id;
+      const cookieHeader = req.headers.cookie;
 
-  if (!cookieHeader) return MissingCredentialResponse;
+      if (!id) return res.json(MissingArgResponse("id"));
+      if (!cookieHeader) return MissingCredentialResponse;
 
-  if (req.method === "GET") {
-    const id = req.params.id;
+      return res.json(await getAuthCaptcha(cookieHeader, id));
+    }
 
-    if (!id) return res.json(MissingArgResponse("id"));
+    const cookieHeader = req.body?.cookie
+      ? req.body.cookie.map(({ name, value }) => `${name}=${value}`).join("; ")
+      : req.headers.cookie;
 
-    return res.json(await getAuthCaptcha(cookieHeader, id));
+    if (!cookieHeader) return MissingCredentialResponse;
+
+    if ("id" in req.body) {
+      return res.json(await getAuthCaptcha(cookieHeader, req.body.id));
+    }
+
+    if (!req.body.moveLength || !req.body.tracks)
+      return res.json(MissingArgResponse("moveLength, tracks"));
+
+    if (!req.body.safeValue) return res.json(MissingArgResponse("safeValue"));
+
+    const result = await verifyAuthCaptcha(
+      cookieHeader,
+      req.body.moveLength,
+      req.body.tracks,
+      req.body.safeValue,
+    );
+
+    return res.json(result);
+  } catch {
+    return res.json(UnknownResponse("验证码错误"));
   }
-
-  if ("id" in req.body) {
-    return res.json(await getAuthCaptcha(cookieHeader, req.body.id));
-  }
-
-  if (!req.body.moveLength || !req.body.tracks || !req.body.safeValue) {
-    return res.json(MissingArgResponse("moveLength, tracks, and safeValue"));
-  }
-
-  const result = await verifyAuthCaptcha(
-    cookieHeader,
-    req.body.moveLength,
-    req.body.tracks,
-    req.body.safeValue,
-  );
-
-  return res.json(result);
 });
