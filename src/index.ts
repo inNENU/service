@@ -32,7 +32,7 @@ captureError();
 applyMiddleware(app);
 
 app.get("/", homeHandler);
-app.use(healthCheckRateLimit).get("/health", healthCheckHandler);
+app.use("/health", healthCheckRateLimit).get("/health", healthCheckHandler);
 app.use("/action", actionRouter);
 app.use("/auth", authRouter);
 app.use("/auth-center", authCenterRouter);
