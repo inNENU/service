@@ -1,12 +1,13 @@
 import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
 
+import { request } from "@/utils/index.js";
+
 import { UPDATE_KEY_URL, VPN_DOMAIN, VPN_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { AUTH_SERVER, authLogin, isReAuthPage } from "../auth/index.js";
 import { ActionFailType, UnknownResponse } from "../config/index.js";
 import type { AccountInfo, CommonFailedResponse } from "../typings.js";
-import { request } from "../utils/index.js";
 
 const CAS_LOGIN_URL = `${VPN_SERVER}/users/auth/cas`;
 

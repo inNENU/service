@@ -1,4 +1,4 @@
-import { request } from "../utils/index.js";
+import { request } from "@/utils/index.js";
 
 export const test302Handler = request((req, res) => {
   console.log(req.headers);

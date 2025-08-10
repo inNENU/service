@@ -1,5 +1,6 @@
+import { request } from "@/utils/index.js";
+
 import { UnknownResponse } from "../config/index.js";
-import { request } from "../utils/index.js";
 
 export const emailHandler = request((_req, res) => {
   return res.json(

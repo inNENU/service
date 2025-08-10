@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-deprecated */
+import { IE_8_USER_AGENT, getIETimeStamp, request } from "@/utils/index.js";
+
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { ActionFailType, ExpiredResponse } from "../config/index.js";
@@ -8,7 +10,6 @@ import type {
   LoginOptions,
 } from "../typings.js";
 import type { TableClassData } from "../under-study/index.js";
-import { IE_8_USER_AGENT, getIETimeStamp, request } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 
 const semesterStartTime: Record<string, string> = {

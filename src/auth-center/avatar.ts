@@ -1,9 +1,10 @@
+import { request } from "@/utils/index.js";
+
 import { authCenterLogin } from "./login.js";
 import { AUTH_INFO_PREFIX } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { ExpiredResponse, MissingCredentialResponse } from "../config/index.js";
 import type { AccountInfo, CommonSuccessResponse } from "../typings.js";
-import { request } from "../utils/index.js";
 
 const USER_CONF_URL = `${AUTH_INFO_PREFIX}/common/getUserConf`;
 

@@ -2,8 +2,9 @@ import AES from "crypto-js/aes.js";
 import Utf8 from "crypto-js/enc-utf8.js";
 import Pkcs7 from "crypto-js/pad-pkcs7.js";
 
+import { request } from "@/utils/index.js";
+
 import type { CommonSuccessResponse } from "../typings.js";
-import { request } from "../utils/index.js";
 
 const DICT = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678";
 const DICT_LENGTH = DICT.length;

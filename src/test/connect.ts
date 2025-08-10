@@ -1,6 +1,6 @@
 import type { PoolConnection } from "mysql2/promise";
 
-import { getConnection, releaseConnection, request } from "../utils/index.js";
+import { getConnection, releaseConnection, request } from "@/utils/index.js";
 
 export const testConnectHandler = request(async (_req, res) => {
   let connection: PoolConnection | null = null;

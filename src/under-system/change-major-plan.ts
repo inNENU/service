@@ -1,3 +1,5 @@
+import { IE_8_USER_AGENT, getIETimeStamp, request } from "@/utils/index.js";
+
 import {
   UNDER_SYSTEM_SERVER,
   fieldRegExp,
@@ -11,7 +13,6 @@ import {
   totalPagesRegExp,
 } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { IE_8_USER_AGENT, getIETimeStamp, request } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 
 const HEADER_REGEXP = /<title>(.*)<\/title>/;

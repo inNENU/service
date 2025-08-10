@@ -1,20 +1,22 @@
 import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
 
-import { GRAD_SYSTEM_SERVER } from "./utils.js";
+import { request } from "@/utils/index.js";
+
+import { CALLBACK_URL, GRAD_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { authLogin } from "../auth/index.js";
 import {
   ActionFailType,
   MissingCredentialResponse,
   UnknownResponse,
+  WAF_URL,
 } from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
   LoginOptions,
 } from "../typings.js";
-import { request } from "../utils/index.js";
 
 export interface GradSystemLoginSuccessResult {
   success: true;
@@ -62,14 +64,14 @@ export const gradSystemLogin = async (
 
   const finalLocation = ticketResponse.headers.get("Location");
 
-  if (finalLocation?.includes("http://wafnenu.nenu.edu.cn/offCampus.html"))
+  if (finalLocation?.includes(WAF_URL))
     return {
       success: false,
       type: ActionFailType.Forbidden,
       msg: "此账户无法登录研究生教学服务系统",
     };
 
-  if (finalLocation === "https://pg.nenu.edu.cn/HProg/yjsy/index_pc.php") {
+  if (finalLocation === CALLBACK_URL) {
     const indexResponse = await fetch(finalLocation, {
       headers: {
         Cookie: cookieStore.getHeader(finalLocation),

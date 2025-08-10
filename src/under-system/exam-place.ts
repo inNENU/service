@@ -1,5 +1,7 @@
 import type { RequestHandler } from "express";
 
+import { IE_8_USER_AGENT } from "@/utils/index.js";
+
 import {
   UNDER_SYSTEM_SERVER,
   fieldRegExp,
@@ -14,7 +16,6 @@ import {
 } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type { EmptyObject, LoginOptions } from "../typings.js";
-import { IE_8_USER_AGENT } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 
 const selectRegExp =

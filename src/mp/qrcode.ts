@@ -1,5 +1,8 @@
 import { toBuffer } from "qrcode";
 
+import type { WechatMpCodeError } from "@/utils/index.js";
+import { getWechatMPCode, request } from "@/utils/index.js";
+
 import type { ActionFailType } from "../config/index.js";
 import {
   MissingArgResponse,
@@ -7,8 +10,6 @@ import {
   appIdInfo,
 } from "../config/index.js";
 import type { CommonFailedResponse } from "../typings.js";
-import type { WechatMpCodeError } from "../utils/index.js";
-import { getWechatMPCode, request } from "../utils/index.js";
 
 export interface WechatMpCodeOptions {
   appId: "wx33acb831ee1831a5" | "wx2550e3fd373b79a8";

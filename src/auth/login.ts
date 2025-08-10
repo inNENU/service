@@ -1,6 +1,8 @@
 import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
 
+import { isInBlackList, request } from "@/utils/index.js";
+
 import { authEncrypt } from "./encrypt.js";
 import {
   AUTH_DOMAIN,
@@ -18,7 +20,6 @@ import {
   getRandomBlacklistHint,
 } from "../config/index.js";
 import type { AccountInfo, CommonFailedResponse } from "../typings.js";
-import { isInBlackList, request } from "../utils/index.js";
 
 export interface AuthLoginOptions extends AccountInfo {
   service?: string;

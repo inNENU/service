@@ -1,5 +1,7 @@
 import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 
+import { getConnection, releaseConnection, request } from "@/utils/index.js";
+
 import type { ActionFailType } from "../config/index.js";
 import {
   DatabaseErrorResponse,
@@ -8,7 +10,6 @@ import {
   WrongPasswordResponse,
 } from "../config/index.js";
 import type { CommonFailedResponse } from "../typings.js";
-import { getConnection, releaseConnection, request } from "../utils/index.js";
 
 export interface MpRemoveOptions {
   appId: string;

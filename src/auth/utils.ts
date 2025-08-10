@@ -1,4 +1,4 @@
-import { isString } from "../utils/index.js";
+import { isString } from "@/utils/index.js";
 
 export const AUTH_DOMAIN = "authserver.nenu.edu.cn";
 export const AUTH_SERVER = `https://${AUTH_DOMAIN}`;

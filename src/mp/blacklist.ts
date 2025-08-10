@@ -1,5 +1,6 @@
+import { isInBlackList, request } from "@/utils/index.js";
+
 import type { CommonSuccessResponse } from "../typings.js";
-import { isInBlackList, request } from "../utils/index.js";
 
 export interface BlacklistOptions {
   id: number;

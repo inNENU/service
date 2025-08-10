@@ -1,8 +1,9 @@
+import { IE_8_USER_AGENT, getIETimeStamp, request } from "@/utils/index.js";
+
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { ActionFailType, UnknownResponse } from "../config/index.js";
 import type { CommonFailedResponse, LoginOptions } from "../typings.js";
-import { IE_8_USER_AGENT, getIETimeStamp, request } from "../utils/index.js";
 
 const infoRegExp =
   /<td>(\S+)<\/td>\s+<td colspan="\d">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/g;

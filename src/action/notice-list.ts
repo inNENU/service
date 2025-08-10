@@ -1,3 +1,5 @@
+import { request } from "@/utils/index.js";
+
 import type { ActionLoginResponse } from "./login.js";
 import { ACTION_SERVER, INFO_BASE_SERVER } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
@@ -7,7 +9,6 @@ import type {
   CommonListSuccessResponse,
   LoginOptions,
 } from "../typings.js";
-import { request } from "../utils/index.js";
 
 const NOTICE_LIST_QUERY_URL = `${ACTION_SERVER}/page/queryList`;
 

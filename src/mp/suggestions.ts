@@ -1,5 +1,6 @@
+import { request } from "@/utils/index.js";
+
 import type { CommonSuccessResponse } from "../typings.js";
-import { request } from "../utils/index.js";
 
 export interface SuggestionOptions {
   appId: string;

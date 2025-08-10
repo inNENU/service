@@ -1,6 +1,8 @@
 import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
 
+import { IE_8_USER_AGENT, request } from "@/utils/index.js";
+
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
@@ -11,13 +13,13 @@ import {
   TEST_ID_NUMBER,
   TEST_LOGIN_RESULT,
   UnknownResponse,
+  WAF_URL,
 } from "../config/index.js";
 import type {
   AccountInfo,
   CommonFailedResponse,
   LoginOptions,
 } from "../typings.js";
-import { IE_8_USER_AGENT, request } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 import { vpnCASLogin } from "../vpn/index.js";
 
@@ -78,7 +80,7 @@ export const underSystemLogin = async (
 
   const finalLocation = ticketResponse.headers.get("Location");
 
-  if (finalLocation?.includes("http://wafnenu.nenu.edu.cn/offCampus.html"))
+  if (finalLocation?.includes(WAF_URL))
     return {
       success: false,
       type: ActionFailType.Forbidden,

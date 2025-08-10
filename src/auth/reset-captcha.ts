@@ -1,11 +1,12 @@
 import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
 
+import { generateRandomString, request } from "@/utils/index.js";
+
 import { RESET_PREFIX } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
 import { RestrictedResponse, UnknownResponse } from "../config/index.js";
 import type { CommonFailedResponse } from "../typings.js";
-import { generateRandomString, request } from "../utils/index.js";
 
 const CAPTCHA_URL = `${RESET_PREFIX}/generateCaptcha`;
 

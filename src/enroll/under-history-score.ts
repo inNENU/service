@@ -1,10 +1,11 @@
+import { request } from "@/utils/index.js";
+
 import type { ActionFailType } from "../config/index.js";
 import { InvalidArgResponse, MissingArgResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../typings.js";
-import { request } from "../utils/index.js";
 
 export interface UnderHistoryScoreInfoOptions {
   type: "info";

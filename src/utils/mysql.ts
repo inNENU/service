@@ -1,38 +1,33 @@
 import type { PoolConnection } from "mysql2/promise";
 import { createPool } from "mysql2/promise";
+
 import "../config/loadEnv.js";
 
 // 创建 MySQL 连接池
-const pool = createPool({
+export const mysqlPool = createPool({
   host: process.env.MYSQL_HOST ?? "localhost",
   port: process.env.MYSQL_PORT ? Number(process.env.MYSQL_PORT) : 3306,
   database: process.env.MYSQL_DATABASE ?? "innenu-service",
   user: process.env.MYSQL_USER ?? "innenu",
   password: process.env.MYSQL_PASSWORD,
-  connectTimeout: 5000,
-  connectionLimit: 50,
+  connectTimeout: 3000,
+  connectionLimit: 100,
+  queueLimit: 300,
 });
 
 export const getConnection = (): Promise<PoolConnection> =>
-  pool.getConnection().catch((error: unknown) => {
+  mysqlPool.getConnection().catch((error: unknown) => {
     console.error("Error connecting to MySQL:", error);
 
     throw error;
   });
 
 export const releaseConnection = (connection?: PoolConnection | null): void => {
-  if (connection) {
-    pool.releaseConnection(connection);
+  try {
+    if (connection) {
+      mysqlPool.releaseConnection(connection);
+    }
+  } catch (error) {
+    console.error("Error releasing MySQL connection:", error);
   }
 };
-
-// test connect locally once
-try {
-  const connection = await getConnection();
-
-  console.log("Connected to MySQL successfully.");
-
-  releaseConnection(connection);
-} catch (error) {
-  console.error("Error connecting to MySQL:", error);
-}

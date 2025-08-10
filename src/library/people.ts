@@ -1,9 +1,11 @@
+import { request } from "@/utils/index.js";
+
 import { UnknownResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../typings.js";
-import { request } from "../utils/index.js";
+import { LIBRARY_SERVER } from "./utils.js";
 
 interface LibraryPeopleRawData {
   code: number;
@@ -34,7 +36,7 @@ export type LibraryPeopleResponse =
 export const libraryPeopleHandler = request<LibraryPeopleResponse>(
   async (_, res) => {
     const response = await fetch(
-      "https://www.library.nenu.edu.cn/engine2/custom/nenu/onlineUserNum",
+      `${LIBRARY_SERVER}/engine2/custom/nenu/onlineUserNum`,
     );
 
     const data = (await response.json()) as LibraryPeopleRawData;

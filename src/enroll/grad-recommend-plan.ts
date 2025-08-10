@@ -3,12 +3,13 @@ import { existsSync, mkdirSync, readFileSync, writeFile } from "node:fs";
 import type { RichTextNode } from "@mptool/parser";
 import { getRichTextNodes } from "@mptool/parser";
 
+import { request } from "@/utils/index.js";
+
 import { UnknownResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../typings.js";
-import { request } from "../utils/index.js";
 
 const POST_RECOMMEND_PLAN_URL =
   "https://pg.nenu.edu.cn/yjsy/HData/ZSB/ZSJZ2024-TM-1.html";

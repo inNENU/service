@@ -1,6 +1,8 @@
 import type { RichTextNode } from "@mptool/parser";
 import { getRichTextNodes } from "@mptool/parser";
 
+import { request } from "@/utils/index.js";
+
 import { OFFICIAL_URL, getOfficialPageView } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
 import { MissingArgResponse, UnknownResponse } from "../config/index.js";
@@ -8,7 +10,6 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../typings.js";
-import { request } from "../utils/index.js";
 
 const INFO_REGEXP =
   /<div class="ar_tit">\s*<h3>([^>]+)<\/h3>\s*<h6>([^]+?)<\/h6>/;

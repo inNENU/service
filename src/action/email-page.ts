@@ -1,3 +1,5 @@
+import { request } from "@/utils/index.js";
+
 import { ACTION_MAIN_PAGE, ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type { ActionFailType } from "../config/index.js";
@@ -7,7 +9,6 @@ import type {
   CommonSuccessResponse,
   LoginOptions,
 } from "../typings.js";
-import { request } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 
 const EMAIL_PAGE_URL = `${ACTION_SERVER}/extract/sendRedirect2Email`;

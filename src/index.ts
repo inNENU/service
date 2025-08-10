@@ -7,6 +7,7 @@ import { authCenterRouter } from "./auth-center/index.js";
 import { UnknownResponse } from "./config/index.js";
 import { enrollRouter } from "./enroll/index.js";
 import { gradRouter } from "./grad-system/index.js";
+import { healthCheckHandler, healthCheckRateLimit } from "./health/index.js";
 import { homeHandler } from "./home.js";
 import { libraryRouter } from "./library/index.js";
 import { applyMiddleware } from "./middlewire/index.js";
@@ -31,6 +32,7 @@ captureError();
 applyMiddleware(app);
 
 app.get("/", homeHandler);
+app.use(healthCheckRateLimit).get("/health", healthCheckHandler);
 app.use("/action", actionRouter);
 app.use("/auth", authRouter);
 app.use("/auth-center", authCenterRouter);

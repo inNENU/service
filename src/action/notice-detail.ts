@@ -1,6 +1,8 @@
 import type { RichTextNode } from "@mptool/parser";
 import { getRichTextNodes } from "@mptool/parser";
 
+import { request } from "@/utils/index.js";
+
 import { ACTION_SERVER, INFO_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type { ActionFailType } from "../config/index.js";
@@ -11,7 +13,6 @@ import type {
   CommonSuccessResponse,
   LoginOptions,
 } from "../typings.js";
-import { request } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 
 const ID_TITLE_REGEXP = /var title = '(.*?)';/;

@@ -1,11 +1,15 @@
-export const getMemoryUsage = (): Record<string, number> =>
-  Object.fromEntries(
-    Object.entries(process.memoryUsage()).map(([key, value]) => {
-      const memory = Math.round((value / 1024 / 1024) * 100) / 100;
+export const getMemoryUsage = (): NodeJS.MemoryUsage => {
+  const memory = process.memoryUsage();
 
-      return [key, memory];
-    }),
-  );
+  for (const key in memory) {
+    memory[key as keyof NodeJS.MemoryUsage] =
+      Math.round(
+        (memory[key as keyof NodeJS.MemoryUsage] / 1024 / 1024) * 100,
+      ) / 100;
+  }
+
+  return memory;
+};
 
 export const reportMemoryUsage = (interval = /** 5 min */ 300000): void => {
   setInterval(() => {

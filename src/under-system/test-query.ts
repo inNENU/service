@@ -1,8 +1,9 @@
+import { IE_8_USER_AGENT, getIETimeStamp, request } from "@/utils/index.js";
+
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { UnknownResponse } from "../config/index.js";
 import type { LoginOptions } from "../typings.js";
-import { IE_8_USER_AGENT, getIETimeStamp, request } from "../utils/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 
 const idCardRegExp = /\[身份证号:(.{18})\]/;

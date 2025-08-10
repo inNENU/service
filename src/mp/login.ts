@@ -1,5 +1,7 @@
 import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 
+import { getConnection, releaseConnection, request } from "@/utils/index.js";
+
 import type { ActionFailType } from "../config/index.js";
 import {
   DatabaseErrorResponse,
@@ -12,7 +14,6 @@ import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../typings.js";
-import { getConnection, releaseConnection, request } from "../utils/index.js";
 
 export type AppID =
   | "wx33acb831ee1831a5"
@@ -145,7 +146,7 @@ export const mpLoginHandler = request<MPLoginResponse, MPLoginOptions>(
 
         if (inBlacklist) console.info(`Blocking user ${openid}`);
       } catch (err) {
-        console.error(`Querying with openid ${openid}`, err);
+        console.error(`数据库查询失败，openid: ${openid}`, err);
 
         return res.json(DatabaseErrorResponse((err as Error).message));
       }
@@ -159,9 +160,12 @@ export const mpLoginHandler = request<MPLoginResponse, MPLoginOptions>(
         },
       });
     } catch (err) {
-      console.error(err);
+      console.error("小程序登陆失败", err);
 
-      if ((err as Error).name === "TimeoutError") {
+      if (
+        (err as Error).name === "AbortError" ||
+        (err as Error).name === "TimeoutError"
+      ) {
         return res.json(UnknownResponse("登录失败: 微信服务器响应超时"));
       }
 

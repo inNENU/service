@@ -1,10 +1,11 @@
+import { request } from "@/utils/index.js";
+
 import { OFFICIAL_URL } from "./utils.js";
 import { UnknownResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../typings.js";
-import { request } from "../utils/index.js";
 
 const UNDER_MAJOR_PLAN_URL = `${OFFICIAL_URL}/jyjx/bksjy/rcpyfa.htm`;
 

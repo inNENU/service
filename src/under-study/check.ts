@@ -1,10 +1,11 @@
-import type { CookieOptions, CookieVerifyResponse } from "../typings.js";
-import { UNDER_STUDY_SERVER } from "./utils.js";
 import {
   EDGE_USER_AGENT_HEADERS,
   cookies2Header,
   request,
-} from "../utils/index.js";
+} from "@/utils/index.js";
+
+import type { CookieOptions, CookieVerifyResponse } from "../typings.js";
+import { UNDER_STUDY_SERVER } from "./utils.js";
 
 export const underStudyCheckHandler = request<
   CookieVerifyResponse,

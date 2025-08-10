@@ -1,8 +1,9 @@
+import { request } from "@/utils/index.js";
+
 import type { OALoginFailedResponse } from "./login.js";
 import { OA_WEB_VPN_SERVER } from "./utils.js";
 import { UnknownResponse } from "../config/index.js";
 import type { CommonSuccessResponse } from "../typings.js";
-import { request } from "../utils/index.js";
 
 interface RawOAInfoData {
   /** 学号 */

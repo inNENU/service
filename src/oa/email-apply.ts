@@ -1,3 +1,5 @@
+import { request } from "@/utils/index.js";
+
 import { getOAInfo } from "./info.js";
 import type { OALoginFailedResponse } from "./login.js";
 import { OA_WEB_VPN_SERVER } from "./utils.js";
@@ -8,7 +10,6 @@ import type {
   CommonSuccessResponse,
   LoginOptions,
 } from "../typings.js";
-import { request } from "../utils/index.js";
 
 interface RawCheckEmailSuccessData {
   result: "0";

@@ -1,3 +1,5 @@
+import { request } from "@/utils/index.js";
+
 import { getAction } from "./action.js";
 import { gradSystemLogin } from "./login.js";
 import { GRAD_SYSTEM_SERVER, MAIN_URL } from "./utils.js";
@@ -8,7 +10,6 @@ import {
   UnknownResponse,
 } from "../config/index.js";
 import type { AccountInfo, CommonFailedResponse } from "../typings.js";
-import { request } from "../utils/index.js";
 
 const TITLE_REG_EXP = /aField\s?="(.*?)"\.split\("\t"\);/;
 const VALUE_REG_EXP = /aDataLS\s?="(.*?)"\.split\("\t"\);/;

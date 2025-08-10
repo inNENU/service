@@ -3,12 +3,13 @@ import { existsSync, mkdirSync, readFileSync, writeFile } from "node:fs";
 import type { RichTextNode } from "@mptool/parser";
 import { getRichTextNodes } from "@mptool/parser";
 
+import { request } from "@/utils/index.js";
+
 import { UnknownResponse } from "../config/index.js";
 import type {
   CommonFailedResponse,
   CommonSuccessResponse,
 } from "../typings.js";
-import { request } from "../utils/index.js";
 
 const GRAD_ENROLL_PLAN_URL = "https://yz.nenu.edu.cn/source/ssml/2024zsml.html";
 const schoolInfoRegExp =

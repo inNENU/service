@@ -1,6 +1,8 @@
 import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
 
+import { EDGE_USER_AGENT_HEADERS, request } from "@/utils/index.js";
+
 import { UNDER_STUDY_SERVER, UNDER_STUDY_VPN_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { AUTH_SERVER, WEB_VPN_AUTH_SERVER, authLogin } from "../auth/index.js";
@@ -17,7 +19,6 @@ import type {
   CommonFailedResponse,
   LoginOptions,
 } from "../typings.js";
-import { EDGE_USER_AGENT_HEADERS, request } from "../utils/index.js";
 
 export interface UnderStudyLoginOptions extends AccountInfo {
   webVPN?: boolean;

@@ -1,6 +1,8 @@
 import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
 
+import { request } from "@/utils/index.js";
+
 import { AUTH_INFO_PAGE } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { AUTH_SERVER, authLogin } from "../auth/index.js";
@@ -10,7 +12,6 @@ import {
   UnknownResponse,
 } from "../config/index.js";
 import type { AccountInfo } from "../typings.js";
-import { request } from "../utils/index.js";
 
 export interface AuthCenterLoginSuccessResult {
   success: true;
