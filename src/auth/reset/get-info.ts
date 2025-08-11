@@ -76,10 +76,19 @@ export const getInfo = async (
       Referer: RESET_PAGE_URL,
     },
     body: JSON.stringify({
-      type: "cellphone",
+      accountId: "",
       loginNo: id,
-      captcha,
+      cellphone: "",
+      email: "",
+      hideCellphone: "",
+      hideEmail: "",
       captchaId,
+      captcha,
+      code: "",
+      type: "cellphone",
+      password: "",
+      confirmPassword: "",
+      sign: "",
     }),
   });
 

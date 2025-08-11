@@ -1,5 +1,8 @@
 import type { ActionFailType } from "@/config/index.js";
-import { InvalidArgResponse } from "@/config/index.js";
+import {
+  InvalidArgResponse,
+  MissingCredentialResponse,
+} from "@/config/index.js";
 import type { CommonFailedResponse } from "@/typings.js";
 import { request } from "@/utils/index.js";
 
@@ -43,7 +46,9 @@ export type ResetPasswordResponse =
   | CheckPasswordResponse
   | ResetPasswordVerifyCodeResponse
   | ResetPasswordSetResponse
-  | CommonFailedResponse<ActionFailType.InvalidArg>;
+  | CommonFailedResponse<
+      ActionFailType.InvalidArg | ActionFailType.MissingCredential
+    >;
 
 export const resetPasswordHandler = request<
   ResetPasswordResponse,
@@ -68,26 +73,29 @@ export const resetPasswordHandler = request<
     return res.json(result);
   }
 
+  const cookieHeader = req.headers.cookie;
   const options = req.body;
 
+  if (!cookieHeader) return res.json(MissingCredentialResponse);
+
   if (options.type === "get-info") {
-    return res.json(await getInfo(options, req.headers.cookie));
+    return res.json(await getInfo(options, cookieHeader));
   }
 
   if (options.type === "send-code") {
-    return res.json(await sendCode(options, req.headers.cookie));
+    return res.json(await sendCode(options, cookieHeader));
   }
 
   if (options.type === "validate-code") {
-    return res.json(await validateCode(options, req.headers.cookie));
+    return res.json(await validateCode(options, cookieHeader));
   }
 
   if (options.type === "check-password") {
-    return res.json(await checkPassword(options, req.headers.cookie, 1));
+    return res.json(await checkPassword(options, cookieHeader, 1));
   }
 
   if (options.type === "reset-password") {
-    return res.json(await resetPassword(options, req.headers.cookie));
+    return res.json(await resetPassword(options, cookieHeader));
   }
 
   return res.json(InvalidArgResponse("options"));
