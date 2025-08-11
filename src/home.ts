@@ -136,6 +136,18 @@ export const homeHandler = request((_req, res) => {
         color: #f44336;
       }
 
+      #health-status.rate-limited {
+        color: #ff9800;
+      }
+
+      .rate-limit-warning {
+        color: #ff9800;
+        padding: 10px;
+        border: 1px solid #ff9800;
+        border-radius: 4px;
+        background-color: rgba(255, 152, 0, 0.1);
+      }
+
       @media (prefers-color-scheme: dark) {
         .button:hover {
           background-color: rgb(50.7909836066, 178.7090163934, 120.393442623);
@@ -176,6 +188,29 @@ export const homeHandler = request((_req, res) => {
       async function loadHealthStatus() {
         try {
           const response = await fetch('/health');
+          
+          // 检查是否是 429 状态码（请求过于频繁）
+          if (response.status === 429) {
+            const statusElement = document.getElementById('health-status');
+            statusElement.textContent = '⚠️ 检查过于频繁';
+            statusElement.className = 'rate-limited';
+            
+            const detailsElement = document.getElementById('health-details');
+            detailsElement.className = '';
+            detailsElement.innerHTML = 
+              \`<div class="rate-limit-warning">
+                <h3>⚠️ 请求过于频繁</h3>
+                <p>健康检查接口已被限流，请稍后再试。</p>
+                <p>您可以点击下方的"查看详细健康状态"按钮直接访问健康检查页面。</p>
+              </div>\`;
+            return;
+          }
+          
+          // 检查其他 HTTP 错误状态码
+          if (!response.ok) {
+            throw new Error(\`HTTP \${response.status}: \${response.statusText}\`);
+          }
+          
           const result = await response.json();
           
           if (result.success && result.data) {
