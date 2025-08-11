@@ -1,70 +1,8 @@
-import { checkAllServicesHealth, databaseMonitor } from "./health/index.js";
 import { request } from "./utils/index.js";
 
 const startupDate = new Date().toLocaleDateString("zh");
 
-export const homeHandler = request(async (_req, res) => {
-  // 获取系统健康状态
-  let healthStatus = "⚠️ 获取中...";
-  let healthDetails = "";
-
-  try {
-    // 创建健康检查器实例
-
-    const [dbHealth, servicesHealth] = await Promise.all([
-      databaseMonitor.getHealthStatus(),
-      checkAllServicesHealth(),
-    ]);
-
-    const healthyServices = servicesHealth.filter(
-      (service) => service.healthy,
-    ).length;
-    const totalServices = servicesHealth.length;
-
-    // 严格判断：数据库健康且所有服务都健康
-    const overallHealthy =
-      dbHealth.healthy && healthyServices === totalServices;
-
-    healthStatus = overallHealthy ? "✅ 健康" : "❌ 异常";
-
-    // 构建健康详情
-    healthDetails = `
-        <div class="health-details">
-          <h3>系统状态详情</h3>
-          <div class="status-item">
-            <span class="status-label">数据库:</span>
-            <span class="status-value ${dbHealth.healthy ? "healthy" : "unhealthy"}">
-              ${dbHealth.healthy ? "✅ 正常" : "❌ 异常"}
-            </span>
-          </div>
-          <div class="status-item">
-            <span class="status-label">外部服务:</span>
-            <span class="status-value ${healthyServices === totalServices ? "healthy" : "warning"}">
-              ${healthyServices}/${totalServices} 可用
-            </span>
-          </div>
-          <div class="services-grid">
-            ${servicesHealth
-              .map(
-                (service) => `
-              <div class="service-item ${service.healthy ? "healthy" : "unhealthy"}">
-                <span class="service-name">${service.name}</span>
-                <span class="service-status">
-                  ${service.healthy ? "✅" : "❌"}
-                  ${service.responseTime ? `(${service.responseTime}ms)` : ""}
-                </span>
-              </div>
-            `,
-              )
-              .join("")}
-          </div>
-        </div>
-      `;
-  } catch (error) {
-    healthStatus = "❌ 检查失败";
-    healthDetails = `<div class="error">健康检查失败: ${(error as Error).message}</div>`;
-  }
-
+export const homeHandler = request((_req, res) => {
   res.header("Content-Type", "text/html");
   res.send(`\
 <!doctype html>
@@ -186,6 +124,18 @@ export const homeHandler = request(async (_req, res) => {
         background-color: rgba(244, 67, 54, 0.1);
       }
 
+      .loading {
+        color: #666;
+      }
+
+      #health-status.healthy {
+        color: #4CAF50;
+      }
+
+      #health-status.unhealthy {
+        color: #f44336;
+      }
+
       @media (prefers-color-scheme: dark) {
         .button:hover {
           background-color: rgb(50.7909836066, 178.7090163934, 120.393442623);
@@ -215,11 +165,80 @@ export const homeHandler = request(async (_req, res) => {
     <div class="container">
       <h1>inNENU 服务</h1>
       <p>当前版本: ${startupDate}</p>
-      <p>服务运行状态: ${healthStatus}</p>
-      ${healthDetails}
+      <p>服务运行状态: <span id="health-status" class="loading">⚠️ 获取中...</span></p>
+      <div id="health-details" class="loading">正在加载健康状态...</div>
       <a class="button" href="https://innenu.com">访问网页版 inNENU</a>
       <a class="button" href="/health">查看详细健康状态</a>
     </div>
+    
+    <script>
+      // 加载健康状态
+      async function loadHealthStatus() {
+        try {
+          const response = await fetch('/health');
+          const result = await response.json();
+          
+          if (result.success && result.data) {
+            const data = result.data;
+            
+            // 更新状态显示
+            const statusElement = document.getElementById('health-status');
+            statusElement.textContent = data.status === 'healthy' ? '✅ 健康' : '❌ 异常';
+            statusElement.className = data.status === 'healthy' ? 'healthy' : 'unhealthy';
+            
+            // 构建详细信息
+            const detailsHtml = \`
+              <div class="health-details">
+                <h3>系统状态详情</h3>
+                <div class="status-item">
+                  <span class="status-label">数据库:</span>
+                  <span class="status-value \${data.database.healthy ? 'healthy' : 'unhealthy'}">
+                    \${data.database.healthy ? '✅ 正常' : '❌ 异常'}
+                  </span>
+                </div>
+                <div class="status-item">
+                  <span class="status-label">外部服务:</span>
+                  <span class="status-value \${data.summary.healthyServices === data.summary.totalServices ? 'healthy' : 'warning'}">
+                    \${data.summary.healthyServices}/\${data.summary.totalServices} 可用
+                  </span>
+                </div>
+                <div class="services-grid">
+                  \${data.services.map(service => \`
+                    <div class="service-item \${service.healthy ? 'healthy' : 'unhealthy'}">
+                      <span class="service-name">\${service.name}</span>
+                      <span class="service-status">
+                        \${service.healthy ? '✅' : '❌'}
+                        \${service.responseTime ? \`(\${service.responseTime}ms)\` : ''}
+                      </span>
+                    </div>
+                  \`).join('')}
+                </div>
+              </div>
+            \`;
+            
+            const detailsElement = document.getElementById('health-details');
+            detailsElement.className = '';
+            detailsElement.innerHTML = detailsHtml;
+          } else {
+            throw new Error('无法获取健康状态数据');
+          }
+        } catch (error) {
+          console.error('加载健康状态失败:', error);
+          
+          const statusElement = document.getElementById('health-status');
+          statusElement.textContent = '❌ 检查失败';
+          statusElement.className = 'unhealthy';
+          
+          const detailsElement = document.getElementById('health-details');
+          detailsElement.className = '';
+          detailsElement.innerHTML = 
+            \`<div class="error">健康检查失败: \${error.message}</div>\`;
+        }
+      }
+      
+      // 页面加载完成后获取健康状态
+      document.addEventListener('DOMContentLoaded', loadHealthStatus);
+    </script>
   </body>
 </html>
 `);
