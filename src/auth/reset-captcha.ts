@@ -41,13 +41,30 @@ export const getResetCaptcha = async (
     `${CAPTCHA_URL}?ltId=${captchaId}&codeType=2`,
     {
       headers: {
-        Cookie:
+        host: "authserver.nenu.edu.cn",
+        "user-agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36 Edg/137.0.0.0",
+        accept:
+          "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+        dnt: "1",
+        "sec-fetch-site": "same-origin",
+        "sec-fetch-mode": "no-cors",
+        "sec-fetch-dest": "image",
+        referer:
+          referer ||
+          "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "accept-encoding": "gzip, deflate, br, zstd",
+        "accept-language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6",
+        "sec-ch-ua":
+          '"Microsoft Edge";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": '"Windows"',
+        cookie:
           cookieHeaderOrStore instanceof CookieStore
             ? cookieStore.getHeader(CAPTCHA_URL)
             : typeof cookieHeaderOrStore === "string"
               ? cookieHeaderOrStore
               : "",
-        Referer: referer,
       },
     },
   );

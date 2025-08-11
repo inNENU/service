@@ -1,0 +1,542 @@
+[
+  {
+    "index": 1,
+    "startedDateTime": "2025-08-11T13:04:28.5851711+08:00",
+    "request": {
+      "method": "POST",
+      "url": "https://authserver.nenu.edu.cn/retrieve-password/language/getLanguageTypes",
+      "headers": {
+        "content-type": "application/json",
+        "referer": "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "cookie": "route=abf2fcac076aab3980f3a6d85313807c; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN; acw_tc=ac11000117548882924597048e0610710702e20b71fc58d3798605332f11e8"
+      },
+      "body": "{}"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": "{\"code\":\"0\",\"datas\":[{\"wid\":\"0\",\"languageKey\":\"zh_CN\",\"languageName\":\"简体中文\",\"isUserLanguage\":0,\"isDefault\":null,\"isChoose\":0,\"isDelete\":null},{\"wid\":\"1\",\"languageKey\":\"en\",\"languageName\":\"English\",\"isUserLanguage\":0,\"isDefault\":null,\"isChoose\":0,\"isDelete\":null}],\"message\":\"SUCCESS\"}"
+    }
+  },
+  {
+    "index": 3,
+    "startedDateTime": "2025-08-11T13:04:29.0839837+08:00",
+    "request": {
+      "method": "POST",
+      "url": "https://authserver.nenu.edu.cn/retrieve-password/language/getStaticLanguageData",
+      "headers": {
+        "content-type": "application/json",
+        "referer": "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "cookie": "route=abf2fcac076aab3980f3a6d85313807c; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN; acw_tc=ac11000117548882924597048e0610710702e20b71fc58d3798605332f11e8"
+      },
+      "body": "{\"type\":\"CIAP_RETRIEVE\",\"languageKey\":\"zh_CN\"}"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": "{\"code\":\"0\",\"datas\":{\"minos.retrieve.activate.error.input\":\"输入信息不正确，请重新输入\",\"step2.checkTip4\":\"检测到您在我校已有身份账号，且已绑定邮箱 \",\"step2.checkTip3\":\"和邮箱 \",\"verificateInfo.searchCancel\":\"取消\",\"title.ISeeText\":\"我知道了\",\"setAccount.upStr\":\"大写字母\",\"step2.editEmail\":\"点击修改\",\"step2.unbanReason\":\"解禁原因\",\"ids.password.not.score\":\"当前密码得分低于最低要求分值，请重设！\",\"i.page.next5\":\"向后 5 页\",\"setAccount.pwdWeakText\":\"弱\",\"DINGTALK\":\"钉钉\",\"minos.retrieve.activate.email.illegal\":\"非法访问\",\"setpassword.submit\":\"下一步\",\"accountAppeal.emptyPhone\":\"手机号不能为空\",\"step2.checkTip2\":\"，如需修改，请激活后至账号与安全页面修改\",\"step0.idNoLabel\":\"证件号\",\"minos.retrieve.activate.email.frequently\":\"邮件发送太频繁\",\"accountAppeal.cancel\":\"取消\",\"step2.checkTip1\":\"检测到您在我校已有身份账号，且已绑定手机 \",\"accountUnban.manualSuccess\":\"账号解禁申请提交成功！\",\"accountAppeal.certTypeName\":\"证件类型\",\"step0.loginName\":\"请输入姓名\",\"step3.autoSuccess\":\"账号成功解禁\",\"account_appeal_success_result_notice\":\"您好，您的帐号申诉已经审核成功！您的新密码{1}。\",\"minos.retrieve.activate.tip.locked\":\"该账号已锁定\",\"step.setOtp\":\"绑定令牌\",\"accountlogin_default_account_tip\":\"设置后，当你再次使用手机号（以及微信等账号相同信息）完成认证时，系统会登录常用账号\",\"setAccount.pwdStrengthOne\":\"至少 \",\"accountAppeal.actualName\":\"真实姓名\",\"safety.unlock.account.pass.email.unbind\":\"您尚未绑定邮箱\",\"verificateInfo.inputCaptcha\":\"请输入图片验证码\",\"minos.retrieve.activate.mobile.error\":\"请输入正确的手机号\",\"otp.auth.code.invalid\":\"该安全令牌口令已失效\",\"setpassword.sussessMsg\":\"密码设置成功\",\"i.locale\":\"zh-CN\",\"setAccount.pwdStrengthtwo\":\"个字符\",\"real.person.auth.getStatus\":\"获取认证状态异常\",\"ids.password.simplePassword\":\"密码过于简单，包含字符不可全部相同，并且不能是连续的字符\",\"step0.idNo\":\"请输入证件号\",\"accountAppeal.useEmail\":\"邮箱\",\"verificateInfo.info\":\"提示信息\",\"minos.retrieve.pass.unbind\":\"用户尚未绑定手机号和邮箱\",\"step5.oneJump\":\"1秒后自动跳转到下一步\",\"setAccount.lowStr\":\"小写字母\",\"step0.loginNoLabel\":\"学号/工号\",\"accountUnban.inputMailCode\":\"请输入邮箱验证码\",\"button.next\":\"下一步\",\"ids.password.ContainsUserInfo\":\"密码包含了黑名单信息如{0}，请修改密码\",\"minos.retrieve.mobile.user\":\"用户不存在\",\"setAccount.pwdStrengthFour\":\"种\",\"otp.auth.fail\":\"操作失败\",\"step3.toLogin\":\"前往登录\",\"step0.freshBtn\":\"刷新\",\"validAccount.chooseType\":\"选择校验方式\",\"otp.auth.no.bind\":\"该账号未绑定OTP安全令牌\",\"accountAppeal.appealing1\":\"该账号正在\",\"step2.loginEmail\":\"请尽快登录邮箱并按照邮件提示，进行后续操作。\",\"minos.retrieve.account.activate.tips.phone\":\"您好{0}，您的帐号已经激活成功！ 登录帐号为{1}，请前往登录页面进行登录。\",\"minos.retrieve.password.mobile\":\"尊敬的用户，您正在找回密码，验证码：{0}，请于{1}分钟内输入，工作人员不会向您索取，请勿泄露。\",\"account_appeal_email_subject\":\"帐号申诉\",\"remote.login.notice.email.title.template\":\"异地登录提示\",\"ids.password.userInfo.element.four\":\"居民身份证号码\",\"step5.authenticationSuccess\":\"认证成功，自动跳到下一个节点\",\"accountAppeal.appealReason\":\"申诉原因\",\"accountUnban.phoneValid\":\"手机号验证\",\"i.datepicker.weeks.mon\":\"一\",\"minos.retrieve.activate.mobile.frequently\":\"获取验证码次数频繁\",\"ids.password.pwdScore.desc\":\"当前密码得分为 <span style='color:red'>{0}</span> 分；密码符合要求最低得分为 <span style='color:red'>{1}</span> 分，请修改！\",\"accountAppeal.photoCode\":\"请输入验证码\",\"verificateInfo.email\":\"请输入邮箱\",\"step2.confirmPasswordLabel\":\"再次输入新密码\",\"accountAppeal.Photo\":\"(头像面)照片\",\"out.apply.pass\":\"您好{0}，您的帐号申请已经审核成功！请使用手机号{1}前往校外用户登录。\",\"sepreator\":\"、\",\"minos.retrieve.password.email\":\"请确认您的邮箱，以完成验证（请在{0}分钟内完成，链接{1}分钟内有效）,可点击下面的链接，或链接不能点击时复制下面的链接到浏览器地址栏中以完成邮箱验证：\",\"minos.retrieve.mobile.format\":\"格式错误\",\"step0.selectIdLabel\":\"证件\",\"minos.retrieve.mobile.email\":\"邮箱账号\",\"accountAppeal.emptyCertTypeName\":\"证件类型不能为空\",\"i.select.placeholder\":\"请选择\",\"step3.pwdSuccess\":\"设置密码成功\",\"safety.unlock.account.error.input\":\"您填写的基本信息有误，请核实后再提交\",\"verificateInfo.searchPlaceHolder\":\"请输入国家名称/代码\",\"i.datepicker.selectTime\":\"选择时间\",\"setpassword.successTip\":\"密码找回成功\",\"promptModal.labelCaptcha\":\"请输入验证码，不区分大小写\",\"step1.birthLable\":\"请选择你的真实生日\",\"ids.pass.again\":\"请输入确认密码\",\"setAccount.pwdStrengthThree\":\"包含大写字母、小写字母、数字、特殊字符中的任意 \",\"EMAIL\":\"邮箱\",\"real.person.auth.getRealPersonAuthFlag\":\"获取是否支持实人认证失败\",\"otp.auth.no.qr\":\"请先扫码完成绑定\",\"otp.auth.yes.bind\":\"该账号已绑定OTP安全令牌\",\"safety.unlock.account.error.limit\":\"您账号解禁操作过于频繁，请稍后重试！\",\"minos.retrieve.password.birth.input\":\"请输入生日信息\",\"step3.jumpMsg\":\"正在前往\",\"title.checkboxText\":\"我已阅读激活须知\",\"step0.loginNoAndAlias\":\"请输入学号/工号\",\"i.datepicker.endTime\":\"结束时间\",\"title.activationInstruction\":\"激活须知\",\"setAccount.pwdMediumText\":\"中\",\"i.page.p\":\"页\",\"lengthMismatch\":\"您输入新密码字符长度或种类不符合要求\",\"step0.idNoValid\":\"请输入有效证件号\",\"accountUnban.info\":\"提示信息\",\"setpassword.speStr\":\"特殊字符\",\"step1.weixinQyValidate\":\"企业微信验证\",\"setpassword.setMsg\":\"设置密码\",\"accountUnban.phone\":\"手机号\",\"step0.loginNoAndAliasLabel\":\"学号/工号\",\"step1.withNoConfirm\":\"确定\",\"accountAppeal.accountAppealTitleing\":\"账号申诉中\",\"i.datepicker.weeks.wed\":\"三\",\"outside.school.login.template.phone\":\"用户{0}您好！您的帐号{1}在校外成功登录，登录时间：{2}，如非本人登录，建议前往“登录页面-忘记密码”修改密码。如果是您本人操作，请忽略本次提醒。\",\"accountUnban.inputName\":\"请输入姓名\",\"i.datepicker.months.m6\":\"6月\",\"i.datepicker.months.m5\":\"5月\",\"i.datepicker.months.m4\":\"4月\",\"i.datepicker.months.m3\":\"3月\",\"i.datepicker.months.m2\":\"2月\",\"i.datepicker.months.m1\":\"1月\",\"step3.loginOther\":\"使用其他账号登录\",\"i.page.prev5\":\"向前 5 页\",\"minos.retrieve.password.app.subject\":\"找回密码\",\"accountUnban.inputCountryCode\":\"请输入国家名称/代码\",\"step.submit\":\"确定\",\"retrievePassword_account_not_exist\":\"用户不存在\",\"i.transfer.titles.source\":\"源列表\",\"i.datepicker.months.m9\":\"9月\",\"step1.changeValidMsg\":\"使用其他验证方式\",\"i.datepicker.months.m8\":\"8月\",\"i.datepicker.months.m7\":\"7月\",\"otp.auth.no.user\":\"该账号不存在\",\"setpassword.titleMsg\":\"忘记密码\",\"real.person.auth.getRealPersonAuthUrl\":\"获取实人认证地址失败\",\"accountAppeal.accountAppealByEmail\":\"邮箱\",\"verificateInfo.countryCode\":\"请选择国家/地区\",\"accountUnban.step2Title\":\"解禁申请\",\"safety.unlock.account.scene.mismatch\":\"解禁条件发生变化，请刷新后重试\",\"ids.password.pwdScore.pass.desc\":\"当前密码得分为 <span style='color:green'>{0}</span> 分；密码符合要求最低得分为{1}分，请确认！\",\"certType.not.match\":\"证件类型不匹配\",\"accountUnban.email\":\"邮箱\",\"accountLogin_account_pwd_error\":\"您提供的用户名或者密码有误\",\"accountAppeal.successTip2\":\"请耐心等待结果\",\"step5.qrcodeInvalid\":\"二维码已失效，点击刷新\",\"accountUnban.step1Title\":\"身份校验\",\"step1.withNoQuestions\":\"没有预设问题，请前往个人端操作\",\"unFreeze_user_template\":\"用户您好！您的帐号已于{1}被管理员手动解冻了，请知悉！\",\"minos.retrieve.activate.mobile.code.error\":\"请输入正确的验证码\",\"step5.noNeed\":\"无须实人认证\",\"setpassword.pwdStrengthTitle\":\"强度\",\"real.person.auth.getUUID\":\"获取UUID失败\",\"minos.retrieve.pass.check\":\"校验成功\",\"step1.moreLable\":\"更多方式\",\"setAccount.matchStrOne\":\"必须包含\",\"safety.unlock.account.email.subject\":\"账号解禁\",\"accountAppeal.successTip1\":\"账号申诉提交成功！\",\"minos.retrieve.mobile.account.input\":\"请输入学号/工号\",\"safety.release.account.no.pass.template\":\"您好{0}，您的账号解禁申请未审核通过，原因如下：{1} \",\"photo.not.match\":\"上传照片不匹配\",\"password_change_notice_template\":\"您好{0}，您的密码已经变更啦!\",\"accountAppeal.emptyCode\":\"验证码不能为空\",\"step1.searchPlaceHolder\":\"请输入国家名称/代码\",\"validAccount.phone\":\"手机号找回\",\"minos.retrieve.activate.mobile.blank\":\"手机号不能为空\",\"minos.retrieve.check.user.request.limit\":\"您忘记密码找回过于频繁，请刷新后重试！\",\"safety.unlock.account.error.disable\":\"当前功能不可用，请联系管理员\",\"step1.info\":\"提示信息\",\"accountAppeal.holdingIDCard\":\"手持身份证\",\"accountAppeal.inputPlaceholder\":\"请输入\",\"accountAppeal.reacquire\":\"s后可重新获取\",\"step1.titleMsg\":\"您可以通过以下方式进行信息校验\",\"setpassword.rulesMsg\":\"密码条件\",\"dynamicCodeLogin_duplicate_mobile\":\"当前手机号关联多个帐号且未设置常用帐号，请选择帐号密码登录方式。\",\"accountAppeal.accountAppealBySMS\":\"短信\",\"i.poptip.cancelText\":\"取消\",\"minos.certType.hk.idCard\":\"港澳台居民身份证\",\"minos.retrieve.activate.pwd.input\":\"请输入密码\",\"promptModal.validTitle\":\"尝试验证次数过多\",\"minos.retrieve.activate.mobile.code.suss\":\"获取成功\",\"step1.cellphone\":\"请输入你绑定的手机号\",\"accountUnban.confirm\":\"确定\",\"i.rate.stars\":\"星\",\"setAccount.sensitivePassedMsg\":\"敏感性校验通过\",\"safety.release.account.pass.template\":\"您好{0}，您的账号解禁申请已经审核通过！请前往认证登录。\",\"i.time.before\":\"前\",\"minos.retrieve.activate.pwd.fail\":\"设置密码失败\",\"i.datepicker.month7\":\"7 月\",\"button.year\":\"年\",\"step1.getCodeMsg\":\"获取验证码\",\"i.datepicker.month8\":\"8 月\",\"i.datepicker.month9\":\"9 月\",\"i.datepicker.month3\":\"3 月\",\"minos.retrieve.activate.email.change\":\"操作成功\",\"i.datepicker.month4\":\"4 月\",\"accountAppeal.pverificationCode\":\"请输入验证码\",\"step3.activateConfirm\":\"请记下您的登录账号\",\"title.systemTitleAccount\":\"账号激活\",\"i.datepicker.month5\":\"5 月\",\"i.datepicker.month6\":\"6 月\",\"step1.warningAginCodeMsg\":\"再次发送太频繁，请稍后再试\",\"accountAppeal.pdept\":\"请输入学院/部门\",\"accountAppeal.phoneNumber\":\"手机号\",\"i.tree.emptyText\":\"暂无数据\",\"accountAppeal.emptyUserNametip\":\"真实姓名不能为空\",\"step1.qqLale\":\"QQ验证\",\"title.enter\":\"进入激活\",\"i.datepicker.weeks.sat\":\"六\",\"step2.checkPassword\":\"两次密码请输入一致\",\"step.checkInfo\":\"信息校验\",\"title.systemTitleUnban\":\"账号解禁\",\"otp.auth.freeze\":\"令牌认证方式已冻结，请{0}秒后再试！\",\"accountUnban.inputCardId\":\"请输入有效证件号码\",\"minos.retrieve.captcha.input.error\":\"验证码不正确\",\"ids.reAuth.faceAuth.title\":\"实人认证\",\"step5.authenticationFailed\":\"认证失败，点击刷新重新认证\",\"accountUnban.disabled\":\"账号禁用\",\"step0.graphical\":\"图形动态码\",\"retrievePassword.account.status.abnormal\":\"账号状态异常，无法使用找回密码\",\"question.labelBirth\":\"请选择出生日期\",\"i.datepicker.month1\":\"1 月\",\"i.datepicker.month2\":\"2 月\",\"step2.reasonPlaceholder\":\"请输入解禁原因\",\"step1.selectMsg\":\"请选择\",\"accountUnban.emailValid\":\"邮箱验证\",\"SMS\":\"短信\",\"accountAppeal.uploadPhotoSizeOverTip\":\"支持JPG/PNG格式，大小不超过\",\"step1.questionTab\":\"问题验证\",\"ids.reAuth.faceAuth.dec\":\"请使用手机微信扫码认证\",\"accountAppeal.uploadPhotoTip\":\"支持JPG/PNG格式\",\"minos.retrieve.activate.email.link.timeout\":\"链接已超时\",\"button.confirm\":\"确定\",\"dynamicCodeLogin_account_not_exist\":\"该用户尚未绑定手机号\",\"promptModal.confirmBtn\":\"我知道了\",\"minos.retrieve.mobile.send1\":\"已重复发送，请\",\"verificateInfo.codeSendingMsg\":\"验证码已发送\",\"step1.emailLable\":\"邮箱验证\",\"minos.retrieve.mobile.send2\":\"秒后重试\",\"setAccount.speStr\":\"特殊字符\",\"minos.retrieve.activate.email.blank\":\"邮箱账号不能为空\",\"account_appeal_fail_result_notice_email\":\"您好{0}，您的帐号已经申诉失败，失败原因如下。\",\"activationCheckInfo_life_expiration\":\"该帐号不支持自助激活，请联系管理员\",\"setpassword.comfirmpassword\":\"请再次输入新密码\",\"i.datepicker.year\":\"年\",\"promptModal.title\":\"请输入图形验证码\",\"step1.checkCode\":\"请输入图片中的字符，不限大小写\",\"accountAppeal.phoneVerification\":\"请填写正确的手机号\",\"accountUnban.step3Title\":\"申请完成\",\"minos.retrieve.pass.username.valid\":\"输入的新密码包含特殊字符不符合规定\",\"minos.retrieve.pass.mobile.binded\":\"请输入绑定的手机号\",\"minos.retrieve.account.activate.email\":\"请确认您的邮箱，以完成验证（请在{0}分钟内完成，链接{1}分钟内有效）,可点击下面的链接，或链接不能点击时复制下面的链接到浏览器地址栏中以完成邮箱验证：\",\"step3.goLogin\":\"去登录\",\"title.exit\":\"退出\",\"step0.loginNo\":\"请输入学号/工号\",\"step2.disabled\":\"账号禁用\",\"i.table.noDataText\":\"暂无数据\",\"accountUnban.inputReason\":\"请输入账号解禁申请的具体原因\",\"setAccount.numStr\":\"数字\",\"safety.unlock.account.status.apply\":\"账号解禁提交成功 ！\",\"accountUnban.inputMailUrl\":\"请输入邮箱地址\",\"question.questionTitle\":\"回答安全问题\",\"i.table.confirmFilter\":\"筛选\",\"step1.checkCodeLabel\":\"验证码\",\"safety.unlock.account.email.suss\":\"邮件发送成功\",\"setpassword.pwdStrengthThree\":\"包含大写字母、小写字母、数字、特殊字符中的任意 \",\"minos.retrieve.activate.email.binded\":\"邮箱已经被其他自然人绑定\",\"minos.retrieve.account.activate.email.title\":\"确认邮件\",\"otp.auth.verify.fail\":\"你已输入错误令牌{0}次，还有{1}次后令牌认证方式将冻结。\",\"accountAppeal.emptycertCode\":\"证件号码不能为空\",\"minos.retrieve.activate.tip.frozen\":\"该账号已冻结\",\"activationCheckInfo_activation_notice\":\"1、在使用统一身份认证系统登录前，请确保完成账号激活流程。\\n2、在激活过程中，您需设置符合强密码要求的密码。\\n3、为完成激活，系统将采集您的手机号、邮箱等个人信息，以用于信息通知、密码找回及安全验证等场景。\\n4、激活成功后，您可使用 \\\"学工号\\\" 和所设置的密码，登录统一身份认证系统。\\n5、如在激活过程中遇到问题，请及时联系管理员\",\"setpassword.pwdWeakText\":\"弱\",\"step1.weLinkValidate\":\"WeLink验证\",\"accountAppeal.emailVerification\":\"请填写正确的电子邮箱地址\",\"accountAppeal.appealing\":\"以上方式都不能用？请进行\",\"accountAppeal.puserNmae\":\"请输入真实姓名\",\"accountAppeal.uploadPhoto\":\"申诉照片\",\"error.errorText\":\"此页面已经超时或失效\",\"step0.qrReLogin\":\"二维码已失效,请刷新二维码重新扫码登录\",\"accountAppeal.emailPlaceholder\":\"请输入电子邮箱地址\",\"photo.file.empty\":\"照片文件为空\",\"title.preQuestion\":\"暂未预设问题，请选择其他方式进行校验。如需使用此方式请在【个人中心】进行预设\",\"accountUnban.nodata\":\"暂无数据\",\"step1.emailValid\":\"请输入正确的绑定邮箱\",\"setpassword.passwordRule\":\"密码不符合设置规则\",\"step2.expired\":\"账号过期\",\"accountAppeal.phonePlaceholder\":\"请输入手机号\",\"setpassword.lowStr\":\"小写字母\",\"minos.retrieve.activate.tip.expired\":\"该账号已过期\",\"bind_email\":\"亲爱的用户{0}：您好！   验证码：{1}，请在页面指定位置填写验证码完成邮箱绑定  验证码过期时间：{2}。\",\"step1.birthLableLabel\":\"选择生日\",\"step2.freeze\":\"账号冻结\",\"minos.retrieve.activate.timeout\":\"请求已超时，返回到第一步页面重试\",\"i.transfer.filterPlaceholder\":\"请输入搜索内容\",\"accountAppeal.appealTitle\":\"账号申诉\",\"safety.unlock.account.status.success\":\"账号成功解禁\",\"step1.phoneHolderText\":\"请输入短信验证码\",\"accountUnban.freeze\":\"账号冻结\",\"minos.retrieve.activate.email.error\":\"请输入正确的邮箱账号\",\"safety.unlock.account.error.status\":\"系统检测到您的账号不符合解禁条件\",\"step1.code\":\"请输入验证码\",\"account.appealIng.request\":\"请求不合法\",\"minos.retrieve.pass.email.unbind\":\"您尚未绑定邮箱\",\"i.datepicker.weekStartDay\":\"0\",\"accountAppeal.isAutoBindOtherAccount\":\"申诉成功后，若手机号或邮箱无其他人绑定，自动绑定此账号\",\"step1.sendToEmail\":\"发送验证信息至邮箱\",\"accountUnban.autoSuccess\":\"账号成功解禁\",\"minos.account.appealIng.request.limit\":\"账号申诉操作过于频繁，请稍后重试\",\"verificateInfo.tabEmail\":\"邮箱验证\",\"safety.unlock.account.status.applying\":\"账号解禁正在审批中 ！\",\"setpassword.gologinTip\":\"即将前往登录页\",\"dynamicCodeLogin_phone_not_bound\":\"该用户尚未绑定手机号\",\"safety.unlock.account.pass.email.binded\":\"请输入绑定的邮箱\",\"step1.validTips\":\"您的账号已预置手机号{phoneNo}，请先完成短信验证码验证。\",\"step_real_person.goValid\":\"前往验证\",\"verificateInfo.validateCode\":\"请输入验证码\",\"accountAppeal.usePhone\":\"短信\",\"certTypeCode.not.match\":\"证件类型编码不匹配\",\"minos.outer.registry.request.limit\":\"手机注册码操作过于频繁，请稍后重试\",\"accountAppeal.sendCodeTip\":\"获取验证码\",\"accountAppeal.certCode\":\"证件号码\",\"accountAppeal.clickUploadTip\":\"上传图片\",\"promptModal.presetQusetionTitle\":\"确定预设问题吗？\",\"ids.password.userInfo.element.five\":\"自定义字符\",\"minos.retrieve.account.activate.email.code\":\"尊敬的用户，您正在绑定邮箱，验证码：{0}，请于{1}分钟内输入，工作人员不会向您索取，请勿泄露。\",\"step0.captchaValid\":\"请输入验证码\",\"accountAppeal.selectPlaceholder\":\"请选择\",\"i.table.noFilteredDataText\":\"暂无筛选结果\",\"minos.retrieve.activate.send.error\":\"发送失败\",\"QYWECHAT\":\"企业微信\",\"baseModal.okBtnText\":\"确定\",\"accountAppeal.emailAddress\":\"邮箱地址\",\"promptModal.knowContentSuffix\":\"之后再来尝试\",\"i.time.days\":\"天\",\"step_otp.titleTips\":\"请打开 微信小程序 “数盾OTP”，使用扫描二维码功能获取安全令牌。\",\"minos.retrieve.pass.mobile.error\":\"请输入正确的绑定手机号\",\"i.table.resetFilter\":\"重置\",\"accountAppeal.correctEmailAddress\":\"请填写正确的邮箱地址\",\"out.apply.send\":\"您好{0}，您有一条校外用户帐号申请待审核。\",\"step2.confirmPassword\":\"请再次确认新密码\",\"i.modal.cancelText\":\"取消\",\"setpassword.sensitivePassedMsg\":\"敏感性校验通过\",\"i.datepicker.weeks.thu\":\"四\",\"step_otp.questionToolTip\":\"若手机与服务器时钟误差超过30s，则会导致验证失败，需前往手机设置中校准时钟。\",\"minos.retrieve.outer.error.file.invalid\":\"请刷新页面后重新尝试\",\"step1.mailCode\":\"邮箱验证码\",\"minos.retrieve.account.activate.tips.email\":\"您好{0}，您的帐号已经激活成功！ 登录帐号为{1}，请前往登录页面进行登录。\",\"step1.warningCodeMsg\":\"获取验证码太频繁，请稍后再试\",\"step1.cellphoneValid\":\"请输入正确格式的手机号\",\"accountAppeal.contactInfo\":\"联系方式\",\"step5.authTip\":\"认证完成后，自动跳转到下一个节点\",\"ids.password.change.fail.samePwd\":\"不能与原密码一致\",\"step.isSetCurAccount\":\"设置当前账号为常用账号\",\"step1.emailLabel\":\"绑定邮箱\",\"step1.cellphoneLabel\":\"手机号\",\"step1.topMsg\":\"如果没有绑定邮箱、手机或没有预设问题，请联系管理员。进行人工找回密码\",\"validAccount.weixinQy\":\"企业微信找回\",\"accountAppeal.idCard\":\"身份证\",\"step1.checkToEmail\":\"验证邮件已发送至\",\"verificateInfo.realPerson\":\"实人认证\",\"accountUnban.waitForResult\":\"请耐心等待管理员审核结果，或\",\"button.warningTip\":\"警告\",\"i.page.prev\":\"上一页\",\"step1.birthMsg\":\"请选择出生日期\",\"accountAppeal.correctPhoneNumber\":\"请填写正确的手机号\",\"validAccount.weLink\":\"WeLink找回\",\"step0.loginLetterNoLabel\":\"学号/工号/录取通知书号\",\"minos.retrieve.pass.invalid\":\"非法请求，请刷新重试\",\"step2.checkStrongMsg\":\"密码不符合设置规则\",\"minos.retrieve.password.birth.error\":\"您的回答与存档信息不符\",\"i.time.minutes\":\"分钟\",\"promptModal.validContent\":\"您输入错误安全信息的次数过多,请60分钟稍后再试\",\"accountUnban.goLogin\":\"前往登录\",\"title.countrySelect\":\"选择国家和地区代码\",\"step0.pleaseInput\":\"请输入\",\"minos.retrieve.activate.mobile.code.fail\":\"获取验证码失败\",\"step1.withNoCancel\":\"取消\",\"accountUnban.expired\":\"账号过期\",\"minos.certType.travel.evidence\":\"旅行证据\",\"minos.retrieve.outer.error.image.size\":\"凭证图片大小超过限制\",\"accountAppeal.appealReasonPlaceholder\":\"请输入申诉原因，如手机号更换\",\"bind_mobile\":\"用户绑定手机。验证码：{1}\",\"minos.retrieve.mobile.timeout\":\"页面会话已超时\",\"i.time.after\":\"后\",\"step.checkIdentify\":\"身份校验\",\"minos.retrieve.activate.pwd.suss\":\"设置密码成功\",\"error.errorMsg\":\"系统异常，请联系管理员或稍后再试\",\"freeze_ip_template\":\"由于IP：{0}登录过于频繁被冻结：冻结开始时间{1}，预期解冻时间：{2}\",\"step2.titleMsgRight\":\"的密码\",\"minos.retrieve.appeal.mobile\":\"尊敬的用户，您正在进行账号申诉，验证码：{0}，请于{1}分钟内输入，工作人员不会向您索取，请勿泄露。\",\"step0.idNumber\":\"证件号码\",\"i.datepicker.clear\":\"清空\",\"accountUnban.chooseConutryCode\":\"选择国家和地区代码\",\"i.time.seconds\":\"秒\",\"step1.qqOrweixinValidate\":\"点击进行验证\",\"step.step3_pc\":\"找回成功\",\"setAccount.labelPasswordFour\":\"推荐字母、数字及特殊符号的密码组合，系统为您校验密码得分。\",\"step.successMsg\":\"发送成功\",\"validAccount.account\":\"请输入您的账号\",\"accountUnban.otherType\":\"其他校验方式\",\"setpassword.matchStrOne\":\"必须包含\",\"accountAppeal.clickChangeTip\":\"点击更换\",\"minos.retrieve.mobile.pwd.suss\":\"密码修改成功\",\"safety.unlock.account.pass.mobile.unbind\":\"您尚未绑定手机号\",\"validAccount.question\":\"安全问题找回\",\"step_otp.inputTips\":\"请输入安全令牌\",\"account_unlock_email_subject\":\"账号解禁\",\"accountAppeal.appealingResult\":\"请耐心等待结果\",\"step0.captchaLabel\":\"验证码\",\"accountAppeal.scommit\":\"提交成功\",\"INBOX\":\"收件箱\",\"minos.retrieve.mobile.code.timeout\":\"验证码错误或已超时\",\"ids.reAuth.faceAuth.fail\":\"抱歉，你没有通过人脸认证，请重新尝试，或联系管理员处理\",\"i.datepicker.weeks.fri\":\"五\",\"i.time.just\":\"刚刚\",\"step.chooseActivateMethod\":\"信息校验\",\"minos.retrieve.activate.pwd.strength\":\"密码不符合强度要求\",\"promptModal.validateCode\":\"请输入验证码\",\"verificateInfo.defaultCountryCode\":\"+86\",\"config.qr.code.invitation.desc\":\"请扫描二维码\",\"CAMPUSHOY\":\"今日校园\",\"step1.knowContentSuffix\":\"之后再来尝试\",\"remote.login.notice.template\":\"用户您好！在学校信息系统安全检查过程中，您的身份认证账号在{2}成功登录，登录时间：{3}，如非本人登录，建议前往登录页面修改密码。如果是您本人操作，请忽略本次提醒。账号如借给他人使用造成网络安全事件，需承担由此带来的后果。\",\"minos.outer.registry.mobile\":\"尊敬的用户，您正在进行校外注册申请，验证码：{0}，请于{1}分钟内输入，工作人员不会向您索取，请勿泄露。\",\"ids.pass.notsame\":\"确认密码与新密码输入不一致\",\"setpassword.labelPasswordOne\":\"密码得分>= \",\"verificateInfo.next\":\"下一步\",\"step.bindEnail\":\"绑定邮箱\",\"promptModal.presetQusetionConcent\":\"没有预设问题，请前往个人端操作\",\"i.rate.star\":\"星\",\"accountUnban.step0Title\":\"信息校验\",\"minos.retrieve.password.email.title\":\"找回密码\",\"accountUnban.loginOther\":\"使用其他账号登录\",\"minos.retrieve.password.not.exist.address\":\"您的账号在通讯录中不存在，请尝试使用其它方式找回密码。\",\"accountAppeal.changeImg\":\"更换图片\",\"accountAppeal.countryCode\":\"国家代码\",\"unbind_mobile_notice_user_template\":\"您的手机已与统一身份认证解绑，如非本人操作请及时与信息中心联系。\",\"step1.knowContentPrefix\":\"您输入的错误信息次数过多，请\",\"copyright.description\":\"东北师范大学\",\"setpassword.checkPassword\":\"两次密码请输入一致\",\"question.inputAnswer\":\"请输入答案\",\"userName.not.match\":\"用户姓名不匹配\",\"safety.unlock.account.error.channel\":\"当前功能不可用，请联系管理员\",\"step.bindPhone\":\"绑定手机\",\"step0.captcha\":\"请输入图片中的字符,不限大小写\",\"minos.retrieve.appeal.error.image.format\":\"申诉图片未通过格式校验\",\"minos.retrieve.captcha.phone..input.error\":\"验证码或者手机号不正确\",\"minos.retrieve.activate.tip.disable\":\"该账号已停用\",\"minos.combineLoginCode.weixinQY\":\"企业微信\",\"step2.delayTime\":\"账号延期时长\",\"title.systemTitlePass\":\"忘记密码\",\"setpassword.labelPasswordThree\":\"当前得分：\",\"step1.email\":\"请输入你绑定的邮箱\",\"accountAppeal.commitBtnText\":\"提交申诉\",\"accountAppeal.emptyDeptName\":\"学院/部门不能为空\",\"accountAppeal.deptName\":\"学院/部门\",\"accountAppeal.pphone\":\"请输入正确的手机号\",\"step5.phoneComplete\":\"请在手机端完成认证\",\"button.delete\":\"删除\",\"step2.passwordLabel\":\"新密码\",\"minos.certType.passport\":\"护照\",\"step.step4_pc\":\"实人认证\",\"i.transfer.notFoundText\":\"列表为空\",\"step.nextBtn\":\"下一步\",\"ids7.retrievePassword.not.support.RealPersonAuth\":\"找回密码需进行实人认证，请前往PC端完成流程！\",\"accountAppeal.oneCard\":\"一卡通\",\"minos.retrieve.ques.error.count\":\"错误次数过多\",\"setpassword.pwdStrengthFour\":\"种\",\"step1.mailUrlHolderText\":\"请输入邮箱地址\",\"accountAppeal.picText\":\"照片\",\"minos.retrieve.pass.mobile.unbind\":\"您尚未绑定手机号\",\"WeChatService\":\"微信服务号\",\"safety.unlock.account.pass.mobile.binded\":\"请输入绑定的手机号\",\"out.apply.reject\":\"您好{0}，您的帐号申请已驳回！驳回原因：{1}。\",\"i.datepicker.month12\":\"12 月\",\"minos.retrieve.outer.error.image.format\":\"凭证图片未通过格式校验\",\"i.datepicker.month11\":\"11 月\",\"title.systemAccountTitle\":\"账号申诉\",\"i.datepicker.month10\":\"10 月\",\"verificateInfo.emailValid\":\"邮箱格式错误\",\"step1.knowError\":\"尝试验证次数过多\",\"safety.unlock.account.status.fail\":\"账号解禁提交失败 ！\",\"step.setPassowrd\":\"设置账号信息\",\"minos.retrieve.activate.mobile.code.invalid\":\"输入错误次数过多，已失效\",\"setpassword.upStr\":\"大写字母\",\"step0.captchaValidLabel\":\"验证码\",\"step3.activateSuccess\":\"账号激活成功！\",\"accountUnban.inputCaptcha\":\"请输入图形动态码\",\"minos.retrieve.mobile.input.binded\":\"请输入账号已绑定的\",\"step2.titleMsgLeft\":\"请设置账号\",\"minos.retrieve.appeal.error.image.size\":\"申诉图片大小超过限制\",\"setpassword.success\":\"找回成功\",\"activationCheckInfo_activation_notice_title\":\"欢迎使用账号激活服务：\",\"verificateInfo.mobile\":\"请输入手机号\",\"i.datepicker.startTime\":\"开始时间\",\"ids.reAuth.faceAuth.success\":\"人脸校验成功\",\"accountAppeal.errorEmail\":\"请输入正确的电子邮箱地址\",\"minos.retrieve.activate.mobile.binded\":\"手机号已经被其他自然人绑定\",\"retrievePassword_account_request_limit\":\"您获取验证码操作过于频繁，请刷新后重试！\",\"step1.mailCodeHolderText\":\"请输入邮箱验证码\",\"button.save\":\"保存\",\"i.poptip.okText\":\"确定\",\"accountUnban.inputMsgCode\":\"请输入短信验证码\",\"i.transfer.titles.target\":\"目的列表\",\"minos.retrieve.activate.error.tip\":\"该账号不支持自助激活，请联系管理员\",\"minos.retrieve.activate.email.fail\":\"邮件发送失败\",\"step1.mailUrl\":\"邮箱地址\",\"step1.questionLable\":\"请输入答案\",\"step1.noMatchData\":\"无匹配数据\",\"unbind_email_notice_user_template\":\"您的邮箱已与统一身份认证解绑，如非本人操作请及时与信息中心联系。\",\"accountAppeal.verificationCode\":\"验证码\",\"retrievePassword_account_status_abnormal\":\"帐号状态异常，无法使用找回密码\",\"error.refresh\":\"请重试\",\"minos.retrieve.appeal.email.subject\":\"账号申诉\",\"i.page.goto\":\"跳至\",\"dynamicCodeLogin_account_not_default\":\"该帐号或手机号绑定的帐号不是常用帐号，不能使用动态码登录，如需登录该帐号请使用密码登录。\",\"step_otp.systemTips\":\"系统时间\",\"step1.simVerifiCodeLabel\":\"验证码\",\"step.unbanApply\":\"解禁申请\",\"accountAppeal.picalt\":\"图像\",\"accountUnban.inputPhone\":\"请输入手机号\",\"title.cancel\":\"取消\",\"step2.password\":\"请输入新密码\",\"photo.fuzzy\":\"上传照片模糊\",\"otp.auth.success\":\"操作成功\",\"accountStatusError_account_not_activated\":\"该帐号未激活，请先完成帐号激活再登录\",\"step2.bindTipOtp\":\"检测到您已绑定OTP，如需解绑，激活后至账号与安全页面解绑\",\"safety.unlock.account.pass.check\":\"验证码校验成功\",\"step0.idType\":\"证件类型\",\"ids.password.userInfo.element.three\":\"用户手机号\",\"setpassword.pwdStrengthOne\":\"至少 \",\"setpassword.pwdStrengthtwo\":\"个字符\",\"activationCheckInfo_account_not_exist\":\"输入信息不正确，请重新输入\",\"question.birthTitle\":\"验证您的出生日期以继续\",\"accountStatusError_account_is_frozen\":\"账号已冻结，预计解冻时间：{0}\",\"verificateInfo.tabPhone\":\"手机号验证\",\"minos.combineLoginCode.weixinMP\":\"微信服务号\",\"ids.password.userInfo.element.one\":\"用户账号\",\"step0.loginLetterNo\":\"请输入学号/工号/录取通知书号\",\"accountAppeal.enterDept\":\"请输入学院/部门，没有则填写无\",\"step.step0_pc\":\"输入账号\",\"step1.dingTalkValidate\":\"钉钉验证\",\"step1.getCodeMsgInfo\":\"s后重发\",\"step0.title\":\"验证码\",\"title.exitMsg\":\"退出后数据将不会被保留\",\"step1.codeLabel\":\"短信验证码\",\"step1.viewEmail\":\"查看邮件\",\"step1.resentToEmail\":\"再次发送\",\"verificateInfo.loginNo\":\"请输入学号/工号\",\"minos.retrieve.activate.pwd.title\":\"设置密码\",\"deviceLogin_not_bind\":\"未查询到绑定设备信息\",\"minos.retrieve.captcha.error\":\"验证码错误\",\"step2.unbanType\":\"解禁类型\",\"validAccount.accountAndAlias\":\"请输入您的账号/别名\",\"minos.retrieve.activate.tip.activation\":\"该帐号已激活\",\"outside.school.login.template.email\":\"用户{0}您好！您的帐号{1}在校外成功登录，登录时间：{2}，如非本人登录，建议前往“登录页面-忘记密码”修改密码。如果是您本人操作，请忽略本次提醒。\",\"ids.password.userInfo.element.two\":\"用户邮箱\",\"minos.retrieve.appeal.send.code.limit\":\"验证码已重复发送，请{0}秒后重试\",\"accountUnban.unbanType\":\"解禁类型\",\"verificateInfo.mobileValid\":\"手机号格式错误\",\"verificateInfo.remark\":\"备注：海外手机请按“国家代码手机号”的格式输入，如：65888888888\",\"i.datepicker.ok\":\"确定\",\"button.edit\":\"编辑\",\"i.modal.okText\":\"确定\",\"safety.unlock.account.error.channel.unbind\":\"您尚未绑定身份校验信息，请联系管理员\",\"verificateInfo.sendCodeMsg\":\"发送验证码\",\"accountAppeal.baseInfo\":\"基本信息\",\"button.cancel\":\"取消\",\"accountAppeal.accountAppealinging\":\"该账号正在账号申诉中，请耐心等待结果\",\"setAccount.pwdStrengthTitle\":\"强度\",\"i.datepicker.months.m12\":\"12月\",\"minos.retrieve.system.error\":\"系统异常\",\"accountAppeal.appealSubTitle\":\"为保障您的账号申诉成功，请认真填写以下信息！\",\"i.page.item\":\"条\",\"i.time.hours\":\"小时\",\"accountAppeal.resultNotice\":\"结果通知\",\"activationCheckInfo_name_not_exist\":\"输入信息不正确，请重新输入\",\"accountAppeal.appealsubTitle\":\"为确保申诉成功，请认真填写以下信息!\",\"ids.password.new.illegal\":\"输入的新密码包含非英文键盘上的字符，不符合规定\",\"i.page.total\":\"共\",\"accountStatusError_account_is_disabled\":\"该帐号已经被禁用\",\"verificateInfo.other\":\"其他校验方式\",\"step3.manualSuccess\":\"账号解禁提交成功！\",\"title.realPersonAuth\":\"实人认证\",\"accountAppeal.where\":\"所在面\",\"ids.password.not.strength\":\"当前密码强度不符合要求，请及时修改密码\",\"accountAppeal.errorcertCode\":\"证件号码格式不正确\",\"step1.knowTitle\":\"验证您的出生日期以继续\",\"freeze_user_template\":\"用户{0}由于登录过于频繁，将被冻结：冻结开始时间{1}，预期解冻时间：{2}\",\"step2.loadingMsg\":\"用户信息保存中...\",\"step.activateSuccess\":\"激活完成\",\"accountAppeal.pcertCode\":\"请输入正确证件号码\",\"minos.retrieve.pass.email.error\":\"请输入正确的绑定邮箱\",\"minos.certType.other.card\":\"其他\",\"baseModal.cancelBtnText\":\"取消\",\"i.page.next\":\"下一页\",\"accountUnban.next\":\"下一步\",\"minos.retrieve.ques.error\":\"您的一个答案或多个答案与存档的安全信息不符\",\"step1.knowOk\":\"我知道了\",\"validAccount.email\":\"邮箱找回\",\"minos.retrieve.mobile.pwd.fail\":\"密码修改失败\",\"ids.password.userInfo.element.seven\":\"相同或连续三位数字/字母\",\"safety.unlock.account.pass.mobile.error\":\"请输入正确的绑定手机号\",\"accountAppeal.accountAppealTitle\":\"账号申诉\",\"step3.waitForResult\":\"请耐心等待管理员审核结果，或\",\"i.datepicker.datePanelLabel\":\"[yyyy年] [m月]\",\"minos.certType.idCard\":\"居民身份证\",\"i.datepicker.selectDate\":\"选择日期\",\"step2.emailError\":\"邮箱填写错误了，怎么办？\",\"ids.pass.new.enter\":\"请输入新密码\",\"accountStatusError_account_is_abolish\":\"您提供的用户名或者密码有误\",\"accountAppeal.scertTypeName\":\"请选择证件类型\",\"accountAppeal.validEmailAddr\":\"请输入正确的邮箱地址\",\"setpassword.password\":\"请输入新密码\",\"step.step1_pc\":\"信息校验\",\"accountAppeal.pupload\":\"上传\",\"setpassword.numStr\":\"数字\",\"minos.format.info.phone.error\":\"您输入的手机号长度有误，请注意再次确认。\",\"setpassword.pwdStrongText\":\"强\",\"i.datepicker.weeks.tue\":\"二\",\"accountUnban.selectCardType\":\"请选择证件类型\",\"step1.resentToEmailInfo\":\"s后再发送\",\"minos.retrieve.mobile.input\":\"请输入\",\"minos.retrieve.pass.email.binded\":\"请输入绑定的邮箱\",\"setAccount.pwdStrongText\":\"强\",\"setpassword.labelPasswordTwo\":\"分，\",\"title.confirmExit\":\"确定要退出吗？\",\"step1.weixinLable\":\"微信验证\",\"minos.retrieve.captcha.email.input.error\":\"验证码或者邮箱不正确\",\"step1.isSureQuesTitle\":\"确定预设问题吗\",\"otp.auth.no.params\":\"参数不能为空\",\"step_otp.bindGuide\":\"绑定指南\",\"i.datepicker.weeks.sun\":\"日\",\"ids.reAuth.faceAuth.no.certNo\":\"您的账户尚未绑定身份证号码，无法完成实人认证，请联系管理员处理！\",\"validAccount.chooseMethod\":\"校验信息\",\"step0.loginNameLabel\":\"姓名\",\"safety.unlock.account.pass.email.error\":\"请输入正确的绑定邮箱\",\"i.page.items\":\"条\",\"step3.titleMsg\":\"密码找回成功\",\"WELINK\":\"WeLink\",\"account.appealIng\":\"该账号正在账号申诉中，请耐心等待结果\",\"get_dynamic_code_template\":\"您好，您正在使用验证码进行认证，验证码为{1}，请勿将该验证码告诉除您之外的任何人！\",\"step3.approvalNow\":\"账号解禁正在审批中！\",\"step1.phoneLable\":\"手机号验证\",\"i.page.page\":\"条/页\",\"accountUnban.resend\":\"重新发送\",\"step1.operMsg\":\"请尽快登录邮箱并按照邮件提示，进行后续操作。\",\"step5.alipayScane1\":\"请使用\",\"step5.alipayScane2\":\"扫描二维码\",\"verificateInfo.questionSubTitle\":\"安全问题\",\"accountUnban.inputAccount\":\"请输入学号/工号\",\"step0.qrInvalid0\":\"二维码已失效\",\"step0.qrInvalid1\":\"点击刷新\",\"step1.inputPhone\":\"请输入你的手机号\",\"accountUnban.chooseMethod\":\"校验信息\",\"account_appeal_fail_result_notice\":\"您好{0}，您的帐号已经申诉失败，失败原因如下。\",\"accountAppeal.emptyEmail\":\"电子邮箱地址不能为空\",\"minos.retrieve.activate.pwd.same\":\"输入的密码不一致\",\"step0.qrSuccess0\":\"扫描成功\",\"minos.retrieve.account.activate.mobile\":\"尊敬的用户，您正在绑定手机号码，验证码：{0}，请于{1}分钟内输入，工作人员不会向您索取，请勿泄露。\",\"step0.qrSuccess1\":\"请在手机上进行人脸认证\",\"step_otp.codeErrMsg\":\"安全令牌不能为空\",\"i.datepicker.months.m10\":\"10月\",\"i.datepicker.months.m11\":\"11月\",\"step.skipText\":\"跳过\",\"accountAppeal.sendPhoneCodeSuccess\":\"验证码已发送，请查看手机短信\",\"account_appeal_success_result_notice_email\":\"您好{0}，您的帐号申诉已经审核成功！您的新密码{1}。\",\"setpassword.pwdMediumText\":\"中\",\"step.applySuccess\":\"申请完成\",\"accountUnban.jumpMsg\":\"正在前往\",\"minos.retrieve.mobile.mobile\":\"手机号\",\"accountUnban.getMsgCode\":\"获取验证码\",\"safety.unlock.account.apply.template\":\"尊敬的用户{0}，您正在申请账号解禁，验证码：{1}，请于{2}分钟内输入，工作人员不会向您索取，请勿泄露。\",\"accountAppeal.successTip\":\"账号申诉提交成功！请耐心等待结果\",\"validAccount.dingTalk\":\"钉钉找回\",\"i.select.noMatch\":\"无匹配数据\",\"step.step2_pc\":\"设置密码\",\"activationCheckInfo_certificate_not_exist\":\"输入信息不正确，请重新输入\",\"safety.unlock.account.pass.invalid\":\"非法请求，请刷新重试\",\"safety.unlock.account.mobile.suss\":\"验证码发送成功\",\"i.select.loading\":\"加载中\",\"setpassword.goLogin\":\"前往登录\",\"verificateInfo.birthErrMsg\":\"请选择生日\",\"minos.retrieve.activate.email.suss\":\"邮件发送成功\",\"promptModal.knowContentPrefix\":\"您输入的错误信息次数过多，请\",\"accountAppeal.sendEmailCodeSuccess\":\"验证码已发送，请查看电子邮箱\",\"accountUnban.approvalNow\":\"账号解禁申请正在审批中！\",\"minos.retrieve.activate.gettoken\":\"获取token失败\",\"ids7.activate.not.support.RealPersonAuth\":\"激活需进行实人认证，请前往PC端完成流程！\",\"verificateInfo.defaultCountryName\":\"中国大陆\",\"title.tipText\":\"关闭此弹窗后，可点击页面右上角按钮再次查看\",\"i.datepicker.month\":\"月\",\"verificateInfo.total\":\"共 {step} 步\",\"step_otp.viewGuide\":\"查看指南\",\"accountAppeal.resendCodeTip\":\"重新获取验证码\",\"i.table.clearFilter\":\"全部\",\"title.know\":\"知道了\",\"step2.bindTipOtpJump\":\"，如需换绑，激活后至账号与安全页面换绑\",\"step0.qrName1\":\"进行人脸识别验证\",\"step0.pleaseSelect\":\"请选择\",\"step0.qrName0\":\"请用支付宝扫描二维码\",\"accountUnban.chooseType\":\"选择校验方式\"},\"message\":\"SUCCESS\"}"
+    }
+  },
+  {
+    "index": 4,
+    "startedDateTime": "2025-08-11T13:04:29.9785260+08:00",
+    "request": {
+      "method": "GET",
+      "url": "https://authserver.nenu.edu.cn/retrieve-password/generateCaptcha?ltId=8107853607403327&codeType=2",
+      "headers": {
+        "referer": "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "cookie": "route=abf2fcac076aab3980f3a6d85313807c; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN; acw_tc=ac11000117548882924597048e0610710702e20b71fc58d3798605332f11e8"
+      },
+      "body": ""
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "image/jpeg"
+      },
+      "body": "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"
+    }
+  },
+  {
+    "index": 5,
+    "startedDateTime": "2025-08-11T13:04:29.9782415+08:00",
+    "request": {
+      "method": "POST",
+      "url": "https://authserver.nenu.edu.cn/retrieve-password/common/getConsoleConfig",
+      "headers": {
+        "content-type": "application/json",
+        "referer": "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "cookie": "route=abf2fcac076aab3980f3a6d85313807c; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN; acw_tc=ac11000117548882924597048e0610710702e20b71fc58d3798605332f11e8"
+      },
+      "body": "{\"type\":\"retrievePasswordPageStyle\"}"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": "{\"code\":\"0\",\"datas\":{\"retrievePasswordPageStyle\":\"1\"},\"message\":\"SUCCESS\"}"
+    }
+  },
+  {
+    "index": 6,
+    "startedDateTime": "2025-08-11T13:04:29.9788256+08:00",
+    "request": {
+      "method": "POST",
+      "url": "https://authserver.nenu.edu.cn/retrieve-password/common/getConsoleConfig",
+      "headers": {
+        "content-type": "application/json",
+        "referer": "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "cookie": "route=abf2fcac076aab3980f3a6d85313807c; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN; acw_tc=ac11000117548882924597048e0610710702e20b71fc58d3798605332f11e8"
+      },
+      "body": "{\"type\":\"aliasBlackEnable,accountAppealEnable\"}"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": "{\"code\":\"0\",\"datas\":{\"aliasBlackEnable\":\"1\",\"accountAppealEnable\":\"1\"},\"message\":\"SUCCESS\"}"
+    }
+  },
+  {
+    "index": 7,
+    "startedDateTime": "2025-08-11T13:04:29.9795190+08:00",
+    "request": {
+      "method": "GET",
+      "url": "https://authserver.nenu.edu.cn/retrieve-password/tenant/info?type=1",
+      "headers": {
+        "content-type": "application/json",
+        "referer": "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "cookie": "route=abf2fcac076aab3980f3a6d85313807c; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN; acw_tc=ac11000117548882924597048e0610710702e20b71fc58d3798605332f11e8"
+      },
+      "body": ""
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json;charset=UTF-8"
+      },
+      "body": "{\"schoolLogoUrl\":\"https://authserver.nenu.edu.cn/oss/schoolIcon/clientPcLogo.png\",\"bindMethod\":\"mobile\",\"retrieveMethod\":\"1,2\",\"authContextPath\":\"\"}"
+    }
+  },
+  {
+    "index": 9,
+    "startedDateTime": "2025-08-11T13:04:30.4908787+08:00",
+    "request": {
+      "method": "GET",
+      "url": "https://authserver.nenu.edu.cn/retrieve-password/realPersonAuth/getRealPersonEnable?authScenes=1",
+      "headers": {
+        "content-type": "application/json",
+        "referer": "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "cookie": "route=abf2fcac076aab3980f3a6d85313807c; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN; acw_tc=ac11000117548882924597048e0610710702e20b71fc58d3798605332f11e8"
+      },
+      "body": ""
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": "{\"datas\":false,\"code\":\"0\",\"message\":null}"
+    }
+  },
+  {
+    "index": 10,
+    "startedDateTime": "2025-08-11T13:04:40.1860124+08:00",
+    "request": {
+      "method": "POST",
+      "url": "https://authserver.nenu.edu.cn/retrieve-password/passwordRetrieve/checkUserInfo",
+      "headers": {
+        "content-type": "application/json",
+        "referer": "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "cookie": "route=abf2fcac076aab3980f3a6d85313807c; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN; acw_tc=ac11000117548882924597048e0610710702e20b71fc58d3798605332f11e8"
+      },
+      "body": "{\"accountId\":\"\",\"loginNo\":\"2021102304\",\"cellphone\":\"\",\"email\":\"\",\"hideCellphone\":\"\",\"hideEmail\":\"\",\"captchaId\":\"8107853607403327\",\"captcha\":\"X1g\",\"code\":\"\",\"type\":\"cellphone\",\"password\":\"\",\"confirmPassword\":\"\",\"sign\":\"\"}"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": "{\"datas\":null,\"code\":\"2106990000\",\"message\":\"验证码错误\"}"
+    }
+  },
+  {
+    "index": 11,
+    "startedDateTime": "2025-08-11T13:04:40.7475515+08:00",
+    "request": {
+      "method": "GET",
+      "url": "https://authserver.nenu.edu.cn/retrieve-password/generateCaptcha?ltId=9897331358015691&codeType=2",
+      "headers": {
+        "referer": "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "cookie": "route=abf2fcac076aab3980f3a6d85313807c; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN; acw_tc=ac11000117548882924597048e0610710702e20b71fc58d3798605332f11e8"
+      },
+      "body": ""
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "image/jpeg"
+      },
+      "body": "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"
+    }
+  },
+  {
+    "index": 12,
+    "startedDateTime": "2025-08-11T13:04:47.6330857+08:00",
+    "request": {
+      "method": "POST",
+      "url": "https://authserver.nenu.edu.cn/retrieve-password/passwordRetrieve/checkUserInfo",
+      "headers": {
+        "content-type": "application/json",
+        "referer": "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "cookie": "route=abf2fcac076aab3980f3a6d85313807c; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN; acw_tc=ac11000117548882924597048e0610710702e20b71fc58d3798605332f11e8"
+      },
+      "body": "{\"accountId\":\"\",\"loginNo\":\"2021102304\",\"cellphone\":\"\",\"email\":\"\",\"hideCellphone\":\"\",\"hideEmail\":\"\",\"captchaId\":\"9897331358015691\",\"captcha\":\"7z4v\",\"code\":\"\",\"type\":\"cellphone\",\"password\":\"\",\"confirmPassword\":\"\",\"sign\":\"\"}"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": "{\"datas\":\"{\\\"appealSign\\\":\\\"989f7ba841a54fecb786b81a4d58aa59\\\",\\\"hideCellphone\\\":\\\"156****7958\\\",\\\"isAppealFlag\\\":\\\"0\\\",\\\"sign\\\":\\\"6878ebe0790b4b348727208b74fef663\\\",\\\"hideEmail\\\":\\\"m******e@outlook.com\\\"}\",\"code\":\"0\",\"message\":null}"
+    }
+  },
+  {
+    "index": 13,
+    "startedDateTime": "2025-08-11T13:04:48.1828026+08:00",
+    "request": {
+      "method": "GET",
+      "url": "https://authserver.nenu.edu.cn/retrieve-password/generateCaptcha?ltId=7711070048172799&codeType=2",
+      "headers": {
+        "referer": "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "cookie": "route=abf2fcac076aab3980f3a6d85313807c; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN; acw_tc=ac11000117548882924597048e0610710702e20b71fc58d3798605332f11e8"
+      },
+      "body": ""
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "image/jpeg"
+      },
+      "body": "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"
+    }
+  },
+  {
+    "index": 14,
+    "startedDateTime": "2025-08-11T13:04:48.1832869+08:00",
+    "request": {
+      "method": "GET",
+      "url": "https://authserver.nenu.edu.cn/retrieve-password/generateCaptcha?ltId=6715479708136226&codeType=2",
+      "headers": {
+        "referer": "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "cookie": "route=abf2fcac076aab3980f3a6d85313807c; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN; acw_tc=ac11000117548882924597048e0610710702e20b71fc58d3798605332f11e8"
+      },
+      "body": ""
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "image/jpeg"
+      },
+      "body": "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"
+    }
+  },
+  {
+    "index": 15,
+    "startedDateTime": "2025-08-11T13:04:48.1951867+08:00",
+    "request": {
+      "method": "POST",
+      "url": "https://authserver.nenu.edu.cn/retrieve-password/getRetrieveOtherMethod",
+      "headers": {
+        "content-type": "application/json",
+        "referer": "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "cookie": "route=abf2fcac076aab3980f3a6d85313807c; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN; acw_tc=ac11000117548882924597048e0610710702e20b71fc58d3798605332f11e8"
+      },
+      "body": "{\"sign\":\"6878ebe0790b4b348727208b74fef663\"}"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": "{\"code\":\"0\",\"datas\":{\"type\":\"weixin\",\"url\":\"https://authserver.nenu.edu.cn/authserver\"},\"message\":\"SUCCESS\"}"
+    }
+  },
+  {
+    "index": 16,
+    "startedDateTime": "2025-08-11T13:04:58.2125316+08:00",
+    "request": {
+      "method": "POST",
+      "url": "https://authserver.nenu.edu.cn/retrieve-password/passwordRetrieve/sendCode",
+      "headers": {
+        "content-type": "application/json",
+        "referer": "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "cookie": "route=abf2fcac076aab3980f3a6d85313807c; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN; acw_tc=ac11000117548882924597048e0610710702e20b71fc58d3798605332f11e8"
+      },
+      "body": "{\"accountId\":\"\",\"loginNo\":\"2021102304\",\"cellphone\":\"w2rkFyw8jXuQWoXtXdaVOA+A1OKNyzSGmvSCC+P0AkqqTW1jwXo5ALePuMz1ZLEVCtw6ggMroYHxnVWb0HxAS5DH4StP1Phr3CSffFtajVM=\",\"email\":\"\",\"hideCellphone\":\"156****7958\",\"hideEmail\":\"m******e@outlook.com\",\"captchaId\":\"7711070048172799\",\"captcha\":\"aaaa\",\"code\":\"\",\"type\":\"cellphone\",\"password\":\"\",\"confirmPassword\":\"\",\"sign\":\"6878ebe0790b4b348727208b74fef663\",\"appealSign\":\"989f7ba841a54fecb786b81a4d58aa59\",\"isAppealFlag\":\"0\"}"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": "{\"datas\":null,\"code\":\"2106990000\",\"message\":\"验证码错误\"}"
+    }
+  },
+  {
+    "index": 17,
+    "startedDateTime": "2025-08-11T13:04:58.7271577+08:00",
+    "request": {
+      "method": "GET",
+      "url": "https://authserver.nenu.edu.cn/retrieve-password/generateCaptcha?ltId=6393365613132427&codeType=2",
+      "headers": {
+        "referer": "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "cookie": "route=abf2fcac076aab3980f3a6d85313807c; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN; acw_tc=ac11000117548882924597048e0610710702e20b71fc58d3798605332f11e8"
+      },
+      "body": ""
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "image/jpeg"
+      },
+      "body": "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"
+    }
+  },
+  {
+    "index": 18,
+    "startedDateTime": "2025-08-11T13:05:05.3035923+08:00",
+    "request": {
+      "method": "POST",
+      "url": "https://authserver.nenu.edu.cn/retrieve-password/passwordRetrieve/sendCode",
+      "headers": {
+        "content-type": "application/json",
+        "referer": "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "cookie": "route=abf2fcac076aab3980f3a6d85313807c; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN; acw_tc=ac11000117548882924597048e0610710702e20b71fc58d3798605332f11e8"
+      },
+      "body": "{\"accountId\":\"\",\"loginNo\":\"2021102304\",\"cellphone\":\"20C5n+nNdR3aPVVJSG87DKy0S2C0a1sXKyp+bPJVb9Rj9DEJx1zWuw75YJ8kobl1X/0mtcKAg8MMifbfLw2gMukICyGFilJc+AS5mwrz3z8=\",\"email\":\"\",\"hideCellphone\":\"156****7958\",\"hideEmail\":\"m******e@outlook.com\",\"captchaId\":\"6393365613132427\",\"captcha\":\"J9Mn\",\"code\":\"\",\"type\":\"cellphone\",\"password\":\"\",\"confirmPassword\":\"\",\"sign\":\"6878ebe0790b4b348727208b74fef663\",\"appealSign\":\"989f7ba841a54fecb786b81a4d58aa59\",\"isAppealFlag\":\"0\"}"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": "{\"datas\":null,\"code\":\"2106990000\",\"message\":\"请输入正确的绑定手机号\"}"
+    }
+  },
+  {
+    "index": 19,
+    "startedDateTime": "2025-08-11T13:05:05.8178494+08:00",
+    "request": {
+      "method": "GET",
+      "url": "https://authserver.nenu.edu.cn/retrieve-password/generateCaptcha?ltId=3933570582556404&codeType=2",
+      "headers": {
+        "referer": "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "cookie": "route=abf2fcac076aab3980f3a6d85313807c; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN; acw_tc=ac11000117548882924597048e0610710702e20b71fc58d3798605332f11e8"
+      },
+      "body": ""
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "image/jpeg"
+      },
+      "body": "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"
+    }
+  },
+  {
+    "index": 20,
+    "startedDateTime": "2025-08-11T13:05:12.5749230+08:00",
+    "request": {
+      "method": "POST",
+      "url": "https://authserver.nenu.edu.cn/retrieve-password/passwordRetrieve/sendCode",
+      "headers": {
+        "content-type": "application/json",
+        "referer": "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "cookie": "route=abf2fcac076aab3980f3a6d85313807c; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN; acw_tc=ac11000117548882924597048e0610710702e20b71fc58d3798605332f11e8"
+      },
+      "body": "{\"accountId\":\"\",\"loginNo\":\"2021102304\",\"cellphone\":\"z0Bt/c2qz1M+0YWvrewzjIfxa05SsWM4leLm82I6tMDpoS565y/nyobnu4fZbhjYVXg8xsr3FF9S2UkzmZOXBjN3r07YSxivF7+Bxzc3EWY=\",\"email\":\"\",\"hideCellphone\":\"156****7958\",\"hideEmail\":\"m******e@outlook.com\",\"captchaId\":\"3933570582556404\",\"captcha\":\"zQbr\",\"code\":\"\",\"type\":\"cellphone\",\"password\":\"\",\"confirmPassword\":\"\",\"sign\":\"6878ebe0790b4b348727208b74fef663\",\"appealSign\":\"989f7ba841a54fecb786b81a4d58aa59\",\"isAppealFlag\":\"0\"}"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": "{\"datas\":\"{\\\"limitTime\\\":120,\\\"sign\\\":\\\"fc297514aa184ede966f768371c31422\\\"}\",\"code\":\"0\",\"message\":\"获取成功\"}"
+    }
+  },
+  {
+    "index": 21,
+    "startedDateTime": "2025-08-11T13:05:31.0533338+08:00",
+    "request": {
+      "method": "POST",
+      "url": "https://authserver.nenu.edu.cn/retrieve-password/passwordRetrieve/checkCode",
+      "headers": {
+        "content-type": "application/json",
+        "referer": "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "cookie": "route=abf2fcac076aab3980f3a6d85313807c; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN; acw_tc=ac11000117548882924597048e0610710702e20b71fc58d3798605332f11e8"
+      },
+      "body": "{\"accountId\":\"\",\"loginNo\":\"2021102304\",\"cellphone\":\"S96jbOWjLBWkGXo/xEBne7u5+MNCiKZqzN1V/iw0ERNFQnYtccfYbC6Sqos6TSS4b9IXmj7QTdQzvvkQ6NmiCPTcEQgEKH6I6AHNVYlJ9SE=\",\"email\":\"\",\"hideCellphone\":\"156****7958\",\"hideEmail\":\"m******e@outlook.com\",\"captchaId\":\"9897331358015691\",\"captcha\":\"7z4v\",\"code\":\"35479\",\"type\":\"cellphone\",\"password\":\"\",\"confirmPassword\":\"\",\"sign\":\"fc297514aa184ede966f768371c31422\",\"appealSign\":\"989f7ba841a54fecb786b81a4d58aa59\",\"isAppealFlag\":\"0\",\"limitTime\":120}"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": "{\"datas\":null,\"code\":\"2106990000\",\"message\":\"验证码或者手机号不正确\"}"
+    }
+  },
+  {
+    "index": 22,
+    "startedDateTime": "2025-08-11T13:05:34.7088068+08:00",
+    "request": {
+      "method": "POST",
+      "url": "https://authserver.nenu.edu.cn/retrieve-password/passwordRetrieve/checkCode",
+      "headers": {
+        "content-type": "application/json",
+        "referer": "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "cookie": "route=abf2fcac076aab3980f3a6d85313807c; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN; acw_tc=ac11000117548882924597048e0610710702e20b71fc58d3798605332f11e8"
+      },
+      "body": "{\"accountId\":\"\",\"loginNo\":\"2021102304\",\"cellphone\":\"av8kJgSqx85dqCuBWPmLzecMZBQvAQzxrz+992c3hK1dmFa9ZUk8RZFWvSCrtql+yn2n2dmO/6Ze/Wv1yjv9s5waC6k7748ggiUdhHhBM3w=\",\"email\":\"\",\"hideCellphone\":\"156****7958\",\"hideEmail\":\"m******e@outlook.com\",\"captchaId\":\"9897331358015691\",\"captcha\":\"7z4v\",\"code\":\"354799\",\"type\":\"cellphone\",\"password\":\"\",\"confirmPassword\":\"\",\"sign\":\"fc297514aa184ede966f768371c31422\",\"appealSign\":\"989f7ba841a54fecb786b81a4d58aa59\",\"isAppealFlag\":\"0\",\"limitTime\":120}"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": "{\"datas\":\"{\\\"sign\\\":\\\"a04c77cc2fca4244a9d88da624d2dc0b\\\"}\",\"code\":\"0\",\"message\":\"校验成功\"}"
+    }
+  },
+  {
+    "index": 23,
+    "startedDateTime": "2025-08-11T13:05:35.2347071+08:00",
+    "request": {
+      "method": "POST",
+      "url": "https://authserver.nenu.edu.cn/retrieve-password/getAllPwdRules",
+      "headers": {
+        "content-type": "application/json",
+        "referer": "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "cookie": "route=abf2fcac076aab3980f3a6d85313807c; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN; acw_tc=ac11000117548882924597048e0610710702e20b71fc58d3798605332f11e8"
+      },
+      "body": "{}"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": "{\"code\":\"0\",\"datas\":[\"密码长度达到8位及以上 ，至少含3种以上字符\",\"不包含简单密码、非键盘字符、账号、手机号、身份证、相同或连续三位数字/字母、以及其他敏感字符\"],\"message\":\"SUCCESS\"}"
+    }
+  },
+  {
+    "index": 24,
+    "startedDateTime": "2025-08-11T13:05:35.2351006+08:00",
+    "request": {
+      "method": "POST",
+      "url": "https://authserver.nenu.edu.cn/retrieve-password/getPwdRule",
+      "headers": {
+        "content-type": "application/json",
+        "referer": "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "cookie": "route=abf2fcac076aab3980f3a6d85313807c; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN; acw_tc=ac11000117548882924597048e0610710702e20b71fc58d3798605332f11e8"
+      },
+      "body": "{}"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": "{\"code\":\"0\",\"datas\":{\"pwdRule\":2,\"score\":null,\"minScore\":null,\"strength\":null,\"confStrength\":2,\"pwdLength\":null,\"pwdKind\":null,\"confPwdLength\":8,\"confPwdKind\":3,\"message\":null,\"containUserInfo\":false,\"pwdMatchTypes\":null,\"confPwdMatchTypes\":\"2,3\",\"pwdExpired\":false,\"successMsg\":null,\"blackInfoSet\":[\"eduPersonCardID\",\"uid\",\"telephoneNumber\",\"contiguousChar\",\"custom\"],\"ifSimplePwd\":false,\"ifSpecialCharContains\":false,\"ifSameAsOldPwd\":false,\"rules\":null,\"ldapPwd\":null,\"msgInfo\":null,\"msgCustom\":null},\"message\":\"SUCCESS\"}"
+    }
+  },
+  {
+    "index": 25,
+    "startedDateTime": "2025-08-11T13:05:42.3886422+08:00",
+    "request": {
+      "method": "POST",
+      "url": "https://authserver.nenu.edu.cn/retrieve-password/common/passwordScoreCheck",
+      "headers": {
+        "content-type": "application/json",
+        "referer": "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "cookie": "route=abf2fcac076aab3980f3a6d85313807c; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN; acw_tc=ac11000117548882924597048e0610710702e20b71fc58d3798605332f11e8"
+      },
+      "body": "{\"password\":\"pF5eqvqmQjoAGkoOVdL+rIVbp6JpR6e/6jyEeETd0fbkgaHEeiHaQ/zm3Usgf7K3vyrZVtBLGbdjlm/eueWwAMhYkyXIIvKbUHNhPa6jGCU=\",\"sign\":\"a04c77cc2fca4244a9d88da624d2dc0b\",\"operationSource\":1}"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": "{\"code\":\"0\",\"datas\":{\"pwdRule\":2,\"score\":null,\"minScore\":null,\"strength\":1,\"confStrength\":2,\"pwdLength\":13,\"pwdKind\":2,\"confPwdLength\":8,\"confPwdKind\":3,\"message\":\"您输入新密码字符长度或种类不符合要求\",\"containUserInfo\":false,\"pwdMatchTypes\":\"1,2\",\"confPwdMatchTypes\":\"2,3\",\"pwdExpired\":false,\"successMsg\":\"当前密码得分为 <span style=color:green>{0}</span> 分；密码符合要求最低得分为{1}分，请确认！\",\"blackInfoSet\":null,\"ifSimplePwd\":false,\"ifSpecialCharContains\":false,\"ifSameAsOldPwd\":false,\"rules\":{\"密码长度达到8位及以上 ，至少含3种以上字符\":\"false\",\"不包含简单密码、非键盘字符、账号、手机号、身份证、相同或连续三位数字/字母、以及其他敏感字符\":\"true\"},\"ldapPwd\":null,\"msgInfo\":null,\"msgCustom\":null},\"message\":\"SUCCESS\"}"
+    }
+  },
+  {
+    "index": 26,
+    "startedDateTime": "2025-08-11T13:05:45.9128304+08:00",
+    "request": {
+      "method": "POST",
+      "url": "https://authserver.nenu.edu.cn/retrieve-password/common/passwordScoreCheck",
+      "headers": {
+        "content-type": "application/json",
+        "referer": "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "cookie": "route=abf2fcac076aab3980f3a6d85313807c; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN; acw_tc=ac11000117548882924597048e0610710702e20b71fc58d3798605332f11e8"
+      },
+      "body": "{\"password\":\"IJ9B7v8CdI2AIR58FUHWQiYJJaEmS5XZR/uXaqBtuLh9VMtRaacengUfddMM4LT5SNk87KGJOBYEYLxFu3KHtuzvp4FQCmkbNqzfJRkyMYw=\",\"sign\":\"a04c77cc2fca4244a9d88da624d2dc0b\",\"operationSource\":1}"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": "{\"code\":\"0\",\"datas\":{\"pwdRule\":2,\"score\":null,\"minScore\":null,\"strength\":1,\"confStrength\":2,\"pwdLength\":13,\"pwdKind\":2,\"confPwdLength\":8,\"confPwdKind\":3,\"message\":\"您输入新密码字符长度或种类不符合要求\",\"containUserInfo\":false,\"pwdMatchTypes\":\"1,2\",\"confPwdMatchTypes\":\"2,3\",\"pwdExpired\":false,\"successMsg\":\"当前密码得分为 <span style=color:green>{0}</span> 分；密码符合要求最低得分为{1}分，请确认！\",\"blackInfoSet\":null,\"ifSimplePwd\":false,\"ifSpecialCharContains\":false,\"ifSameAsOldPwd\":false,\"rules\":{\"密码长度达到8位及以上 ，至少含3种以上字符\":\"false\",\"不包含简单密码、非键盘字符、账号、手机号、身份证、相同或连续三位数字/字母、以及其他敏感字符\":\"true\"},\"ldapPwd\":null,\"msgInfo\":null,\"msgCustom\":null},\"message\":\"SUCCESS\"}"
+    }
+  },
+  {
+    "index": 27,
+    "startedDateTime": "2025-08-11T13:05:47.6940087+08:00",
+    "request": {
+      "method": "POST",
+      "url": "https://authserver.nenu.edu.cn/retrieve-password/common/passwordScoreCheck",
+      "headers": {
+        "content-type": "application/json",
+        "referer": "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "cookie": "route=abf2fcac076aab3980f3a6d85313807c; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN; acw_tc=ac11000117548882924597048e0610710702e20b71fc58d3798605332f11e8"
+      },
+      "body": "{\"password\":\"haRo1aIWPbhIylZmp+R3ayT2ntFK8mA4FfgX9iAhiK9SYgnXsBE7e7iLpS30lLHeXxfvD1fhLhwKCRDwjg8rmi6P/Nhnz/40HPlxojrYvL0=\",\"sign\":\"a04c77cc2fca4244a9d88da624d2dc0b\",\"operationSource\":1}"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": "{\"code\":\"0\",\"datas\":{\"pwdRule\":2,\"score\":null,\"minScore\":null,\"strength\":2,\"confStrength\":2,\"pwdLength\":14,\"pwdKind\":3,\"confPwdLength\":8,\"confPwdKind\":3,\"message\":null,\"containUserInfo\":false,\"pwdMatchTypes\":\"1,2,4\",\"confPwdMatchTypes\":\"2,3\",\"pwdExpired\":false,\"successMsg\":\"当前密码得分为 <span style=color:green>{0}</span> 分；密码符合要求最低得分为{1}分，请确认！\",\"blackInfoSet\":null,\"ifSimplePwd\":false,\"ifSpecialCharContains\":false,\"ifSameAsOldPwd\":false,\"rules\":{\"密码长度达到8位及以上 ，至少含3种以上字符\":\"true\",\"不包含简单密码、非键盘字符、账号、手机号、身份证、相同或连续三位数字/字母、以及其他敏感字符\":\"true\"},\"ldapPwd\":null,\"msgInfo\":null,\"msgCustom\":null},\"message\":\"SUCCESS\"}"
+    }
+  },
+  {
+    "index": 28,
+    "startedDateTime": "2025-08-11T13:05:52.5120175+08:00",
+    "request": {
+      "method": "POST",
+      "url": "https://authserver.nenu.edu.cn/retrieve-password/passwordRetrieve/resetPassword",
+      "headers": {
+        "content-type": "application/json",
+        "referer": "https://authserver.nenu.edu.cn/retrieve-password/retrievePassword/index.html",
+        "cookie": "route=abf2fcac076aab3980f3a6d85313807c; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=zh_CN; acw_tc=ac11000117548882924597048e0610710702e20b71fc58d3798605332f11e8"
+      },
+      "body": "{\"accountId\":\"\",\"loginNo\":\"2021102304\",\"cellphone\":\"3EaymiSVx586UpY8YhrY4IKw/WvyubC7eklqd7jNA5NHrr52nok3xfJO06xCUXiZq6oM/g6hBB2WPSCo4q0WgxTF+s6rR6FOEdYpkYEpg/Y=\",\"email\":\"\",\"hideCellphone\":\"156****7958\",\"hideEmail\":\"m******e@outlook.com\",\"captchaId\":\"9897331358015691\",\"captcha\":\"7z4v\",\"code\":\"354799\",\"type\":\"cellphone\",\"password\":\"bsFFwOPiNKc5k7fp2Q2E6ylnz/8jikkfsM3RiZ2bmRlNPITMG7UNOzEf2L/cb/Co80WkctFA/26kVL3QDfwZf2rD6+SNlO/GGbc8e2LPHsM=\",\"confirmPassword\":\"tRRBtj0Nuq5g78VPFNbxDbXafClVVOZdheSR5ibkzP/Npsayfk6kRzGJ9O1aPw+wDY73xSuKY/isWXScQwg76WaSksCXV8qkylSoaSGelxs=\",\"sign\":\"a04c77cc2fca4244a9d88da624d2dc0b\",\"appealSign\":\"989f7ba841a54fecb786b81a4d58aa59\",\"isAppealFlag\":\"0\",\"limitTime\":120}"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": "{\"datas\":null,\"code\":\"0\",\"message\":\"校验成功\"}"
+    }
+  }
+]
