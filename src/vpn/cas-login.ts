@@ -93,6 +93,14 @@ export const vpnCASLogin = async (
         };
       }
     }
+
+    console.error(
+      "VPN 服务更新未知错误",
+      callbackResponse,
+      await callbackResponse.text(),
+    );
+
+    return UnknownResponse("VPN 服务负载过高，请稍后重试");
   }
 
   if (casResponse.status === 500)
