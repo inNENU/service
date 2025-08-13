@@ -7,6 +7,8 @@ export const oaCheckHandler = request<CookieVerifyResponse, CookieOptions>(
   async (req, res) => {
     const cookieHeader = req.headers.cookie ?? cookies2Header(req.body.cookies);
 
+    if (!cookieHeader) return res.json({ success: true, valid: false });
+
     if (cookieHeader.includes("TEST"))
       return res.json({ success: true, valid: true });
 
