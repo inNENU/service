@@ -1,7 +1,7 @@
 import { request } from "@/utils/index.js";
 
 import type { CommonSuccessResponse } from "../typings.js";
-import { databaseMonitor } from "./monitor.js";
+import { databaseMonitor } from "./databaser.js";
 import type { ServiceHealthStatus } from "./services.js";
 import { checkAllServicesHealth } from "./services.js";
 import type { SystemHealthStatus } from "./system.js";
@@ -13,7 +13,6 @@ interface HealthCheckResponse {
   system: SystemHealthStatus;
   database: {
     healthy: boolean;
-    connectionTest: boolean;
     errorMessage?: string;
   };
   services: ServiceHealthStatus[];

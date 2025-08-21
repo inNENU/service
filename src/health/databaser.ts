@@ -70,7 +70,7 @@ export class DatabaseMonitor {
   /**
    * 开始监控连接池状态
    */
-  startMonitoring(intervalMs = 60000): void {
+  startMonitoring(intervalMs = /** 5 min */ 300000): void {
     if (this.intervalId) {
       console.warn("监控已经在运行中");
 
