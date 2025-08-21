@@ -1,0 +1,6 @@
+onlyBuiltDependencies:
+  - "esbuild"
+  - "unrs-resolver"
+
+overrides:
+  iconv-lite: 0.7.0
