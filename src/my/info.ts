@@ -66,8 +66,6 @@ export interface MyInfo {
   id: number;
   /** 用户姓名 */
   name: string;
-  /** 用户身份证号 */
-  idCard: string;
   /** 用户所在组织名称 */
   org: string;
   /** 用户所在组织 ID */

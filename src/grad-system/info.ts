@@ -73,7 +73,6 @@ const getInfo = (content: string): GradStudentInfo => {
   return {
     name: values[nameIndex],
     gender: values[genderIndex] as "男" | "女",
-    idCard,
     people: values[peopleIndex],
     politicalType: values[politicalTypeIndex],
     birth,
