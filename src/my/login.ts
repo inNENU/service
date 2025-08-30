@@ -67,7 +67,7 @@ export const myLogin = async (
   if (ticketResponse.status !== 302) {
     console.error("Login to my failed", ticketResponse.status);
 
-    return UnknownResponse("登录失败");
+    return UnknownResponse("由于当前账户暂时未获权限，服务大厅登录失败");
   }
 
   const sessionLocation = ticketResponse.headers.get("Location");

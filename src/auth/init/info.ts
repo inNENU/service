@@ -220,6 +220,12 @@ export const getAuthInfo = async (
           type: ActionFailType.Forbidden,
           msg: "当前时段服务大厅暂未开放，无法获取个人信息",
         };
+      } else {
+        return {
+          success: false,
+          type: ActionFailType.Unknown,
+          msg: "账号密码校验成功，但" + loginResult.msg,
+        };
       }
     }
 
