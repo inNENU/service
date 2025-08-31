@@ -64,13 +64,13 @@ export const actionLogin = async (
 
   if (ticketResponse.status !== 302) {
     console.error(
-      "action login failed",
+      "action login failed with unknown ticketResponse",
       ticketResponse.status,
       ticketResponse,
       await ticketResponse.text(),
     );
 
-    return UnknownResponse("登录失败");
+    return UnknownResponse("由于当前账户暂时未获权限，融合门户登录失败");
   }
 
   const finalLocation = ticketResponse.headers.get("Location");
@@ -102,6 +102,8 @@ export const actionLogin = async (
     const info = /pfs.comm.showDialog\("(.*?)",/.exec(content)?.[1];
 
     if (info) {
+      console.error("action login forbidden:", info);
+
       return {
         success: false,
         type: ActionFailType.Forbidden,

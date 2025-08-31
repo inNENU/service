@@ -21,6 +21,7 @@ import { underSystemRouter } from "./under-system/index.js";
 import { captureError, patchFetch, reportMemoryUsage } from "./utils/index.js";
 import { vpnRouter } from "./vpn/index.js";
 import { weatherHandler } from "./weather.js";
+import { whoRouter } from "./who/index.js";
 
 const app = express();
 const port = process.env.PORT ? Number(process.env.PORT) : 8080;
@@ -47,6 +48,7 @@ app.use("/test", testRouter);
 app.use("/under-study", underStudyRouter);
 app.use("/under-system", underSystemRouter);
 app.use("/vpn", vpnRouter);
+app.use("/who", whoRouter);
 
 /*  ------------ 天气 ------------ */
 

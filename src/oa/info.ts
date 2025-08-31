@@ -23,15 +23,15 @@ interface RawOAInfoData {
   secLevel: string;
 
   /** 公司名称 */
-  subCompanyName: "东北师范大学";
+  subCompanyName: string;
   /** 公司 ID */
-  subCompanyId: "1";
+  subCompanyId: string;
   /** 部门名称 */
-  departmentName: "物理学院";
+  departmentName: string;
   /** 部门备注 */
-  departmentMark: "物理学院";
+  departmentMark: string;
   /** 部门 ID */
-  departmentId: "60";
+  departmentId: string;
 }
 
 export interface OAInfoData {
