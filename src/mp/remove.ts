@@ -4,7 +4,7 @@ import { getConnection, releaseConnection, request } from "@/utils/index.js";
 
 import type { ActionFailType } from "../config/index.js";
 import {
-  DatabaseErrorResponse,
+  // DatabaseErrorResponse,
   MissingArgResponse,
   MissingCredentialResponse,
   WrongPasswordResponse,
@@ -46,20 +46,21 @@ export const mpRemoveHandler = request<MpRemoveResponse, MpRemoveOptions>(
 
       if (!tokenResults.length) return res.json(WrongPasswordResponse);
 
+      // FIXME: Add this back once we can fetch student info
       // remove info from database
-      try {
-        await connection.execute("DELETE FROM `student_info` WHERE `id` = ?", [
-          id,
-        ]);
-        await connection.execute(
-          "DELETE FROM `student_avatar` WHERE `id` = ?",
-          [id],
-        );
-      } catch (err) {
-        console.error(err);
+      // try {
+      //   await connection.execute("DELETE FROM `student_info` WHERE `id` = ?", [
+      //     id,
+      //   ]);
+      //   await connection.execute(
+      //     "DELETE FROM `student_avatar` WHERE `id` = ?",
+      //     [id],
+      //   );
+      // } catch (err) {
+      //   console.error(err);
 
-        return res.json(DatabaseErrorResponse((err as Error).message));
-      }
+      //   return res.json(DatabaseErrorResponse((err as Error).message));
+      // }
 
       return res.json({ success: true });
     } finally {
