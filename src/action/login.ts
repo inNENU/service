@@ -6,8 +6,8 @@ import { request } from "@/utils/index.js";
 import { ACTION_MAIN_PAGE, ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { WEB_VPN_AUTH_SERVER, authLogin } from "../auth/index.js";
-import type { ActionFailType } from "../config/index.js";
 import {
+  ActionFailType,
   MissingCredentialResponse,
   TEST_ID_NUMBER,
   TEST_LOGIN_RESULT,
@@ -62,15 +62,60 @@ export const actionLogin = async (
 
   cookieStore.applyResponse(ticketResponse, result.location);
 
-  if (ticketResponse.status !== 302) return UnknownResponse("登录失败");
+  if (ticketResponse.status !== 302) {
+    console.error(
+      "action login failed",
+      ticketResponse.status,
+      ticketResponse,
+      await ticketResponse.text(),
+    );
+
+    return UnknownResponse("登录失败");
+  }
 
   const finalLocation = ticketResponse.headers.get("Location");
 
-  if (finalLocation?.startsWith(ACTION_MAIN_PAGE))
+  if (finalLocation?.startsWith(ACTION_MAIN_PAGE)) {
+    const finalLocationResponse = await fetch(finalLocation, {
+      headers: {
+        Cookie: cookieStore.getHeader(finalLocation),
+        Referer: ACTION_SERVER,
+      },
+      redirect: "manual",
+    });
+
+    cookieStore.applyResponse(finalLocationResponse, finalLocation);
+
+    if (finalLocationResponse.status !== 200) {
+      console.error(
+        "action login failed",
+        finalLocationResponse.status,
+        finalLocationResponse,
+        await finalLocationResponse.text(),
+      );
+
+      return UnknownResponse("登录失败");
+    }
+
+    const content = await finalLocationResponse.text();
+
+    const info = /pfs.comm.showDialog\("(.*?)",/.exec(content)?.[1];
+
+    if (info) {
+      return {
+        success: false,
+        type: ActionFailType.Forbidden,
+        msg: info,
+      };
+    }
+
     return {
       success: true,
       cookieStore,
     };
+  }
+
+  console.error("action login failed", finalLocation);
 
   return UnknownResponse("登录失败");
 };
