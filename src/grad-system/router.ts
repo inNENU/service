@@ -1,6 +1,7 @@
 import { Router } from "express";
 
 import { gradInfoHandler } from "./info.js";
+import { gradInformationHandler } from "./information.js";
 import { gradSystemLoginHandler, loginToGradSystem } from "./login.js";
 
 const gradRouter = Router();
@@ -12,5 +13,6 @@ gradRouter.post("/login", gradSystemLoginHandler);
 gradRouter.use(loginToGradSystem);
 
 gradRouter.post("/info", gradInfoHandler);
+gradRouter.post("/information", gradInformationHandler);
 
 export { gradRouter };

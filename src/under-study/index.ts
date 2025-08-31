@@ -4,6 +4,8 @@ export * from "./course-table/index.js";
 export * from "./grade-detail.js";
 export * from "./grade-list.js";
 export * from "./login.js";
+export * from "./info.js";
 export * from "./router.js";
 export * from "./select/index.js";
 export * from "./special-exam.js";
+export * from "./utils.js";

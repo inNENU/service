@@ -9,11 +9,7 @@ import {
   MissingCredentialResponse,
   UnknownResponse,
 } from "../config/index.js";
-import type {
-  AccountInfo,
-  CommonFailedResponse,
-  CommonSuccessResponse,
-} from "../typings.js";
+import type { AccountInfo, CommonFailedResponse } from "../typings.js";
 
 const TITLE_REG_EXP = /aField\s?="(.*?)"\.split\("\t"\);/;
 const VALUE_REG_EXP = /aDataLS\s?="(.*?)"\.split\("\t"\);/;
@@ -23,7 +19,6 @@ export interface GradStudentInfo {
   name: string;
   /** 性别 */
   gender: "男" | "女";
-  genderId: 1 | 2;
   /** 身份证号 */
   idCard: string;
   /** 政治面貌 */
@@ -38,18 +33,17 @@ export interface GradStudentInfo {
   /** 年级 */
   grade: number;
   /** 学院 */
-  org: string;
-  orgId: 0;
+  school: string;
   /** 专业 */
   major: string;
   /** 专业 */
-  majorId: string;
+  majorCode: number;
   /** 研究生类别 */
   type: string;
-  typeId: "yjs";
-  /** 入学年份 */
-  inYear: number;
-  location: "benbu" | "jingyue" | "unknown";
+  /** 学生分类 */
+  category: string;
+  /** 入学日期 */
+  inDate: string;
 }
 
 const getInfo = (content: string): GradStudentInfo => {
@@ -72,31 +66,33 @@ const getInfo = (content: string): GradStudentInfo => {
   const majorIndex = titles.findIndex((title) => title === "专业名称");
   const majorCodeIndex = titles.findIndex((title) => title === "专业代码");
   const typeIndex = titles.findIndex((title) => title === "研究生类型");
+  const categoryIndex = titles.findIndex((title) => title === "研究生分类");
   const inDateIndex = titles.findIndex((title) => title === "入学日期");
   const inDate = values[inDateIndex];
 
   return {
     name: values[nameIndex],
     gender: values[genderIndex] as "男" | "女",
-    genderId: values[genderIndex] === "男" ? 1 : 2,
     idCard,
     people: values[peopleIndex],
     politicalType: values[politicalTypeIndex],
     birth,
+
     id: Number(id),
     grade: Number(id.substring(0, 4)),
-    org: values[schoolIndex],
-    orgId: 0,
+    school: values[schoolIndex],
     major: values[majorIndex],
-    majorId: values[majorCodeIndex],
+    majorCode: Number(values[majorCodeIndex]),
     type: values[typeIndex],
-    typeId: "yjs",
-    inYear: Number(inDate.substring(0, 4)),
-    location: "unknown",
+    category: values[categoryIndex],
+    inDate: inDate.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3"),
   };
 };
 
-export type GradInfoSuccessResponse = CommonSuccessResponse<GradStudentInfo>;
+export interface GradInfoSuccessResponse {
+  success: true;
+  info: GradStudentInfo;
+}
 
 export type GradInfoResponse =
   | GradInfoSuccessResponse
@@ -133,16 +129,18 @@ export const getGradInfo = async (
         msg: "功能当前暂未开放",
       };
 
+    const info = getInfo(content);
+
     return {
       success: true,
-      data: getInfo(content),
+      info,
     };
   }
 
   return UnknownResponse("获取信息失败");
 };
 
-export const gradInfoHandler = request<GradInfoResponse, AccountInfo>(
+export const gradInformationHandler = request<GradInfoResponse, AccountInfo>(
   async (req, res) => {
     const { id, password, authToken } = req.body;
 

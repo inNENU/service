@@ -8,6 +8,9 @@ import {
   UnknownResponse,
   getRandomBlacklistHint,
 } from "@/config/index.js";
+// import { getGradInfo } from "@/grad-system/info.js";
+// import { gradSystemLogin } from "@/grad-system/login.js";
+// import { GRAD_SYSTEM_SERVER } from "@/grad-system/utils.js";
 import type { AccountInfo, CommonFailedResponse } from "@/typings.js";
 import {
   getConnection,
@@ -15,11 +18,16 @@ import {
   releaseConnection,
 } from "@/utils/index.js";
 
-// import {
-//   AUTH_INFO_PREFIX,
-//   authCenterLogin,
-//   getAvatar,
-// } from "../../auth-center/index.js";
+import {
+  AUTH_INFO_PREFIX,
+  authCenterLogin,
+  getAvatar,
+} from "../../auth-center/index.js";
+import {
+  UNDER_STUDY_SERVER,
+  getUnderStudyInfo,
+  underStudyLogin,
+} from "../../under-study/index.js";
 import type { WhoInfoData } from "../../who/index.js";
 // import { WHO_SERVER, getWhoInfo, whoLogin } from "../../who/index.js";
 
@@ -50,39 +58,67 @@ export const TEST_AUTH_INFO: AuthInfoSuccessResponse = {
   cookieStore: TEST_COOKIE_STORE,
 };
 
-// const DATABASE_FIELDS = [
-//   "id",
-//   "name",
-//   "org",
-//   "orgId",
-//   "major",
-//   "majorId",
-//   "inYear",
-//   "grade",
-//   "type",
-//   "typeId",
-//   "people",
-//   "gender",
-//   "genderId",
-//   "birth",
-//   "location",
-//   "createTime",
-//   "updateTime",
-// ];
+const DATABASE_FIELDS = [
+  "id",
+  "name",
+  "org",
+  "orgId",
+  "major",
+  "majorId",
+  "inYear",
+  "grade",
+  "type",
+  "typeId",
+  "people",
+  "gender",
+  "genderId",
+  "birth",
+  "location",
+  "createTime",
+  "updateTime",
+];
 
-// const SQL_STRING = `INSERT INTO \`student_info\` (${DATABASE_FIELDS.map(
-//   (field) => `\`${field}\``,
-// ).join(
-//   ", ",
-// )}) VALUES (${new Array(DATABASE_FIELDS.length - 2).fill("?").join(", ")}, NOW(), NOW()) ON DUPLICATE KEY UPDATE ${DATABASE_FIELDS.filter(
-//   (field) => !["id", "createTime"].includes(field),
-// )
-//   .map((field) => `\`${field}\` = VALUES(\`${field}\`)`)
-//   .join(", ")}`;
+const SQL_STRING = `INSERT INTO \`student_info\` (${DATABASE_FIELDS.map(
+  (field) => `\`${field}\``,
+).join(
+  ", ",
+)}) VALUES (${new Array(DATABASE_FIELDS.length - 2).fill("?").join(", ")}, NOW(), NOW()) ON DUPLICATE KEY UPDATE ${DATABASE_FIELDS.filter(
+  (field) => !["id", "createTime"].includes(field),
+)
+  .map((field) => `\`${field}\` = VALUES(\`${field}\`)`)
+  .join(", ")}`;
+
+const getTempInfo = (id: number): WhoInfoData => {
+  const grade = Number(id.toString().substring(0, 4));
+  const typeNumber = Number(id.toString()[4]);
+
+  return {
+    id,
+    name: "获取失败",
+    org: "获取失败",
+    orgId: 0,
+    major: "获取失败",
+    majorId: "",
+    inYear: grade,
+    grade: grade,
+    type: "",
+    typeId:
+      typeNumber === 0
+        ? "bks"
+        : typeNumber === 1 || typeNumber === 2
+          ? "yjs"
+          : "unknown",
+    people: "",
+    gender: "",
+    genderId: 0,
+    birth: "",
+    location: "unknown",
+    idCard: "",
+  };
+};
 
 export const getAuthInfo = async (
-  { id, authToken, appId, openid }: GetAuthInfoOptions,
-  // { id, password, authToken, appId, openid }: GetAuthInfoOptions,
+  { id, password, authToken, appId, openid }: GetAuthInfoOptions,
   cookieStore = new CookieStore(),
 ): Promise<AuthInfoResponse> => {
   let connection: PoolConnection | null = null;
@@ -136,117 +172,194 @@ export const getAuthInfo = async (
       console.error("Database error", err);
     }
 
-    const grade = Number(id.toString().substring(0, 4));
-    const typeNumber = Number(id.toString()[5]);
+    const typeNumber = Number(id.toString()[4]);
+    const typeId =
+      typeNumber === 0
+        ? "bks"
+        : typeNumber === 1 || typeNumber === 2
+          ? "yjs"
+          : "unknown";
 
-    info ??= {
-      avatar: "",
-      id,
-      name: "获取失败",
-      org: "获取失败",
-      orgId: 0,
-      major: "获取失败",
-      majorId: "",
-      inYear: grade,
-      grade: grade,
-      type: "",
-      typeId:
-        typeNumber === 0
-          ? "bks"
-          : typeNumber === 1 || typeNumber === 2
-            ? "yjs"
-            : "unknown",
-      people: "",
-      gender: "",
-      genderId: 0,
-      birth: "",
-      location: "unknown",
-      idCard: "",
-    };
+    if (!info) {
+      if (typeId === "bks") {
+        const loginResult = await underStudyLogin(
+          { id, password, authToken },
+          cookieStore,
+        );
 
-    // if (!info) {
-    //   let loginResult = await whoLogin(
-    //     { id, password, authToken },
-    //     cookieStore,
-    //   );
-    //   if (
-    //     "type" in loginResult &&
-    //     loginResult.type === ActionFailType.Forbidden
-    //   ) {
-    //     loginResult = await whoLogin({ id, password, authToken }, cookieStore);
-    //   }
-    //   // 获得信息
-    //   if (loginResult.success) {
-    //     const studentInfo = await getWhoInfo(
-    //       id,
-    //       cookieStore.getHeader(WHO_SERVER),
-    //     );
-    //     if (studentInfo.success) {
-    //       let avatar = "";
-    //       const authCenterResult = await authCenterLogin(
-    //         { id, password, authToken },
-    //         cookieStore,
-    //       );
-    //       if (authCenterResult.success) {
-    //         const avatarInfo = await getAvatar(
-    //           cookieStore.getHeader(AUTH_INFO_PREFIX),
-    //         );
-    //         if (avatarInfo.success) {
-    //           avatar = avatarInfo.data.avatar;
-    //           try {
-    //             connection ??= await getConnection();
-    //             await connection.execute(
-    //               "REPLACE INTO `student_avatar` (`id`, `avatar`) VALUES (?, ?)",
-    //               [id, avatar],
-    //             );
-    //           } catch (err) {
-    //             console.error("Database error", err);
-    //           }
-    //         } else {
-    //           console.error("Get avatar failed", avatarInfo);
-    //         }
-    //       }
-    //       info = {
-    //         avatar,
-    //         ...studentInfo.data,
-    //       };
-    //       try {
-    //         connection ??= await getConnection();
-    //         await connection.execute(SQL_STRING, [
-    //           info.id,
-    //           info.name,
-    //           info.org,
-    //           info.orgId,
-    //           info.major,
-    //           info.majorId,
-    //           info.inYear,
-    //           info.grade,
-    //           info.type,
-    //           info.typeId,
-    //           info.people,
-    //           info.gender,
-    //           info.genderId,
-    //           info.birth,
-    //           info.location,
-    //         ]);
-    //       } catch (err) {
-    //         console.error("Database error", err);
-    //       }
-    //     }
-    //   } else if (loginResult.type === ActionFailType.Forbidden) {
-    //     return {
-    //       success: false,
-    //       type: ActionFailType.Forbidden,
-    //       msg: "当前时段服务大厅暂未开放，无法获取个人信息",
-    //     };
-    //   } else {
-    //     return {
-    //       success: false,
-    //       type: ActionFailType.Unknown,
-    //       msg: "账号密码校验成功，但" + loginResult.msg,
-    //     };
-    //   }
-    // }
+        if (!loginResult.success) {
+          if (loginResult.type === ActionFailType.Forbidden) {
+            return {
+              success: false,
+              type: ActionFailType.Forbidden,
+              msg: "本科教务系统无法登录，获取个人信息失败",
+            };
+          }
+
+          return {
+            success: false,
+            type: ActionFailType.Unknown,
+            msg: "账号密码校验成功，但" + loginResult.msg,
+          };
+        }
+
+        const studentInfo = await getUnderStudyInfo(
+          cookieStore.getHeader(UNDER_STUDY_SERVER),
+        );
+
+        if (studentInfo.success) {
+          let avatar = "";
+          const authCenterResult = await authCenterLogin(
+            { id, password, authToken },
+            cookieStore,
+          );
+
+          if (authCenterResult.success) {
+            const avatarInfo = await getAvatar(
+              cookieStore.getHeader(AUTH_INFO_PREFIX),
+            );
+
+            if (avatarInfo.success) {
+              avatar = avatarInfo.data.avatar;
+              try {
+                connection ??= await getConnection();
+                await connection.execute(
+                  "REPLACE INTO `student_avatar` (`id`, `avatar`) VALUES (?, ?)",
+                  [id, avatar],
+                );
+              } catch (err) {
+                console.error("Database error", err);
+              }
+            } else {
+              console.error("Get avatar failed", avatarInfo);
+            }
+          }
+          info = {
+            avatar,
+            ...studentInfo.data,
+          };
+          try {
+            connection ??= await getConnection();
+            await connection.execute(SQL_STRING, [
+              info.id,
+              info.name,
+              info.org,
+              info.orgId,
+              info.major,
+              info.majorId,
+              info.inYear,
+              info.grade,
+              info.type,
+              info.typeId,
+              info.people,
+              info.gender,
+              info.genderId,
+              info.birth,
+              info.location,
+            ]);
+          } catch (err) {
+            console.error("Database error", err);
+          }
+        }
+
+        return UnknownResponse("从本科生教务系统获取个人信息失败");
+      } else {
+        info ??= {
+          avatar: "",
+          ...getTempInfo(id),
+        };
+
+        // let loginResult = await gradSystemLogin(
+        //   { id, password, authToken },
+        //   cookieStore,
+        // );
+
+        // if (
+        //   "type" in loginResult &&
+        //   loginResult.type === ActionFailType.Forbidden
+        // ) {
+        //   loginResult = await gradSystemLogin(
+        //     { id, password, authToken },
+        //     cookieStore,
+        //   );
+        // }
+
+        // // 获得信息
+        // if (loginResult.success) {
+        //   const studentInfo = await getGradInfo(
+        //     cookieStore.getHeader(GRAD_SYSTEM_SERVER),
+        //   );
+
+        //   if (studentInfo.success) {
+        //     let avatar = "";
+        //     const authCenterResult = await authCenterLogin(
+        //       { id, password, authToken },
+        //       cookieStore,
+        //     );
+
+        //     if (authCenterResult.success) {
+        //       const avatarInfo = await getAvatar(
+        //         cookieStore.getHeader(AUTH_INFO_PREFIX),
+        //       );
+
+        //       if (avatarInfo.success) {
+        //         avatar = avatarInfo.data.avatar;
+        //         try {
+        //           connection ??= await getConnection();
+        //           await connection.execute(
+        //             "REPLACE INTO `student_avatar` (`id`, `avatar`) VALUES (?, ?)",
+        //             [id, avatar],
+        //           );
+        //         } catch (err) {
+        //           console.error("Database error", err);
+        //         }
+        //       } else {
+        //         console.error("Get avatar failed", avatarInfo);
+        //       }
+        //     }
+
+        //     info = {
+        //       avatar,
+        //       ...studentInfo.data,
+        //     };
+        //     try {
+        //       connection ??= await getConnection();
+        //       await connection.execute(SQL_STRING, [
+        //         info.id,
+        //         info.name,
+        //         info.org,
+        //         info.orgId,
+        //         info.major,
+        //         info.majorId,
+        //         info.inYear,
+        //         info.grade,
+        //         info.type,
+        //         info.typeId,
+        //         info.people,
+        //         info.gender,
+        //         info.genderId,
+        //         info.birth,
+        //         info.location,
+        //       ]);
+        //     } catch (err) {
+        //       console.error("Database error", err);
+        //     }
+        //   }
+        // } else if (loginResult.type === ActionFailType.Forbidden) {
+        //   return {
+        //     success: false,
+        //     type: ActionFailType.Forbidden,
+        //     msg: "当前时段研究生教务系统暂未开放，无法获取个人信息",
+        //   };
+        // } else {
+        //   return {
+        //     success: false,
+        //     type: ActionFailType.Unknown,
+        //     msg: "账号密码校验成功，但" + loginResult.msg,
+        //   };
+        // }
+      }
+    }
 
     // check blacklist
     if (await isInBlackList(id, openid, info))
