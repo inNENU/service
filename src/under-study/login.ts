@@ -19,6 +19,8 @@ import type {
   CommonFailedResponse,
   LoginOptions,
 } from "../typings.js";
+import type { VPNLoginFailedResponse } from "../vpn/index.js";
+import { vpnCASLogin } from "../vpn/index.js";
 
 export interface UnderStudyLoginOptions extends AccountInfo {
   webVPN?: boolean;
@@ -32,9 +34,9 @@ export interface UnderStudyLoginSuccessResult {
 export type UnderStudyLoginResult =
   | UnderStudyLoginSuccessResult
   | AuthLoginFailedResponse
+  | VPNLoginFailedResponse
   | CommonFailedResponse<ActionFailType.Restricted>;
 
-// FIXME: Add webVPN issue hints
 export const underStudyLogin = async (
   { webVPN = false, ...options }: UnderStudyLoginOptions,
   cookieStore = new CookieStore(),
@@ -42,6 +44,12 @@ export const underStudyLogin = async (
   const server = webVPN ? UNDER_STUDY_VPN_SERVER : UNDER_STUDY_SERVER;
   const SSO_LOGIN_URL = `${server}/new/ssoLogin`;
   const MAIN_URL = `${server}/new/welcome.page`;
+
+  if (webVPN) {
+    const vpnLoginResult = await vpnCASLogin(options, cookieStore);
+
+    if (!vpnLoginResult.success) return vpnLoginResult;
+  }
 
   const result = await authLogin({
     ...options,
@@ -111,10 +119,14 @@ export interface UnderStudyLoginSuccessResponse {
   cookies: CookieType[];
 }
 
+export type UnderStudyLoginFailedResponse =
+  | AuthLoginFailedResponse
+  | VPNLoginFailedResponse
+  | CommonFailedResponse<ActionFailType.Restricted>;
+
 export type UnderStudyLoginResponse =
   | UnderStudyLoginSuccessResponse
-  | AuthLoginFailedResponse
-  | CommonFailedResponse<ActionFailType.Restricted>;
+  | UnderStudyLoginFailedResponse;
 
 export const loginToUnderStudy = request<
   | UnderStudyLoginResponse
