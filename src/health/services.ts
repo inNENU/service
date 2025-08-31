@@ -132,7 +132,8 @@ export const checkAllServicesHealth = async (): Promise<
     checkMyPortalHealth(),
     checkOfficialSiteHealth(),
     checkLibraryHealth(),
-    checkEnrollmentHealth(),
+    // FIXME: This server is currently down
+    // checkEnrollmentHealth(),
     checkGradEnrollmentHealth(),
   ];
 
