@@ -92,6 +92,14 @@ export const vpnCASLogin = async (
           cookieStore,
         };
       }
+
+      console.error(
+        "VPN 服务回调错误",
+        callbackResponse,
+        await callbackResponse.text(),
+      );
+
+      return UnknownResponse("未知错误");
     }
 
     console.error(
@@ -103,12 +111,15 @@ export const vpnCASLogin = async (
     return UnknownResponse("VPN 服务负载过高，请稍后重试");
   }
 
-  if (casResponse.status === 500)
+  if (casResponse.status >= 500) {
+    console.error("VPN 服务出错", casResponse, await casResponse.text());
+
     return {
       success: false,
       type: ActionFailType.Error,
       msg: "学校 WebVPN 服务崩溃，请稍后重试。",
     };
+  }
 
   console.error("VPN 服务未知错误", casResponse, await casResponse.text());
 

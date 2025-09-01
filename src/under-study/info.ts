@@ -60,8 +60,6 @@ export interface UnderStudyInfo {
   typeId: "bks";
   /** 用户民族 */
   people: string;
-  /** 用户民族代码 */
-  peopleId: number;
   /** 用户性别 */
   gender: string;
   /** 用户性别代码 */
@@ -90,15 +88,6 @@ export const getUnderStudyInfo = async (
   cookieHeader: string,
 ): Promise<UnderStudyInfoResult> => {
   try {
-    await fetch(`${UNDER_STUDY_SERVER}/new/student/xjkpxx`, {
-      headers: {
-        Cookie: cookieHeader,
-        Referer: `${UNDER_STUDY_SERVER}/new/welcome.page?ui=new`,
-        ...EDGE_USER_AGENT_HEADERS,
-      },
-      redirect: "manual",
-    });
-
     const infoResponse = await fetch(
       `${UNDER_STUDY_SERVER}/new/student/xjkpxx/edit.page?confirmInfo=`,
       {
@@ -134,7 +123,6 @@ export const getUnderStudyInfo = async (
         type: "本科生",
         typeId: "bks",
         people: PEOPLE_MATCH_REGEXP.exec(peopleSelectContent)![1],
-        peopleId: -1,
         gender: Number(idCard[16]) % 2 === 0 ? "女" : "男",
         genderId: Number(idCard[16]) % 2 === 0 ? 2 : 1,
         birth: `${idCard.slice(6, 10)}-${idCard.slice(10, 12)}-${idCard.slice(12, 14)}`,

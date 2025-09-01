@@ -94,10 +94,10 @@ const getTempInfo = (id: number): WhoInfoData => {
 
   return {
     id,
-    name: "获取失败",
-    org: "获取失败",
-    orgId: 0,
-    major: "获取失败",
+    name: "未知姓名",
+    org: "未知院系",
+    orgId: -1,
+    major: "未知专业",
     majorId: "",
     inYear: grade,
     grade: grade,
@@ -110,7 +110,7 @@ const getTempInfo = (id: number): WhoInfoData => {
           : "unknown",
     people: "",
     gender: "",
-    genderId: 0,
+    genderId: -1,
     birth: "",
     location: "unknown",
     idCard: "",
@@ -192,14 +192,17 @@ export const getAuthInfo = async (
             return {
               success: false,
               type: ActionFailType.Forbidden,
-              msg: "本科教务系统无法登录，获取个人信息失败",
+              msg: "本科教务系统无法登录，获取个人信息失败，请通过小程序客服联系 Mr.Hope",
             };
           }
 
           return {
             success: false,
             type: ActionFailType.Unknown,
-            msg: "账号密码校验成功，但" + loginResult.msg,
+            msg:
+              "账号密码校验成功，但" +
+              loginResult.msg +
+              "，你可通过小程序客服联系 Mr.Hope。",
           };
         }
 
@@ -234,10 +237,12 @@ export const getAuthInfo = async (
               console.error("Get avatar failed", avatarInfo);
             }
           }
+
           info = {
             avatar,
             ...studentInfo.data,
           };
+
           try {
             connection ??= await getConnection();
             await connection.execute(SQL_STRING, [
@@ -260,9 +265,9 @@ export const getAuthInfo = async (
           } catch (err) {
             console.error("Database error", err);
           }
+        } else {
+          return UnknownResponse("从本科生教务系统获取个人信息失败");
         }
-
-        return UnknownResponse("从本科生教务系统获取个人信息失败");
       } else {
         info ??= {
           avatar: "",
