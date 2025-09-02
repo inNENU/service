@@ -28,7 +28,7 @@ const GRADE_REGEXP =
 const LOCATION_REGEXP =
   /<td align="right">所在校区：<\/td>\s*<td><label style="width: 90px">(.*?)<\/label><\/td>/;
 const PEOPLE_WRAPPER_REGEXP =
-  /<select.+?title='民族' disabled='disabled'>([\s\S]+?)<\/select>/;
+  /<select.+?title='民族'[^>]+>([\s\S]+?)<\/select>/;
 const PEOPLE_MATCH_REGEXP =
   /<option\s+value='\d+'\s*?selected>(.*?)<\/option>/g;
 
