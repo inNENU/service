@@ -45,8 +45,8 @@ importers:
         specifier: 5.1.0
         version: 5.1.0
       express-rate-limit:
-        specifier: 8.0.1
-        version: 8.0.1(express@5.1.0)
+        specifier: 8.1.0
+        version: 8.1.0(express@5.1.0)
       iconv-lite:
         specifier: 0.7.0
         version: 0.7.0
@@ -1393,8 +1393,8 @@ packages:
     resolution: {integrity: sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg==}
     engines: {node: '>= 0.6'}
 
-  express-rate-limit@8.0.1:
-    resolution: {integrity: sha512-aZVCnybn7TVmxO4BtlmnvX+nuz8qHW124KKJ8dumsBsmv5ZLxE0pYu7S2nwyRBGHHCAzdmnGyrc5U/rksSPO7Q==}
+  express-rate-limit@8.1.0:
+    resolution: {integrity: sha512-4nLnATuKupnmwqiJc27b4dCFmB/T60ExgmtDD7waf4LdrbJ8CPZzZRHYErDYNhoz+ql8fUdYwM/opf90PoPAQA==}
     engines: {node: '>= 16'}
     peerDependencies:
       express: '>= 4.11'
@@ -3606,7 +3606,7 @@ snapshots:
 
   etag@1.8.1: {}
 
-  express-rate-limit@8.0.1(express@5.1.0):
+  express-rate-limit@8.1.0(express@5.1.0):
     dependencies:
       express: 5.1.0
       ip-address: 10.0.1
