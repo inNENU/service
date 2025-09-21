@@ -128,7 +128,7 @@ const getStudentArchive = async (
               `data:image/jpeg;base64,${Buffer.from(buffer).toString("base64")}`,
           )
           .catch(() => "")
-      : "",
+      : Promise.resolve(""),
     examImageLink
       ? fetch(`${UNDER_SYSTEM_SERVER}${examImageLink}`, {
           method: "POST",
@@ -142,7 +142,7 @@ const getStudentArchive = async (
               `data:image/jpeg;base64,${Buffer.from(buffer).toString("base64")}`,
           )
           .catch(() => "")
-      : "",
+      : Promise.resolve(""),
   ]);
 
   const path = pathRegExp.exec(content)?.[1] ?? "";
