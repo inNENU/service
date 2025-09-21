@@ -2,6 +2,10 @@
   "name": "innenu-service",
   "private": true,
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/innenu/service.git"
+  },
   "scripts": {
     "build": "rollup -c rollup.config.ts --configPlugin esbuild",
     "bundle:encrypt": "rollup -c scripts/encrypt.ts --configPlugin esbuild",
@@ -30,16 +34,16 @@
     "cookie-parser": "1.4.7",
     "cors": "2.8.5",
     "crypto-js": "4.2.0",
-    "dotenv": "17.2.1",
+    "dotenv": "17.2.2",
     "express": "5.1.0",
-    "express-rate-limit": "8.0.1",
+    "express-rate-limit": "8.1.0",
     "iconv-lite": "0.7.0",
     "js-sha1": "0.7.0",
     "morgan": "1.10.1",
-    "mysql2": "3.14.4",
+    "mysql2": "3.15.0",
     "picocolors": "1.1.1",
     "qrcode": "1.5.4",
-    "uuid": "11.1.0"
+    "uuid": "13.0.0"
   },
   "devDependencies": {
     "@commitlint/cli": "19.8.1",
@@ -55,24 +59,24 @@
     "@types/express": "5.0.3",
     "@types/express-serve-static-core": "5.0.7",
     "@types/morgan": "1.9.10",
-    "@types/node": "24.3.0",
+    "@types/node": "24.5.2",
     "@types/qrcode": "1.5.5",
     "@types/qs": "6.14.0",
-    "@types/uuid": "10.0.0",
+    "@types/uuid": "11.0.0",
     "cross-env": "10.0.0",
     "domhandler": "^5.0.3",
-    "eslint": "9.34.0",
+    "eslint": "9.36.0",
     "eslint-config-mister-hope": "0.9.6",
     "husky": "9.1.7",
     "nano-staged": "0.8.0",
     "prettier": "3.6.2",
-    "rollup": "4.50.0",
+    "rollup": "4.52.0",
     "rollup-plugin-dts": "6.2.3",
     "rollup-plugin-esbuild": "6.2.1",
     "tsx": "4.20.5",
     "typescript": "5.9.2"
   },
-  "packageManager": "pnpm@10.15.0",
+  "packageManager": "pnpm@10.17.0",
   "engines": {
     "node": ">= 20"
   }
