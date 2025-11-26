@@ -6,11 +6,7 @@ import { underSystemLogin } from "./login.js";
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { MissingCredentialResponse, UnknownResponse } from "../config/index.js";
-import type {
-  CommonFailedResponse,
-  EmptyObject,
-  LoginOptions,
-} from "../typings.js";
+import type { EmptyObject, LoginOptions } from "../typings.js";
 
 const NAME_REGEXP =
   /<td>姓&nbsp;名<\/td>\s+<td colspan="3">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/;
@@ -141,8 +137,7 @@ export interface UnderInfoSuccessResponse {
 
 export type UnderInfoResponse =
   | UnderInfoSuccessResponse
-  | AuthLoginFailedResponse
-  | CommonFailedResponse;
+  | AuthLoginFailedResponse;
 
 export const getUnderInfo = async (
   cookieHeader: string,

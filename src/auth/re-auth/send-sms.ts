@@ -36,6 +36,7 @@ interface RawReAuthSMSFailResponse {
 
 type RawReAuthSMSResponse =
   | RawReAuthSMSSuccessResponse
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   | RawReAuthSMSFrequentResponse
   | RawReAuthSMSFailResponse;
 

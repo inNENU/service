@@ -3,7 +3,7 @@ import { EDGE_USER_AGENT_HEADERS, request } from "@/utils/index.js";
 import { UNDER_STUDY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { ExpiredResponse, UnknownResponse } from "../config/index.js";
-import type { CommonFailedResponse, LoginOptions } from "../typings.js";
+import type { LoginOptions } from "../typings.js";
 
 export interface UnderGradeListOptions extends LoginOptions {
   /** 查询时间 */
@@ -133,8 +133,7 @@ export interface UnderGradeListSuccessResponse {
 
 export type UnderGradeListResponse =
   | UnderGradeListSuccessResponse
-  | AuthLoginFailedResponse
-  | CommonFailedResponse;
+  | AuthLoginFailedResponse;
 
 const QUERY_URL = `${UNDER_STUDY_SERVER}/new/student/xskccj/kccjDatas`;
 

@@ -2,12 +2,8 @@ import { request } from "@/utils/index.js";
 
 import { ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import type { ActionFailType } from "../config/index.js";
 import { ExpiredResponse, UnknownResponse } from "../config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-} from "../typings.js";
+import type { CommonSuccessResponse } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 
 const CARD_BALANCE_URL = `${ACTION_SERVER}/soapBasic/postSoap`;
@@ -30,8 +26,7 @@ export type CardBalanceSuccessResponse = CommonSuccessResponse<number>;
 export type CardBalanceResponse =
   | CardBalanceSuccessResponse
   | AuthLoginFailedResponse
-  | VPNLoginFailedResponse
-  | CommonFailedResponse<ActionFailType.Expired | ActionFailType.Unknown>;
+  | VPNLoginFailedResponse;
 
 const TEST_CARD_BALANCE_RESPONSE: CardBalanceSuccessResponse = {
   success: true,

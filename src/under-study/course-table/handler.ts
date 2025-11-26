@@ -4,11 +4,7 @@ import {
   UnknownResponse,
   semesterStartTime,
 } from "@/config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-  LoginOptions,
-} from "@/typings.js";
+import type { CommonSuccessResponse, LoginOptions } from "@/typings.js";
 import { EDGE_USER_AGENT_HEADERS, request } from "@/utils/index.js";
 
 import type {
@@ -37,8 +33,8 @@ interface RawUnderCourseTableFailResult {
 }
 
 type RawUnderCourseTableResult =
-  | RawUnderCourseTableSuccessResult
-  | RawUnderCourseTableFailResult;
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+  RawUnderCourseTableSuccessResult | RawUnderCourseTableFailResult;
 
 export type UnderCourseTableSuccessResponse = CommonSuccessResponse<{
   table: TableData;
@@ -47,8 +43,7 @@ export type UnderCourseTableSuccessResponse = CommonSuccessResponse<{
 
 export type UnderCourseTableResponse =
   | UnderCourseTableSuccessResponse
-  | AuthLoginFailedResponse
-  | CommonFailedResponse;
+  | AuthLoginFailedResponse;
 
 export const getCourseTable = (
   classes: RawUnderCourseTableItem[],

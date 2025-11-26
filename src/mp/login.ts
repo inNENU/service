@@ -146,7 +146,7 @@ export const mpLoginHandler = request<MPLoginResponse, MPLoginOptions>(
 
         if (inBlacklist) console.info(`Blocking user ${openid}`);
       } catch (err) {
-        console.error(`数据库查询失败，openid: ${openid}`, err);
+        console.error("数据库查询失败，openid: %s", openid, err);
 
         return res.json(DatabaseErrorResponse((err as Error).message));
       }

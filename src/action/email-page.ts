@@ -2,13 +2,8 @@ import { request } from "@/utils/index.js";
 
 import { ACTION_MAIN_PAGE, ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import type { ActionFailType } from "../config/index.js";
 import { ExpiredResponse, UnknownResponse } from "../config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-  LoginOptions,
-} from "../typings.js";
+import type { CommonSuccessResponse, LoginOptions } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 
 const EMAIL_PAGE_URL = `${ACTION_SERVER}/extract/sendRedirect2Email`;
@@ -29,8 +24,7 @@ export type ActionEmailPageSuccessResponse = CommonSuccessResponse<string>;
 export type ActionEmailPageResponse =
   | ActionEmailPageSuccessResponse
   | AuthLoginFailedResponse
-  | VPNLoginFailedResponse
-  | CommonFailedResponse<ActionFailType.Expired | ActionFailType.Unknown>;
+  | VPNLoginFailedResponse;
 
 const TEST_EMAIL_PAGE_RESPONSE: ActionEmailPageSuccessResponse = {
   success: true,

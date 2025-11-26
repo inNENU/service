@@ -1,4 +1,4 @@
-name: Build Artifacts
+name: Build and Deploy Artifacts
 
 on:
   push:
@@ -65,11 +65,12 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-          echo "Host innenu" >> ~/.ssh/config
+          echo "Host $HOST" >> ~/.ssh/config
           echo "  HostName $HOST" >> ~/.ssh/config
           echo "  Port $SSH_PORT" >> ~/.ssh/config
           echo "  User git" >> ~/.ssh/config
           echo "  IdentityFile ~/.ssh/id_rsa" >> ~/.ssh/config
+          echo "  StrictHostKeyChecking no" >> ~/.ssh/config
 
           git config --global user.name 'Mr.Hope'
           git config --global user.email 'mister-hope@outlook.com'

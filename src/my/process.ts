@@ -1,8 +1,6 @@
 import { MY_MAIN_PAGE, MY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import type { ActionFailType } from "../config/index.js";
 import { ExpiredResponse, UnknownResponse } from "../config/index.js";
-import type { CommonFailedResponse } from "../typings.js";
 
 interface RawProcessResult {
   success: boolean;
@@ -25,10 +23,7 @@ export interface MyProcessSuccessResult {
   realFormPath: string;
 }
 
-export type MyProcessResult =
-  | MyProcessSuccessResult
-  | AuthLoginFailedResponse
-  | CommonFailedResponse<ActionFailType.Expired>;
+export type MyProcessResult = MyProcessSuccessResult | AuthLoginFailedResponse;
 
 export const getProcess = async (
   processId: string,

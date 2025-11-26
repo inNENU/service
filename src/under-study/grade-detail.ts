@@ -3,11 +3,7 @@ import { EDGE_USER_AGENT_HEADERS, request } from "@/utils/index.js";
 import { UNDER_STUDY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { ExpiredResponse, UnknownResponse } from "../config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-  LoginOptions,
-} from "../typings.js";
+import type { CommonSuccessResponse, LoginOptions } from "../typings.js";
 
 export interface UnderGradeDetailOptions extends LoginOptions {
   /** 成绩代码 */
@@ -74,11 +70,12 @@ interface RawUnderGradeSuccessResult {
 }
 
 interface RawUnderGradeFailResult {
-  code: number;
+  code: Exclude<number, 0>;
   data: unknown;
   message: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 type RawUnderGradeResult = RawUnderGradeSuccessResult | RawUnderGradeFailResult;
 
 const getGradeDetail = ({
@@ -115,8 +112,7 @@ export type UnderGradeDetailSuccessResponse = CommonSuccessResponse<
 
 export type UnderGradeDetailResponse =
   | UnderGradeDetailSuccessResponse
-  | AuthLoginFailedResponse
-  | CommonFailedResponse;
+  | AuthLoginFailedResponse;
 
 const UNDER_GRADE_DETAIL_RESPONSE: UnderGradeDetailSuccessResponse = {
   success: true,

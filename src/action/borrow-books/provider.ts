@@ -1,6 +1,5 @@
-import type { ActionFailType } from "@/config/index.js";
 import { ExpiredResponse } from "@/config/index.js";
-import type { CommonFailedResponse, CommonSuccessResponse } from "@/typings.js";
+import type { CommonSuccessResponse } from "@/typings.js";
 
 import type { BorrowBookData, RawBorrowBooksData } from "./converter.js";
 import { getBorrowBookData } from "./converter.js";
@@ -17,8 +16,7 @@ export type BorrowBooksSuccessResponse = CommonSuccessResponse<
 export type BorrowBooksResponse =
   | BorrowBooksSuccessResponse
   | AuthLoginFailedResponse
-  | VPNLoginFailedResponse
-  | CommonFailedResponse<ActionFailType.Expired | ActionFailType.Unknown>;
+  | VPNLoginFailedResponse;
 
 export const getBorrowBooks = async (
   cookieHeader: string,

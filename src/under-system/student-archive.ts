@@ -171,8 +171,7 @@ export interface UnderGetStudentArchiveSuccessResponse {
 
 export type UnderGetStudentArchiveResponse =
   | UnderGetStudentArchiveSuccessResponse
-  | AuthLoginFailedResponse
-  | CommonFailedResponse;
+  | AuthLoginFailedResponse;
 
 export const getUnderStudentArchive = async (
   cookieHeader: string,

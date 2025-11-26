@@ -109,7 +109,7 @@ export const checkIDCode = async ({
 
       isAdmin = adminRows.length > 0;
     } catch (err) {
-      console.error(`Querying admin with openid ${openid}`, err);
+      console.error("Querying admin with openid %s", openid, err);
     }
 
     if (!uuid) {

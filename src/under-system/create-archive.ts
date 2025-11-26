@@ -260,8 +260,7 @@ export interface UnderCreateStudentArchiveSubmitInfoSuccessResponse {
 
 export type UnderCreateStudentArchiveSubmitInfoResponse =
   | UnderCreateStudentArchiveSubmitInfoSuccessResponse
-  | AuthLoginFailedResponse
-  | CommonFailedResponse;
+  | AuthLoginFailedResponse;
 
 export const submitUnderStudentArchiveInfo = async (
   cookieHeader: string,
@@ -326,8 +325,7 @@ export interface UnderCreateStudentArchiveSubmitAddressSuccessResponse {
 
 export type UnderCreateStudentArchiveSubmitAddressResponse =
   | UnderCreateStudentArchiveSubmitAddressSuccessResponse
-  | AuthLoginFailedResponse
-  | CommonFailedResponse;
+  | AuthLoginFailedResponse;
 
 export const submitUnderStudentArchiveAddress = async (
   cookieHeader: string,
@@ -418,8 +416,7 @@ export interface UnderCreateStudentArchiveSubmitStudySuccessResponse {
 
 export type UnderCreateStudentArchiveSubmitStudyResponse =
   | UnderCreateStudentArchiveSubmitStudySuccessResponse
-  | AuthLoginFailedResponse
-  | CommonFailedResponse;
+  | AuthLoginFailedResponse;
 
 export const submitUnderStudentArchiveStudy = async (
   cookieHeader: string,
@@ -533,8 +530,7 @@ export interface UnderCreateStudentArchiveSubmitFamilySuccessResponse {
 
 export type UnderCreateStudentArchiveSubmitFamilyResponse =
   | UnderCreateStudentArchiveSubmitFamilySuccessResponse
-  | AuthLoginFailedResponse
-  | CommonFailedResponse;
+  | AuthLoginFailedResponse;
 
 export const submitUnderStudentArchiveFamily = async (
   cookieHeader: string,

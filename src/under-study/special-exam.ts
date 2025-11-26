@@ -3,10 +3,7 @@ import { EDGE_USER_AGENT_HEADERS, request } from "@/utils/index.js";
 import { UNDER_STUDY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { ExpiredResponse, UnknownResponse } from "../config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-} from "../typings.js";
+import type { CommonSuccessResponse } from "../typings.js";
 
 interface RawUnderSpecialExamItem {
   /** 考试成绩 */
@@ -81,8 +78,7 @@ export type UnderSpecialExamSuccessResponse = CommonSuccessResponse<
 
 export type UnderSpecialExamResponse =
   | UnderSpecialExamSuccessResponse
-  | AuthLoginFailedResponse
-  | CommonFailedResponse;
+  | AuthLoginFailedResponse;
 
 const QUERY_URL = `${UNDER_STUDY_SERVER}/new/student/xskjcj/datas`;
 
