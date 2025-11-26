@@ -9,6 +9,7 @@ export * from "./ie.js";
 export * from "./memory.js";
 export * from "./mysql.js";
 export * from "./pathFetch.js";
+export * from "./pathname.js";
 export * from "./shortUUID.js";
 export * from "./splitWords.js";
 export * from "./wechatAccessToken.js";

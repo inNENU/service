@@ -1,7 +1,7 @@
 import type { RichTextNode } from "@mptool/parser";
 import { getRichTextNodes } from "@mptool/parser";
 
-import { request } from "@/utils/index.js";
+import { isValidPathname, request } from "@/utils/index.js";
 
 import { OFFICIAL_URL, getOfficialPageView } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
@@ -48,6 +48,8 @@ export const getOfficialNoticeDetail = async (
   url: string,
 ): Promise<OfficialNoticeDetailResponse> => {
   if (!url) return MissingArgResponse("url");
+
+  if (!isValidPathname(url)) return UnknownResponse("url参数不合法");
 
   const response = await fetch(`${OFFICIAL_URL}/${url}`);
 
