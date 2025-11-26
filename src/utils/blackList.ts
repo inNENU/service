@@ -38,7 +38,7 @@ export const isInBlackList = async (
     );
 
     if (conditionRows.length > 0) {
-      console.info(`Blocking user ${id} due to condition`, conditionRows[0]);
+      console.info('Blocking user %s due to condition', id, conditionRows[0]);
 
       await connection.execute(
         "INSERT IGNORE INTO `id_blacklist` (`id`, `remark`) VALUES (?, ?)",
