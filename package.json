@@ -35,7 +35,7 @@
     "cors": "2.8.5",
     "crypto-js": "4.2.0",
     "dotenv": "17.2.3",
-    "express": "5.1.0",
+    "express": "5.2.0",
     "express-rate-limit": "8.2.1",
     "iconv-lite": "0.7.0",
     "js-sha1": "0.7.0",
