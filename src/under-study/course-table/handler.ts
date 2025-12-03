@@ -33,8 +33,8 @@ interface RawUnderCourseTableFailResult {
 }
 
 type RawUnderCourseTableResult =
-  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-  RawUnderCourseTableSuccessResult | RawUnderCourseTableFailResult;
+  | RawUnderCourseTableSuccessResult
+  | RawUnderCourseTableFailResult;
 
 export type UnderCourseTableSuccessResponse = CommonSuccessResponse<{
   table: TableData;

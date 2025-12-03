@@ -75,7 +75,6 @@ interface RawUnderGradeFailResult {
   message: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 type RawUnderGradeResult = RawUnderGradeSuccessResult | RawUnderGradeFailResult;
 
 const getGradeDetail = ({

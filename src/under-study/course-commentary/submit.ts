@@ -18,13 +18,11 @@ interface RawUnderCourseCommentarySubmitSuccessResult {
 }
 
 type RawUnderCourseCommentarySubmitResult =
-  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   | RawUnderCourseCommentarySubmitSuccessResult
   | RawUnderCourseCommentaryFailResult;
 
 export interface SubmitUnderCourseCommentaryOptions
-  extends LoginOptions,
-    UnderCourseCommentaryInfo {
+  extends LoginOptions, UnderCourseCommentaryInfo {
   type: "submit";
   /** 选项 */
   answers: number[];

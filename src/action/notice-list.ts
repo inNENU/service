@@ -84,8 +84,9 @@ const getNoticeItem = ({
     : {}),
 });
 
-export interface NoticeListSuccessResponse
-  extends CommonListSuccessResponse<NoticeInfo[]> {
+export interface NoticeListSuccessResponse extends CommonListSuccessResponse<
+  NoticeInfo[]
+> {
   size: number;
   count: number;
 }

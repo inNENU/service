@@ -244,8 +244,7 @@ export const getUnderStudentArchiveInfo = async (
   };
 };
 
-export interface UnderCreateStudentArchiveSubmitInfoOptions
-  extends LoginOptions {
+export interface UnderCreateStudentArchiveSubmitInfoOptions extends LoginOptions {
   type: "submit-info";
   fields: UnderArchiveFieldInfo[];
   path: string;
@@ -309,8 +308,7 @@ export const submitUnderStudentArchiveInfo = async (
   };
 };
 
-export interface UnderCreateStudentArchiveSubmitAddressOptions
-  extends LoginOptions {
+export interface UnderCreateStudentArchiveSubmitAddressOptions extends LoginOptions {
   type: "submit-address";
   fields: UnderArchiveFieldInfo[];
   path: string;
@@ -399,8 +397,7 @@ export interface UnderStudyOptions {
   witness: string;
 }
 
-export interface UnderCreateStudentArchiveSubmitStudyOptions
-  extends LoginOptions {
+export interface UnderCreateStudentArchiveSubmitStudyOptions extends LoginOptions {
   type: "submit-study";
   fields: UnderArchiveFieldInfo[];
   path: string;
@@ -516,8 +513,7 @@ export interface UnderFamilyOptions {
   phone: string;
 }
 
-export interface UnderCreateStudentArchiveSubmitFamilyOptions
-  extends LoginOptions {
+export interface UnderCreateStudentArchiveSubmitFamilyOptions extends LoginOptions {
   type: "submit-family";
   fields: UnderArchiveFieldInfo[];
   path: string;
