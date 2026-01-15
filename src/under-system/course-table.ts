@@ -41,7 +41,7 @@ export type LegacyTableRowData = LegacyTableCellData[];
 export type LegacyTableData = LegacyTableRowData[];
 
 const courseRowRegExp =
-  /<tr>\s+<td[^>]*>\s+\d+\s+<\/td>\s+((?:<td[^>]*>[^]+?<\/td>\s*?)+)\s+<\/tr>/g;
+  /<tr>\s+<td[^>]*>\s+\d+\s+<\/td>\s+((?:<td[^>]*>[\s\S]*?<\/td>\s*)+)\s+<\/tr>/g;
 const courseCellRegExp =
   /<td .*?>\s+<div id="\d-\d-\d"\s?>([^]+?)<\/div>[^]+?<\/td>/g;
 
