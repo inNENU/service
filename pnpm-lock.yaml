@@ -45,8 +45,8 @@ importers:
         specifier: 5.2.1
         version: 5.2.1
       express-rate-limit:
-        specifier: 8.2.1
-        version: 8.2.1(express@5.2.1)
+        specifier: 8.2.2
+        version: 8.2.2(express@5.2.1)
       iconv-lite:
         specifier: 0.7.0
         version: 0.7.0
@@ -1370,8 +1370,8 @@ packages:
     resolution: {integrity: sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg==}
     engines: {node: '>= 0.6'}
 
-  express-rate-limit@8.2.1:
-    resolution: {integrity: sha512-PCZEIEIxqwhzw4KF0n7QF4QqruVTcF73O5kFKUnGOyjbCCgizBBiFaYpd/fnBLUMPw/BWw9OsiN7GgrNYr7j6g==}
+  express-rate-limit@8.2.2:
+    resolution: {integrity: sha512-Ybv7bqtOgA914MLwaHWVFXMpMYeR1MQu/D+z2MaLYteqBsTIp9sY3AU7mGNLMJv8eLg8uQMpE20I+L2Lv49nSg==}
     engines: {node: '>= 16'}
     peerDependencies:
       express: '>= 4.11'
@@ -1465,6 +1465,7 @@ packages:
   git-raw-commits@4.0.0:
     resolution: {integrity: sha512-ICsMM1Wk8xSGMowkOmPrzo2Fgmfo4bMHLNX6ytHjajRJUqvHOw/TFapQ+QG75c3X/tTDDhOSRPGC52dDbNM8FQ==}
     engines: {node: '>=16'}
+    deprecated: This package is no longer maintained. For the JavaScript API, please use @conventional-changelog/git-client instead.
     hasBin: true
 
   glob-parent@6.0.2:
@@ -1550,8 +1551,8 @@ packages:
     resolution: {integrity: sha512-QQnnxNyfvmHFIsj7gkPcYymR8Jdw/o7mp5ZFihxn6h8Ci6fh3Dx4E1gPjpQEpIuPo9XVNY/ZUwh4BPMjGyL01g==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
 
-  ip-address@10.0.1:
-    resolution: {integrity: sha512-NWv9YLW4PoW2B7xtzaS3NCot75m6nK7Icdv0o3lfMceJVRfSoQwqD4wEH5rLwoKJwUiZ/rfpiVBhnaF0FK4HoA==}
+  ip-address@10.1.0:
+    resolution: {integrity: sha512-XXADHxXmvT9+CRxhXg56LJovE+bmWnEWB78LB83VZTprKTmaC5QfruXocxzTZ2Kl0DNwKuBdlIhjL8LeY8Sf8Q==}
     engines: {node: '>= 12'}
 
   ipaddr.js@1.9.1:
@@ -3513,10 +3514,10 @@ snapshots:
 
   etag@1.8.1: {}
 
-  express-rate-limit@8.2.1(express@5.2.1):
+  express-rate-limit@8.2.2(express@5.2.1):
     dependencies:
       express: 5.2.1
-      ip-address: 10.0.1
+      ip-address: 10.1.0
 
   express@5.2.1:
     dependencies:
@@ -3715,7 +3716,7 @@ snapshots:
 
   ini@4.1.1: {}
 
-  ip-address@10.0.1: {}
+  ip-address@10.1.0: {}
 
   ipaddr.js@1.9.1: {}
 
