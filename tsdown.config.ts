@@ -1,3 +1,4 @@
+import path from "node:path";
 import { defineConfig } from "tsdown";
 
 const isDev = process.env.NODE_ENV === "development";
@@ -11,7 +12,7 @@ export default defineConfig([
     inputOptions: {
       resolve: {
         alias: {
-          "@": "/src",
+          "@": path.resolve(import.meta.dirname, "src"),
         },
       },
     },
