@@ -1,4 +1,4 @@
-import { ActionFailType, ExpiredResponse } from "@/config/index.js";
+import { ActionFailType, expiredResponse } from "@/config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse } from "@/typings.js";
 import { EDGE_USER_AGENT_HEADERS, request } from "@/utils/index.js";
 
@@ -52,7 +52,7 @@ const DISALLOWED_CATEGORY_ITEM_REGEXP =
   /<div id="bb1"[^]+?lay-tips="选课学期:(.*?)\s*<br>\s*([^"]+?)\s*"\s+lay-iframe="(.*?)"\s+data-href="(.*?)"/g;
 
 const getSelectCategories = (content: string): UnderSelectCategoryInfo => ({
-  allowed: Array.from(content.matchAll(ALLOWED_CATEGORY_ITEM_REGEXP)).map(
+  allowed: [...content.matchAll(ALLOWED_CATEGORY_ITEM_REGEXP)].map(
     ([, term, stage, canRemoveText, name, link, startTime, endTime]) => ({
       term,
       stage,
@@ -65,7 +65,7 @@ const getSelectCategories = (content: string): UnderSelectCategoryInfo => ({
       isPublic: name.includes("公共课程"),
     }),
   ),
-  disallowed: Array.from(content.matchAll(DISALLOWED_CATEGORY_ITEM_REGEXP)).map(
+  disallowed: [...content.matchAll(DISALLOWED_CATEGORY_ITEM_REGEXP)].map(
     ([, term, description, name, link]) => ({
       term,
       description: description
@@ -80,34 +80,30 @@ const getSelectCategories = (content: string): UnderSelectCategoryInfo => ({
   ),
 });
 
-export type UnderSelectCategorySuccessResponse =
-  CommonSuccessResponse<UnderSelectCategoryInfo>;
+export type UnderSelectCategorySuccessResponse = CommonSuccessResponse<UnderSelectCategoryInfo>;
 
 export type UnderSelectCategoryResponse =
   | UnderSelectCategorySuccessResponse
   | AuthLoginFailedResponse
   | CommonFailedResponse<
-      | ActionFailType.NotInitialized
-      | ActionFailType.MissingCredential
-      | ActionFailType.Unknown
+      ActionFailType.NotInitialized | ActionFailType.MissingCredential | ActionFailType.Unknown
     >;
 
-const TEST_UNDER_SELECT_CATEGORY_RESPONSE: UnderSelectCategorySuccessResponse =
-  {
-    success: true,
-    data: {
-      allowed: [],
-      disallowed: [
-        {
-          term: "2021-2022-1",
-          name: "公共课程",
-          link: "/test",
-          canSelect: false,
-          description: "测试分类",
-        },
-      ],
-    },
-  };
+const TEST_UNDER_SELECT_CATEGORY_RESPONSE: UnderSelectCategorySuccessResponse = {
+  success: true,
+  data: {
+    allowed: [],
+    disallowed: [
+      {
+        term: "2021-2022-1",
+        name: "公共课程",
+        link: "/test",
+        canSelect: false,
+        description: "测试分类",
+      },
+    ],
+  },
+};
 
 export const getUnderSelectCategories = async (
   cookieHeader: string,
@@ -121,13 +117,11 @@ export const getUnderSelectCategories = async (
     redirect: "manual",
   });
 
-  if (response.status === 302) return ExpiredResponse;
+  if (response.status === 302) return expiredResponse;
 
   const content = await response.text();
 
-  if (
-    ["选课正在初始化", "选课未初始化"].some((item) => content.includes(item))
-  ) {
+  if (["选课正在初始化", "选课未初始化"].some((item) => content.includes(item))) {
     return {
       success: false,
       type: ActionFailType.NotInitialized,
@@ -141,13 +135,10 @@ export const getUnderSelectCategories = async (
   };
 };
 
-export const underSelectCategoryHandler = request<UnderSelectCategoryResponse>(
-  async (req, res) => {
-    const cookieHeader = req.headers.cookie!;
+export const underSelectCategoryHandler = request<UnderSelectCategoryResponse>(async (req, res) => {
+  const cookieHeader = req.headers.cookie!;
 
-    if (cookieHeader.includes("TEST"))
-      return res.json(TEST_UNDER_SELECT_CATEGORY_RESPONSE);
+  if (cookieHeader.includes("TEST")) return res.json(TEST_UNDER_SELECT_CATEGORY_RESPONSE);
 
-    return res.json(await getUnderSelectCategories(cookieHeader));
-  },
-);
+  return res.json(await getUnderSelectCategories(cookieHeader));
+});

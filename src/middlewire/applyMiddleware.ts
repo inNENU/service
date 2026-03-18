@@ -9,11 +9,7 @@ import { morganMiddleware } from "./morgan.js";
 export const applyMiddleware = (app: Express): void => {
   app.use(
     cors({
-      origin: [
-        "https://servicewechat.com",
-        /^https:\/\/.*\.innenu\.com$/,
-        "https://innenu.com",
-      ],
+      origin: ["https://servicewechat.com", /^https:\/\/.*\.innenu\.com$/, "https://innenu.com"],
     }),
   );
   app.use(cookieParser());
@@ -25,15 +21,13 @@ export const applyMiddleware = (app: Express): void => {
   app.use((_req, res, next) => {
     const originalJson = res.json;
 
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-    res.json = function (body) {
+    // eslint-disable-next-line no-shadow, @typescript-eslint/explicit-function-return-type
+    res.json = function json(...args: Parameters<typeof originalJson>) {
       // @ts-expect-error: Express type issue
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      res.body = body;
+      [res.body] = args;
 
-      // @ts-expect-error: Express type issue
-      // eslint-disable-next-line prefer-rest-params
-      return originalJson.apply(this, arguments);
+      return Reflect.apply(originalJson, this, args);
     };
     next();
   });

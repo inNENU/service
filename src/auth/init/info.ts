@@ -5,29 +5,17 @@ import {
   ActionFailType,
   TEST_COOKIE_STORE,
   TEST_INFO,
-  UnknownResponse,
+  unknownResponse,
   getRandomBlacklistHint,
 } from "@/config/index.js";
 // import { getGradInfo } from "@/grad-system/info.js";
 // import { gradSystemLogin } from "@/grad-system/login.js";
 // import { GRAD_SYSTEM_SERVER } from "@/grad-system/utils.js";
 import type { AccountInfo, CommonFailedResponse } from "@/typings.js";
-import {
-  getConnection,
-  isInBlackList,
-  releaseConnection,
-} from "@/utils/index.js";
+import { getConnection, isInBlackList, releaseConnection } from "@/utils/index.js";
 
-import {
-  AUTH_INFO_PREFIX,
-  authCenterLogin,
-  getAvatar,
-} from "../../auth-center/index.js";
-import {
-  UNDER_STUDY_SERVER,
-  getUnderStudyInfo,
-  underStudyLogin,
-} from "../../under-study/index.js";
+import { AUTH_INFO_PREFIX, authCenterLogin, getAvatar } from "../../auth-center/index.js";
+import { UNDER_STUDY_SERVER, getUnderStudyInfo, underStudyLogin } from "../../under-study/index.js";
 import type { WhoInfoData } from "../../who/index.js";
 // import { WHO_SERVER, getWhoInfo, whoLogin } from "../../who/index.js";
 
@@ -82,14 +70,14 @@ const SQL_STRING = `INSERT INTO \`student_info\` (${DATABASE_FIELDS.map(
   (field) => `\`${field}\``,
 ).join(
   ", ",
-)}) VALUES (${new Array(DATABASE_FIELDS.length - 2).fill("?").join(", ")}, NOW(), NOW()) ON DUPLICATE KEY UPDATE ${DATABASE_FIELDS.filter(
+)}) VALUES (${Array.from({ length: DATABASE_FIELDS.length - 2 }, () => "?").join(", ")}, NOW(), NOW()) ON DUPLICATE KEY UPDATE ${DATABASE_FIELDS.filter(
   (field) => !["id", "createTime"].includes(field),
 )
   .map((field) => `\`${field}\` = VALUES(\`${field}\`)`)
   .join(", ")}`;
 
 const getTempInfo = (id: number): WhoInfoData => {
-  const grade = Number(id.toString().substring(0, 4));
+  const grade = Number(id.toString().slice(0, 4));
   const typeNumber = Number(id.toString()[4]);
 
   return {
@@ -102,12 +90,7 @@ const getTempInfo = (id: number): WhoInfoData => {
     inYear: grade,
     grade: grade,
     type: "",
-    typeId:
-      typeNumber === 0
-        ? "bks"
-        : typeNumber === 1 || typeNumber === 2
-          ? "yjs"
-          : "unknown",
+    typeId: typeNumber === 0 ? "bks" : typeNumber === 1 || typeNumber === 2 ? "yjs" : "unknown",
     people: "",
     gender: "",
     genderId: -1,
@@ -127,7 +110,7 @@ export const getAuthInfo = async (
     let info: AuthInfo | null = null;
 
     // store authToken in database for auth
-    if (appId)
+    if (appId) {
       try {
         connection ??= await getConnection();
 
@@ -138,13 +121,15 @@ export const getAuthInfo = async (
       } catch (err) {
         console.error("Database error", err);
       }
+    }
 
     try {
       connection ??= await getConnection();
 
-      const [infoRows] = await connection.execute<
-        (RowDataPacket & Omit<WhoInfoData, "avatar">)[]
-      >("SELECT * FROM `student_info` WHERE `id` = ?", [id]);
+      const [infoRows] = await connection.execute<(RowDataPacket & Omit<WhoInfoData, "avatar">)[]>(
+        "SELECT * FROM `student_info` WHERE `id` = ?",
+        [id],
+      );
 
       if (infoRows.length > 0) {
         const infoData = infoRows[0];
@@ -158,9 +143,10 @@ export const getAuthInfo = async (
         delete infoData.createTime;
         delete infoData.updateTime;
 
-        const [avatarRows] = await connection.execute<
-          (RowDataPacket & { avatar: string })[]
-        >("SELECT * FROM `student_avatar` WHERE `id` = ?", [id]);
+        const [avatarRows] = await connection.execute<(RowDataPacket & { avatar: string })[]>(
+          "SELECT * FROM `student_avatar` WHERE `id` = ?",
+          [id],
+        );
 
         info = {
           avatar: avatarRows[0]?.avatar ?? "",
@@ -174,18 +160,11 @@ export const getAuthInfo = async (
 
     const typeNumber = Number(id.toString()[4]);
     const typeId =
-      typeNumber === 0
-        ? "bks"
-        : typeNumber === 1 || typeNumber === 2
-          ? "yjs"
-          : "unknown";
+      typeNumber === 0 ? "bks" : typeNumber === 1 || typeNumber === 2 ? "yjs" : "unknown";
 
     if (!info) {
       if (typeId === "bks") {
-        const loginResult = await underStudyLogin(
-          { id, password, authToken },
-          cookieStore,
-        );
+        const loginResult = await underStudyLogin({ id, password, authToken }, cookieStore);
 
         if (!loginResult.success) {
           if (loginResult.type === ActionFailType.Forbidden) {
@@ -199,31 +178,21 @@ export const getAuthInfo = async (
           return {
             success: false,
             type: ActionFailType.Unknown,
-            msg:
-              "账号密码校验成功，但" +
-              loginResult.msg +
-              "，你可通过小程序客服联系 Mr.Hope。",
+            msg: `账号密码校验成功，但${loginResult.msg}，你可通过小程序客服联系 Mr.Hope。`,
           };
         }
 
-        const studentInfo = await getUnderStudyInfo(
-          cookieStore.getHeader(UNDER_STUDY_SERVER),
-        );
+        const studentInfo = await getUnderStudyInfo(cookieStore.getHeader(UNDER_STUDY_SERVER));
 
         if (studentInfo.success) {
           let avatar = "";
-          const authCenterResult = await authCenterLogin(
-            { id, password, authToken },
-            cookieStore,
-          );
+          const authCenterResult = await authCenterLogin({ id, password, authToken }, cookieStore);
 
           if (authCenterResult.success) {
-            const avatarInfo = await getAvatar(
-              cookieStore.getHeader(AUTH_INFO_PREFIX),
-            );
+            const avatarInfo = await getAvatar(cookieStore.getHeader(AUTH_INFO_PREFIX));
 
             if (avatarInfo.success) {
-              avatar = avatarInfo.data.avatar;
+              ({ avatar } = avatarInfo.data);
               try {
                 connection ??= await getConnection();
                 await connection.execute(
@@ -266,7 +235,7 @@ export const getAuthInfo = async (
             console.error("Database error", err);
           }
         } else {
-          return UnknownResponse("从本科生教务系统获取个人信息失败");
+          return unknownResponse("从本科生教务系统获取个人信息失败");
         }
       } else {
         info ??= {
@@ -367,12 +336,13 @@ export const getAuthInfo = async (
     }
 
     // check blacklist
-    if (await isInBlackList(id, openid, info))
+    if (await isInBlackList(id, openid, info)) {
       return {
         success: false,
         type: ActionFailType.BlackList,
         msg: getRandomBlacklistHint(),
       };
+    }
 
     return {
       success: true,
@@ -382,7 +352,7 @@ export const getAuthInfo = async (
   } catch (err) {
     console.error("Get auth info error", err);
 
-    return UnknownResponse("未知错误");
+    return unknownResponse("未知错误");
   } finally {
     releaseConnection(connection);
   }

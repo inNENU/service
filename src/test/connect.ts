@@ -9,8 +9,8 @@ export const testConnectHandler = request(async (_req, res) => {
     connection = await getConnection();
 
     return res.send("Connected to MySQL");
-  } catch (error) {
-    console.error("Error connecting to MySQL:", error);
+  } catch (err) {
+    console.error("Error connecting to MySQL:", err);
 
     return res.status(500).send("Error connecting to MySQL");
   } finally {

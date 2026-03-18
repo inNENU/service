@@ -3,10 +3,7 @@ import { request } from "@/utils/index.js";
 import { ACTION_MAIN_PAGE, ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { ActionFailType } from "../config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-} from "../typings.js";
+import type { CommonFailedResponse, CommonSuccessResponse } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 
 const EMAIL_INFO_URL = `${ACTION_SERVER}/extract/getEmailInfo`;
@@ -59,9 +56,7 @@ interface RawRecentMailFailedResponse {
   };
 }
 
-type RawRecentMailResponse =
-  | RawRecentMailSuccessResponse
-  | RawRecentMailFailedResponse;
+type RawRecentMailResponse = RawRecentMailSuccessResponse | RawRecentMailFailedResponse;
 
 export interface EmailData {
   /** 邮件主题 */
@@ -103,9 +98,7 @@ export interface RecentMailData {
 export type RecentMailSuccessResponse = CommonSuccessResponse<RecentMailData>;
 
 export type RecentMailFailedResponse = CommonFailedResponse<
-  | ActionFailType.MissingCredential
-  | ActionFailType.NotInitialized
-  | ActionFailType.Unknown
+  ActionFailType.MissingCredential | ActionFailType.NotInitialized | ActionFailType.Unknown
 >;
 
 export type ActionRecentMailResponse =
@@ -118,20 +111,21 @@ const TEST_RECENT_EMAIL_RESPONSE: RecentMailSuccessResponse = {
   success: true,
   data: {
     unread: 1,
-    emails: Array<EmailData>(10).fill({
-      subject: "测试邮件",
-      receivedDate: Date.now(),
-      name: "测试用户",
-      email: "admin@example.com",
-      mid: "1",
-      unread: true,
-    }),
+    emails: Array.from(
+      { length: 10 },
+      (): EmailData => ({
+        subject: "测试邮件",
+        receivedDate: Date.now(),
+        name: "测试用户",
+        email: "admin@example.com",
+        mid: "1",
+        unread: true,
+      }),
+    ),
   },
 };
 
-export const getRecentEmails = async (
-  cookieHeader: string,
-): Promise<ActionRecentMailResponse> => {
+export const getRecentEmails = async (cookieHeader: string): Promise<ActionRecentMailResponse> => {
   const checkResponse = await fetch(EMAIL_INFO_URL, {
     method: "POST",
     headers: {
@@ -145,11 +139,7 @@ export const getRecentEmails = async (
 
   const checkResult = (await checkResponse.json()) as RawRecentMailResponse;
 
-  if (
-    "success" in checkResult &&
-    checkResult.success &&
-    checkResult.emailList.con
-  )
+  if ("success" in checkResult && checkResult.success && checkResult.emailList.con) {
     return {
       success: true,
       data: {
@@ -157,6 +147,7 @@ export const getRecentEmails = async (
         emails: checkResult.emailList.con.var.map(getRecentEmailData),
       },
     };
+  }
 
   return {
     success: false,
@@ -165,13 +156,10 @@ export const getRecentEmails = async (
   };
 };
 
-export const actionRecentEmailHandler = request<ActionRecentMailResponse>(
-  async (req, res) => {
-    const cookieHeader = req.headers.cookie!;
+export const actionRecentEmailHandler = request<ActionRecentMailResponse>(async (req, res) => {
+  const cookieHeader = req.headers.cookie!;
 
-    if (cookieHeader.includes("TEST"))
-      return res.json(TEST_RECENT_EMAIL_RESPONSE);
+  if (cookieHeader.includes("TEST")) return res.json(TEST_RECENT_EMAIL_RESPONSE);
 
-    return res.json(await getRecentEmails(cookieHeader));
-  },
-);
+  return res.json(await getRecentEmails(cookieHeader));
+});

@@ -1,11 +1,8 @@
 import { request } from "@/utils/index.js";
 
 import { OFFICIAL_URL, getOfficialPageView } from "./utils.js";
-import { UnknownResponse } from "../config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonListSuccessResponse,
-} from "../typings.js";
+import { unknownResponse } from "../config/index.js";
+import type { CommonFailedResponse, CommonListSuccessResponse } from "../typings.js";
 
 const ITEM_REGEXP =
   /data-aos="fade-up">\s*<a href="([^"]+)"[^>]+>\s+<div class="time">\s+<h3>(.*?)\.(.*?)<\/h3>\s*<h6>(.*?)<\/h6>\s*<\/div>\s*<div[^>]*>\s*<h4[^>]*>(.*)<\/h4>\s+<h6>(.*?)<span>/g;
@@ -31,13 +28,9 @@ export interface OfficialNoticeInfoItem {
   url: string;
 }
 
-export type OfficialNoticeSuccessResponse = CommonListSuccessResponse<
-  OfficialNoticeInfoItem[]
->;
+export type OfficialNoticeSuccessResponse = CommonListSuccessResponse<OfficialNoticeInfoItem[]>;
 
-export type OfficialNoticeListResponse =
-  | OfficialNoticeSuccessResponse
-  | CommonFailedResponse;
+export type OfficialNoticeListResponse = OfficialNoticeSuccessResponse | CommonFailedResponse;
 
 let totalPageState = 0;
 
@@ -51,7 +44,7 @@ export const getOfficialNoticeList = async ({
       : `${OFFICIAL_URL}/tzgg.htm`,
   );
 
-  if (response.status !== 200) return UnknownResponse("请求失败");
+  if (response.status !== 200) return unknownResponse("请求失败");
 
   const content = await response.text();
 
@@ -63,7 +56,7 @@ export const getOfficialNoticeList = async ({
     pageIds.split(/,\s*/).map((id) => getOfficialPageView(id, owner)),
   );
 
-  const data = Array.from(content.matchAll(ITEM_REGEXP)).map(
+  const data = [...content.matchAll(ITEM_REGEXP)].map(
     ([, url, month, date, year, title, from], index) => ({
       title,
       time: `${year}-${month}-${date}`,
@@ -85,8 +78,6 @@ export const officialNoticeListHandler = request<
   OfficialNoticeListResponse,
   OfficialNoticeListOptions,
   OfficialNoticeListOptions
->(async (req, res) => {
-  return res.json(
-    await getOfficialNoticeList(req.method === "GET" ? req.query : req.body),
-  );
-});
+>(async (req, res) =>
+  res.json(await getOfficialNoticeList(req.method === "GET" ? req.query : req.body)),
+);

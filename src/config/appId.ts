@@ -1,3 +1,4 @@
+// oxlint-disable-next-line import/no-unassigned-import
 import "./loadEnv.js";
 
 export const rawId2appId: Record<string, string> = {

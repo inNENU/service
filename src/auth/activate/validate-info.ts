@@ -1,6 +1,6 @@
 import { CookieStore } from "@mptool/net";
 
-import { ActionFailType, UnknownResponse } from "@/config/index.js";
+import { ActionFailType, unknownResponse } from "@/config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse } from "@/typings.js";
 
 import { authEncrypt } from "../encrypt.js";
@@ -27,9 +27,7 @@ interface RawValidationFailResponse {
   messages: string;
 }
 
-type RawValidationResponse =
-  | RawValidationSuccessResponse
-  | RawValidationFailResponse;
+type RawValidationResponse = RawValidationSuccessResponse | RawValidationFailResponse;
 
 export interface ActivateValidationOptions {
   type: "validate-info";
@@ -58,24 +56,21 @@ export const validAccountInfo = async (
 ): Promise<ActivateValidationResponse> => {
   const cookieStore = new CookieStore();
 
-  const response = await fetch(
-    `${RESET_PREFIX}/accountActivation/queryAccountByLoginNoAndId`,
-    {
-      method: "POST",
-      headers: {
-        Cookie: cookieHeader,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        loginNo: schoolId,
-        loginName: name,
-        captcha,
-        captchaId,
-        idType,
-        idNo: authEncrypt(id, RESET_SALT),
-      }),
+  const response = await fetch(`${RESET_PREFIX}/accountActivation/queryAccountByLoginNoAndId`, {
+    method: "POST",
+    headers: {
+      Cookie: cookieHeader,
+      "Content-Type": "application/json",
     },
-  );
+    body: JSON.stringify({
+      loginNo: schoolId,
+      loginName: name,
+      captcha,
+      captchaId,
+      idType,
+      idNo: authEncrypt(id, RESET_SALT),
+    }),
+  });
 
   const data = (await response.json()) as RawValidationResponse;
 
@@ -93,7 +88,7 @@ export const validAccountInfo = async (
       };
     }
 
-    return UnknownResponse(data.message);
+    return unknownResponse(data.message);
   }
 
   const captchaResponse = await getResetCaptcha(cookieStore);

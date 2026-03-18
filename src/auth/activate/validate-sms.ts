@@ -27,9 +27,7 @@ interface RawValidSmsFailedResponse {
   result: null;
 }
 
-type RawValidSmsResponse =
-  | RawValidSmsSuccessResponse
-  | RawValidSmsFailedResponse;
+type RawValidSmsResponse = RawValidSmsSuccessResponse | RawValidSmsFailedResponse;
 
 export type ActivateValidSmsSuccessResponse = CommonSuccessResponse<{
   loginNo: string;
@@ -51,26 +49,24 @@ export const validateActivateSms = async (
   { sign, code }: ActivateValidSmsOptions,
   cookieHeader: string,
 ): Promise<ActivateValidSmsResponse> => {
-  const response = await fetch(
-    `${RESET_PREFIX}/accountActivation/checkValidateCode`,
-    {
-      method: "POST",
-      headers: {
-        Cookie: cookieHeader,
-        "Content-Type": "application/json;charset=UTF-8",
-      },
-      body: JSON.stringify({ sign, validateCode: code }),
+  const response = await fetch(`${RESET_PREFIX}/accountActivation/checkValidateCode`, {
+    method: "POST",
+    headers: {
+      Cookie: cookieHeader,
+      "Content-Type": "application/json;charset=UTF-8",
     },
-  );
+    body: JSON.stringify({ sign, validateCode: code }),
+  });
 
   const data = (await response.json()) as RawValidSmsResponse;
 
-  if (!data.success)
+  if (!data.success) {
     return {
       success: false,
       type: ActionFailType.WrongCaptcha,
       msg: data.messages,
     };
+  }
 
   const result = await getPasswordRule(cookieHeader);
 

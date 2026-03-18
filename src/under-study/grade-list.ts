@@ -2,7 +2,7 @@ import { EDGE_USER_AGENT_HEADERS, request } from "@/utils/index.js";
 
 import { UNDER_STUDY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ExpiredResponse, UnknownResponse } from "../config/index.js";
+import { expiredResponse, unknownResponse } from "../config/index.js";
 import type { LoginOptions } from "../typings.js";
 
 export interface UnderGradeListOptions extends LoginOptions {
@@ -92,9 +92,7 @@ interface RawUnderGradeFailedResult {
   message: string;
 }
 
-type RawUnderGradeResult =
-  | RawUnderGradeSuccessResult
-  | RawUnderGradeFailedResult;
+type RawUnderGradeResult = RawUnderGradeSuccessResult | RawUnderGradeFailedResult;
 
 export interface UnderStudyGradeResult {
   /** 修读时间 */
@@ -131,15 +129,11 @@ export interface UnderGradeListSuccessResponse {
   data: UnderStudyGradeResult[];
 }
 
-export type UnderGradeListResponse =
-  | UnderGradeListSuccessResponse
-  | AuthLoginFailedResponse;
+export type UnderGradeListResponse = UnderGradeListSuccessResponse | AuthLoginFailedResponse;
 
 const QUERY_URL = `${UNDER_STUDY_SERVER}/new/student/xskccj/kccjDatas`;
 
-const getGradeLists = (
-  records: RawUnderGradeResultItem[],
-): UnderStudyGradeResult[] =>
+const getGradeLists = (records: RawUnderGradeResultItem[]): UnderStudyGradeResult[] =>
   records.map(
     ({
       xnxqmc,
@@ -176,24 +170,22 @@ const getGradeLists = (
 
 const TEST_UNDER_GRADE_LIST_RESPONSE: UnderGradeListSuccessResponse = {
   success: true,
-  data: Array(10)
-    .fill(null)
-    .map((_, i) => ({
-      time: `${new Date().getFullYear() - 1}-${new Date().getFullYear()}`,
-      cid: `${new Date().getFullYear() - 1}-${new Date().getFullYear()}-1`,
-      name: `测试课程${i + 1}`,
-      grade: 100 - i * 2,
-      gradeCode: "A",
-      gradeText: "优秀",
-      gradeType: "百分制",
-      courseType: "必修",
-      shortCourseType: "必",
-      office: "测试单位",
-      hours: 36,
-      point: 2,
-      examType: "正常考试",
-      mark: "正常",
-    })),
+  data: Array.from({ length: 10 }, (_, i) => ({
+    time: `${new Date().getFullYear() - 1}-${new Date().getFullYear()}`,
+    cid: `${new Date().getFullYear() - 1}-${new Date().getFullYear()}-1`,
+    name: `测试课程${i + 1}`,
+    grade: 100 - i * 2,
+    gradeCode: "A",
+    gradeText: "优秀",
+    gradeType: "百分制",
+    courseType: "必修",
+    shortCourseType: "必",
+    office: "测试单位",
+    hours: 36,
+    point: 2,
+    examType: "正常考试",
+    mark: "正常",
+  })),
 };
 
 export const getUnderGradeList = async (
@@ -219,15 +211,14 @@ export const getUnderGradeList = async (
     }),
   });
 
-  if (response.headers.get("Content-Type")?.includes("text/html"))
-    return ExpiredResponse;
+  if (response.headers.get("Content-Type")?.includes("text/html")) return expiredResponse;
 
   const data = (await response.json()) as RawUnderGradeResult;
 
   if ("code" in data) {
-    if (data.message === "尚未登录，请先登录") return ExpiredResponse;
+    if (data.message === "尚未登录，请先登录") return expiredResponse;
 
-    return UnknownResponse(data.message);
+    return unknownResponse(data.message);
   }
 
   const gradeList = getGradeLists(data.rows);
@@ -238,15 +229,12 @@ export const getUnderGradeList = async (
   };
 };
 
-export const underStudyGradeListHandler = request<
-  UnderGradeListResponse,
-  UnderGradeListOptions
->(async (req, res) => {
-  const cookieHeader = req.headers.cookie!;
+export const underStudyGradeListHandler = request<UnderGradeListResponse, UnderGradeListOptions>(
+  async (req, res) => {
+    const cookieHeader = req.headers.cookie!;
 
-  if (cookieHeader.includes("TEST")) {
-    return res.json(TEST_UNDER_GRADE_LIST_RESPONSE);
-  }
+    if (cookieHeader.includes("TEST")) return res.json(TEST_UNDER_GRADE_LIST_RESPONSE);
 
-  return res.json(await getUnderGradeList(cookieHeader, req.body.time ?? ""));
-});
+    return res.json(await getUnderGradeList(cookieHeader, req.body.time ?? ""));
+  },
+);

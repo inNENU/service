@@ -6,9 +6,8 @@ export const isValidPathname = (pathname: string): boolean => {
     pathname.startsWith("https:") ||
     pathname.includes("..") ||
     !/^[a-zA-Z0-9\-_./]+$/.test(pathname)
-  ) {
+  )
     return false;
-  }
 
   return true;
 };

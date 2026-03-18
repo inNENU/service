@@ -1,11 +1,7 @@
 import { CookieStore } from "@mptool/net";
 
 import type { ActionFailType } from "@/config/index.js";
-import {
-  MissingArgResponse,
-  TEST_COOKIE_STORE,
-  TEST_ID,
-} from "@/config/index.js";
+import { missingArgResponse, TEST_COOKIE_STORE, TEST_ID } from "@/config/index.js";
 import type { CommonFailedResponse, EmptyObject } from "@/typings.js";
 import { request } from "@/utils/index.js";
 
@@ -34,9 +30,7 @@ export type AuthInitInfoSuccessResponse = {
 export type AuthInitInfoResponse =
   | AuthInitInfoSuccessResponse
   | CommonFailedResponse<
-      | ActionFailType.MissingArg
-      | ActionFailType.TooFrequent
-      | ActionFailType.Unknown
+      ActionFailType.MissingArg | ActionFailType.TooFrequent | ActionFailType.Unknown
     >;
 
 export const TEST_AUTH_INIT_INFO: AuthInitInfoSuccessResponse = {
@@ -55,7 +49,7 @@ export const getAuthInitInfo = async (
   cookieStore = new CookieStore(),
 ): Promise<AuthInitInfoResponse> => {
   // FIXME:
-  // return UnknownResponse(
+  // return unknownResponse(
   //   // "教育部网络安全演练期间，小程序账号功能暂不可用。预计持续两周",
   //   "放假期间，小程序暂不可用",
   // );
@@ -94,10 +88,9 @@ export const getAuthInitInfo = async (
 
   cookieStore.applyResponse(captchaCheckResponse, AUTH_SERVER);
 
-  const { isNeed: needCaptcha } =
-    await (captchaCheckResponse.json() as Promise<{
-      isNeed: boolean;
-    }>);
+  const { isNeed: needCaptcha } = await (captchaCheckResponse.json() as Promise<{
+    isNeed: boolean;
+  }>);
 
   const captchaResponse = needCaptcha
     ? await getAuthCaptcha(cookieStore.getHeader(AUTH_CAPTCHA_URL), id)
@@ -121,34 +114,30 @@ export const getAuthInitInfo = async (
   } as AuthInitInfoSuccessResponse;
 };
 
-export const authInitInfoHandler = request<
-  AuthInitInfoResponse,
-  EmptyObject,
-  { id: string }
->(async (req, res) => {
-  const { id } = req.query;
+export const authInitInfoHandler = request<AuthInitInfoResponse, EmptyObject, { id: string }>(
+  async (req, res) => {
+    const { id } = req.query;
 
-  if (!id) return res.json(MissingArgResponse("id"));
+    if (!id) return res.json(missingArgResponse("id"));
 
-  const result =
-    // Note: Return fake result for testing
-    id === TEST_ID ? TEST_AUTH_INIT_INFO : await getAuthInitInfo(id);
+    const result =
+      // Note: Return fake result for testing
+      id === TEST_ID ? TEST_AUTH_INIT_INFO : await getAuthInitInfo(id);
 
-  if (!result.success) return res.json(result);
+    if (!result.success) return res.json(result);
 
-  const cookies = result.cookieStore
-    .getAllCookies()
-    .map((item) => item.toJSON());
+    const cookies = result.cookieStore.getAllCookies().map((item) => item.toJSON());
 
-  cookies.forEach(({ name, value, ...rest }) => {
-    res.cookie(name, value, rest);
-  });
+    cookies.forEach(({ name, value, ...rest }) => {
+      res.cookie(name, value, rest);
+    });
 
-  return res.json({
-    success: true,
-    needCaptcha: result.needCaptcha,
-    captcha: result.captcha,
-    params: result.params,
-    salt: result.salt,
-  } as AuthInitInfoSuccessResponse);
-});
+    return res.json({
+      success: true,
+      needCaptcha: result.needCaptcha,
+      captcha: result.captcha,
+      params: result.params,
+      salt: result.salt,
+    } as AuthInitInfoSuccessResponse);
+  },
+);

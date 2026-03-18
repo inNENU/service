@@ -52,7 +52,7 @@ export interface ChangeMajorPlan {
 }
 
 const getPlans = (content: string): ChangeMajorPlan[] =>
-  Array.from(content.matchAll(PLAN_REGEXP)).map(
+  [...content.matchAll(PLAN_REGEXP)].map(
     ([
       ,
       ,
@@ -77,9 +77,9 @@ const getPlans = (content: string): ChangeMajorPlan[] =>
       plan: Number(plan),
       current: Number(current),
       requirement: requirement
-        .replace(/准入考核内容/g, "\n准入考核内容")
-        .replace(/(\d+)\./g, "\n$1.")
-        .replace(/([一二三四五六七八九十]+)、/g, "\n$1、")
+        .replaceAll("准入考核内容", "\n准入考核内容")
+        .replaceAll(/(\d+)\./g, "\n$1.")
+        .replaceAll(/([一二三四五六七八九十]+)、/g, "\n$1、")
         .trim(),
       contact,
       phone,
@@ -96,8 +96,7 @@ export const getPlanList = async (
   const totalPages = Number(totalPagesRegExp.exec(content)![1]);
 
   // users are editing them, so the main page must be refetched
-  const shouldRefetch =
-    tableFields !== DEFAULT_TABLE_FIELD || otherFields !== DEFAULT_OTHER_FIELD;
+  const shouldRefetch = tableFields !== DEFAULT_TABLE_FIELD || otherFields !== DEFAULT_OTHER_FIELD;
 
   const plans = shouldRefetch ? [] : getPlans(content);
 
@@ -107,14 +106,12 @@ export const getPlanList = async (
   const printPageSize = String(printPageSizeRegExp.exec(content)?.[1]);
   const keyCode = String(keyCodeRegExp.exec(content)?.[1]);
   const printHQL =
-    String(printHQLInputRegExp.exec(content)?.[1]) ||
-    String(printHQLJSRegExp.exec(content)?.[1]);
+    String(printHQLInputRegExp.exec(content)?.[1]) || String(printHQLJSRegExp.exec(content)?.[1]);
   const sqlString = sqlStringRegExp.exec(content)?.[1];
 
   const pages: number[] = [];
 
-  for (let page = shouldRefetch ? 1 : 2; page <= totalPages; page++)
-    pages.push(page);
+  for (let page = shouldRefetch ? 1 : 2; page <= totalPages; page++) pages.push(page);
 
   await Promise.all(
     pages.map(async (page) => {
@@ -160,19 +157,18 @@ export interface UnderChangeMajorPlanSuccessResponse {
   plans: ChangeMajorPlan[];
 }
 
-export type UnderChangeMajorPlanFailedResponse =
-  | AuthLoginFailedResponse
-  | VPNLoginFailedResponse;
+export type UnderChangeMajorPlanFailedResponse = AuthLoginFailedResponse | VPNLoginFailedResponse;
 
 export type UnderChangeMajorPlanResponse =
   | UnderChangeMajorPlanSuccessResponse
   | UnderChangeMajorPlanFailedResponse;
 
-const TEST_UNDER_CHANGE_MAJOR_PLAN_RESPONSE: UnderChangeMajorPlanSuccessResponse =
-  {
-    success: true,
-    header: `${new Date().getFullYear()}年度本科生专业转换计划`,
-    plans: Array<ChangeMajorPlan>(2).fill({
+const TEST_UNDER_CHANGE_MAJOR_PLAN_RESPONSE: UnderChangeMajorPlanSuccessResponse = {
+  success: true,
+  header: `${new Date().getFullYear()}年度本科生专业转换计划`,
+  plans: Array.from(
+    { length: 2 },
+    (): ChangeMajorPlan => ({
       school: "计算机学院",
       major: "计算机科学与技术",
       subject: "理科",
@@ -185,7 +181,8 @@ const TEST_UNDER_CHANGE_MAJOR_PLAN_RESPONSE: UnderChangeMajorPlanSuccessResponse
       contact: "张三",
       phone: "123456789",
     }),
-  };
+  ),
+};
 
 export const getUnderChangeMajorPlan = async (
   cookieHeader: string,
@@ -207,12 +204,12 @@ export const getUnderChangeMajorPlan = async (
   };
 };
 
-export const underChangeMajorPlanHandler =
-  request<UnderChangeMajorPlanResponse>(async (req, res) => {
+export const underChangeMajorPlanHandler = request<UnderChangeMajorPlanResponse>(
+  async (req, res) => {
     const cookieHeader = req.headers.cookie!;
 
-    if (cookieHeader.includes("TEST"))
-      return res.json(TEST_UNDER_CHANGE_MAJOR_PLAN_RESPONSE);
+    if (cookieHeader.includes("TEST")) return res.json(TEST_UNDER_CHANGE_MAJOR_PLAN_RESPONSE);
 
     return res.json(await getUnderChangeMajorPlan(cookieHeader));
-  });
+  },
+);

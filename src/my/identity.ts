@@ -3,7 +3,7 @@ import { request } from "@/utils/index.js";
 import type { MyLoginFailedResponse } from "./login.js";
 import { MY_SERVER } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
-import { UnknownResponse } from "../config/index.js";
+import { unknownResponse } from "../config/index.js";
 import type { AccountInfo, CommonFailedResponse } from "../typings.js";
 
 interface RAWIdentityInfo {
@@ -30,9 +30,7 @@ const TEST_IDENTITY_RESULT: MyIdentitySuccessResult = {
   },
 };
 
-export const getMyIdentity = async (
-  cookieHeader: string,
-): Promise<MyIdentityResult> => {
+export const getMyIdentity = async (cookieHeader: string): Promise<MyIdentityResult> => {
   const infoResponse = await fetch(`${MY_SERVER}/hallIndex/getidentity`, {
     method: "POST",
     headers: {
@@ -43,15 +41,16 @@ export const getMyIdentity = async (
 
   const identityResult = (await infoResponse.json()) as RAWIdentityInfo;
 
-  if (identityResult.success)
+  if (identityResult.success) {
     return {
       success: true,
       data: {
         type: identityResult.sf,
       },
     };
+  }
 
-  return UnknownResponse("获取人员身份失败");
+  return unknownResponse("获取人员身份失败");
 };
 
 export type MyIdentityResponse =
@@ -59,12 +58,10 @@ export type MyIdentityResponse =
   | MyLoginFailedResponse
   | CommonFailedResponse<ActionFailType.MissingCredential>;
 
-export const myIdentityHandler = request<MyIdentityResponse, AccountInfo>(
-  async (req, res) => {
-    const cookieHeader = req.headers.cookie!;
+export const myIdentityHandler = request<MyIdentityResponse, AccountInfo>(async (req, res) => {
+  const cookieHeader = req.headers.cookie!;
 
-    if (cookieHeader.includes("TEST")) return res.json(TEST_IDENTITY_RESULT);
+  if (cookieHeader.includes("TEST")) return res.json(TEST_IDENTITY_RESULT);
 
-    return res.json(await getMyIdentity(cookieHeader));
-  },
-);
+  return res.json(await getMyIdentity(cookieHeader));
+});

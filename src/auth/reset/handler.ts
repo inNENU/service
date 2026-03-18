@@ -1,34 +1,19 @@
 import type { ActionFailType } from "@/config/index.js";
-import {
-  InvalidArgResponse,
-  MissingCredentialResponse,
-} from "@/config/index.js";
+import { invalidArgResponse, MissingCredentialResponse } from "@/config/index.js";
 import type { CommonFailedResponse } from "@/typings.js";
 import { request } from "@/utils/index.js";
 
-import type {
-  ResetPasswordGetInfoOptions,
-  ResetPasswordGetInfoResponse,
-} from "./get-info.js";
+import type { ResetPasswordGetInfoOptions, ResetPasswordGetInfoResponse } from "./get-info.js";
 import { getInfo } from "./get-info.js";
-import type {
-  ResetPasswordSetOptions,
-  ResetPasswordSetResponse,
-} from "./reset-password.js";
+import type { ResetPasswordSetOptions, ResetPasswordSetResponse } from "./reset-password.js";
 import { resetPassword } from "./reset-password.js";
-import type {
-  ResetPasswordSendCodeOptions,
-  ResetPasswordSendCodeResponse,
-} from "./send-code.js";
+import type { ResetPasswordSendCodeOptions, ResetPasswordSendCodeResponse } from "./send-code.js";
 import { sendCode } from "./send-code.js";
 import type {
   ResetPasswordVerifyCodeOptions,
   ResetPasswordVerifyCodeResponse,
 } from "./validate-code.js";
-import type {
-  CheckPasswordOptions,
-  CheckPasswordResponse,
-} from "../check-password.js";
+import type { CheckPasswordOptions, CheckPasswordResponse } from "../check-password.js";
 import { validateCode } from "./validate-code.js";
 import { checkPassword } from "../check-password.js";
 import { getResetCaptcha } from "../reset-captcha.js";
@@ -46,57 +31,45 @@ export type ResetPasswordResponse =
   | CheckPasswordResponse
   | ResetPasswordVerifyCodeResponse
   | ResetPasswordSetResponse
-  | CommonFailedResponse<
-      ActionFailType.InvalidArg | ActionFailType.MissingCredential
-    >;
+  | CommonFailedResponse<ActionFailType.InvalidArg | ActionFailType.MissingCredential>;
 
-export const resetPasswordHandler = request<
-  ResetPasswordResponse,
-  ResetPasswordOptions
->(async (req, res) => {
-  if (req.method === "GET") {
-    const result = await getResetCaptcha();
+export const resetPasswordHandler = request<ResetPasswordResponse, ResetPasswordOptions>(
+  async (req, res) => {
+    if (req.method === "GET") {
+      const result = await getResetCaptcha();
 
-    if ("cookieStore" in result) {
-      const cookies = result.cookieStore
-        .getAllCookies()
-        .map((item) => item.toJSON());
+      if ("cookieStore" in result) {
+        const cookies = result.cookieStore.getAllCookies().map((item) => item.toJSON());
 
-      cookies.forEach(({ name, value, ...rest }) => {
-        res.cookie(name, value, rest);
-      });
+        cookies.forEach(({ name, value, ...rest }) => {
+          res.cookie(name, value, rest);
+        });
 
-      // @ts-expect-error: cookieStore is not needed
-      delete result.cookieStore;
+        // @ts-expect-error: cookieStore is not needed
+        delete result.cookieStore;
+      }
+
+      return res.json(result);
     }
 
-    return res.json(result);
-  }
+    const cookieHeader = req.headers.cookie;
+    const options = req.body;
 
-  const cookieHeader = req.headers.cookie;
-  const options = req.body;
+    if (!cookieHeader) return res.json(MissingCredentialResponse);
 
-  if (!cookieHeader) return res.json(MissingCredentialResponse);
+    if (options.type === "get-info") return res.json(await getInfo(options, cookieHeader));
 
-  if (options.type === "get-info") {
-    return res.json(await getInfo(options, cookieHeader));
-  }
+    if (options.type === "send-code") return res.json(await sendCode(options, cookieHeader));
 
-  if (options.type === "send-code") {
-    return res.json(await sendCode(options, cookieHeader));
-  }
+    if (options.type === "validate-code")
+      return res.json(await validateCode(options, cookieHeader));
 
-  if (options.type === "validate-code") {
-    return res.json(await validateCode(options, cookieHeader));
-  }
+    if (options.type === "check-password")
+      return res.json(await checkPassword(options, cookieHeader, 1));
 
-  if (options.type === "check-password") {
-    return res.json(await checkPassword(options, cookieHeader, 1));
-  }
+    if (options.type === "reset-password")
+      return res.json(await resetPassword(options, cookieHeader));
 
-  if (options.type === "reset-password") {
-    return res.json(await resetPassword(options, cookieHeader));
-  }
-
-  return res.json(InvalidArgResponse("options"));
-});
+    return res.json(invalidArgResponse("options"));
+  },
+);

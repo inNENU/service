@@ -31,8 +31,7 @@ export const getWechatMPCode = async (
 
   const image = Buffer.from(await response.arrayBuffer());
 
-  if (image.byteLength < 1024)
-    return JSON.parse(image.toString()) as WechatMpCodeError;
+  if (image.byteLength < 1024) return JSON.parse(image.toString()) as WechatMpCodeError;
 
   return image;
 };

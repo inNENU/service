@@ -12,14 +12,10 @@ import {
   MissingCredentialResponse,
   TEST_ID_NUMBER,
   TEST_LOGIN_RESULT,
-  UnknownResponse,
+  unknownResponse,
   WAF_URL,
 } from "../config/index.js";
-import type {
-  AccountInfo,
-  CommonFailedResponse,
-  LoginOptions,
-} from "../typings.js";
+import type { AccountInfo, CommonFailedResponse, LoginOptions } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 import { vpnCASLogin } from "../vpn/index.js";
 
@@ -74,18 +70,17 @@ export const underSystemLogin = async (
 
   cookieStore.applyResponse(ticketResponse, result.location);
 
-  if (ticketResponse.status !== 302) {
-    return UnknownResponse("登录失败");
-  }
+  if (ticketResponse.status !== 302) return unknownResponse("登录失败");
 
   const finalLocation = ticketResponse.headers.get("Location");
 
-  if (finalLocation?.includes(WAF_URL))
+  if (finalLocation?.includes(WAF_URL)) {
     return {
       success: false,
       type: ActionFailType.Forbidden,
       msg: "此账户无法登录本科教学服务系统",
     };
+  }
 
   if (finalLocation?.includes(";jsessionid=")) {
     const ssoUrl = `${UNDER_SYSTEM_SERVER}/Logon.do?method=logonBySSO`;
@@ -106,7 +101,7 @@ export const underSystemLogin = async (
     };
   }
 
-  return UnknownResponse("登录失败");
+  return unknownResponse("登录失败");
 };
 
 export interface UnderSystemLoginSuccessResponse {
@@ -120,13 +115,10 @@ export type UnderSystemLoginResponse =
   | VPNLoginFailedResponse;
 
 export const loginToUnderSystem = request<
-  | UnderSystemLoginResponse
-  | CommonFailedResponse<ActionFailType.MissingCredential>,
+  UnderSystemLoginResponse | CommonFailedResponse<ActionFailType.MissingCredential>,
   LoginOptions
 >(async (req, res, next) => {
-  if (!req.body) {
-    return res.json(MissingCredentialResponse);
-  }
+  if (!req.body) return res.json(MissingCredentialResponse);
 
   const { id, password, authToken } = req.body;
 
@@ -140,29 +132,24 @@ export const loginToUnderSystem = request<
     return res.json(MissingCredentialResponse);
   }
 
-  return next();
+  next();
 });
 
-export const underSystemLoginHandler = request<
-  UnderSystemLoginResponse,
-  AccountInfo
->(async (req, res) => {
-  const result = // fake result for testing
-    req.body.id === TEST_ID_NUMBER
-      ? TEST_LOGIN_RESULT
-      : await underSystemLogin(req.body);
+export const underSystemLoginHandler = request<UnderSystemLoginResponse, AccountInfo>(
+  async (req, res) => {
+    const result = // fake result for testing
+      req.body.id === TEST_ID_NUMBER ? TEST_LOGIN_RESULT : await underSystemLogin(req.body);
 
-  if (result.success) {
-    const cookies = result.cookieStore
-      .getAllCookies()
-      .map((item) => item.toJSON());
+    if (result.success) {
+      const cookies = result.cookieStore.getAllCookies().map((item) => item.toJSON());
 
-    cookies.forEach(({ name, value, ...rest }) => {
-      res.cookie(name, value, rest);
-    });
+      cookies.forEach(({ name, value, ...rest }) => {
+        res.cookie(name, value, rest);
+      });
 
-    return res.json({ success: true, cookies });
-  }
+      return res.json({ success: true, cookies });
+    }
 
-  return res.json(result);
-});
+    return res.json(result);
+  },
+);

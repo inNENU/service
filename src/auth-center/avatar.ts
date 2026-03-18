@@ -3,7 +3,7 @@ import { request } from "@/utils/index.js";
 import { authCenterLogin } from "./login.js";
 import { AUTH_INFO_PREFIX } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ExpiredResponse, MissingCredentialResponse } from "../config/index.js";
+import { expiredResponse, MissingCredentialResponse } from "../config/index.js";
 import type { AccountInfo, CommonSuccessResponse } from "../typings.js";
 
 const USER_CONF_URL = `${AUTH_INFO_PREFIX}/common/getUserConf`;
@@ -36,9 +36,7 @@ const TEST_AVATAR_RESPONSE: AvatarSuccessResponse = {
   },
 };
 
-export const getAvatar = async (
-  cookieHeader: string,
-): Promise<AvatarResponse> => {
+export const getAvatar = async (cookieHeader: string): Promise<AvatarResponse> => {
   const response = await fetch(USER_CONF_URL, {
     method: "POST",
     headers: {
@@ -49,7 +47,7 @@ export const getAvatar = async (
     redirect: "manual",
   });
 
-  if (response.status !== 200) return ExpiredResponse;
+  if (response.status !== 200) return expiredResponse;
 
   const data = (await response.json()) as RawUserConfData;
 
@@ -61,30 +59,26 @@ export const getAvatar = async (
   };
 };
 
-export const avatarHandler = request<AvatarResponse, AccountInfo>(
-  async (req, res) => {
-    const { id, password, authToken } = req.body;
+export const avatarHandler = request<AvatarResponse, AccountInfo>(async (req, res) => {
+  const { id, password, authToken } = req.body;
 
-    if (id && password && authToken) {
-      const result = await authCenterLogin({
-        id,
-        password,
-        authToken,
-      });
+  if (id && password && authToken) {
+    const result = await authCenterLogin({
+      id,
+      password,
+      authToken,
+    });
 
-      if (!result.success) return res.json(result);
+    if (!result.success) return res.json(result);
 
-      req.headers.cookie = result.cookieStore.getHeader(AUTH_INFO_PREFIX);
-    } else if (!req.headers.cookie) {
-      return MissingCredentialResponse;
-    }
+    req.headers.cookie = result.cookieStore.getHeader(AUTH_INFO_PREFIX);
+  } else if (!req.headers.cookie) {
+    return MissingCredentialResponse;
+  }
 
-    const cookieHeader = req.headers.cookie;
+  const cookieHeader = req.headers.cookie;
 
-    if (cookieHeader.includes("TEST")) {
-      return res.json(TEST_AVATAR_RESPONSE);
-    }
+  if (cookieHeader.includes("TEST")) return res.json(TEST_AVATAR_RESPONSE);
 
-    return res.json(await getAvatar(cookieHeader));
-  },
-);
+  return res.json(await getAvatar(cookieHeader));
+});

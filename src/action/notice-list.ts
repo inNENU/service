@@ -3,12 +3,8 @@ import { request } from "@/utils/index.js";
 import type { ActionLoginResponse } from "./login.js";
 import { ACTION_SERVER, INFO_BASE_SERVER } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
-import { ExpiredResponse, UnknownResponse } from "../config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonListSuccessResponse,
-  LoginOptions,
-} from "../typings.js";
+import { expiredResponse, unknownResponse } from "../config/index.js";
+import type { CommonFailedResponse, CommonListSuccessResponse, LoginOptions } from "../typings.js";
 
 const NOTICE_LIST_QUERY_URL = `${ACTION_SERVER}/page/queryList`;
 
@@ -84,9 +80,7 @@ const getNoticeItem = ({
     : {}),
 });
 
-export interface NoticeListSuccessResponse extends CommonListSuccessResponse<
-  NoticeInfo[]
-> {
+export interface NoticeListSuccessResponse extends CommonListSuccessResponse<NoticeInfo[]> {
   size: number;
   count: number;
 }
@@ -94,20 +88,16 @@ export interface NoticeListSuccessResponse extends CommonListSuccessResponse<
 export type NoticeListResponse =
   | NoticeListSuccessResponse
   | ActionLoginResponse
-  | CommonFailedResponse<
-      ActionFailType.MissingCredential | ActionFailType.Unknown
-    >;
+  | CommonFailedResponse<ActionFailType.MissingCredential | ActionFailType.Unknown>;
 
 const TEST_NOTICE_LIST: NoticeListSuccessResponse = {
   success: true,
-  data: Array(10)
-    .fill(null)
-    .map((_, i) => ({
-      title: `测试通知标题${i + 1}`,
-      from: `来源${i + 1}`,
-      time: `${new Date().getFullYear()}/${i + 1}/${i + 1}`,
-      id: "test",
-    })),
+  data: Array.from({ length: 10 }, (_, i) => ({
+    title: `测试通知标题${i + 1}`,
+    from: `来源${i + 1}`,
+    time: `${new Date().getFullYear()}/${i + 1}/${i + 1}`,
+    id: "test",
+  })),
   count: 10,
   size: 20,
   current: 1,
@@ -138,19 +128,16 @@ export const getNoticeList = async (
     redirect: "manual",
   });
 
-  if (response.status === 302) return ExpiredResponse;
+  if (response.status === 302) return expiredResponse;
 
   const { data, pageIndex, pageSize, totalCount, totalPage } =
     (await response.json()) as RawNoticeListData;
 
-  if (!data.length)
-    return UnknownResponse(
-      `获取公告列表失败: ${JSON.stringify(data, null, 2)}`,
-    );
+  if (!data.length) return unknownResponse(`获取公告列表失败: ${JSON.stringify(data, null, 2)}`);
 
   return {
     success: true,
-    data: data.map(getNoticeItem),
+    data: data.map((item) => getNoticeItem(item)),
     count: totalCount,
     size: pageSize,
     current: pageIndex,

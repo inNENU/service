@@ -3,9 +3,7 @@ export const getMemoryUsage = (): NodeJS.MemoryUsage => {
 
   for (const key in memory) {
     memory[key as keyof NodeJS.MemoryUsage] =
-      Math.round(
-        (memory[key as keyof NodeJS.MemoryUsage] / 1024 / 1024) * 100,
-      ) / 100;
+      Math.round((memory[key as keyof NodeJS.MemoryUsage] / 1024 / 1024) * 100) / 100;
   }
 
   return memory;

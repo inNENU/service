@@ -6,13 +6,10 @@ export const cookies2Header = <T extends CookieType[] | undefined>(
   if (!cookies) return null as T extends undefined ? null : string;
 
   const finalCookies = cookies.filter(
-    ({ name }, index) =>
-      cookies.findLastIndex((item) => item.name === name) === index,
+    ({ name }, index) => cookies.findLastIndex((item) => item.name === name) === index,
   );
 
-  const cookieHeader = finalCookies
-    .map((cookie) => `${cookie.name}=${cookie.value}`)
-    .join("; ");
+  const cookieHeader = finalCookies.map((cookie) => `${cookie.name}=${cookie.value}`).join("; ");
 
   return cookieHeader as T extends undefined ? null : string;
 };

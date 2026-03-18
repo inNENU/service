@@ -4,11 +4,7 @@ import type { WechatMpCodeError } from "@/utils/index.js";
 import { getWechatMPCode, request } from "@/utils/index.js";
 
 import type { ActionFailType } from "../config/index.js";
-import {
-  MissingArgResponse,
-  UnknownResponse,
-  appIdInfo,
-} from "../config/index.js";
+import { missingArgResponse, unknownResponse, appIdInfo } from "../config/index.js";
 import type { CommonFailedResponse } from "../typings.js";
 
 export interface WechatMpCodeOptions {
@@ -36,41 +32,39 @@ export type MpCodeResponse =
 const getQQMpCode = async (appId: number, page: string): Promise<Buffer> =>
   toBuffer(`https://m.q.qq.com/a/p/${appId}?s=${encodeURI(page)}`);
 
-export const mpQrCodeHandler = request<
-  MpCodeResponse,
-  MpCodeOptions,
-  MpCodeOptions
->(async (req, res) => {
-  const options = req.method === "GET" ? req.query : req.body;
+export const mpQrCodeHandler = request<MpCodeResponse, MpCodeOptions, MpCodeOptions>(
+  async (req, res) => {
+    const options = req.method === "GET" ? req.query : req.body;
 
-  console.info("Requesting MP QRCode with", options);
+    console.info("Requesting MP QRCode with", options);
 
-  const { appId, page } = options;
+    const { appId, page } = options;
 
-  if (!appIdInfo[appId]) return res.json(MissingArgResponse("appId"));
+    // This is a Wechat Mini Program
+    if ("scene" in options) {
+      if (!appIdInfo[appId as keyof typeof appIdInfo]) return res.json(missingArgResponse("appId"));
 
-  // This is a Wechat Mini Program
-  if ("scene" in options) {
-    const image = await getWechatMPCode(appId as string, page, options.scene);
+      const image = await getWechatMPCode(appId as string, page, options.scene);
 
-    if (image instanceof Buffer) {
-      res.set({
-        "Content-Disposition": "qrcode.png",
-        "Content-Type": "image/png",
-      });
+      if (image instanceof Buffer) {
+        res.set({
+          "Content-Disposition": "qrcode.png",
+          "Content-Type": "image/png",
+        });
 
-      return res.end(image);
+        return res.end(image);
+      }
+
+      return res.json(unknownResponse((image as WechatMpCodeError).errmsg));
     }
 
-    return res.json(UnknownResponse((image as WechatMpCodeError).errmsg));
-  }
+    const image = await getQQMpCode(appId as number, page);
 
-  const image = await getQQMpCode(appId as number, page);
+    res.set({
+      "Content-Disposition": `qrcode.png`,
+      "Content-Type": "image/png",
+    });
 
-  res.set({
-    "Content-Disposition": `qrcode.png`,
-    "Content-Type": "image/png",
-  });
-
-  return res.end(image);
-});
+    return res.end(image);
+  },
+);

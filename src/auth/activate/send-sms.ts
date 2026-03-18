@@ -1,4 +1,4 @@
-import { ActionFailType, UnknownResponse } from "@/config/index.js";
+import { ActionFailType, unknownResponse } from "@/config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse } from "@/typings.js";
 
 import { authEncrypt } from "../encrypt.js";
@@ -48,23 +48,20 @@ export const sendActivateSms = async (
   { sign, mobile, captcha, captchaId }: ActivateSendSmsOptions,
   cookieHeader: string,
 ): Promise<ActivateSendSmsResponse> => {
-  const response = await fetch(
-    `${RESET_PREFIX}/accountActivation/queryValidateCodeByMobile`,
-    {
-      method: "POST",
-      headers: {
-        Cookie: cookieHeader,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        sign,
-        accountType: 1,
-        accountNum: authEncrypt(mobile, RESET_SALT),
-        captcha,
-        captchaId,
-      }),
+  const response = await fetch(`${RESET_PREFIX}/accountActivation/queryValidateCodeByMobile`, {
+    method: "POST",
+    headers: {
+      Cookie: cookieHeader,
+      "Content-Type": "application/json",
     },
-  );
+    body: JSON.stringify({
+      sign,
+      accountType: 1,
+      accountNum: authEncrypt(mobile, RESET_SALT),
+      captcha,
+      captchaId,
+    }),
+  });
 
   const data = (await response.json()) as RawSendSmsResponse;
 
@@ -82,7 +79,7 @@ export const sendActivateSms = async (
       };
     }
 
-    return UnknownResponse(data.message);
+    return unknownResponse(data.message);
   }
 
   return {

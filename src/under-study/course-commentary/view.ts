@@ -1,9 +1,5 @@
 import type { ActionFailType } from "@/config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-  LoginOptions,
-} from "@/typings.js";
+import type { CommonFailedResponse, CommonSuccessResponse, LoginOptions } from "@/typings.js";
 import { EDGE_USER_AGENT_HEADERS } from "@/utils/index.js";
 
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
@@ -48,9 +44,7 @@ export type UnderCourseCommentaryViewResponse =
   | UnderCourseCommentaryViewSuccessResponse
   | AuthLoginFailedResponse
   | CommonFailedResponse<
-      | ActionFailType.Expired
-      | ActionFailType.MissingCredential
-      | ActionFailType.Unknown
+      ActionFailType.Expired | ActionFailType.MissingCredential | ActionFailType.Unknown
     >;
 
 export const UNDER_COURSE_COMMENTARY_VIEW_TEST_RESPONSE: UnderCourseCommentaryViewSuccessResponse =

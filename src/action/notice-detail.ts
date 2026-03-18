@@ -6,13 +6,9 @@ import { request } from "@/utils/index.js";
 import { ACTION_SERVER, INFO_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type { ActionFailType } from "../config/index.js";
-import { ExpiredResponse, MissingArgResponse } from "../config/index.js";
+import { expiredResponse, missingArgResponse } from "../config/index.js";
 import { MY_SERVER } from "../my/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-  LoginOptions,
-} from "../typings.js";
+import type { CommonFailedResponse, CommonSuccessResponse, LoginOptions } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 
 const ID_TITLE_REGEXP = /var title = '(.*?)';/;
@@ -21,15 +17,13 @@ const ID_TIME_REGEXP =
   /<span style="margin: 0 10px;font-size: 13px;color: #787878;font-family: 'Microsoft YaHei';">\s+时间：(.*?)(?:&nbsp;)*?\s+<\/span>/;
 const ID_PAGEVIEW_REGEXP =
   /<span style="margin: 0 10px;font-size: 13px;color: #787878;font-family: 'Microsoft YaHei';">\s+阅览：(\d+)\s+<\/span>/;
-const ID_CONTENT_REGEXP =
-  /<div class="read" id="WBNR">\s+([^]*?)\s+<\/div>\s+<p id="zrbj"/;
+const ID_CONTENT_REGEXP = /<div class="read" id="WBNR">\s+([^]*?)\s+<\/div>\s+<p id="zrbj"/;
 
 const TITLE_REGEXP = /name="pageTitle" content="(.*)"/;
 const FROM_REGEXP = /<span>(?:发布单位|供稿单位)：(.*)<\/span>/;
 const TIME_REGEXP = /<span>发布时间：(.*)<\/span>/;
 const PAGEVIEW_REGEXP = /_showDynClicks\("wbnews", (\d+), (\d+)\)/;
-const CONTENT_REGEXP =
-  /<div id="vsb_content.*?>([^]*?)\s*<\/div>\s*<div id="div_vote_id"/;
+const CONTENT_REGEXP = /<div id="vsb_content.*?>([^]*?)\s*<\/div>\s*<div id="div_vote_id"/;
 
 export interface NoticeOptions extends LoginOptions {
   noticeID: string;
@@ -51,9 +45,7 @@ export type NoticeResponse =
   | AuthLoginFailedResponse
   | VPNLoginFailedResponse
   | CommonFailedResponse<
-      | ActionFailType.MissingArg
-      | ActionFailType.MissingCredential
-      | ActionFailType.Unknown
+      ActionFailType.MissingArg | ActionFailType.MissingCredential | ActionFailType.Unknown
     >;
 
 const TEST_NOTICE_DETAIL: NoticeSuccessResponse = {
@@ -101,15 +93,15 @@ export const getNoticeDetailById = async (
     redirect: "manual",
   });
 
-  if (response.status === 302) return ExpiredResponse;
+  if (response.status === 302) return expiredResponse;
 
   const text = await response.text();
 
-  const title = ID_TITLE_REGEXP.exec(text)![1];
-  const time = ID_TIME_REGEXP.exec(text)![1];
-  const from = ID_FROM_REGEXP.exec(text)![1];
-  const pageView = ID_PAGEVIEW_REGEXP.exec(text)![1];
-  const content = ID_CONTENT_REGEXP.exec(text)![1];
+  const [, title] = ID_TITLE_REGEXP.exec(text)!;
+  const [, time] = ID_TIME_REGEXP.exec(text)!;
+  const [, from] = ID_FROM_REGEXP.exec(text)!;
+  const [, pageView] = ID_PAGEVIEW_REGEXP.exec(text)!;
+  const [, content] = ID_CONTENT_REGEXP.exec(text)!;
 
   const data = {
     title,
@@ -121,11 +113,7 @@ export const getNoticeDetailById = async (
         a: (node) => {
           const href = node.attrs?.href;
 
-          if (
-            href &&
-            !href.startsWith(ACTION_SERVER) &&
-            !href.startsWith(MY_SERVER)
-          )
+          if (href && !href.startsWith(ACTION_SERVER) && !href.startsWith(MY_SERVER))
             node.children?.push({ type: "text", text: ` (${href})` });
 
           return node;
@@ -153,15 +141,15 @@ export const getNoticeDetailByUrl = async (
     redirect: "manual",
   });
 
-  if (response.status === 302) return ExpiredResponse;
+  if (response.status === 302) return expiredResponse;
 
   const text = await response.text();
 
-  const title = TITLE_REGEXP.exec(text)![1];
-  const time = TIME_REGEXP.exec(text)![1];
-  const from = FROM_REGEXP.exec(text)![1];
+  const [, title] = TITLE_REGEXP.exec(text)!;
+  const [, time] = TIME_REGEXP.exec(text)!;
+  const [, from] = FROM_REGEXP.exec(text)!;
   const [, owner, clickId] = PAGEVIEW_REGEXP.exec(text)!;
-  const content = CONTENT_REGEXP.exec(text)![1];
+  const [, content] = CONTENT_REGEXP.exec(text)!;
 
   const pageviews = await fetch(
     `${INFO_SERVER}/system/resource/code/news/click/dynclicks.jsp?clickid=${clickId}&owner=${owner}&clicktype=wbnews`,
@@ -227,21 +215,16 @@ export const getNoticeDetailByUrl = async (
   };
 };
 
-export const noticeHandler = request<NoticeResponse, NoticeOptions>(
-  async (req, res) => {
-    const { noticeUrl, noticeID } = req.body;
+export const noticeHandler = request<NoticeResponse, NoticeOptions>(async (req, res) => {
+  const { noticeUrl, noticeID } = req.body;
 
-    if (!noticeUrl && !noticeID)
-      return res.json(MissingArgResponse("公告链接或公告ID"));
+  if (!noticeUrl && !noticeID) return res.json(missingArgResponse("公告链接或公告ID"));
 
-    const cookieHeader = req.headers.cookie!;
+  const cookieHeader = req.headers.cookie!;
 
-    if (cookieHeader.includes("TEST")) return res.json(TEST_NOTICE_DETAIL);
+  if (cookieHeader.includes("TEST")) return res.json(TEST_NOTICE_DETAIL);
 
-    if (noticeUrl) {
-      return res.json(await getNoticeDetailByUrl(cookieHeader, noticeUrl));
-    }
+  if (noticeUrl) return res.json(await getNoticeDetailByUrl(cookieHeader, noticeUrl));
 
-    return res.json(await getNoticeDetailById(cookieHeader, noticeID));
-  },
-);
+  return res.json(await getNoticeDetailById(cookieHeader, noticeID));
+});

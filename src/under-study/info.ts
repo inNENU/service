@@ -3,11 +3,7 @@ import { EDGE_USER_AGENT_HEADERS, request } from "@/utils/index.js";
 import type { UnderStudyLoginFailedResponse } from "./login.js";
 import { UNDER_STUDY_SERVER } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
-import {
-  ExpiredResponse,
-  TEST_INFO,
-  UnknownResponse,
-} from "../config/index.js";
+import { expiredResponse, TEST_INFO, unknownResponse } from "../config/index.js";
 import type { AccountInfo, CommonFailedResponse } from "../typings.js";
 
 const ID_REGEXP =
@@ -27,10 +23,8 @@ const GRADE_REGEXP =
 
 const LOCATION_REGEXP =
   /<td align="right">所在校区：<\/td>\s*<td><label style="width: 90px">(.*?)<\/label><\/td>/;
-const PEOPLE_WRAPPER_REGEXP =
-  /<select.+?title='民族'[^>]+>([\s\S]+?)<\/select>/;
-const PEOPLE_MATCH_REGEXP =
-  /<option\s+value='\d+'\s*?selected>(.*?)<\/option>/g;
+const PEOPLE_WRAPPER_REGEXP = /<select.+?title='民族'[^>]+>([\s\S]+?)<\/select>/;
+const PEOPLE_MATCH_REGEXP = /<option\s+value='\d+'\s*?selected>(.*?)<\/option>/g;
 
 const ID_CARD_REGEXP =
   /<td align="right">证件号码：<\/td>\s*<td><input\s+id="sfzh"[\s\S]*?value="(.*?)"/;
@@ -84,9 +78,7 @@ const TEST_INFO_RESULT: UnderStudyInfoSuccessResult = {
   data: TEST_INFO,
 };
 
-export const getUnderStudyInfo = async (
-  cookieHeader: string,
-): Promise<UnderStudyInfoResult> => {
+export const getUnderStudyInfo = async (cookieHeader: string): Promise<UnderStudyInfoResult> => {
   try {
     const infoResponse = await fetch(
       `${UNDER_STUDY_SERVER}/new/student/xjkpxx/edit.page?confirmInfo=`,
@@ -100,7 +92,7 @@ export const getUnderStudyInfo = async (
       },
     );
 
-    if (infoResponse.status === 302) return ExpiredResponse;
+    if (infoResponse.status === 302) return expiredResponse;
 
     const infoResult = await infoResponse.text();
 
@@ -126,18 +118,13 @@ export const getUnderStudyInfo = async (
         gender: Number(idCard[16]) % 2 === 0 ? "女" : "男",
         genderId: Number(idCard[16]) % 2 === 0 ? 2 : 1,
         birth: `${idCard.slice(6, 10)}-${idCard.slice(10, 12)}-${idCard.slice(12, 14)}`,
-        location:
-          location === "本部"
-            ? "benbu"
-            : location === "净月"
-              ? "jingyue"
-              : "unknown",
+        location: location === "本部" ? "benbu" : location === "净月" ? "jingyue" : "unknown",
       },
     };
   } catch (err) {
     console.error("获取人员信息失败", err);
 
-    return UnknownResponse("获取人员信息失败");
+    return unknownResponse("获取人员信息失败");
   }
 };
 
@@ -146,12 +133,10 @@ export type UnderStudyInfoResponse =
   | UnderStudyLoginFailedResponse
   | CommonFailedResponse<ActionFailType.MissingCredential>;
 
-export const underInfoHandler = request<UnderStudyInfoResponse, AccountInfo>(
-  async (req, res) => {
-    const cookieHeader = req.headers.cookie!;
+export const underInfoHandler = request<UnderStudyInfoResponse, AccountInfo>(async (req, res) => {
+  const cookieHeader = req.headers.cookie!;
 
-    if (cookieHeader.includes("TEST")) return res.json(TEST_INFO_RESULT);
+  if (cookieHeader.includes("TEST")) return res.json(TEST_INFO_RESULT);
 
-    return res.json(await getUnderStudyInfo(cookieHeader));
-  },
-);
+  return res.json(await getUnderStudyInfo(cookieHeader));
+});

@@ -2,11 +2,7 @@ import { request } from "@/utils/index.js";
 
 import type { WhoLoginFailedResponse } from "./login.js";
 import { WHO_SERVER, getWhoTime } from "./utils.js";
-import {
-  TEST_GRADE,
-  TEST_ID_NUMBER,
-  UnknownResponse,
-} from "../config/index.js";
+import { TEST_GRADE, TEST_ID_NUMBER, unknownResponse } from "../config/index.js";
 import type { CommonSuccessResponse } from "../typings.js";
 
 interface RawWhoInfoData {
@@ -102,20 +98,14 @@ export const TEST_WHO_INFO: WhoInfoSuccessResponse = {
   },
 };
 
-export const getWhoInfo = async (
-  id: number,
-  cookieHeader: string,
-): Promise<WhoInfoResponse> => {
-  const userInfoResponse = await fetch(
-    `${WHO_SERVER}/tryLoginUserInfo?_t=${getWhoTime()}`,
-    {
-      method: "POST",
-      headers: {
-        Accept: "application/json, text/javascript, */*; q=0.01",
-        Cookie: cookieHeader,
-      },
+export const getWhoInfo = async (id: number, cookieHeader: string): Promise<WhoInfoResponse> => {
+  const userInfoResponse = await fetch(`${WHO_SERVER}/tryLoginUserInfo?_t=${getWhoTime()}`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json, text/javascript, */*; q=0.01",
+      Cookie: cookieHeader,
     },
-  );
+  });
 
   const userInfoData = (await userInfoResponse.json()) as {
     meta: { success: boolean; statusCode: number; message: string };
@@ -125,7 +115,7 @@ export const getWhoInfo = async (
   if (!userInfoData.meta.success) {
     console.error("获取 Who 信息失败", userInfoData);
 
-    return UnknownResponse("获取 Who 信息失败");
+    return unknownResponse("获取 Who 信息失败");
   }
 
   console.log(userInfoData.data);
@@ -148,14 +138,13 @@ export const getWhoInfo = async (
   if (!studentInfoData.meta.success) {
     console.error("获取 Who 信息失败", studentInfoData);
 
-    return UnknownResponse("获取 Who 信息失败");
+    return unknownResponse("获取 Who 信息失败");
   }
 
   console.log(studentInfoData.data);
 
   const { departmentId, idcard } = userInfoData.data;
-  const { XY, XH, SZXQ, ZYH, XB, PYCC, MZ, XM, RXNY, XSLB, NJ, ZYMC } =
-    studentInfoData.data;
+  const { XY, XH, SZXQ, ZYH, XB, PYCC, MZ, XM, RXNY, XSLB, NJ, ZYMC } = studentInfoData.data;
 
   return {
     success: true,
@@ -166,38 +155,26 @@ export const getWhoInfo = async (
       orgId: Number(departmentId),
       major: ZYMC,
       majorId: ZYH,
-      inYear: Number(RXNY.substring(0, 4)),
+      inYear: Number(RXNY.slice(0, 4)),
       grade: Number(NJ),
       type: XSLB,
-      typeId:
-        PYCC === "本科"
-          ? "bks"
-          : PYCC === "硕士" || PYCC === "博士"
-            ? "yjs"
-            : "unknown",
+      typeId: PYCC === "本科" ? "bks" : PYCC === "硕士" || PYCC === "博士" ? "yjs" : "unknown",
       idCard: idcard,
       people: MZ,
       gender: XB,
       genderId: XB === "女" ? 1 : 0,
-      birth: `${idcard.substring(6, 10)}-${idcard.substring(10, 12)}-${idcard.substring(12, 14)}`,
-      location:
-        SZXQ === "自由校区"
-          ? "benbu"
-          : SZXQ === "净月校区"
-            ? "jingyue"
-            : "unknown",
+      birth: `${idcard.slice(6, 10)}-${idcard.slice(10, 12)}-${idcard.slice(12, 14)}`,
+      location: SZXQ === "自由校区" ? "benbu" : SZXQ === "净月校区" ? "jingyue" : "unknown",
     },
   };
 };
 
-export const whoInfoHandler = request<
-  WhoInfoResponse,
-  Record<string, never>,
-  { id: number }
->(async (req, res) => {
-  const cookieHeader = req.headers.cookie!;
+export const whoInfoHandler = request<WhoInfoResponse, Record<string, never>, { id: number }>(
+  async (req, res) => {
+    const cookieHeader = req.headers.cookie!;
 
-  if (cookieHeader.includes("TEST")) return res.json(TEST_WHO_INFO);
+    if (cookieHeader.includes("TEST")) return res.json(TEST_WHO_INFO);
 
-  return res.json(await getWhoInfo(req.body.id, cookieHeader));
-});
+    return res.json(await getWhoInfo(req.body.id, cookieHeader));
+  },
+);

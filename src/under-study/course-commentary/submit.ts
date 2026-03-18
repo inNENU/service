@@ -1,10 +1,6 @@
 import type { ActionFailType } from "@/config/index.js";
-import { ExpiredResponse, UnknownResponse } from "@/config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-  LoginOptions,
-} from "@/typings.js";
+import { expiredResponse, unknownResponse } from "@/config/index.js";
+import type { CommonFailedResponse, CommonSuccessResponse, LoginOptions } from "@/typings.js";
 import { EDGE_USER_AGENT_HEADERS } from "@/utils/index.js";
 
 import type { UnderCourseCommentaryInfo } from "./get.js";
@@ -30,8 +26,7 @@ export interface SubmitUnderCourseCommentaryOptions
   commentary: string;
 }
 
-export type SubmitUnderCourseCommentarySuccessResponse =
-  CommonSuccessResponse<string>;
+export type SubmitUnderCourseCommentarySuccessResponse = CommonSuccessResponse<string>;
 
 export type SubmitUnderCourseCommentaryFailResponse = CommonFailedResponse<
   | ActionFailType.Expired
@@ -46,61 +41,46 @@ export type SubmitUnderCourseCommentaryResponse =
 
 export const submitUnderCourseCommentary = async (
   cookieHeader: string,
-  {
-    commentary,
-    params,
-    questions,
-    text,
-    answers,
-  }: SubmitUnderCourseCommentaryOptions,
+  { commentary, params, questions, text, answers }: SubmitUnderCourseCommentaryOptions,
 ): Promise<SubmitUnderCourseCommentaryResponse> => {
-  const response = await fetch(
-    `${UNDER_STUDY_SERVER}/new/student/teapj/savePj`,
-    {
-      method: "POST",
-      headers: {
-        Accept: "application/json; charset=UTF-8",
-        Cookie: cookieHeader,
-        Referer: `${UNDER_STUDY_SERVER}/new/student/teapj`,
-        ...EDGE_USER_AGENT_HEADERS,
-      },
-      body: new URLSearchParams({
-        ...params,
-        wtpf: answers
-          .reduce(
-            (acc, answer, index) =>
-              acc + questions[index].options[answer].score,
-            0,
-          )
-          .toString(),
-        dt: JSON.stringify([
-          ...questions.map(({ txdm, zbdm, title }, index) => {
-            const { text, value, score } =
-              questions[index].options[answers[index]];
-
-            return {
-              txdm,
-              zbdm,
-              zbmc: title,
-              zbxmdm: value,
-              fz: score,
-              dtjg: text,
-            };
-          }),
-          {
-            txdm: text.txdm,
-            zbdm: text.zbdm,
-            zbmc: text.title,
-            fz: 0,
-            dtjg: commentary,
-          },
-        ]),
-      }),
+  const response = await fetch(`${UNDER_STUDY_SERVER}/new/student/teapj/savePj`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json; charset=UTF-8",
+      Cookie: cookieHeader,
+      Referer: `${UNDER_STUDY_SERVER}/new/student/teapj`,
+      ...EDGE_USER_AGENT_HEADERS,
     },
-  );
+    body: new URLSearchParams({
+      ...params,
+      wtpf: answers
+        .reduce((acc, answer, index) => acc + questions[index].options[answer].score, 0)
+        .toString(),
+      dt: JSON.stringify([
+        ...questions.map(({ txdm, zbdm, title }, index) => {
+          const { text, value, score } = questions[index].options[answers[index]];
 
-  if (response.headers.get("Content-Type")?.includes("text/html"))
-    return ExpiredResponse;
+          return {
+            txdm,
+            zbdm,
+            zbmc: title,
+            zbxmdm: value,
+            fz: score,
+            dtjg: text,
+          };
+        }),
+        {
+          txdm: text.txdm,
+          zbdm: text.zbdm,
+          zbmc: text.title,
+          fz: 0,
+          dtjg: commentary,
+        },
+      ]),
+    }),
+  });
+
+  if (response.headers.get("Content-Type")?.includes("text/html")) return expiredResponse;
 
   const data = (await response.json()) as RawUnderCourseCommentarySubmitResult;
 
@@ -111,7 +91,7 @@ export const submitUnderCourseCommentary = async (
     };
   }
 
-  if (data.message === "尚未登录，请先登录") return ExpiredResponse;
+  if (data.message === "尚未登录，请先登录") return expiredResponse;
 
-  return UnknownResponse(data.message);
+  return unknownResponse(data.message);
 };
