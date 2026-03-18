@@ -10,10 +10,7 @@ const DICT = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678";
 const DICT_LENGTH = DICT.length;
 
 const getRandomString = (length: number): string =>
-  Array(length)
-    .fill(null)
-    .map(() => DICT.charAt(Math.floor(Math.random() * DICT_LENGTH)))
-    .join("");
+  Array.from({ length }, () => DICT.charAt(Math.floor(Math.random() * DICT_LENGTH))).join("");
 
 export const authEncrypt = (password: string, key: string): string => {
   const CONTENT = getRandomString(64) + password;

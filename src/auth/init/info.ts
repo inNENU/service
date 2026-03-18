@@ -70,7 +70,7 @@ const SQL_STRING = `INSERT INTO \`student_info\` (${DATABASE_FIELDS.map(
   (field) => `\`${field}\``,
 ).join(
   ", ",
-)}) VALUES (${new Array(DATABASE_FIELDS.length - 2).fill("?").join(", ")}, NOW(), NOW()) ON DUPLICATE KEY UPDATE ${DATABASE_FIELDS.filter(
+)}) VALUES (${Array.from({ length: DATABASE_FIELDS.length - 2 }, () => "?").join(", ")}, NOW(), NOW()) ON DUPLICATE KEY UPDATE ${DATABASE_FIELDS.filter(
   (field) => !["id", "createTime"].includes(field),
 )
   .map((field) => `\`${field}\` = VALUES(\`${field}\`)`)
@@ -178,7 +178,7 @@ export const getAuthInfo = async (
           return {
             success: false,
             type: ActionFailType.Unknown,
-            msg: "账号密码校验成功，但" + loginResult.msg + "，你可通过小程序客服联系 Mr.Hope。",
+            msg: `账号密码校验成功，但${loginResult.msg}，你可通过小程序客服联系 Mr.Hope。`,
           };
         }
 

@@ -111,14 +111,17 @@ const TEST_RECENT_EMAIL_RESPONSE: RecentMailSuccessResponse = {
   success: true,
   data: {
     unread: 1,
-    emails: Array<EmailData>(10).fill({
-      subject: "测试邮件",
-      receivedDate: Date.now(),
-      name: "测试用户",
-      email: "admin@example.com",
-      mid: "1",
-      unread: true,
-    }),
+    emails: Array.from(
+      { length: 10 },
+      (): EmailData => ({
+        subject: "测试邮件",
+        receivedDate: Date.now(),
+        name: "测试用户",
+        email: "admin@example.com",
+        mid: "1",
+        unread: true,
+      }),
+    ),
   },
 };
 

@@ -69,7 +69,7 @@ export const getUnderAdmission = async ({
 
   const result = (await response.json()) as RawEnrollResult;
 
-  if (result.student === null) {
+  if (result.student == null) {
     if (result.message === "Admission query is not available") {
       return {
         success: false,

@@ -166,19 +166,22 @@ export type UnderChangeMajorPlanResponse =
 const TEST_UNDER_CHANGE_MAJOR_PLAN_RESPONSE: UnderChangeMajorPlanSuccessResponse = {
   success: true,
   header: `${new Date().getFullYear()}年度本科生专业转换计划`,
-  plans: Array<ChangeMajorPlan>(2).fill({
-    school: "计算机学院",
-    major: "计算机科学与技术",
-    subject: "理科",
-    examType: "统一考试",
-    time: "2021-08-01",
-    location: "A栋101",
-    plan: 100,
-    current: 50,
-    requirement: "准入考核内容\n1. 本科生\n2. 专业课程\n3. 通过率70%",
-    contact: "张三",
-    phone: "123456789",
-  }),
+  plans: Array.from(
+    { length: 2 },
+    (): ChangeMajorPlan => ({
+      school: "计算机学院",
+      major: "计算机科学与技术",
+      subject: "理科",
+      examType: "统一考试",
+      time: "2021-08-01",
+      location: "A栋101",
+      plan: 100,
+      current: 50,
+      requirement: "准入考核内容\n1. 本科生\n2. 专业课程\n3. 通过率70%",
+      contact: "张三",
+      phone: "123456789",
+    }),
+  ),
 };
 
 export const getUnderChangeMajorPlan = async (

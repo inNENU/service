@@ -186,7 +186,9 @@ export interface ApplyEmailOptions {
   phone: string;
 }
 
-export type ApplyEmailResponse = CommonSuccessResponse | CommonFailedResponse;
+export type ApplyEmailResponse =
+  | CommonSuccessResponse
+  | CommonFailedResponse<ActionFailType.Existed | ActionFailType.Unknown>;
 
 export const applyEmail = async (
   cookieHeader: string,
@@ -372,9 +374,8 @@ export const emailApplyHandler = request<
   const { type } = req.body;
 
   if (type === "init") {
-    if (cookieHeader.includes("TEST")) {
+    if (cookieHeader.includes("TEST"))
       return res.json(unknownResponse("您已有邮箱 test@nenu.edu.cn，请勿重复申请！"));
-    }
 
     return res.json(await checkEmail(cookieHeader));
   }

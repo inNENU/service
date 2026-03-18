@@ -92,14 +92,12 @@ export type NoticeListResponse =
 
 const TEST_NOTICE_LIST: NoticeListSuccessResponse = {
   success: true,
-  data: Array(10)
-    .fill(null)
-    .map((_, i) => ({
-      title: `测试通知标题${i + 1}`,
-      from: `来源${i + 1}`,
-      time: `${new Date().getFullYear()}/${i + 1}/${i + 1}`,
-      id: "test",
-    })),
+  data: Array.from({ length: 10 }, (_, i) => ({
+    title: `测试通知标题${i + 1}`,
+    from: `来源${i + 1}`,
+    time: `${new Date().getFullYear()}/${i + 1}/${i + 1}`,
+    id: "test",
+  })),
   count: 10,
   size: 20,
   current: 1,
@@ -135,13 +133,11 @@ export const getNoticeList = async (
   const { data, pageIndex, pageSize, totalCount, totalPage } =
     (await response.json()) as RawNoticeListData;
 
-  if (!data.length) {
-    return unknownResponse(`获取公告列表失败: ${JSON.stringify(data, null, 2)}`);
-  }
+  if (!data.length) return unknownResponse(`获取公告列表失败: ${JSON.stringify(data, null, 2)}`);
 
   return {
     success: true,
-    data: data.map(getNoticeItem),
+    data: data.map((item) => getNoticeItem(item)),
     count: totalCount,
     size: pageSize,
     current: pageIndex,

@@ -106,7 +106,7 @@ export const getGradEnrollPlan = async (): Promise<GradEnrollResponse> => {
 
             const start = content.indexOf(startLine) + startLine.length;
             const end = content.lastIndexOf(`dXYName['${name}']['${code}'].push("</tr>");`);
-            const majorContent = content.substring(start, end);
+            const majorContent = content.slice(start, end);
 
             const lines = [
               ...majorContent.matchAll(/dXYName\['.*?'\]\['[^']+'\]\.push\("(.*)"\)/g),

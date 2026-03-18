@@ -46,22 +46,22 @@ const getInfo = (content: string): GradStudentInfo => {
   const titles = TITLE_REG_EXP.exec(content)![1].split("\t");
   const values = VALUE_REG_EXP.exec(content)![1].split("\t");
 
-  const nameIndex = titles.findIndex((title) => title === "学生姓名");
-  const genderIndex = titles.findIndex((title) => title === "性别");
-  const idCardIndex = titles.findIndex((title) => title === "身份证号");
+  const nameIndex = titles.indexOf("学生姓名");
+  const genderIndex = titles.indexOf("性别");
+  const idCardIndex = titles.indexOf("身份证号");
   const idCard = values[idCardIndex];
   const birth = idCard.slice(6, 14).replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
-  const peopleIndex = titles.findIndex((title) => title === "民族");
-  const politicalTypeIndex = titles.findIndex((title) => title === "政治面貌");
+  const peopleIndex = titles.indexOf("民族");
+  const politicalTypeIndex = titles.indexOf("政治面貌");
 
-  const idIndex = titles.findIndex((title) => title === "学号");
+  const idIndex = titles.indexOf("学号");
   const id = values[idIndex];
-  const schoolIndex = titles.findIndex((title) => title === "学院名称");
-  const majorIndex = titles.findIndex((title) => title === "专业名称");
-  const majorCodeIndex = titles.findIndex((title) => title === "专业代码");
-  const typeIndex = titles.findIndex((title) => title === "研究生类型");
-  const categoryIndex = titles.findIndex((title) => title === "研究生分类");
-  const inDateIndex = titles.findIndex((title) => title === "入学日期");
+  const schoolIndex = titles.indexOf("学院名称");
+  const majorIndex = titles.indexOf("专业名称");
+  const majorCodeIndex = titles.indexOf("专业代码");
+  const typeIndex = titles.indexOf("研究生类型");
+  const categoryIndex = titles.indexOf("研究生分类");
+  const inDateIndex = titles.indexOf("入学日期");
   const inDate = values[inDateIndex];
 
   return {

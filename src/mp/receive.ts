@@ -54,7 +54,13 @@ export const mpReceiveHandler = request<
   try {
     const { signature, timestamp, nonce } = req.query;
 
-    if (sha1([process.env.TOKEN, timestamp, nonce].sort().join("")) !== signature)
+    if (
+      sha1(
+        [process.env.TOKEN, timestamp, nonce]
+          .sort((a, b) => String(a ?? "").localeCompare(String(b ?? "")))
+          .join(""),
+      ) !== signature
+    )
       return res.status(403).send("Invalid signature");
 
     if (req.method === "GET") return res.send(req.query.echostr);

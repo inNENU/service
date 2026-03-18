@@ -40,10 +40,10 @@ export const mpQrCodeHandler = request<MpCodeResponse, MpCodeOptions, MpCodeOpti
 
     const { appId, page } = options;
 
-    if (!appIdInfo[appId]) return res.json(missingArgResponse("appId"));
-
     // This is a Wechat Mini Program
     if ("scene" in options) {
+      if (!appIdInfo[appId as keyof typeof appIdInfo]) return res.json(missingArgResponse("appId"));
+
       const image = await getWechatMPCode(appId as string, page, options.scene);
 
       if (image instanceof Buffer) {

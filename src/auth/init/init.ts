@@ -176,7 +176,7 @@ export const initAuth = async (
       method: "POST",
       headers: {
         Accept: "application/json, text/javascript, */*; q=0.01",
-        Cookie: cookieHeader + ";" + cookieStore.getHeader(UPDATE_INFO_URL),
+        Cookie: `${cookieHeader};${cookieStore.getHeader(UPDATE_INFO_URL)}`,
         "User-Agent": "inNENU service",
       },
     });

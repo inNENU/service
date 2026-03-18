@@ -22,14 +22,12 @@ export const applyMiddleware = (app: Express): void => {
     const originalJson = res.json;
 
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-    res.json = function json(body) {
+    res.json = function json(...args: Parameters<typeof originalJson>) {
       // @ts-expect-error: Express type issue
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      res.body = body;
+      res.body = args[0];
 
-      // @ts-expect-error: Express type issue
-      // eslint-disable-next-line prefer-rest-params
-      return originalJson.apply(this, arguments);
+      return Reflect.apply(originalJson, this, args);
     };
     next();
   });

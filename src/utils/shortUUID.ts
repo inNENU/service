@@ -4,12 +4,12 @@ const CUSTOM_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz012345
 
 export const getShortUUID = (uuid?: string): string => {
   // Generate a random UUID if not provided
-  uuid ??= v7();
+  const id = uuid ?? v7();
 
   // Remove dashes from UUID
-  const hex = uuid.replaceAll("-", "");
+  const hex = id.replaceAll("-", "");
   // Generate 8 bit BigInt
-  let bigInt = BigInt("0x" + hex);
+  let bigInt = BigInt(`0x${hex}`);
 
   // 转换为 64 进制字符串
   let shortUUID = "";
@@ -21,7 +21,7 @@ export const getShortUUID = (uuid?: string): string => {
     bigInt /= 64n;
   }
 
-  while (shortUUID.length < 24) shortUUID = "A" + shortUUID;
+  while (shortUUID.length < 24) shortUUID = `A${shortUUID}`;
 
   return shortUUID;
 };

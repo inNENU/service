@@ -66,7 +66,7 @@ const getCourseInfo = (html: string): UnderCourseCommentaryInfo => {
       txdm,
       zbdm,
       title,
-      options: new Array(optionNumber).fill(null).map((_, index) => {
+      options: Array.from({ length: optionNumber }, (_, index) => {
         const [name, value, score, text] = items.slice(index * 4, index * 4 + 4);
 
         return {

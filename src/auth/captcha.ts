@@ -172,7 +172,7 @@ export const authCaptchaHandler = request<AuthCaptchaResponse, AuthCaptchaOption
         if (!id) return res.json(missingArgResponse("id"));
         if (!cookieHeader) return MissingCredentialResponse;
 
-        return res.json(await getAuthCaptcha(cookieHeader, id));
+        return res.json(await getAuthCaptcha(cookieHeader, id as string));
       }
 
       const cookieHeader = req.body?.cookie

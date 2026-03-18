@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-deprecated */
 import { IE_8_USER_AGENT, getIETimeStamp, request } from "@/utils/index.js";
 
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
@@ -77,7 +76,7 @@ const getCourses = (content: string): LegacyTableData =>
       [...cell.matchAll(classRegExp)].forEach(([, name, teacher, time, location]) => {
         const weeks = getWeekRange(time);
         const locations = Object.fromEntries(
-          new Array(weeks.length).fill(null).map((_, i) => [weeks[i].toString(), location]),
+          Array.from({ length: weeks.length }, (_, i) => [weeks[i].toString(), location]),
         );
         const existingClass = result.find((item) => item.name === name);
 
@@ -148,8 +147,8 @@ export const LEGACY_UNDER_COURSE_TABLE_TEST_RESPONSE: LegacyUnderCourseTableSucc
                 teachers: ["测试教师"],
                 time: `星期${weekIndex + 1} 第${classIndex * 2 + 1}${classIndex * 2 + 2}节`,
                 classIndex: [classIndex * 2 + 1, classIndex * 2 + 2],
-                weeks: new Array(17).fill(null).map((_, i) => i + 1),
-                locations: new Array(17).fill("测试地点"),
+                weeks: Array.from({ length: 17 }, (_, i) => i + 1),
+                locations: Array.from({ length: 17 }, () => "测试地点"),
                 teacher: "测试教师",
                 location: "测试地点",
               },

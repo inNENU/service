@@ -226,7 +226,7 @@ export const getUnderStudentArchiveInfo = async (
 
           return null;
         })
-        .filter((item): item is { name: string; value: string } => item !== null),
+        .filter((item): item is { name: string; value: string } => item != null),
       ...hiddenFields,
     ],
     path: pathRegExp.exec(infoContent)![1],
@@ -417,9 +417,8 @@ export const submitUnderStudentArchiveStudy = async (
       );
     }
 
-    if (!/^\d{8}$/.test(startTime) || !/^\d{8}$/.test(endTime)) {
+    if (!/^\d{8}$/.test(startTime) || !/^\d{8}$/.test(endTime))
       throw new Error(`第${index + 1}条学习与工作经历时间格式不正确，格式应为 20010101`);
-    }
 
     params[`qsrq${index + 1}`] = startTime;
     params[`zzrq${index + 1}`] = endTime;
@@ -577,16 +576,14 @@ export const underCreateStudentArchiveHandler: RequestHandler<
 
   if (req.body.type === "get-info") return res.json(await getUnderStudentArchiveInfo(cookieHeader));
 
-  if (req.body.type === "submit-info") {
+  if (req.body.type === "submit-info")
     return res.json(await submitUnderStudentArchiveInfo(cookieHeader, req.body));
-  }
-  if (req.body.type === "submit-study") {
-    return res.json(await submitUnderStudentArchiveStudy(cookieHeader, req.body));
-  }
 
-  if (req.body.type === "submit-family") {
+  if (req.body.type === "submit-study")
+    return res.json(await submitUnderStudentArchiveStudy(cookieHeader, req.body));
+
+  if (req.body.type === "submit-family")
     return res.json(await submitUnderStudentArchiveFamily(cookieHeader, req.body));
-  }
 
   return res.json(unknownResponse("未知操作"));
 };

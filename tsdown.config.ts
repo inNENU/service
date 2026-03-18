@@ -1,6 +1,5 @@
 import { defineConfig } from "tsdown";
 
-// oxlint-disable-next-line node/no-process-env
 const isDev = process.env.NODE_ENV === "development";
 
 export default defineConfig([

@@ -4,7 +4,6 @@ import type { CookieOptions, CookieVerifyResponse } from "../typings.js";
 import { MY_SERVER } from "./utils.js";
 
 export const myCheckHandler = request<CookieVerifyResponse, CookieOptions>(async (req, res) => {
-  // oxlint-disable-next-line typescript/no-non-null-assertion
   const cookieHeader = req.headers.cookie ?? cookies2Header(req.body.cookies!);
 
   if (cookieHeader.includes("TEST")) return res.json({ success: true, valid: true });

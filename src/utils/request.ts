@@ -35,8 +35,6 @@ export const request =
   async (req, res, next) => {
     try {
       await handler(req, res, next);
-
-      return;
     } catch (err) {
       next(err);
     }

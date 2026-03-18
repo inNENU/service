@@ -150,9 +150,7 @@ const getSelectInfo = (content: string): UnderSelectInfo => {
   const currentMajor = CURRENT_MAJOR_REGEXP.exec(content)![2];
 
   const currentYear = new Date().getFullYear();
-  const grades = Array(6)
-    .fill(null)
-    .map((_, i) => currentYear - i);
+  const grades = Array.from({ length: 6 }, (_, i) => currentYear - i);
 
   setAreas(content);
   setCourseOffices(content);
@@ -324,9 +322,8 @@ export const underStudySelectInfoHandler = request<UnderSelectInfoResponse, Unde
 
     if (!link) return res.json(missingArgResponse("link"));
 
-    if (cookieHeader.includes("TEST")) {
+    if (cookieHeader.includes("TEST"))
       return res.json(unknownResponse("因子系统逻辑复杂，测试账号暂不提供选课操作模拟"));
-    }
 
     return res.json(await getUnderSelectInfo(cookieHeader, link));
   },

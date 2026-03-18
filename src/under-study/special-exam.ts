@@ -87,13 +87,16 @@ const getSpecialExamResults = (records: RawUnderSpecialExamItem[]): UnderSpecial
 
 const TEST_SPECIAL_EXAM_RESPONSE: UnderSpecialExamSuccessResponse = {
   success: true,
-  data: Array<UnderSpecialExamResult>(4).fill({
-    semester: "20-21学年第一学期",
-    time: "2020-12-31",
-    name: "测试考试",
-    grade: 100,
-    gradeCode: "100",
-  }),
+  data: Array.from(
+    { length: 4 },
+    (): UnderSpecialExamResult => ({
+      semester: "20-21学年第一学期",
+      time: "2020-12-31",
+      name: "测试考试",
+      grade: 100,
+      gradeCode: "100",
+    }),
+  ),
 };
 
 export const getUnderStudySpecialExam = async (
