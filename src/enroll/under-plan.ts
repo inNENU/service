@@ -1,7 +1,7 @@
 import { request } from "@/utils/index.js";
 
 import type { ActionFailType } from "../config/index.js";
-import { InvalidArgResponse, missingArgResponse } from "../config/index.js";
+import { invalidArgResponse, missingArgResponse } from "../config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse } from "../typings.js";
 
 export interface UnderEnrollPlanInfoOptions {
@@ -151,6 +151,6 @@ export const underEnrollPlanHandler = request<UnderEnrollPlanResponse, UnderEnro
 
     if (req.body.type === "query") return res.json(await queryUnderEnrollPlan(req.body));
 
-    return res.json(InvalidArgResponse("type"));
+    return res.json(invalidArgResponse("type"));
   },
 );

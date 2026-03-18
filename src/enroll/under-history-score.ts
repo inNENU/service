@@ -1,7 +1,7 @@
 import { request } from "@/utils/index.js";
 
 import type { ActionFailType } from "../config/index.js";
-import { InvalidArgResponse, missingArgResponse } from "../config/index.js";
+import { invalidArgResponse, missingArgResponse } from "../config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse } from "../typings.js";
 
 export interface UnderHistoryScoreInfoOptions {
@@ -196,5 +196,5 @@ export const underHistoryScoreHandler = request<
 
   if (req.body.type === "query") return res.json(await queryUnderHistoryScore(req.body));
 
-  return res.json(InvalidArgResponse("type"));
+  return res.json(invalidArgResponse("type"));
 });

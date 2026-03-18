@@ -3,7 +3,7 @@ import { request } from "@/utils/index.js";
 import { getOAInfo } from "./info.js";
 import type { OALoginFailedResponse } from "./login.js";
 import { OA_WEB_VPN_SERVER } from "./utils.js";
-import { ActionFailType, InvalidArgResponse, unknownResponse } from "../config/index.js";
+import { ActionFailType, invalidArgResponse, unknownResponse } from "../config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse, LoginOptions } from "../typings.js";
 
 const WORKFLOW_ID = 8021;
@@ -381,5 +381,5 @@ export const emailApplyHandler = request<
 
   if (type === "apply") return res.json(await applyEmail(cookieHeader, req.body));
 
-  return res.json(InvalidArgResponse("type"));
+  return res.json(invalidArgResponse("type"));
 });

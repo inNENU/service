@@ -1,5 +1,5 @@
 import type { ActionFailType } from "@/config/index.js";
-import { InvalidArgResponse, MissingCredentialResponse } from "@/config/index.js";
+import { invalidArgResponse, MissingCredentialResponse } from "@/config/index.js";
 import type { CommonFailedResponse } from "@/typings.js";
 import { request } from "@/utils/index.js";
 
@@ -70,6 +70,6 @@ export const resetPasswordHandler = request<ResetPasswordResponse, ResetPassword
     if (options.type === "reset-password")
       return res.json(await resetPassword(options, cookieHeader));
 
-    return res.json(InvalidArgResponse("options"));
+    return res.json(invalidArgResponse("options"));
   },
 );

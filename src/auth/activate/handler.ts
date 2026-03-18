@@ -1,4 +1,4 @@
-import { InvalidArgResponse, MissingCredentialResponse } from "@/config/index.js";
+import { invalidArgResponse, MissingCredentialResponse } from "@/config/index.js";
 import { request } from "@/utils/index.js";
 
 import type { ActivateInfoResponse } from "./get-info.js";
@@ -66,5 +66,5 @@ export const activateHandler = request<ActivateResponse, ActivateOptions>(async 
 
   if (options.type === "set-password") return res.json(await setPassword(options, cookieHeader));
 
-  return InvalidArgResponse("type");
+  return invalidArgResponse("type");
 });

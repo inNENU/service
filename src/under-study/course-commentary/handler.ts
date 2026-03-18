@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { InvalidArgResponse, missingArgResponse } from "@/config/index.js";
+import { invalidArgResponse, missingArgResponse } from "@/config/index.js";
 import type { EmptyObject } from "@/typings.js";
 
 import type { GetUnderCourseCommentaryOptions } from "./get.js";
@@ -53,5 +53,5 @@ export const underStudyCourseCommentaryHandler: RequestHandler<
   if (req.body.type === "submit")
     return res.json(await submitUnderCourseCommentary(cookieHeader, req.body));
 
-  return res.json(InvalidArgResponse("type"));
+  return res.json(invalidArgResponse("type"));
 };

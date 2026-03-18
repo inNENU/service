@@ -2,7 +2,7 @@ import { request } from "@/utils/index.js";
 
 import { OFFICIAL_URL, getOfficialPageView } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
-import { InvalidArgResponse, unknownResponse } from "../config/index.js";
+import { invalidArgResponse, unknownResponse } from "../config/index.js";
 import type { CommonFailedResponse, CommonListSuccessResponse } from "../typings.js";
 
 const LIST_REGEXP = /<ul class=".*? dsyw">([^]+?)<\/ul>/;
@@ -55,7 +55,7 @@ export const getOfficialInfoList = async ({
   current = 1,
   total = totalPageState[type] || 0,
 }: OfficialInfoListOptions): Promise<OfficialInfoListResponse> => {
-  if (!["social", "science", "news", "media"].includes(type)) return InvalidArgResponse("type");
+  if (!["social", "science", "news", "media"].includes(type)) return invalidArgResponse("type");
 
   const response = await fetch(
     total && current !== 1

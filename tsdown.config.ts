@@ -1,4 +1,3 @@
-import path from "node:path";
 import { defineConfig } from "tsdown";
 
 // oxlint-disable-next-line node/no-process-env

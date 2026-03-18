@@ -41,7 +41,7 @@ export const missingArgResponse = (
   msg: `缺少${name}参数`,
 });
 
-export const InvalidArgResponse = (name = ""): CommonFailedResponse<ActionFailType.InvalidArg> => ({
+export const invalidArgResponse = (name = ""): CommonFailedResponse<ActionFailType.InvalidArg> => ({
   success: false,
   type: ActionFailType.InvalidArg,
   msg: `${name}参数非法`,

@@ -12,6 +12,15 @@ export default defineConfig({
   ignorePatterns: [...defaultIgnorePatterns, "lib/"],
   rules: {
     "no-console": "off",
+    "no-warning-comments": "off",
     "typescript/strict-boolean-expressions": "off",
   },
+  overrides: [
+    {
+      files: ["src/utils/mysql.ts"],
+      rules: {
+        "node/no-process-env": "off",
+      },
+    },
+  ],
 });

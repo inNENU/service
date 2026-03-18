@@ -1,7 +1,7 @@
 import {
   ActionFailType,
   ExpiredResponse,
-  InvalidArgResponse,
+  invalidArgResponse,
   missingArgResponse,
   unknownResponse,
 } from "@/config/index.js";
@@ -206,5 +206,5 @@ export const underSelectProcessHandler = request<
 
   if (type === "remove") return res.json(await removeUnderSelectCourse(req.body, cookieHeader));
 
-  return res.json(InvalidArgResponse("type"));
+  return res.json(invalidArgResponse("type"));
 });

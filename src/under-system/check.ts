@@ -5,7 +5,8 @@ import { UNDER_SYSTEM_SERVER } from "./utils.js";
 
 export const underSystemCheckHandler = request<CookieVerifyResponse, CookieOptions>(
   async (req, res) => {
-    const cookieHeader = req.headers.cookie ?? cookies2Header(req.body.cookies);
+    // oxlint-disable-next-line typescript/no-non-null-assertion
+    const cookieHeader = req.headers.cookie ?? cookies2Header(req.body.cookies)!;
 
     if (cookieHeader.includes("TEST")) {
       return res.json({
