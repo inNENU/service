@@ -5,7 +5,7 @@ import { AUTH_INFO_PAGE } from "./utils.js";
 
 export const authCenterCheckHandler = request<CookieVerifyResponse, CookieOptions>(
   async (req, res) => {
-    const cookieHeader = req.headers.cookie ?? cookies2Header(req.body.cookies)!;
+    const cookieHeader = req.headers.cookie ?? cookies2Header(req.body.cookies) ?? "";
 
     if (cookieHeader.includes("TEST")) return res.json({ success: true, valid: true });
 

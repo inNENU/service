@@ -4,7 +4,7 @@ import type { CookieOptions, CookieVerifyResponse } from "../typings.js";
 import { OA_WEB_VPN_SERVER } from "./utils.js";
 
 export const oaCheckHandler = request<CookieVerifyResponse, CookieOptions>(async (req, res) => {
-  const cookieHeader = req.headers.cookie ?? cookies2Header(req.body.cookies)!;
+  const cookieHeader = req.headers.cookie ?? cookies2Header(req.body.cookies) ?? "";
 
   if (!cookieHeader) return res.json({ success: true, valid: false });
 
