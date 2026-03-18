@@ -57,25 +57,28 @@ jobs:
 
       - name: Configuration environment
         env:
-          HOST: innenu.com
+          HOST: service.innenu.com
           SSH_PORT: ${{ secrets.SSH_PORT }}
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.ssh/
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
 
           echo "Host $HOST" >> ~/.ssh/config
           echo "  HostName $HOST" >> ~/.ssh/config
           echo "  Port $SSH_PORT" >> ~/.ssh/config
           echo "  User git" >> ~/.ssh/config
-          echo "  IdentityFile ~/.ssh/id_rsa" >> ~/.ssh/config
+          echo "  IdentityFile ~/.ssh/id_ed25519" >> ~/.ssh/config
           echo "  StrictHostKeyChecking no" >> ~/.ssh/config
 
           git config --global user.name 'Mr.Hope'
           git config --global user.email 'mister-hope@outlook.com'
 
       - name: Deploy
+        env:
+          HOST: service.innenu.com
+          DEST: /www/wwwroot/innenu-service
         run: |
-          git push -f git@innenu.com:/www/wwwroot/innenu-service deploy
-          ssh git@innenu.com "cd /www/wwwroot/innenu-service && git reset --hard HEAD"
+          git push -f git@$HOST:$DEST deploy
+          ssh git@$HOST "cd $DEST && git reset --hard HEAD"
