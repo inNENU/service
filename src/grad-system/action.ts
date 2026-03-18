@@ -1,7 +1,4 @@
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-} from "../typings.js";
+import type { CommonFailedResponse, CommonSuccessResponse } from "../typings.js";
 import { MAIN_ACTIONS_URL, MAIN_URL } from "./utils.js";
 
 const ACTION_REG_EXP = /xPageIDs\s*=\s*'(.*?)';[^]+xPageAbc\s*=\s*'(.*?)';/;
@@ -15,13 +12,9 @@ export type GradActionSuccessResponse = CommonSuccessResponse<{
   actions: GradAction[];
 }>;
 
-export type GradActionResponse =
-  | GradActionSuccessResponse
-  | CommonFailedResponse;
+export type GradActionResponse = GradActionSuccessResponse | CommonFailedResponse;
 
-export const getAction = async (
-  cookieHeader: string,
-): Promise<GradActionResponse> => {
+export const getAction = async (cookieHeader: string): Promise<GradActionResponse> => {
   const response = await fetch(MAIN_ACTIONS_URL, {
     headers: {
       Cookie: cookieHeader,

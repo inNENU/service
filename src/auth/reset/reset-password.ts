@@ -1,4 +1,4 @@
-import { UnknownResponse } from "@/config/index.js";
+import { unknownResponse } from "@/config/index.js";
 import type { CommonFailedResponse } from "@/typings.js";
 
 import { RESET_PAGE_URL } from "./utils.js";
@@ -19,9 +19,7 @@ interface RawResetPasswordSetFailedData {
   datas: null;
 }
 
-type RawResetPasswordSetData =
-  | RawResetPasswordSetSuccessData
-  | RawResetPasswordSetFailedData;
+type RawResetPasswordSetData = RawResetPasswordSetSuccessData | RawResetPasswordSetFailedData;
 
 export interface ResetPasswordSetOptions {
   type: "reset-password";
@@ -92,9 +90,7 @@ export const resetPassword = async (
 
   const data = (await verifyResponse.json()) as RawResetPasswordSetData;
 
-  if (data.code !== "0") {
-    return UnknownResponse(data.message);
-  }
+  if (data.code !== "0") return unknownResponse(data.message);
 
   return {
     success: true,

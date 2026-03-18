@@ -2,7 +2,7 @@ import { request } from "@/utils/index.js";
 
 import { ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ExpiredResponse, UnknownResponse } from "../config/index.js";
+import { ExpiredResponse, unknownResponse } from "../config/index.js";
 import type { CommonSuccessResponse } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 
@@ -33,9 +33,7 @@ const TEST_CARD_BALANCE_RESPONSE: CardBalanceSuccessResponse = {
   data: 10,
 };
 
-export const getCardBalance = async (
-  cookieHeader: string,
-): Promise<CardBalanceResponse> => {
+export const getCardBalance = async (cookieHeader: string): Promise<CardBalanceResponse> => {
   const response = await fetch(CARD_BALANCE_URL, {
     method: "POST",
     headers: {
@@ -52,23 +50,20 @@ export const getCardBalance = async (
 
   const data = (await response.json()) as RawCardBalanceData;
 
-  if (!data.success) return UnknownResponse(JSON.stringify(data));
+  if (!data.success) return unknownResponse(JSON.stringify(data));
 
   const balanceList = data.demo.items.item;
 
   return {
     success: true,
-    data: /\d+/.exec(balanceList[0].kye) ? Number(balanceList[0].kye) / 100 : 0,
+    data: /\d+/.test(balanceList[0].kye) ? Number(balanceList[0].kye) / 100 : 0,
   };
 };
 
-export const cardBalanceHandler = request<CardBalanceResponse>(
-  async (req, res) => {
-    const cookieHeader = req.headers.cookie!;
+export const cardBalanceHandler = request<CardBalanceResponse>(async (req, res) => {
+  const cookieHeader = req.headers.cookie!;
 
-    if (cookieHeader.includes("TEST"))
-      return res.json(TEST_CARD_BALANCE_RESPONSE);
+  if (cookieHeader.includes("TEST")) return res.json(TEST_CARD_BALANCE_RESPONSE);
 
-    return res.json(await getCardBalance(cookieHeader));
-  },
-);
+  return res.json(await getCardBalance(cookieHeader));
+});

@@ -1,6 +1,6 @@
 import { request } from "@/utils/index.js";
 
-import { ActionFailType, UnknownResponse } from "../config/index.js";
+import { ActionFailType, unknownResponse } from "../config/index.js";
 import type { CommonFailedResponse } from "../typings.js";
 
 const QUERY_URL = "https://gkcx.nenu.edu.cn/api/user/admissionQuery";
@@ -59,32 +59,29 @@ export const getUnderAdmission = async ({
     body: JSON.stringify(params),
   });
 
-  if (!response.headers.get("content-type")?.includes("application/json"))
+  if (!response.headers.get("content-type")?.includes("application/json")) {
     return {
       success: false,
       type: ActionFailType.Closed,
       msg: "查询通道已关闭",
     };
+  }
 
   const result = (await response.json()) as RawEnrollResult;
 
   if (result.student === null) {
-    if (result.message === "Admission query is not available")
+    if (result.message === "Admission query is not available") {
       return {
         success: false,
         type: ActionFailType.Closed,
         msg: "查询通道已关闭",
       };
+    }
 
-    return UnknownResponse(result.message);
+    return unknownResponse(result.message);
   }
 
-  const {
-    department,
-    major,
-    mail_code: mailCode,
-    is_mailed: hasMailed,
-  } = result.student;
+  const { department, major, mail_code: mailCode, is_mailed: hasMailed } = result.student;
 
   return {
     success: true,
@@ -117,9 +114,6 @@ export const getUnderAdmission = async ({
   };
 };
 
-export const underAdmissionHandler = request<
-  UnderAdmissionResponse,
-  UnderAdmissionOptions
->(async (req, res) => {
-  return res.json(await getUnderAdmission(req.body));
-});
+export const underAdmissionHandler = request<UnderAdmissionResponse, UnderAdmissionOptions>(
+  async (req, res) => res.json(await getUnderAdmission(req.body)),
+);

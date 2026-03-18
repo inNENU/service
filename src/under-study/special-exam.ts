@@ -2,7 +2,7 @@ import { EDGE_USER_AGENT_HEADERS, request } from "@/utils/index.js";
 
 import { UNDER_STUDY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ExpiredResponse, UnknownResponse } from "../config/index.js";
+import { ExpiredResponse, unknownResponse } from "../config/index.js";
 import type { CommonSuccessResponse } from "../typings.js";
 
 interface RawUnderSpecialExamItem {
@@ -55,9 +55,7 @@ interface RawUnderSpecialExamFailedResult {
   message: string;
 }
 
-type RawUnderSpecialExamResult =
-  | RawUnderSpecialExamSuccessResult
-  | RawUnderSpecialExamFailedResult;
+type RawUnderSpecialExamResult = RawUnderSpecialExamSuccessResult | RawUnderSpecialExamFailedResult;
 
 export interface UnderSpecialExamResult {
   /** 修复学期 */
@@ -72,19 +70,13 @@ export interface UnderSpecialExamResult {
   gradeCode: string;
 }
 
-export type UnderSpecialExamSuccessResponse = CommonSuccessResponse<
-  UnderSpecialExamResult[]
->;
+export type UnderSpecialExamSuccessResponse = CommonSuccessResponse<UnderSpecialExamResult[]>;
 
-export type UnderSpecialExamResponse =
-  | UnderSpecialExamSuccessResponse
-  | AuthLoginFailedResponse;
+export type UnderSpecialExamResponse = UnderSpecialExamSuccessResponse | AuthLoginFailedResponse;
 
 const QUERY_URL = `${UNDER_STUDY_SERVER}/new/student/xskjcj/datas`;
 
-const getSpecialExamResults = (
-  records: RawUnderSpecialExamItem[],
-): UnderSpecialExamResult[] =>
+const getSpecialExamResults = (records: RawUnderSpecialExamItem[]): UnderSpecialExamResult[] =>
   records.map(({ zcj, kssj, xnxqmc, kjkcmc, kjcjdm }) => ({
     semester: xnxqmc.replace(/^20/, "").replace(/季学期$/, ""),
     time: kssj,
@@ -123,15 +115,14 @@ export const getUnderStudySpecialExam = async (
     }),
   });
 
-  if (response.headers.get("Content-Type")?.includes("text/html"))
-    return ExpiredResponse;
+  if (response.headers.get("Content-Type")?.includes("text/html")) return ExpiredResponse;
 
   const data = (await response.json()) as RawUnderSpecialExamResult;
 
   if ("code" in data) {
     if (data.message === "尚未登录，请先登录") return ExpiredResponse;
 
-    return UnknownResponse(data.message);
+    return unknownResponse(data.message);
   }
 
   const records = getSpecialExamResults(data.rows);
@@ -142,13 +133,10 @@ export const getUnderStudySpecialExam = async (
   };
 };
 
-export const underStudySpecialExamHandler = request<UnderSpecialExamResponse>(
-  async (req, res) => {
-    const cookieHeader = req.headers.cookie!;
+export const underStudySpecialExamHandler = request<UnderSpecialExamResponse>(async (req, res) => {
+  const cookieHeader = req.headers.cookie!;
 
-    if (cookieHeader.includes("TEST"))
-      return res.json(TEST_SPECIAL_EXAM_RESPONSE);
+  if (cookieHeader.includes("TEST")) return res.json(TEST_SPECIAL_EXAM_RESPONSE);
 
-    return res.json(await getUnderStudySpecialExam(cookieHeader));
-  },
-);
+  return res.json(await getUnderStudySpecialExam(cookieHeader));
+});

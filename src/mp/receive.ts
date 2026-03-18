@@ -54,15 +54,10 @@ export const mpReceiveHandler = request<
   try {
     const { signature, timestamp, nonce } = req.query;
 
-    if (
-      sha1([process.env.TOKEN, timestamp, nonce].sort().join("")) !== signature
-    ) {
+    if (sha1([process.env.TOKEN, timestamp, nonce].sort().join("")) !== signature)
       return res.status(403).send("Invalid signature");
-    }
 
-    if (req.method === "GET") {
-      return res.send(req.query.echostr);
-    }
+    if (req.method === "GET") return res.send(req.query.echostr);
 
     const { ToUserName, FromUserName, CreateTime, MsgType } = req.body;
 
@@ -84,11 +79,7 @@ export const mpReceiveHandler = request<
       console.error("Database error", err);
     }
 
-    if (
-      MsgType === "text" ||
-      MsgType === "image" ||
-      MsgType === "miniprogrampage"
-    ) {
+    if (MsgType === "text" || MsgType === "image" || MsgType === "miniprogrampage") {
       return res.json({
         ToUserName: FromUserName,
         FromUserName: ToUserName,

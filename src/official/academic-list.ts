@@ -1,11 +1,8 @@
 import { request } from "@/utils/index.js";
 
 import { OFFICIAL_URL, getOfficialPageView } from "./utils.js";
-import { UnknownResponse } from "../config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonListSuccessResponse,
-} from "../typings.js";
+import { unknownResponse } from "../config/index.js";
+import type { CommonFailedResponse, CommonListSuccessResponse } from "../typings.js";
 
 const LIST_REGEXP = /<ul class=".*? xsyg">([^]+?)<\/ul>/;
 const ITEM_REGEXP =
@@ -48,7 +45,7 @@ export const getAcademicList = async ({
       : `${OFFICIAL_URL}/xsyj/xsyg.htm`,
   );
 
-  if (response.status !== 200) return UnknownResponse("请求失败");
+  if (response.status !== 200) return unknownResponse("请求失败");
 
   const content = await response.text();
 
@@ -60,16 +57,16 @@ export const getAcademicList = async ({
     pageIds.split(/,\s*/).map((id) => getOfficialPageView(id, owner)),
   );
 
-  const data = Array.from(
-    LIST_REGEXP.exec(content)![1].matchAll(ITEM_REGEXP),
-  ).map(([, url, subject, person, time, location], index) => ({
-    subject,
-    person,
-    time,
-    location,
-    pageView: pageViews[index],
-    url,
-  }));
+  const data = [...LIST_REGEXP.exec(content)![1].matchAll(ITEM_REGEXP)].map(
+    ([, url, subject, person, time, location], index) => ({
+      subject,
+      person,
+      time,
+      location,
+      pageView: pageViews[index],
+      url,
+    }),
+  );
 
   return {
     success: true,
@@ -83,8 +80,4 @@ export const officialAcademicListHandler = request<
   OfficialAcademicListResponse,
   OfficialAcademicListOptions,
   OfficialAcademicListOptions
->(async (req, res) => {
-  return res.json(
-    await getAcademicList(req.method === "GET" ? req.query : req.body),
-  );
-});
+>(async (req, res) => res.json(await getAcademicList(req.method === "GET" ? req.query : req.body)));

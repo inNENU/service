@@ -9,18 +9,14 @@ import { ACTION_SERVER } from "../utils.js";
 
 const BORROW_BOOKS_URL = `${ACTION_SERVER}/basicInfo/getBookBorrow`;
 
-export type BorrowBooksSuccessResponse = CommonSuccessResponse<
-  BorrowBookData[]
->;
+export type BorrowBooksSuccessResponse = CommonSuccessResponse<BorrowBookData[]>;
 
 export type BorrowBooksResponse =
   | BorrowBooksSuccessResponse
   | AuthLoginFailedResponse
   | VPNLoginFailedResponse;
 
-export const getBorrowBooks = async (
-  cookieHeader: string,
-): Promise<BorrowBooksResponse> => {
+export const getBorrowBooks = async (cookieHeader: string): Promise<BorrowBooksResponse> => {
   const response = await fetch(BORROW_BOOKS_URL, {
     headers: {
       Accept: "application/json, text/javascript, */*; q=0.01",

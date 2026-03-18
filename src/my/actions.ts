@@ -47,9 +47,7 @@ export interface MyApplyResult {
 
 const GET_APPLIES_URL = `${MY_SERVER}/PersonAnalysisController/getMyApplyAnalysis`;
 
-export const queryMyApplies = async (
-  cookieHeader: string,
-): Promise<MyApplyResult[]> => {
+export const queryMyApplies = async (cookieHeader: string): Promise<MyApplyResult[]> => {
   const appliesResponse = await fetch(GET_APPLIES_URL, {
     method: "POST",
     headers: {
@@ -69,21 +67,18 @@ export const queryMyApplies = async (
     }),
   });
 
-  const appliesResult =
-    (await appliesResponse.json()) as RawCompleteApplyResult;
+  const appliesResult = (await appliesResponse.json()) as RawCompleteApplyResult;
 
-  return appliesResult.data.map(
-    ({ SHIXIANG, XTMC, key, unit, unitName, SQCS, YBSL, RN }) => ({
-      name: SHIXIANG,
-      system: XTMC,
-      key,
-      unit,
-      unitName,
-      applyCount: SQCS,
-      completeCount: YBSL,
-      delegateCount: RN,
-    }),
-  );
+  return appliesResult.data.map(({ SHIXIANG, XTMC, key, unit, unitName, SQCS, YBSL, RN }) => ({
+    name: SHIXIANG,
+    system: XTMC,
+    key,
+    unit,
+    unitName,
+    applyCount: SQCS,
+    completeCount: YBSL,
+    delegateCount: RN,
+  }));
 };
 
 const GET_APPLY_DATA_URL = `${MY_SERVER}/AnalysisForPerson/loadMyApplyData`;
@@ -148,15 +143,11 @@ export const queryMyActions = async <T extends Record<string, unknown>>(
 
   const fieldsInfo = FIELD_INFO_REGEXP.exec(actionPageContent)![1];
 
-  const fields = Array.from(fieldsInfo.matchAll(FIELD_REG_EXP)).map(
-    ([, field]) => field,
-  );
+  const fields = [...fieldsInfo.matchAll(FIELD_REG_EXP)].map(([, field]) => field);
 
   const colNames = [
     ...fields,
-    ...(fields.every((field) => field.toUpperCase() !== "ID__")
-      ? ["ID__"]
-      : []),
+    ...(fields.every((field) => field.toUpperCase() !== "ID__") ? ["ID__"] : []),
     ...BUILD_IN_COLUMNS,
   ].join(",");
   const userId = USER_ID_REG_EXP.exec(actionPageContent)![1];

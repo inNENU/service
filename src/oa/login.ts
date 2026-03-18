@@ -11,13 +11,9 @@ import {
   MissingCredentialResponse,
   TEST_ID_NUMBER,
   TEST_LOGIN_RESULT,
-  UnknownResponse,
+  unknownResponse,
 } from "../config/index.js";
-import type {
-  AccountInfo,
-  CommonFailedResponse,
-  LoginOptions,
-} from "../typings.js";
+import type { AccountInfo, CommonFailedResponse, LoginOptions } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 import { vpnCASLogin } from "../vpn/index.js";
 
@@ -26,9 +22,7 @@ export interface OALoginSuccessResult {
   cookieStore: CookieStore;
 }
 
-export type OALoginFailedResponse =
-  | AuthLoginFailedResponse
-  | VPNLoginFailedResponse;
+export type OALoginFailedResponse = AuthLoginFailedResponse | VPNLoginFailedResponse;
 
 export type OALoginResult = OALoginSuccessResult | OALoginFailedResponse;
 
@@ -53,11 +47,7 @@ export const oaLogin = async (
     return result;
   }
 
-  console.log(
-    "location",
-    result.location,
-    cookieStore.getHeader(result.location),
-  );
+  console.log("location", result.location, cookieStore.getHeader(result.location));
   console.log("server", cookieStore.getHeader(OA_WEB_VPN_SERVER));
 
   const ticketUrl = result.location;
@@ -72,13 +62,9 @@ export const oaLogin = async (
   cookieStore.applyResponse(ticketResponse, ticketUrl);
 
   if (ticketResponse.status !== 302) {
-    console.error(
-      "Login to oa failed",
-      ticketResponse.status,
-      await ticketResponse.text(),
-    );
+    console.error("Login to oa failed", ticketResponse.status, await ticketResponse.text());
 
-    return UnknownResponse("登录失败");
+    return unknownResponse("登录失败");
   }
 
   const sessionLocation = ticketResponse.headers.get("Location");
@@ -97,16 +83,17 @@ export const oaLogin = async (
     if (
       sessionResponse.status === 302 &&
       sessionResponse.headers.get("Location") === OA_MAIN_PAGE
-    )
+    ) {
       return {
         success: true,
         cookieStore,
       };
+    }
   }
 
   console.error("login to oa failed", sessionLocation);
 
-  return UnknownResponse("登录失败");
+  return unknownResponse("登录失败");
 };
 
 export interface OALoginSuccessResponse {
@@ -120,9 +107,7 @@ export const loginToOA = request<
   OALoginResponse | CommonFailedResponse<ActionFailType.MissingCredential>,
   LoginOptions
 >(async (req, res, next) => {
-  if (!req.body) {
-    return res.json(MissingCredentialResponse);
-  }
+  if (!req.body) return res.json(MissingCredentialResponse);
 
   const { id, password, authToken } = req.body;
 
@@ -136,29 +121,23 @@ export const loginToOA = request<
     return res.json(MissingCredentialResponse);
   }
 
-  return next();
+  next();
 });
 
-export const oaLoginHandler = request<OALoginResponse, AccountInfo>(
-  async (req, res) => {
-    const result =
-      // fake result for testing
-      req.body.id === TEST_ID_NUMBER
-        ? TEST_LOGIN_RESULT
-        : await oaLogin(req.body);
+export const oaLoginHandler = request<OALoginResponse, AccountInfo>(async (req, res) => {
+  const result =
+    // fake result for testing
+    req.body.id === TEST_ID_NUMBER ? TEST_LOGIN_RESULT : await oaLogin(req.body);
 
-    if (result.success) {
-      const cookies = result.cookieStore
-        .getAllCookies()
-        .map((item) => item.toJSON());
+  if (result.success) {
+    const cookies = result.cookieStore.getAllCookies().map((item) => item.toJSON());
 
-      cookies.forEach(({ name, value, ...rest }) => {
-        res.cookie(name, value, rest);
-      });
+    cookies.forEach(({ name, value, ...rest }) => {
+      res.cookie(name, value, rest);
+    });
 
-      return res.json({ success: true, cookies });
-    }
+    return res.json({ success: true, cookies });
+  }
 
-    return res.json(result);
-  },
-);
+  return res.json(result);
+});

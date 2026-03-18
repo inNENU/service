@@ -2,7 +2,7 @@ import { IE_8_USER_AGENT, getIETimeStamp, request } from "@/utils/index.js";
 
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { UnknownResponse } from "../config/index.js";
+import { unknownResponse } from "../config/index.js";
 import type { LoginOptions } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 
@@ -33,76 +33,74 @@ export interface UnderTestQueySuccessResponse {
   result: AppliedTest[];
 }
 
-export type UnderTestQueyFailedResponse =
-  | AuthLoginFailedResponse
-  | VPNLoginFailedResponse;
+export type UnderTestQueyFailedResponse = AuthLoginFailedResponse | VPNLoginFailedResponse;
 
-export type UnderTestQueyResponse =
-  | UnderTestQueySuccessResponse
-  | UnderTestQueyFailedResponse;
+export type UnderTestQueyResponse = UnderTestQueySuccessResponse | UnderTestQueyFailedResponse;
 
-export const underTestQueryHandler = request<
-  UnderTestQueyResponse,
-  LoginOptions
->(async (req, res) => {
-  const cookieHeader = req.headers.cookie!;
+export const underTestQueryHandler = request<UnderTestQueyResponse, LoginOptions>(
+  async (req, res) => {
+    const cookieHeader = req.headers.cookie!;
 
-  const QUERY_URL = `${UNDER_SYSTEM_SERVER}/kjlbgl.do?method=goStudentSKBm&tktime=${getIETimeStamp()}`;
-  const queryResponse = await fetch(QUERY_URL, {
-    headers: {
-      Cookie: cookieHeader,
-      Referer: `${UNDER_SYSTEM_SERVER}/framework/new_window.jsp?lianjie=&winid=win1`,
-      "User-Agent": IE_8_USER_AGENT,
-    },
-  });
-
-  const queryContent = await queryResponse.text();
-
-  const idCard = idCardRegExp.exec(queryContent)?.[1];
-
-  if (!idCard) return res.json(UnknownResponse("未获取到身份证号"));
-
-  const applyListResponse = await fetch(
-    `${UNDER_SYSTEM_SERVER}/kjlbgl.do?method=goStudentSKXx&xs0101id=${idCard}`,
-    {
+    const QUERY_URL = `${UNDER_SYSTEM_SERVER}/kjlbgl.do?method=goStudentSKBm&tktime=${getIETimeStamp()}`;
+    const queryResponse = await fetch(QUERY_URL, {
       headers: {
         Cookie: cookieHeader,
-        Referer: QUERY_URL,
+        Referer: `${UNDER_SYSTEM_SERVER}/framework/new_window.jsp?lianjie=&winid=win1`,
         "User-Agent": IE_8_USER_AGENT,
       },
-    },
-  );
+    });
 
-  const applyContent = await applyListResponse.text();
+    const queryContent = await queryResponse.text();
 
-  const applyTable = tableRegExp.exec(applyContent)![0];
+    const idCard = idCardRegExp.exec(queryContent)?.[1];
 
-  const applyList = Array.from(applyTable.matchAll(applyRowRexExp)).map(
-    ([, url, name, time, type]) => ({ name, time, type, url }),
-  );
+    if (!idCard) return res.json(unknownResponse("未获取到身份证号"));
 
-  const resultListResponse = await fetch(
-    `${UNDER_SYSTEM_SERVER}/kjlbgl.do?method=goStudentSKYbXx&xs0101id=${idCard}`,
-    {
-      headers: {
-        Cookie: cookieHeader,
-        Referer: QUERY_URL,
-        "User-Agent": IE_8_USER_AGENT,
+    const applyListResponse = await fetch(
+      `${UNDER_SYSTEM_SERVER}/kjlbgl.do?method=goStudentSKXx&xs0101id=${idCard}`,
+      {
+        headers: {
+          Cookie: cookieHeader,
+          Referer: QUERY_URL,
+          "User-Agent": IE_8_USER_AGENT,
+        },
       },
-    },
-  );
+    );
 
-  const resultContent = await resultListResponse.text();
+    const applyContent = await applyListResponse.text();
 
-  const resultTable = tableRegExp.exec(resultContent)![0];
+    const applyTable = tableRegExp.exec(applyContent)![0];
 
-  const resultList = Array.from(resultTable.matchAll(resultRowRexExp)).map(
-    ([, name, time, type, status]) => ({ name, time, type, status }),
-  );
+    const applyList = [...applyTable.matchAll(applyRowRexExp)].map(([, url, name, time, type]) => ({
+      name,
+      time,
+      type,
+      url,
+    }));
 
-  return res.json({
-    success: true,
-    apply: applyList,
-    result: resultList,
-  });
-});
+    const resultListResponse = await fetch(
+      `${UNDER_SYSTEM_SERVER}/kjlbgl.do?method=goStudentSKYbXx&xs0101id=${idCard}`,
+      {
+        headers: {
+          Cookie: cookieHeader,
+          Referer: QUERY_URL,
+          "User-Agent": IE_8_USER_AGENT,
+        },
+      },
+    );
+
+    const resultContent = await resultListResponse.text();
+
+    const resultTable = tableRegExp.exec(resultContent)![0];
+
+    const resultList = [...resultTable.matchAll(resultRowRexExp)].map(
+      ([, name, time, type, status]) => ({ name, time, type, status }),
+    );
+
+    return res.json({
+      success: true,
+      apply: applyList,
+      result: resultList,
+    });
+  },
+);

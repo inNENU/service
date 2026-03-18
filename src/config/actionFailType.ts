@@ -1,4 +1,4 @@
-export const enum ActionFailType {
+export enum ActionFailType {
   /** 缺少登录凭据 */
   MissingCredential = "missing-credential",
   /** 缺少必要参数 */

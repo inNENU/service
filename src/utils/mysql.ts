@@ -16,18 +16,16 @@ export const mysqlPool = createPool({
 });
 
 export const getConnection = (): Promise<PoolConnection> =>
-  mysqlPool.getConnection().catch((error: unknown) => {
-    console.error("Error connecting to MySQL:", error);
+  mysqlPool.getConnection().catch((err: unknown) => {
+    console.error("Error connecting to MySQL:", err);
 
-    throw error;
+    throw err;
   });
 
 export const releaseConnection = (connection?: PoolConnection | null): void => {
   try {
-    if (connection) {
-      mysqlPool.releaseConnection(connection);
-    }
-  } catch (error) {
-    console.error("Error releasing MySQL connection:", error);
+    if (connection) mysqlPool.releaseConnection(connection);
+  } catch (err) {
+    console.error("Error releasing MySQL connection:", err);
   }
 };

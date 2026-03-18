@@ -1,18 +1,9 @@
 import type { PoolConnection } from "mysql2/promise";
 
-import {
-  ActionFailType,
-  DatabaseErrorResponse,
-  UnknownResponse,
-} from "@/config/index.js";
+import { ActionFailType, databaseErrorResponse, unknownResponse } from "@/config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse } from "@/typings.js";
 import type { WechatMpCodeError } from "@/utils/index.js";
-import {
-  getConnection,
-  getShortUUID,
-  getWechatMPCode,
-  releaseConnection,
-} from "@/utils/index.js";
+import { getConnection, getShortUUID, getWechatMPCode, releaseConnection } from "@/utils/index.js";
 
 import type { UnderAdmissionOptions } from "../../enroll/index.js";
 import { getUnderAdmission } from "../../enroll/index.js";
@@ -35,9 +26,7 @@ export type StoreAdmissionInfoResponse =
   | StoreAdmissionInfoCodeSuccessResponse
   | StoreAdmissionInfoUUIDSuccessResponse
   | CommonFailedResponse<
-      | ActionFailType.DatabaseError
-      | ActionFailType.WrongInfo
-      | ActionFailType.Unknown
+      ActionFailType.DatabaseError | ActionFailType.WrongInfo | ActionFailType.Unknown
     >;
 
 export const storeStoreAdmissionInfo = async ({
@@ -48,21 +37,23 @@ export const storeStoreAdmissionInfo = async ({
   remark,
   appId,
 }: StoreAdmissionInfoOptions): Promise<StoreAdmissionInfoResponse> => {
-  if (testId.length < 14)
+  if (testId.length < 14) {
     return {
       success: false,
       type: ActionFailType.WrongInfo,
       msg: "未提供有效的14位考生号",
     };
+  }
 
   const result = await getUnderAdmission({ name, id, testId });
 
-  if (!result.success)
+  if (!result.success) {
     return {
       success: false,
       type: ActionFailType.WrongInfo,
       msg: "信息有误",
     };
+  }
 
   const uuid = getShortUUID();
 
@@ -87,17 +78,13 @@ export const storeStoreAdmissionInfo = async ({
   } catch (err) {
     console.error(err);
 
-    return DatabaseErrorResponse((err as Error).message);
+    return databaseErrorResponse((err as Error).message);
   } finally {
     releaseConnection(connection);
   }
 
   if (appId) {
-    const result = await getWechatMPCode(
-      appId,
-      "pkg/user/pages/account/login",
-      `verify:${uuid}`,
-    );
+    const result = await getWechatMPCode(appId, "pkg/user/pages/account/login", `verify:${uuid}`);
 
     if (result instanceof Buffer) {
       return {
@@ -108,7 +95,7 @@ export const storeStoreAdmissionInfo = async ({
       };
     }
 
-    return UnknownResponse((result as WechatMpCodeError).errmsg);
+    return unknownResponse((result as WechatMpCodeError).errmsg);
   }
 
   return {

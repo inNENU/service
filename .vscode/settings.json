@@ -10,5 +10,5 @@
     "qrcode",
     "wechat"
   ],
-  "typescript.tsdk": "node_modules\\typescript\\lib"
+  "oxc.unusedDisableDirectives": "deny"
 }

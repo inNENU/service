@@ -31,12 +31,10 @@ export interface AuthEncryptOptions {
   salt: string;
 }
 
-export const authEncryptHandler = request<
-  CommonSuccessResponse<string>,
-  AuthEncryptOptions
->((req, res) =>
-  res.json({
-    success: true,
-    data: authEncrypt(req.body.password, req.body.salt),
-  }),
+export const authEncryptHandler = request<CommonSuccessResponse<string>, AuthEncryptOptions>(
+  (req, res) =>
+    res.json({
+      success: true,
+      data: authEncrypt(req.body.password, req.body.salt),
+    }),
 );

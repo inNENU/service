@@ -6,11 +6,7 @@ import { request } from "@/utils/index.js";
 import { AUTH_INFO_PAGE } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { AUTH_SERVER, authLogin } from "../auth/index.js";
-import {
-  TEST_ID_NUMBER,
-  TEST_LOGIN_RESULT,
-  UnknownResponse,
-} from "../config/index.js";
+import { TEST_ID_NUMBER, TEST_LOGIN_RESULT, unknownResponse } from "../config/index.js";
 import type { AccountInfo } from "../typings.js";
 
 export interface AuthCenterLoginSuccessResult {
@@ -20,9 +16,7 @@ export interface AuthCenterLoginSuccessResult {
 
 export type AuthCenterLoginFailResult = AuthLoginFailedResponse;
 
-export type AuthCenterLoginResult =
-  | AuthCenterLoginSuccessResult
-  | AuthCenterLoginFailResult;
+export type AuthCenterLoginResult = AuthCenterLoginSuccessResult | AuthCenterLoginFailResult;
 
 export const authCenterLogin = async (
   options: AccountInfo,
@@ -52,7 +46,7 @@ export const authCenterLogin = async (
 
   cookieStore.applyResponse(ticketResponse, ticketUrl);
 
-  if (ticketResponse.status !== 302) return UnknownResponse("登录失败");
+  if (ticketResponse.status !== 302) return unknownResponse("登录失败");
 
   const finalLocation = ticketResponse.headers.get("Location");
 
@@ -63,7 +57,7 @@ export const authCenterLogin = async (
     };
   }
 
-  return UnknownResponse("登录失败");
+  return unknownResponse("登录失败");
 };
 
 export interface AuthCenterLoginSuccessResponse {
@@ -71,31 +65,24 @@ export interface AuthCenterLoginSuccessResponse {
   cookies: CookieType[];
 }
 
-export type AuthCenterLoginResponse =
-  | AuthCenterLoginSuccessResponse
-  | AuthCenterLoginFailResult;
+export type AuthCenterLoginResponse = AuthCenterLoginSuccessResponse | AuthCenterLoginFailResult;
 
-export const authCenterLoginHandler = request<
-  AuthCenterLoginResponse,
-  AccountInfo
->(async (req, res) => {
-  const result =
-    // fake result for testing
-    req.body.id === TEST_ID_NUMBER
-      ? TEST_LOGIN_RESULT
-      : await authCenterLogin(req.body);
+export const authCenterLoginHandler = request<AuthCenterLoginResponse, AccountInfo>(
+  async (req, res) => {
+    const result =
+      // fake result for testing
+      req.body.id === TEST_ID_NUMBER ? TEST_LOGIN_RESULT : await authCenterLogin(req.body);
 
-  if (result.success) {
-    const cookies = result.cookieStore
-      .getAllCookies()
-      .map((item) => item.toJSON());
+    if (result.success) {
+      const cookies = result.cookieStore.getAllCookies().map((item) => item.toJSON());
 
-    cookies.forEach(({ name, value, ...rest }) => {
-      res.cookie(name, value, rest);
-    });
+      cookies.forEach(({ name, value, ...rest }) => {
+        res.cookie(name, value, rest);
+      });
 
-    return res.json({ success: true, cookies });
-  }
+      return res.json({ success: true, cookies });
+    }
 
-  return res.json(result);
-});
+    return res.json(result);
+  },
+);

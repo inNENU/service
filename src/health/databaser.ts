@@ -24,10 +24,7 @@ export class DatabaseMonitor {
     // 监听连接获取事件
     this.pool.on("acquire", () => {
       this.activeConnections++;
-      this.totalConnections = Math.max(
-        this.totalConnections,
-        this.activeConnections,
-      );
+      this.totalConnections = Math.max(this.totalConnections, this.activeConnections);
     });
 
     // 监听连接入队事件
@@ -102,35 +99,26 @@ export class DatabaseMonitor {
       const stats = this.getPoolStats();
 
       console.info("=== 数据库连接池状态 ===");
-      console.info(
-        `活跃连接数: ${stats.activeConnections}/${stats.connectionLimit}`,
-      );
-      console.info(
-        `排队请求数: ${stats.queuedRequests} (限制: ${stats.queueLimit || "无限制"})`,
-      );
+      console.info(`活跃连接数: ${stats.activeConnections}/${stats.connectionLimit}`);
+      console.info(`排队请求数: ${stats.queuedRequests} (限制: ${stats.queueLimit || "无限制"})`);
       console.info(`历史最大连接数: ${stats.totalConnections}`);
 
       // 计算连接池使用率
-      const usagePercent = (
-        (stats.activeConnections / stats.connectionLimit) *
-        100
-      ).toFixed(1);
+      const usagePercent = ((stats.activeConnections / stats.connectionLimit) * 100).toFixed(1);
 
       console.info(`连接池使用率: ${usagePercent}%`);
 
       // 如果使用率过高，发出警告
-      if (parseFloat(usagePercent) > 80) {
+      if (Number.parseFloat(usagePercent) > 80)
         console.warn(`⚠️  连接池使用率过高: ${usagePercent}%`);
-      }
 
       // 如果有排队请求，发出警告
-      if (stats.queuedRequests > 0) {
+      if (stats.queuedRequests > 0)
         console.warn(`⚠️  有 ${stats.queuedRequests} 个请求在排队等待连接`);
-      }
 
       console.info("========================");
-    } catch (error) {
-      console.error("获取连接池状态失败:", error);
+    } catch (err) {
+      console.error("获取连接池状态失败:", err);
     }
   }
 
@@ -160,14 +148,14 @@ export class DatabaseMonitor {
         return {
           healthy: true,
         };
-      } catch (error) {
+      } catch (err) {
         this.pool.releaseConnection(connection);
-        throw error;
+        throw err;
       }
-    } catch (error) {
+    } catch (err) {
       return {
         healthy: false,
-        errorMessage: (error as Error).message,
+        errorMessage: (err as Error).message,
       };
     }
   }

@@ -4,7 +4,7 @@ import express from "express";
 import { actionRouter } from "./action/index.js";
 import { authRouter } from "./auth/index.js";
 import { authCenterRouter } from "./auth-center/index.js";
-import { UnknownResponse } from "./config/index.js";
+import { unknownResponse } from "./config/index.js";
 import { enrollRouter } from "./enroll/index.js";
 import { gradRouter } from "./grad-system/index.js";
 import { healthCheckHandler, healthCheckRateLimit } from "./health/index.js";
@@ -55,11 +55,10 @@ app.use("/who", whoRouter);
 app.get("/weather", weatherHandler);
 
 // @ts-expect-error: Express type issue
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((err: Error, _req: Request, res: Response, _next: () => void) => {
   console.error(err);
 
-  res.status(500).json(UnknownResponse(err.message ?? "未知错误"));
+  res.status(500).json(unknownResponse(err.message ?? "未知错误"));
 });
 
 app.listen(port, () => {

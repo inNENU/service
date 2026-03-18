@@ -5,19 +5,14 @@ import {
   ActionFailType,
   MissingArgResponse,
   MissingCredentialResponse,
-  UnknownResponse,
+  unknownResponse,
 } from "@/config/index.js";
 import type { CommonFailedResponse } from "@/typings.js";
 import { request } from "@/utils/index.js";
 
 import type { AuthInfo } from "../init/info.js";
 import { getAuthInfo } from "../init/info.js";
-import {
-  AUTH_INDEX_URL,
-  AUTH_LOGIN_URL,
-  AUTH_SERVER,
-  RE_AUTH_URL,
-} from "../utils.js";
+import { AUTH_INDEX_URL, AUTH_LOGIN_URL, AUTH_SERVER, RE_AUTH_URL } from "../utils.js";
 
 const RE_AUTH_VERIFY_URL = `${AUTH_SERVER}/authserver/reAuthCheck/reAuthSubmit.do`;
 
@@ -100,8 +95,7 @@ export const verifyReAuthCaptcha = async (
       };
     }
 
-    const reAuthResult =
-      (await reAuthResponse.json()) as RawVerifyReAuthCaptchaResponse;
+    const reAuthResult = (await reAuthResponse.json()) as RawVerifyReAuthCaptchaResponse;
 
     if (reAuthResult.code !== "reAuth_success") {
       if (reAuthResult.msg === "验证码错误") {
@@ -112,9 +106,9 @@ export const verifyReAuthCaptcha = async (
         };
       }
 
-      console.error("二次认证失败: ", reAuthResult);
+      console.error("二次认证失败:", reAuthResult);
 
-      return UnknownResponse(reAuthResult.msg);
+      return unknownResponse(reAuthResult.msg);
     }
 
     const cookieStore = new CookieStore();
@@ -130,21 +124,14 @@ export const verifyReAuthCaptcha = async (
       signal: AbortSignal.timeout(5000),
     });
 
-    if (
-      loginResponse.status !== 302 ||
-      loginResponse.headers.get("Location") !== AUTH_INDEX_URL
-    ) {
-      return UnknownResponse("登录失败，二次验证回调失败");
-    }
+    if (loginResponse.status !== 302 || loginResponse.headers.get("Location") !== AUTH_INDEX_URL)
+      return unknownResponse("登录失败，二次验证回调失败");
 
     cookieStore.applyResponse(loginResponse, AUTH_LOGIN_URL);
 
     const authToken = cookieStore.getValue("MULTIFACTOR_USERS", {})!;
 
-    const authInfo = await getAuthInfo(
-      { id, password, authToken, appId, openid },
-      cookieStore,
-    );
+    const authInfo = await getAuthInfo({ id, password, authToken, appId, openid }, cookieStore);
 
     if (!authInfo.success) return authInfo;
 
@@ -156,33 +143,32 @@ export const verifyReAuthCaptcha = async (
       cookies,
       info: authInfo.info,
     };
-  } catch (error) {
-    console.error("二次认证失败: ", error);
+  } catch (err) {
+    console.error("二次认证失败:", err);
 
-    return UnknownResponse("二次认证失败，请稍后再试");
+    return unknownResponse("二次认证失败，请稍后再试");
   }
 };
 
-export const verifyReAuthHandler = request<
-  VerifyReAuthCaptchaResponse,
-  ReAuthVerifyOptions
->(async (req, res) => {
-  const cookieHeader = req.headers.cookie;
-  const { smsCode, id, password, appId } = req.body;
+export const verifyReAuthHandler = request<VerifyReAuthCaptchaResponse, ReAuthVerifyOptions>(
+  async (req, res) => {
+    const cookieHeader = req.headers.cookie;
+    const { smsCode, id, password, appId } = req.body;
 
-  if (!cookieHeader) return res.json(MissingCredentialResponse);
-  if (!smsCode) return res.json(MissingArgResponse("smsCode"));
-  if (!id) return res.json(MissingArgResponse("id"));
-  if (!password) return res.json(MissingArgResponse("password"));
-  if (!appId) return res.json(MissingArgResponse("appId"));
+    if (!cookieHeader) return res.json(MissingCredentialResponse);
+    if (!smsCode) return res.json(MissingArgResponse("smsCode"));
+    if (!id) return res.json(MissingArgResponse("id"));
+    if (!password) return res.json(MissingArgResponse("password"));
+    if (!appId) return res.json(MissingArgResponse("appId"));
 
-  const result = await verifyReAuthCaptcha(req.body, cookieHeader);
+    const result = await verifyReAuthCaptcha(req.body, cookieHeader);
 
-  if (result.success) {
-    result.cookies.forEach(({ name, value, ...rest }) => {
-      res.cookie(name, value, rest);
-    });
-  }
+    if (result.success) {
+      result.cookies.forEach(({ name, value, ...rest }) => {
+        res.cookie(name, value, rest);
+      });
+    }
 
-  return res.json(result);
-});
+    return res.json(result);
+  },
+);

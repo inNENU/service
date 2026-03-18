@@ -3,12 +3,8 @@ import { request } from "@/utils/index.js";
 import type { ActionLoginResponse } from "./login.js";
 import { ACTION_SERVER, INFO_BASE_SERVER } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
-import { ExpiredResponse, UnknownResponse } from "../config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonListSuccessResponse,
-  LoginOptions,
-} from "../typings.js";
+import { ExpiredResponse, unknownResponse } from "../config/index.js";
+import type { CommonFailedResponse, CommonListSuccessResponse, LoginOptions } from "../typings.js";
 
 const NOTICE_LIST_QUERY_URL = `${ACTION_SERVER}/page/queryList`;
 
@@ -84,9 +80,7 @@ const getNoticeItem = ({
     : {}),
 });
 
-export interface NoticeListSuccessResponse extends CommonListSuccessResponse<
-  NoticeInfo[]
-> {
+export interface NoticeListSuccessResponse extends CommonListSuccessResponse<NoticeInfo[]> {
   size: number;
   count: number;
 }
@@ -94,9 +88,7 @@ export interface NoticeListSuccessResponse extends CommonListSuccessResponse<
 export type NoticeListResponse =
   | NoticeListSuccessResponse
   | ActionLoginResponse
-  | CommonFailedResponse<
-      ActionFailType.MissingCredential | ActionFailType.Unknown
-    >;
+  | CommonFailedResponse<ActionFailType.MissingCredential | ActionFailType.Unknown>;
 
 const TEST_NOTICE_LIST: NoticeListSuccessResponse = {
   success: true,
@@ -143,10 +135,9 @@ export const getNoticeList = async (
   const { data, pageIndex, pageSize, totalCount, totalPage } =
     (await response.json()) as RawNoticeListData;
 
-  if (!data.length)
-    return UnknownResponse(
-      `获取公告列表失败: ${JSON.stringify(data, null, 2)}`,
-    );
+  if (!data.length) {
+    return unknownResponse(`获取公告列表失败: ${JSON.stringify(data, null, 2)}`);
+  }
 
   return {
     success: true,

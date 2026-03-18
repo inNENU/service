@@ -5,11 +5,7 @@ import { getConnection, releaseConnection, request } from "@/utils/index.js";
 import type { MyLoginFailedResponse } from "./login.js";
 import { MY_SERVER } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
-import {
-  ExpiredResponse,
-  TEST_INFO,
-  UnknownResponse,
-} from "../config/index.js";
+import { ExpiredResponse, TEST_INFO, unknownResponse } from "../config/index.js";
 import type { AccountInfo, CommonFailedResponse } from "../typings.js";
 
 type RawInfo =
@@ -116,9 +112,7 @@ const TEST_INFO_RESULT: MyInfoSuccessResult = {
   data: TEST_INFO,
 };
 
-export const getMyInfo = async (
-  cookieHeader: string,
-): Promise<MyInfoResult> => {
+export const getMyInfo = async (cookieHeader: string): Promise<MyInfoResult> => {
   let connection: PoolConnection | null = null;
 
   try {
@@ -137,10 +131,7 @@ export const getMyInfo = async (
 
     const infoResult = (await infoResponse.json()) as RawInfo;
 
-    if (
-      infoResult.success &&
-      infoResult.data.execResponse.return.Body?.code === "200"
-    ) {
+    if (infoResult.success && infoResult.data.execResponse.return.Body?.code === "200") {
       const personInfo = infoResult.data.execResponse.return.Body.items.item[0];
 
       const info = {
@@ -184,9 +175,7 @@ export const getMyInfo = async (
           DEC: "12",
         };
 
-        info.birth = `${
-          Number(year[0]) < 5 ? "20" : "19"
-        }${year}-${monthMap[month]}-${day}`;
+        info.birth = `${Number(year[0]) < 5 ? "20" : "19"}${year}-${monthMap[month]}-${day}`;
       }
 
       const location = [
@@ -226,23 +215,22 @@ export const getMyInfo = async (
           : ["070201"].includes(info.majorId) || info.major === "细胞生物学"
             ? "unknown"
             : [
-                  164000, 166000, 170000, 173000, 174000, 175000, 177000,
-                  232000, 234000, 236000, 253000,
+                  164000, 166000, 170000, 173000, 174000, 175000, 177000, 232000, 234000, 236000,
+                  253000,
                 ].includes(info.orgId)
               ? "benbu"
-              : [
-                    161000, 168000, 169000, 178000, 235000, 245000, 246000,
-                    252000, 261000,
-                  ].includes(info.orgId)
+              : [161000, 168000, 169000, 178000, 235000, 245000, 246000, 252000, 261000].includes(
+                    info.orgId,
+                  )
                 ? "jingyue"
                 : "unknown";
 
       try {
         connection = await getConnection();
-        await connection.execute(
-          "INSERT IGNORE INTO `org_id` (`orgId`, `org`) VALUES (?, ?)",
-          [info.orgId, info.org],
-        );
+        await connection.execute("INSERT IGNORE INTO `org_id` (`orgId`, `org`) VALUES (?, ?)", [
+          info.orgId,
+          info.org,
+        ]);
         await connection.execute(
           "INSERT IGNORE INTO `major_id` (`majorId`, `major`, `orgId`) VALUES (?, ?, ?)",
           [info.majorId, info.major, info.orgId],
@@ -260,7 +248,7 @@ export const getMyInfo = async (
       };
     }
 
-    return UnknownResponse("获取人员信息失败");
+    return unknownResponse("获取人员信息失败");
   } finally {
     releaseConnection(connection);
   }
@@ -271,12 +259,10 @@ export type MyInfoResponse =
   | MyLoginFailedResponse
   | CommonFailedResponse<ActionFailType.MissingCredential>;
 
-export const myInfoHandler = request<MyInfoResponse, AccountInfo>(
-  async (req, res) => {
-    const cookieHeader = req.headers.cookie!;
+export const myInfoHandler = request<MyInfoResponse, AccountInfo>(async (req, res) => {
+  const cookieHeader = req.headers.cookie!;
 
-    if (cookieHeader.includes("TEST")) return res.json(TEST_INFO_RESULT);
+  if (cookieHeader.includes("TEST")) return res.json(TEST_INFO_RESULT);
 
-    return res.json(await getMyInfo(cookieHeader));
-  },
-);
+  return res.json(await getMyInfo(cookieHeader));
+});

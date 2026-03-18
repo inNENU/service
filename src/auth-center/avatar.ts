@@ -36,9 +36,7 @@ const TEST_AVATAR_RESPONSE: AvatarSuccessResponse = {
   },
 };
 
-export const getAvatar = async (
-  cookieHeader: string,
-): Promise<AvatarResponse> => {
+export const getAvatar = async (cookieHeader: string): Promise<AvatarResponse> => {
   const response = await fetch(USER_CONF_URL, {
     method: "POST",
     headers: {
@@ -61,30 +59,26 @@ export const getAvatar = async (
   };
 };
 
-export const avatarHandler = request<AvatarResponse, AccountInfo>(
-  async (req, res) => {
-    const { id, password, authToken } = req.body;
+export const avatarHandler = request<AvatarResponse, AccountInfo>(async (req, res) => {
+  const { id, password, authToken } = req.body;
 
-    if (id && password && authToken) {
-      const result = await authCenterLogin({
-        id,
-        password,
-        authToken,
-      });
+  if (id && password && authToken) {
+    const result = await authCenterLogin({
+      id,
+      password,
+      authToken,
+    });
 
-      if (!result.success) return res.json(result);
+    if (!result.success) return res.json(result);
 
-      req.headers.cookie = result.cookieStore.getHeader(AUTH_INFO_PREFIX);
-    } else if (!req.headers.cookie) {
-      return MissingCredentialResponse;
-    }
+    req.headers.cookie = result.cookieStore.getHeader(AUTH_INFO_PREFIX);
+  } else if (!req.headers.cookie) {
+    return MissingCredentialResponse;
+  }
 
-    const cookieHeader = req.headers.cookie;
+  const cookieHeader = req.headers.cookie;
 
-    if (cookieHeader.includes("TEST")) {
-      return res.json(TEST_AVATAR_RESPONSE);
-    }
+  if (cookieHeader.includes("TEST")) return res.json(TEST_AVATAR_RESPONSE);
 
-    return res.json(await getAvatar(cookieHeader));
-  },
-);
+  return res.json(await getAvatar(cookieHeader));
+});

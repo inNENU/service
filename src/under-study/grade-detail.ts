@@ -2,7 +2,7 @@ import { EDGE_USER_AGENT_HEADERS, request } from "@/utils/index.js";
 
 import { UNDER_STUDY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ExpiredResponse, UnknownResponse } from "../config/index.js";
+import { ExpiredResponse, unknownResponse } from "../config/index.js";
 import type { CommonSuccessResponse, LoginOptions } from "../typings.js";
 
 export interface UnderGradeDetailOptions extends LoginOptions {
@@ -105,13 +105,9 @@ const getGradeDetail = ({
   return results;
 };
 
-export type UnderGradeDetailSuccessResponse = CommonSuccessResponse<
-  UnderScoreDetail[]
->;
+export type UnderGradeDetailSuccessResponse = CommonSuccessResponse<UnderScoreDetail[]>;
 
-export type UnderGradeDetailResponse =
-  | UnderGradeDetailSuccessResponse
-  | AuthLoginFailedResponse;
+export type UnderGradeDetailResponse = UnderGradeDetailSuccessResponse | AuthLoginFailedResponse;
 
 const UNDER_GRADE_DETAIL_RESPONSE: UnderGradeDetailSuccessResponse = {
   success: true,
@@ -144,20 +140,17 @@ export const getUnderGradeDetail = async (
     },
   });
 
-  if (response.headers.get("Content-Type")?.includes("text/html"))
-    return ExpiredResponse;
+  if (response.headers.get("Content-Type")?.includes("text/html")) return ExpiredResponse;
 
   const data = (await response.json()) as RawUnderGradeResult;
 
   if (data.code !== 0) {
     if (data.message === "尚未登录，请先登录") return ExpiredResponse;
 
-    return UnknownResponse(data.message);
+    return unknownResponse(data.message);
   }
 
-  const gradeDetail = getGradeDetail(
-    (data.data as RawUnderGradeDetailItem[])[0],
-  );
+  const gradeDetail = getGradeDetail((data.data as RawUnderGradeDetailItem[])[0]);
 
   return {
     success: true,
@@ -172,8 +165,7 @@ export const underStudyGradeDetailHandler = request<
   const { gradeCode } = req.body;
   const cookieHeader = req.headers.cookie!;
 
-  if (cookieHeader.includes("TEST"))
-    return res.json(UNDER_GRADE_DETAIL_RESPONSE);
+  if (cookieHeader.includes("TEST")) return res.json(UNDER_GRADE_DETAIL_RESPONSE);
 
   return res.json(await getUnderGradeDetail(cookieHeader, gradeCode));
 });

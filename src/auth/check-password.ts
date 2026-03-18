@@ -1,10 +1,7 @@
 import { authEncrypt } from "./encrypt.js";
 import { RESET_PREFIX, RESET_SALT } from "./utils.js";
-import { UnknownResponse } from "../config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-} from "../typings.js";
+import { unknownResponse } from "../config/index.js";
+import type { CommonFailedResponse, CommonSuccessResponse } from "../typings.js";
 
 export interface CheckPasswordOptions {
   type: "check-password";
@@ -25,13 +22,9 @@ interface RawCheckPasswordFailResponse {
   message: string;
 }
 
-type RawCheckPasswordResponse =
-  | RawCheckPasswordSuccessResponse
-  | RawCheckPasswordFailResponse;
+type RawCheckPasswordResponse = RawCheckPasswordSuccessResponse | RawCheckPasswordFailResponse;
 
-export type CheckPasswordResponse =
-  | CommonSuccessResponse
-  | CommonFailedResponse;
+export type CheckPasswordResponse = CommonSuccessResponse | CommonFailedResponse;
 
 export const checkPassword = async (
   { sign, password }: CheckPasswordOptions,
@@ -53,17 +46,13 @@ export const checkPassword = async (
 
   const data = (await response.json()) as RawCheckPasswordResponse;
 
-  if (data.code !== "0" || data.message !== "SUCCESS")
-    return UnknownResponse(data.message);
+  if (data.code !== "0" || data.message !== "SUCCESS") return unknownResponse(data.message);
 
-  const warnings = Object.entries(
-    (data as RawCheckPasswordSuccessResponse).datas.rules,
-  )
+  const warnings = Object.entries((data as RawCheckPasswordSuccessResponse).datas.rules)
     .filter(([, value]) => !value)
     .map(([key]) => key);
 
-  if (warnings.length > 0)
-    return UnknownResponse(`密码不满足要求: ${warnings.join(", ")}`);
+  if (warnings.length > 0) return unknownResponse(`密码不满足要求: ${warnings.join(", ")}`);
 
   return {
     success: true,

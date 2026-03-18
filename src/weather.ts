@@ -145,6 +145,8 @@ interface WeatherRawResponse {
  *
  * @param icon 天气代码
  * @param isDay 当前是否是白天
+ *
+ * @returns 天气代码
  */
 const getWeatherCode = (icon: string, isDay: boolean): string =>
   icon === "00" || icon === "01" || icon === "03" || icon === "13"
@@ -322,10 +324,7 @@ const getWeather = ({ air, alarm, ...data }: WeatherRawData): WeatherData => {
   const hints = [
     ...Object.entries(data.index)
       .filter(([id]) => id !== "time")
-      .map(([id, value]) => ({
-        id,
-        ...(value as { name: string; info: string; detail: string }),
-      })),
+      .map(([id, value]) => ({ id, ...(value as { name: string; info: string; detail: string }) })),
     {
       id: "tailnumber",
       name: "尾号限行",
@@ -337,22 +336,20 @@ const getWeather = ({ air, alarm, ...data }: WeatherRawData): WeatherData => {
   const hourForecast = Object.entries(data.forecast_1h)
     .sort(([keyA], [keyB]) => Number(keyA) - Number(keyB))
     .map(([, value]) => value)
-    .map(({ degree, update_time: updateTime, weather_code: weatherCode }) => {
-      const { sunrise, sunset } = rise.find(
-        (item) => item.time === updateTime.substring(0, 8),
-      )!;
-      const hour = Number(updateTime.substring(8, 10));
-      const sunriseHour = Number(sunrise.substring(0, 2));
-      const sunsetHour = Number(sunset.substring(0, 2));
+    .flatMap(({ degree, update_time: updateTime, weather_code: weatherCode }) => {
+      const { sunrise, sunset } = rise.find((item) => item.time === updateTime.slice(0, 8))!;
+      const hour = Number(updateTime.slice(8, 10));
+      const sunriseHour = Number(sunrise.slice(0, 2));
+      const sunsetHour = Number(sunset.slice(0, 2));
       const isDay = sunriseHour < hour && hour <= sunsetHour;
 
       const weather = {
         degree: `${degree}°`,
         weatherCode: getWeatherCode(weatherCode, isDay),
-        time: `${updateTime.substring(8, 10)}:${updateTime.substring(10, 12)}`,
+        time: `${updateTime.slice(8, 10)}:${updateTime.slice(10, 12)}`,
       };
 
-      if (hour === sunriseHour)
+      if (hour === sunriseHour) {
         return [
           weather,
           {
@@ -361,8 +358,9 @@ const getWeather = ({ air, alarm, ...data }: WeatherRawData): WeatherData => {
             time: sunrise,
           },
         ];
+      }
 
-      if (hour === sunsetHour)
+      if (hour === sunsetHour) {
         return [
           weather,
           {
@@ -371,10 +369,10 @@ const getWeather = ({ air, alarm, ...data }: WeatherRawData): WeatherData => {
             time: sunset,
           },
         ];
+      }
 
       return weather;
-    })
-    .flat();
+    });
 
   const dayForecast = Object.entries(data.forecast_24h)
     .sort(([keyA], [keyB]) => Number(keyA) - Number(keyB))
@@ -397,7 +395,7 @@ const getWeather = ({ air, alarm, ...data }: WeatherRawData): WeatherData => {
           time,
         },
       ]) => ({
-        date: `${time.substring(5, 7)}/${time.substring(8, 10)}`,
+        date: `${time.slice(5, 7)}/${time.slice(8, 10)}`,
         weekday:
           index === "0"
             ? "昨天"
@@ -439,13 +437,11 @@ const getWeather = ({ air, alarm, ...data }: WeatherRawData): WeatherData => {
       pm25: Number(pm25),
       so2: Number(so2),
     },
-    alarm: Object.entries(alarm).map(
-      ([, { detail, level_name: level, type_name: type }]) => ({
-        level,
-        type,
-        text: detail,
-      }),
-    ),
+    alarm: Object.entries(alarm).map(([, { detail, level_name: level, type_name: type }]) => ({
+      level,
+      type,
+      text: detail,
+    })),
     dayForecast,
     hourForecast,
     hints,
@@ -465,16 +461,14 @@ const getWeather = ({ air, alarm, ...data }: WeatherRawData): WeatherData => {
   };
 };
 
-export const weatherHandler = request<WeatherData, WeatherOptions>(
-  async (req, res) => {
-    const { province = "吉林", city = "长春", county = "南关" } = req.params;
+export const weatherHandler = request<WeatherData, WeatherOptions>(async (req, res) => {
+  const { province = "吉林", city = "长春", county = "南关" } = req.params;
 
-    const weather = await fetch(
-      `https://wis.qq.com/weather/common?source=pc&weather_type=observe|rise|air|forecast_1h|forecast_24h|index|alarm|limit|tips&province=${province}&city=${city}&county=${county}`,
-    );
+  const weather = await fetch(
+    `https://wis.qq.com/weather/common?source=pc&weather_type=observe|rise|air|forecast_1h|forecast_24h|index|alarm|limit|tips&province=${province}&city=${city}&county=${county}`,
+  );
 
-    const rawData = ((await weather.json()) as WeatherRawResponse).data;
+  const rawData = ((await weather.json()) as WeatherRawResponse).data;
 
-    return res.json(getWeather(rawData));
-  },
-);
+  return res.json(getWeather(rawData));
+});

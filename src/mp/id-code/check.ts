@@ -2,20 +2,15 @@ import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 
 import {
   ActionFailType,
-  DatabaseErrorResponse,
+  databaseErrorResponse,
   MissingArgResponse,
   MissingCredentialResponse,
   TEST_ID,
-  UnknownResponse,
+  unknownResponse,
 } from "@/config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse } from "@/typings.js";
 import type { WechatMpCodeError } from "@/utils/index.js";
-import {
-  getConnection,
-  getWechatMPCode,
-  releaseConnection,
-  request,
-} from "@/utils/index.js";
+import { getConnection, getWechatMPCode, releaseConnection, request } from "@/utils/index.js";
 
 import type { IDCodeData } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
@@ -50,8 +45,7 @@ export interface IdCodeInfo {
 }
 
 export type CheckIDCodeStatusSuccessResponse = CommonSuccessResponse<
-  | { existed: true; code: string; remark: string }
-  | { existed: false; verifier: string | null }
+  { existed: true; code: string; remark: string } | { existed: false; verifier: string | null }
 >;
 export type CheckIDCodeInfoSuccessResponse = CommonSuccessResponse<IdCodeInfo>;
 
@@ -77,8 +71,7 @@ export const checkIDCode = async ({
   let connection: PoolConnection | null = null;
 
   try {
-    if (id.toString() === TEST_ID)
-      return UnknownResponse("不支持为测试账号生成身份码");
+    if (id.toString() === TEST_ID) return unknownResponse("不支持为测试账号生成身份码");
 
     if (!authToken || !id) return MissingCredentialResponse;
     if (!appId) return MissingArgResponse("appId");
@@ -92,12 +85,13 @@ export const checkIDCode = async ({
       [id, authToken],
     );
 
-    if (!tokenRows.length)
+    if (!tokenRows.length) {
       return {
         success: false,
         type: ActionFailType.Expired,
         msg: "用户凭据已失效，无法校验身份码，请重新登录。\n提示: 为了保证身份码的可靠性，您只能在最后一次登录的设备校验身份码。",
       };
+    }
 
     let isAdmin = false;
 
@@ -120,7 +114,7 @@ export const checkIDCode = async ({
       );
 
       // if no id code exists
-      if (idCodeRows.length === 0)
+      if (idCodeRows.length === 0) {
         return {
           success: true,
           data: {
@@ -128,11 +122,12 @@ export const checkIDCode = async ({
             verifier: null,
           },
         };
+      }
 
       const row = idCodeRows[0] as IDCodeData;
 
       // already verified
-      if (row.verifyRemark)
+      if (row.verifyRemark) {
         return {
           success: true,
           data: {
@@ -140,6 +135,7 @@ export const checkIDCode = async ({
             verifier: row.verifyRemark,
           },
         };
+      }
 
       const result = await getWechatMPCode(
         appId,
@@ -158,7 +154,7 @@ export const checkIDCode = async ({
         };
       }
 
-      return UnknownResponse((result as WechatMpCodeError).errmsg);
+      return unknownResponse((result as WechatMpCodeError).errmsg);
     }
 
     // check whether uuid is valid
@@ -167,21 +163,23 @@ export const checkIDCode = async ({
       [uuid],
     );
 
-    if (idCodeRows.length === 0)
+    if (idCodeRows.length === 0) {
       return {
         success: false,
         type: ActionFailType.WrongInfo,
         msg: "无效的身份码",
       };
+    }
 
     const row = idCodeRows[0] as IDCodeData;
 
-    if (row.verifyId)
+    if (row.verifyId) {
       return {
         success: false,
         type: ActionFailType.Expired,
         msg: "身份码已被核验",
       };
+    }
 
     if (row.id === id) {
       return {
@@ -197,23 +195,19 @@ export const checkIDCode = async ({
       [row.id],
     );
 
-    if (!infoRows.length)
+    if (!infoRows.length) {
       return {
         success: false,
         type: ActionFailType.WrongInfo,
         msg: "用户信息不存在",
       };
+    }
 
     const info = infoRows[0] as MyInfo;
 
     await connection.execute(
       "UPDATE `id_code` SET `verifyId` = ?, `verifyTime` = FROM_UNIXTIME(?), `verifyRemark` = ? WHERE `uuid` = ?",
-      [
-        id,
-        Math.round(Date.now() / 1000),
-        isAdmin ? "管理员" : (remark ?? ""),
-        uuid,
-      ],
+      [id, Math.round(Date.now() / 1000), isAdmin ? "管理员" : (remark ?? ""), uuid],
     );
 
     return {
@@ -233,15 +227,12 @@ export const checkIDCode = async ({
   } catch (err) {
     console.error(err);
 
-    return DatabaseErrorResponse((err as Error).message);
+    return databaseErrorResponse((err as Error).message);
   } finally {
     releaseConnection(connection);
   }
 };
 
-export const checkIdCodeHandler = request<
-  CheckIDCodeInfoResponse,
-  CheckIDCodeOptions
->(async (req, res) => {
-  return res.json(await checkIDCode(req.body));
-});
+export const checkIdCodeHandler = request<CheckIDCodeInfoResponse, CheckIDCodeOptions>(
+  async (req, res) => res.json(await checkIDCode(req.body)),
+);

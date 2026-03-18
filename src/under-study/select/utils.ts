@@ -28,26 +28,20 @@ export const COURSE_CATEGORIES: SelectOptionConfig[] = [
   { name: "自然科学", value: "45" },
 ];
 
-export const getCourses = (
-  records: RawUnderSelectClassItem[],
-): UnderSelectCourseInfo[] =>
-  records.map(
-    ({ kcmc, jc, kcdlmc, kcflmc, kkyxmc, xf, zxs, kcbh, kcptdm }) => ({
-      name: kcmc,
-      shortType: jc,
-      type: kcdlmc,
-      category: kcflmc,
-      office: kkyxmc,
-      point: xf,
-      hours: zxs,
-      code: kcbh,
-      id: kcptdm,
-    }),
-  );
+export const getCourses = (records: RawUnderSelectClassItem[]): UnderSelectCourseInfo[] =>
+  records.map(({ kcmc, jc, kcdlmc, kcflmc, kkyxmc, xf, zxs, kcbh, kcptdm }) => ({
+    name: kcmc,
+    shortType: jc,
+    type: kcdlmc,
+    category: kcflmc,
+    office: kkyxmc,
+    point: xf,
+    hours: zxs,
+    code: kcbh,
+    id: kcptdm,
+  }));
 
-export const getClasses = (
-  records: RawUnderSelectClassItem[],
-): UnderSelectClassInfo[] =>
+export const getClasses = (records: RawUnderSelectClassItem[]): UnderSelectClassInfo[] =>
   records.map(
     ({
       kcmc: name,
@@ -70,9 +64,7 @@ export const getClasses = (
       jxbdm: classCode,
       kcrwdm: classId,
     }) => {
-      const classInfos = (
-        /^复制(.*)-1$/.exec(rawClassInfo)?.[1] ?? rawClassInfo
-      ).split(",");
+      const classInfos = (/^复制(.*)-1$/.exec(rawClassInfo)?.[1] ?? rawClassInfo).split(",");
 
       const isTarget = classInfos.every((info) => /^\d{4}.+$/.exec(info));
 

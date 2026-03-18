@@ -11,13 +11,9 @@ import {
   MissingCredentialResponse,
   TEST_ID_NUMBER,
   TEST_LOGIN_RESULT,
-  UnknownResponse,
+  unknownResponse,
 } from "../config/index.js";
-import type {
-  AccountInfo,
-  CommonFailedResponse,
-  LoginOptions,
-} from "../typings.js";
+import type { AccountInfo, CommonFailedResponse, LoginOptions } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 import { FORBIDDEN_URL, vpnCASLogin } from "../vpn/index.js";
 
@@ -26,9 +22,7 @@ export interface MyLoginSuccessResult {
   cookieStore: CookieStore;
 }
 
-export type MyLoginFailedResponse =
-  | AuthLoginFailedResponse
-  | VPNLoginFailedResponse;
+export type MyLoginFailedResponse = AuthLoginFailedResponse | VPNLoginFailedResponse;
 
 export type MyLoginResult = MyLoginSuccessResult | MyLoginFailedResponse;
 
@@ -67,7 +61,7 @@ export const myLogin = async (
   if (ticketResponse.status !== 302) {
     console.error("Login to my failed", ticketResponse.status);
 
-    return UnknownResponse("由于当前账户权限缺失，服务大厅登录失败。");
+    return unknownResponse("由于当前账户权限缺失，服务大厅登录失败。");
   }
 
   const sessionLocation = ticketResponse.headers.get("Location");
@@ -85,11 +79,12 @@ export const myLogin = async (
 
     const content = await mainResponse.text();
 
-    if (content.includes("<title>网上服务大厅</title>"))
+    if (content.includes("<title>网上服务大厅</title>")) {
       return {
         success: true,
         cookieStore,
       };
+    }
   }
 
   if (sessionLocation === FORBIDDEN_URL) {
@@ -102,7 +97,7 @@ export const myLogin = async (
 
   console.error("login to my failed", sessionLocation);
 
-  return UnknownResponse("登录失败");
+  return unknownResponse("登录失败");
 };
 
 export interface MyLoginSuccessResponse {
@@ -116,9 +111,7 @@ export const loginToMy = request<
   MyLoginResponse | CommonFailedResponse<ActionFailType.MissingCredential>,
   LoginOptions
 >(async (req, res, next) => {
-  if (!req.body) {
-    return res.json(MissingCredentialResponse);
-  }
+  if (!req.body) return res.json(MissingCredentialResponse);
 
   const { id, password, authToken } = req.body;
 
@@ -132,29 +125,23 @@ export const loginToMy = request<
     return res.json(MissingCredentialResponse);
   }
 
-  return next();
+  next();
 });
 
-export const myLoginHandler = request<MyLoginResponse, AccountInfo>(
-  async (req, res) => {
-    const result =
-      // fake result for testing
-      req.body.id === TEST_ID_NUMBER
-        ? TEST_LOGIN_RESULT
-        : await myLogin(req.body);
+export const myLoginHandler = request<MyLoginResponse, AccountInfo>(async (req, res) => {
+  const result =
+    // fake result for testing
+    req.body.id === TEST_ID_NUMBER ? TEST_LOGIN_RESULT : await myLogin(req.body);
 
-    if (result.success) {
-      const cookies = result.cookieStore
-        .getAllCookies()
-        .map((item) => item.toJSON());
+  if (result.success) {
+    const cookies = result.cookieStore.getAllCookies().map((item) => item.toJSON());
 
-      cookies.forEach(({ name, value, ...rest }) => {
-        res.cookie(name, value, rest);
-      });
+    cookies.forEach(({ name, value, ...rest }) => {
+      res.cookie(name, value, rest);
+    });
 
-      return res.json({ success: true, cookies });
-    }
+    return res.json({ success: true, cookies });
+  }
 
-    return res.json(result);
-  },
-);
+  return res.json(result);
+});

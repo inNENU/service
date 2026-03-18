@@ -9,11 +9,7 @@ import { morganMiddleware } from "./morgan.js";
 export const applyMiddleware = (app: Express): void => {
   app.use(
     cors({
-      origin: [
-        "https://servicewechat.com",
-        /^https:\/\/.*\.innenu\.com$/,
-        "https://innenu.com",
-      ],
+      origin: ["https://servicewechat.com", /^https:\/\/.*\.innenu\.com$/, "https://innenu.com"],
     }),
   );
   app.use(cookieParser());
@@ -26,7 +22,7 @@ export const applyMiddleware = (app: Express): void => {
     const originalJson = res.json;
 
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-    res.json = function (body) {
+    res.json = function json(body) {
       // @ts-expect-error: Express type issue
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       res.body = body;

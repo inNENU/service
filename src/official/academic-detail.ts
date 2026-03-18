@@ -5,14 +5,10 @@ import { isValidPathname, request } from "@/utils/index.js";
 
 import { OFFICIAL_URL, getOfficialPageView } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
-import { MissingArgResponse, UnknownResponse } from "../config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-} from "../typings.js";
+import { MissingArgResponse, unknownResponse } from "../config/index.js";
+import type { CommonFailedResponse, CommonSuccessResponse } from "../typings.js";
 
-const INFO_REGEXP =
-  /<div class="ar_tit">\s*<h3>([^>]+)<\/h3>\s*<h6>([^]+?)<\/h6>/;
+const INFO_REGEXP = /<div class="ar_tit">\s*<h3>([^>]+)<\/h3>\s*<h6>([^]+?)<\/h6>/;
 const CONTENT_REGEXP =
   /<div class="v_news_content">([^]+?)<\/div>\s*<\/div>\s*<div id="div_vote_id">/;
 const TIME_REGEXP = /<span>发布时间：([^<]*)<\/span>/;
@@ -34,23 +30,20 @@ export interface OfficialAcademicData {
   content: RichTextNode[];
 }
 
-export type OfficialAcademicDetailSuccessResponse =
-  CommonSuccessResponse<OfficialAcademicData>;
+export type OfficialAcademicDetailSuccessResponse = CommonSuccessResponse<OfficialAcademicData>;
 
 export type OfficialAcademicDetailResponse =
   | OfficialAcademicDetailSuccessResponse
   | CommonFailedResponse<ActionFailType.MissingArg | ActionFailType.Unknown>;
 
-export const getAcademicDetail = async (
-  url: string,
-): Promise<OfficialAcademicDetailResponse> => {
+export const getAcademicDetail = async (url: string): Promise<OfficialAcademicDetailResponse> => {
   if (!url) return MissingArgResponse("url");
 
-  if (!isValidPathname(url)) return UnknownResponse("url参数不合法");
+  if (!isValidPathname(url)) return unknownResponse("url参数不合法");
 
   const response = await fetch(`${OFFICIAL_URL}/${url}`);
 
-  if (response.status !== 200) return UnknownResponse("请求失败");
+  if (response.status !== 200) return unknownResponse("请求失败");
 
   const text = await response.text();
 
@@ -96,6 +89,4 @@ export const officialAcademicDetailHandler = request<
   OfficialAcademicDetailResponse,
   OfficialAcademicDetailOptions,
   OfficialAcademicDetailOptions
->(async (req, res) => {
-  return res.json(await getAcademicDetail(req.query.url || req.body.url));
-});
+>(async (req, res) => res.json(await getAcademicDetail(req.query.url || req.body.url)));

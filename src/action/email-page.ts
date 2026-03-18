@@ -2,7 +2,7 @@ import { request } from "@/utils/index.js";
 
 import { ACTION_MAIN_PAGE, ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ExpiredResponse, UnknownResponse } from "../config/index.js";
+import { ExpiredResponse, unknownResponse } from "../config/index.js";
 import type { CommonSuccessResponse, LoginOptions } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 
@@ -50,13 +50,11 @@ export const getEmailPage = async (
     redirect: "manual",
   });
 
-  if (response.status === 302) {
-    return ExpiredResponse;
-  }
+  if (response.status === 302) return ExpiredResponse;
 
   const result = (await response.json()) as RawEmailPageResponse;
 
-  if (!result.success) return UnknownResponse("获取邮件页面失败");
+  if (!result.success) return unknownResponse("获取邮件页面失败");
 
   return {
     success: true,

@@ -3,16 +3,8 @@ import { request } from "@/utils/index.js";
 import { getOAInfo } from "./info.js";
 import type { OALoginFailedResponse } from "./login.js";
 import { OA_WEB_VPN_SERVER } from "./utils.js";
-import {
-  ActionFailType,
-  InvalidArgResponse,
-  UnknownResponse,
-} from "../config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-  LoginOptions,
-} from "../typings.js";
+import { ActionFailType, InvalidArgResponse, unknownResponse } from "../config/index.js";
+import type { CommonFailedResponse, CommonSuccessResponse, LoginOptions } from "../typings.js";
 
 const WORKFLOW_ID = 8021;
 
@@ -57,8 +49,7 @@ export const checkMailBox = async (
     },
   );
 
-  const checkMailBoxData =
-    (await checkMailBoxResponse.json()) as RawCheckEmailData;
+  const checkMailBoxData = (await checkMailBoxResponse.json()) as RawCheckEmailData;
 
   if (checkMailBoxData.result === "1" && "mailname" in checkMailBoxData) {
     return {
@@ -76,7 +67,7 @@ export const checkMailBox = async (
 
   console.log("Check mailbox result:", checkMailBoxData);
 
-  return UnknownResponse(
+  return unknownResponse(
     "errmessage" in checkMailBoxData ? checkMailBoxData.errmessage : "无法申请",
   );
 };
@@ -90,9 +81,7 @@ interface RawCheckEmailAccountFailData {
   errmessage: string;
 }
 
-type RawCheckEmailAccountData =
-  | RawCheckEmailAccountSuccessData
-  | RawCheckEmailAccountFailData;
+type RawCheckEmailAccountData = RawCheckEmailAccountSuccessData | RawCheckEmailAccountFailData;
 
 export const checkMailBoxAccount = async (
   cookieHeader: string,
@@ -126,10 +115,8 @@ export const checkMailBoxAccount = async (
 
   console.log("Check mailbox account result:", checkMailBoxAccountData);
 
-  return UnknownResponse(
-    "errmessage" in checkMailBoxAccountData
-      ? checkMailBoxAccountData.errmessage
-      : "无法申请",
+  return unknownResponse(
+    "errmessage" in checkMailBoxAccountData ? checkMailBoxAccountData.errmessage : "无法申请",
   );
 };
 
@@ -150,17 +137,12 @@ export type CheckEmailResponse =
   | OALoginFailedResponse
   | CommonFailedResponse<ActionFailType.Existed>;
 
-export const checkEmail = async (
-  cookieHeader: string,
-): Promise<CheckEmailResponse> => {
+export const checkEmail = async (cookieHeader: string): Promise<CheckEmailResponse> => {
   const infoResult = await getOAInfo(cookieHeader);
 
   if (!infoResult.success) return infoResult;
 
-  const checkEmailBoxResult = await checkMailBox(
-    cookieHeader,
-    infoResult.data.id,
-  );
+  const checkEmailBoxResult = await checkMailBox(cookieHeader, infoResult.data.id);
 
   if (!checkEmailBoxResult.success) return checkEmailBoxResult;
 
@@ -215,10 +197,7 @@ export const applyEmail = async (
 
     if (!checkEmailBoxResult.success) return checkEmailBoxResult;
 
-    const checkMailBoxAccountResult = await checkMailBoxAccount(
-      cookieHeader,
-      account,
-    );
+    const checkMailBoxAccountResult = await checkMailBoxAccount(cookieHeader, account);
 
     if (!checkMailBoxAccountResult.success) return checkMailBoxAccountResult;
 
@@ -244,8 +223,7 @@ export const applyEmail = async (
     } & Record<string, unknown>;
 
     const data = {
-      existChangeRange:
-        "field19443,field19453,field19449,field19450,field19445",
+      existChangeRange: "field19443,field19453,field19449,field19450,field19445",
       requestname: "个人邮箱申请",
       requestlevel: "0",
       field19446: "1",
@@ -293,10 +271,7 @@ export const applyEmail = async (
       },
       body: new URLSearchParams(
         Object.fromEntries(
-          Object.entries(applyResetBody).map(([key, value]) => [
-            key,
-            value.toString(),
-          ]),
+          Object.entries(applyResetBody).map(([key, value]) => [key, value.toString()]),
         ),
       ),
     });
@@ -321,10 +296,7 @@ export const applyEmail = async (
       },
       body: new URLSearchParams(
         Object.fromEntries(
-          Object.entries(applyBody).map(([key, value]) => [
-            key,
-            value.toString(),
-          ]),
+          Object.entries(applyBody).map(([key, value]) => [key, value.toString()]),
         ),
       ),
     });
@@ -340,7 +312,7 @@ export const applyEmail = async (
       }[];
     };
 
-    if (!applyEmailData.result.allPass) return UnknownResponse("校验不通过");
+    if (!applyEmailData.result.allPass) return unknownResponse("校验不通过");
 
     const operationBody = {
       ...formData.submitParams,
@@ -373,19 +345,13 @@ export const applyEmail = async (
         },
         body: new URLSearchParams(
           Object.fromEntries(
-            Object.entries(operationBody).map(([key, value]) => [
-              key,
-              value.toString(),
-            ]),
+            Object.entries(operationBody).map(([key, value]) => [key, value.toString()]),
           ),
         ),
       },
     );
 
-    const operationData = (await operationResponse.json()) as Record<
-      string,
-      string
-    >;
+    const operationData = (await operationResponse.json()) as Record<string, string>;
 
     return {
       success: applyEmailData.result.allPass,
@@ -394,14 +360,12 @@ export const applyEmail = async (
   } catch (err) {
     console.error(err);
 
-    return UnknownResponse("未知错误");
+    return unknownResponse("未知错误");
   }
 };
 
 export const emailApplyHandler = request<
-  | CheckEmailResponse
-  | ApplyEmailResponse
-  | CommonFailedResponse<ActionFailType.InvalidArg>,
+  CheckEmailResponse | ApplyEmailResponse | CommonFailedResponse<ActionFailType.InvalidArg>,
   CheckEmailOptions | ApplyEmailOptions
 >(async (req, res) => {
   const cookieHeader = req.headers.cookie!;
@@ -409,17 +373,13 @@ export const emailApplyHandler = request<
 
   if (type === "init") {
     if (cookieHeader.includes("TEST")) {
-      return res.json(
-        UnknownResponse("您已有邮箱 test@nenu.edu.cn，请勿重复申请！"),
-      );
+      return res.json(unknownResponse("您已有邮箱 test@nenu.edu.cn，请勿重复申请！"));
     }
 
     return res.json(await checkEmail(cookieHeader));
   }
 
-  if (type === "apply") {
-    return res.json(await applyEmail(cookieHeader, req.body));
-  }
+  if (type === "apply") return res.json(await applyEmail(cookieHeader, req.body));
 
   return res.json(InvalidArgResponse("type"));
 });

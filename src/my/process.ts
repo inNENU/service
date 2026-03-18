@@ -1,6 +1,6 @@
 import { MY_MAIN_PAGE, MY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ExpiredResponse, UnknownResponse } from "../config/index.js";
+import { ExpiredResponse, unknownResponse } from "../config/index.js";
 
 interface RawProcessResult {
   success: boolean;
@@ -58,5 +58,5 @@ export const getProcess = async (
     };
   }
 
-  return UnknownResponse("获取流程信息失败");
+  return unknownResponse("获取流程信息失败");
 };

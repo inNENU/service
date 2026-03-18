@@ -1,9 +1,5 @@
 import type { ActionFailType } from "@/config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-  LoginOptions,
-} from "@/typings.js";
+import type { CommonFailedResponse, CommonSuccessResponse, LoginOptions } from "@/typings.js";
 import { EDGE_USER_AGENT_HEADERS } from "@/utils/index.js";
 
 import { UNDER_STUDY_SERVER } from "../utils.js";
@@ -63,30 +59,25 @@ const getCourseInfo = (html: string): UnderCourseCommentaryInfo => {
       .map(([, key, value]) => [key, value]),
   );
 
-  const questions = Array.from(html.matchAll(OPTIONS_REGEXP)).map(
-    ([, txdm, zbdm, title, ...items]) => {
-      const optionNumber = items.length / 4;
+  const questions = [...html.matchAll(OPTIONS_REGEXP)].map(([, txdm, zbdm, title, ...items]) => {
+    const optionNumber = items.length / 4;
 
-      return {
-        txdm,
-        zbdm,
-        title,
-        options: new Array(optionNumber).fill(null).map((_, index) => {
-          const [name, value, score, text] = items.slice(
-            index * 4,
-            index * 4 + 4,
-          );
+    return {
+      txdm,
+      zbdm,
+      title,
+      options: new Array(optionNumber).fill(null).map((_, index) => {
+        const [name, value, score, text] = items.slice(index * 4, index * 4 + 4);
 
-          return {
-            name,
-            value,
-            score: Number(score),
-            text,
-          };
-        }),
-      };
-    },
-  );
+        return {
+          name,
+          value,
+          score: Number(score),
+          text,
+        };
+      }),
+    };
+  });
 
   const [, txdm, zbdm, title, name] = TEXT_REGEXP.exec(html)!;
 

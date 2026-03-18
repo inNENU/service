@@ -2,7 +2,7 @@ import { request } from "@/utils/index.js";
 
 import type { OALoginFailedResponse } from "./login.js";
 import { OA_WEB_VPN_SERVER } from "./utils.js";
-import { UnknownResponse } from "../config/index.js";
+import { unknownResponse } from "../config/index.js";
 import type { CommonSuccessResponse } from "../typings.js";
 
 interface RawOAInfoData {
@@ -57,9 +57,7 @@ export const TEST_OA_INFO: OAInfoSuccessResponse = {
   },
 };
 
-export const getOAInfo = async (
-  cookieHeader: string,
-): Promise<OAInfoResponse> => {
+export const getOAInfo = async (cookieHeader: string): Promise<OAInfoResponse> => {
   const ecodeResponse = await fetch(`${OA_WEB_VPN_SERVER}/api/ecode/sync`, {
     headers: {
       Accept: "application/json, text/javascript, */*; q=0.01",
@@ -75,11 +73,10 @@ export const getOAInfo = async (
   if (!ecodeData.status || !("_user" in ecodeData._data)) {
     console.error("获取 OA 信息失败", ecodeData);
 
-    return UnknownResponse("获取 OA 信息失败");
+    return unknownResponse("获取 OA 信息失败");
   }
 
-  const { id, loginId, resourceName, departmentName, departmentId } =
-    ecodeData._data._user;
+  const { id, loginId, resourceName, departmentName, departmentId } = ecodeData._data._user;
 
   return {
     success: true,

@@ -1,10 +1,6 @@
 import type { ActionFailType } from "@/config/index.js";
-import { ExpiredResponse, UnknownResponse } from "@/config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-  LoginOptions,
-} from "@/typings.js";
+import { ExpiredResponse, unknownResponse } from "@/config/index.js";
+import type { CommonFailedResponse, CommonSuccessResponse, LoginOptions } from "@/typings.js";
 import { EDGE_USER_AGENT_HEADERS } from "@/utils/index.js";
 
 import type { RawUnderCourseCommentaryFailResult } from "./utils.js";
@@ -14,12 +10,9 @@ import { UNDER_STUDY_SERVER } from "../utils.js";
 const MAIN_URL = `${UNDER_STUDY_SERVER}/new/student/teapj`;
 const LIST_URL = `${UNDER_STUDY_SERVER}/new/student/teapj/pjDatas`;
 
-const SELECTED_OPTION_REG =
-  /<option value='([^']*?)' selected>([^<]*?)<\/option>/;
+const SELECTED_OPTION_REG = /<option value='([^']*?)' selected>([^<]*?)<\/option>/;
 
-const getCurrentTime = async (
-  cookieHeader: string,
-): Promise<{ time: string; value: string }> => {
+const getCurrentTime = async (cookieHeader: string): Promise<{ time: string; value: string }> => {
   const response = await fetch(MAIN_URL, {
     headers: {
       Cookie: cookieHeader,
@@ -138,9 +131,7 @@ export type UnderCourseCommentaryListResponse =
   | UnderCourseCommentaryListSuccessResponse
   | AuthLoginFailedResponse
   | CommonFailedResponse<
-      | ActionFailType.Expired
-      | ActionFailType.MissingCredential
-      | ActionFailType.Unknown
+      ActionFailType.Expired | ActionFailType.MissingCredential | ActionFailType.Unknown
     >;
 
 export const UNDER_COURSE_COMMENTARY_LIST_TEST_RESPONSE: UnderCourseCommentaryListSuccessResponse =
@@ -185,15 +176,14 @@ export const listUnderCourseCommentary = async (
     }),
   });
 
-  if (response.headers.get("Content-Type")?.includes("text/html"))
-    return ExpiredResponse;
+  if (response.headers.get("Content-Type")?.includes("text/html")) return ExpiredResponse;
 
   const data = (await response.json()) as RawUnderCourseCommentaryListResult;
 
   if ("code" in data) {
     if (data.message === "尚未登录，请先登录") return ExpiredResponse;
 
-    return UnknownResponse(data.message);
+    return unknownResponse(data.message);
   }
 
   return {

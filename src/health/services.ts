@@ -47,7 +47,7 @@ async function checkServiceHealth(
       responseTime,
       error: response.ok ? undefined : `HTTP ${response.status}`,
     };
-  } catch (error) {
+  } catch (err) {
     const responseTime = Date.now() - startTime;
 
     return {
@@ -55,7 +55,7 @@ async function checkServiceHealth(
       url,
       healthy: false,
       responseTime,
-      error: (error as Error).message,
+      error: (err as Error).message,
     };
   }
 }
@@ -118,9 +118,7 @@ export const checkGradEnrollmentHealth = (): Promise<ServiceHealthStatus> =>
  * 执行所有服务的健康检查
  * 注意：这是一个重型操作，建议配合速率限制使用
  */
-export const checkAllServicesHealth = async (): Promise<
-  ServiceHealthStatus[]
-> => {
+export const checkAllServicesHealth = async (): Promise<ServiceHealthStatus[]> => {
   console.info("开始执行全服务健康检查...");
   const startTime = Date.now();
 
@@ -139,29 +137,27 @@ export const checkAllServicesHealth = async (): Promise<
 
   const results = await Promise.allSettled(healthChecks);
   const healthStatuses = results.map((result, index) => {
-    if (result.status === "fulfilled") {
-      return result.value;
-    } else {
-      // 如果健康检查本身出错，返回一个错误状态
-      const serviceNames = [
-        "统一认证服务",
-        "研究生系统",
-        "本科教学系统",
-        "OA办公系统",
-        "个人门户",
-        "学校官网",
-        "图书馆系统",
-        "本科招生查询",
-        "研究生招生",
-      ];
+    if (result.status === "fulfilled") return result.value;
 
-      return {
-        name: serviceNames[index] || "未知服务",
-        url: "unknown",
-        healthy: false,
-        error: (result.reason as Error)?.message ?? "健康检查失败",
-      };
-    }
+    // 如果健康检查本身出错，返回一个错误状态
+    const serviceNames = [
+      "统一认证服务",
+      "研究生系统",
+      "本科教学系统",
+      "OA办公系统",
+      "个人门户",
+      "学校官网",
+      "图书馆系统",
+      "本科招生查询",
+      "研究生招生",
+    ];
+
+    return {
+      name: serviceNames[index] || "未知服务",
+      url: "unknown",
+      healthy: false,
+      error: (result.reason as Error)?.message ?? "健康检查失败",
+    };
   });
 
   const totalTime = Date.now() - startTime;

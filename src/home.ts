@@ -2,6 +2,7 @@ import { request } from "./utils/index.js";
 
 const startupDate = new Date().toLocaleDateString("zh");
 
+// oxlint-disable-next-line max-lines-per-function
 export const homeHandler = request((_req, res) => {
   res.header("Content-Type", "text/html");
   res.send(`\
