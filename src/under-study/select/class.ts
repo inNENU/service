@@ -1,5 +1,5 @@
 import type { ActionFailType } from "@/config/index.js";
-import { ExpiredResponse, MissingArgResponse } from "@/config/index.js";
+import { ExpiredResponse, missingArgResponse } from "@/config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse, LoginOptions } from "@/typings.js";
 import { EDGE_USER_AGENT_HEADERS, request } from "@/utils/index.js";
 
@@ -62,8 +62,8 @@ export const underSelectClassHandler = request<UnderSelectClassResponse, UnderSe
     const cookieHeader = req.headers.cookie!;
     const { link, courseId } = req.body;
 
-    if (!link) return res.json(MissingArgResponse("link"));
-    if (!courseId) return res.json(MissingArgResponse("courseId"));
+    if (!link) return res.json(missingArgResponse("link"));
+    if (!courseId) return res.json(missingArgResponse("courseId"));
 
     return res.json(await getUnderSelectClasses(link, courseId, cookieHeader));
   },

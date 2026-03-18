@@ -33,7 +33,7 @@ export const databaseErrorResponse = (
   msg,
 });
 
-export const MissingArgResponse = (
+export const missingArgResponse = (
   name = "必要",
 ): CommonFailedResponse<ActionFailType.MissingArg> => ({
   success: false,

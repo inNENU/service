@@ -1,6 +1,6 @@
 import {
   ActionFailType,
-  MissingArgResponse,
+  missingArgResponse,
   MissingCredentialResponse,
   unknownResponse,
 } from "@/config/index.js";
@@ -106,7 +106,7 @@ export const startReAuthHandler = request<ReAuthSMSResponse, EmptyObject, { id: 
     const { id } = req.query;
 
     if (!cookieHeader) return MissingCredentialResponse;
-    if (!id) return MissingArgResponse("id");
+    if (!id) return missingArgResponse("id");
 
     return res.json(await sendReAuthSMS(cookieHeader, id));
   },

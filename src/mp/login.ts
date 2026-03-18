@@ -5,7 +5,7 @@ import { getConnection, releaseConnection, request } from "@/utils/index.js";
 import type { ActionFailType } from "../config/index.js";
 import {
   databaseErrorResponse,
-  MissingArgResponse,
+  missingArgResponse,
   unknownResponse,
   appIdInfo,
   donutAppIdInfo,
@@ -64,15 +64,15 @@ export const mpLoginHandler = request<MPLoginResponse, MPLoginOptions>(async (re
     let openid = "";
 
     if ("openid" in req.body) {
-      if (!req.body.openid) return res.json(MissingArgResponse("openid"));
+      if (!req.body.openid) return res.json(missingArgResponse("openid"));
 
       ({ openid } = req.body);
     } else {
       const { env, appId, code } = req.body;
 
-      if (!env) return res.json(MissingArgResponse("env"));
-      if (!appId) return res.json(MissingArgResponse("appId"));
-      if (!code) return res.json(MissingArgResponse("code"));
+      if (!env) return res.json(missingArgResponse("env"));
+      if (!appId) return res.json(missingArgResponse("appId"));
+      if (!code) return res.json(missingArgResponse("code"));
 
       if (env === "wx") {
         const url = `https://api.weixin.qq.com/sns/jscode2session?appid=${appId}&secret=${

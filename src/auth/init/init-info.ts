@@ -1,7 +1,7 @@
 import { CookieStore } from "@mptool/net";
 
 import type { ActionFailType } from "@/config/index.js";
-import { MissingArgResponse, TEST_COOKIE_STORE, TEST_ID } from "@/config/index.js";
+import { missingArgResponse, TEST_COOKIE_STORE, TEST_ID } from "@/config/index.js";
 import type { CommonFailedResponse, EmptyObject } from "@/typings.js";
 import { request } from "@/utils/index.js";
 
@@ -118,7 +118,7 @@ export const authInitInfoHandler = request<AuthInitInfoResponse, EmptyObject, { 
   async (req, res) => {
     const { id } = req.query;
 
-    if (!id) return res.json(MissingArgResponse("id"));
+    if (!id) return res.json(missingArgResponse("id"));
 
     const result =
       // Note: Return fake result for testing

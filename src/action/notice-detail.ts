@@ -6,7 +6,7 @@ import { request } from "@/utils/index.js";
 import { ACTION_SERVER, INFO_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type { ActionFailType } from "../config/index.js";
-import { ExpiredResponse, MissingArgResponse } from "../config/index.js";
+import { ExpiredResponse, missingArgResponse } from "../config/index.js";
 import { MY_SERVER } from "../my/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse, LoginOptions } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
@@ -218,7 +218,7 @@ export const getNoticeDetailByUrl = async (
 export const noticeHandler = request<NoticeResponse, NoticeOptions>(async (req, res) => {
   const { noticeUrl, noticeID } = req.body;
 
-  if (!noticeUrl && !noticeID) return res.json(MissingArgResponse("公告链接或公告ID"));
+  if (!noticeUrl && !noticeID) return res.json(missingArgResponse("公告链接或公告ID"));
 
   const cookieHeader = req.headers.cookie!;
 

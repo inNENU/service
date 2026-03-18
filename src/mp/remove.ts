@@ -5,7 +5,7 @@ import { getConnection, releaseConnection, request } from "@/utils/index.js";
 import type { ActionFailType } from "../config/index.js";
 import {
   // databaseErrorResponse,
-  MissingArgResponse,
+  missingArgResponse,
   MissingCredentialResponse,
   WrongPasswordResponse,
 } from "../config/index.js";
@@ -34,7 +34,7 @@ export const mpRemoveHandler = request<MpRemoveResponse, MpRemoveOptions>(async 
     const { appId, id, authToken } = req.body;
 
     if (!authToken || !id) return res.json(MissingCredentialResponse);
-    if (!appId) return res.json(MissingArgResponse("appId"));
+    if (!appId) return res.json(missingArgResponse("appId"));
 
     connection = await getConnection();
 

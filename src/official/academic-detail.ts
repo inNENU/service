@@ -5,7 +5,7 @@ import { isValidPathname, request } from "@/utils/index.js";
 
 import { OFFICIAL_URL, getOfficialPageView } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
-import { MissingArgResponse, unknownResponse } from "../config/index.js";
+import { missingArgResponse, unknownResponse } from "../config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse } from "../typings.js";
 
 const INFO_REGEXP = /<div class="ar_tit">\s*<h3>([^>]+)<\/h3>\s*<h6>([^]+?)<\/h6>/;
@@ -37,7 +37,7 @@ export type OfficialAcademicDetailResponse =
   | CommonFailedResponse<ActionFailType.MissingArg | ActionFailType.Unknown>;
 
 export const getAcademicDetail = async (url: string): Promise<OfficialAcademicDetailResponse> => {
-  if (!url) return MissingArgResponse("url");
+  if (!url) return missingArgResponse("url");
 
   if (!isValidPathname(url)) return unknownResponse("url参数不合法");
 

@@ -2,7 +2,7 @@ import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 
 import {
   ActionFailType,
-  MissingArgResponse,
+  missingArgResponse,
   MissingCredentialResponse,
   TEST_ID,
   unknownResponse,
@@ -56,7 +56,7 @@ export const generateIdCode = async ({
     if (id.toString() === TEST_ID) return unknownResponse("不支持为测试账号生成身份码");
 
     if (!authToken || !id) return MissingCredentialResponse;
-    if (!appId) return MissingArgResponse("appId");
+    if (!appId) return missingArgResponse("appId");
 
     let existed = false;
     let uuid: string | null = null;
@@ -104,7 +104,7 @@ export const generateIdCode = async ({
     // generate new uuid
     else {
       // remark must be provided
-      if (!remark) return MissingArgResponse("remark");
+      if (!remark) return missingArgResponse("remark");
 
       uuid = getShortUUID();
 

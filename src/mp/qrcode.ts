@@ -4,7 +4,7 @@ import type { WechatMpCodeError } from "@/utils/index.js";
 import { getWechatMPCode, request } from "@/utils/index.js";
 
 import type { ActionFailType } from "../config/index.js";
-import { MissingArgResponse, unknownResponse, appIdInfo } from "../config/index.js";
+import { missingArgResponse, unknownResponse, appIdInfo } from "../config/index.js";
 import type { CommonFailedResponse } from "../typings.js";
 
 export interface WechatMpCodeOptions {
@@ -40,7 +40,7 @@ export const mpQrCodeHandler = request<MpCodeResponse, MpCodeOptions, MpCodeOpti
 
     const { appId, page } = options;
 
-    if (!appIdInfo[appId]) return res.json(MissingArgResponse("appId"));
+    if (!appIdInfo[appId]) return res.json(missingArgResponse("appId"));
 
     // This is a Wechat Mini Program
     if ("scene" in options) {

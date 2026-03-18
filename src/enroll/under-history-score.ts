@@ -1,7 +1,7 @@
 import { request } from "@/utils/index.js";
 
 import type { ActionFailType } from "../config/index.js";
-import { InvalidArgResponse, MissingArgResponse } from "../config/index.js";
+import { InvalidArgResponse, missingArgResponse } from "../config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse } from "../typings.js";
 
 export interface UnderHistoryScoreInfoOptions {
@@ -136,13 +136,13 @@ export const queryUnderHistoryScore = async ({
   classType,
   majorType,
 }: UnderHistoryScoreQueryOptions): Promise<UnderHistoryScoreQueryResponse> => {
-  if (!province) return MissingArgResponse("province");
+  if (!province) return missingArgResponse("province");
 
-  if (!year) return MissingArgResponse("year");
+  if (!year) return missingArgResponse("year");
 
-  if (!classType) return MissingArgResponse("classType");
+  if (!classType) return missingArgResponse("classType");
 
-  if (!majorType) return MissingArgResponse("majorType");
+  if (!majorType) return missingArgResponse("majorType");
 
   const queryResponse = await fetch(`https://gkcx.nenu.edu.cn/api/user/queryScore`, {
     method: "POST",

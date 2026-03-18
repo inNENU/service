@@ -2,7 +2,7 @@ import {
   ActionFailType,
   ExpiredResponse,
   InvalidArgResponse,
-  MissingArgResponse,
+  missingArgResponse,
   unknownResponse,
 } from "@/config/index.js";
 import type { CommonFailedResponse, LoginOptions } from "@/typings.js";
@@ -199,8 +199,8 @@ export const underSelectProcessHandler = request<
 
   const cookieHeader = req.headers.cookie!;
 
-  if (!link) return res.json(MissingArgResponse("link"));
-  if (!classId) return res.json(MissingArgResponse("classId"));
+  if (!link) return res.json(missingArgResponse("link"));
+  if (!classId) return res.json(missingArgResponse("classId"));
 
   if (type === "add") return res.json(await addUnderSelectCourse(req.body, cookieHeader));
 

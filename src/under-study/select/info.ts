@@ -1,7 +1,7 @@
 import {
   ActionFailType,
   ExpiredResponse,
-  MissingArgResponse,
+  missingArgResponse,
   unknownResponse,
 } from "@/config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse, LoginOptions } from "@/typings.js";
@@ -322,7 +322,7 @@ export const underStudySelectInfoHandler = request<UnderSelectInfoResponse, Unde
     const cookieHeader = req.headers.cookie!;
     const { link } = req.body;
 
-    if (!link) return res.json(MissingArgResponse("link"));
+    if (!link) return res.json(missingArgResponse("link"));
 
     if (cookieHeader.includes("TEST")) {
       return res.json(unknownResponse("因子系统逻辑复杂，测试账号暂不提供选课操作模拟"));

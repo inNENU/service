@@ -1,7 +1,7 @@
 import { request } from "@/utils/index.js";
 
 import type { ActionFailType } from "../config/index.js";
-import { InvalidArgResponse, MissingArgResponse } from "../config/index.js";
+import { InvalidArgResponse, missingArgResponse } from "../config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse } from "../typings.js";
 
 export interface UnderEnrollPlanInfoOptions {
@@ -104,10 +104,10 @@ export const queryUnderEnrollPlan = async ({
   classType,
   majorType,
 }: UnderEnrollPlanQueryOptions): Promise<UnderEnrollPlanQueryResponse> => {
-  if (!province) return MissingArgResponse("province");
-  if (!year) return MissingArgResponse("year");
-  if (!classType) return MissingArgResponse("classType");
-  if (!majorType) return MissingArgResponse("majorType");
+  if (!province) return missingArgResponse("province");
+  if (!year) return missingArgResponse("year");
+  if (!classType) return missingArgResponse("classType");
+  if (!majorType) return missingArgResponse("majorType");
 
   const queryResponse = await fetch(`https://gkcx.nenu.edu.cn/api/user/queryPlan`, {
     method: "POST",

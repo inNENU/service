@@ -3,7 +3,7 @@ import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 import {
   ActionFailType,
   databaseErrorResponse,
-  MissingArgResponse,
+  missingArgResponse,
   MissingCredentialResponse,
   TEST_ID,
   unknownResponse,
@@ -74,8 +74,8 @@ export const checkIDCode = async ({
     if (id.toString() === TEST_ID) return unknownResponse("不支持为测试账号生成身份码");
 
     if (!authToken || !id) return MissingCredentialResponse;
-    if (!appId) return MissingArgResponse("appId");
-    if (!openid) return MissingArgResponse("openid");
+    if (!appId) return missingArgResponse("appId");
+    if (!openid) return missingArgResponse("openid");
 
     connection = await getConnection();
 

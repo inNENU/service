@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { InvalidArgResponse, MissingArgResponse } from "@/config/index.js";
+import { InvalidArgResponse, missingArgResponse } from "@/config/index.js";
 import type { EmptyObject } from "@/typings.js";
 
 import type { GetUnderCourseCommentaryOptions } from "./get.js";
@@ -36,7 +36,7 @@ export const underStudyCourseCommentaryHandler: RequestHandler<
 
     if (cookieHeader.includes("TEST")) return res.json(UNDER_COURSE_COMMENTARY_VIEW_TEST_RESPONSE);
 
-    if (!commentaryCode) return res.json(MissingArgResponse("commentaryCode"));
+    if (!commentaryCode) return res.json(missingArgResponse("commentaryCode"));
 
     return res.json(await viewUnderCourseCommentary(cookieHeader, req.body.commentaryCode));
   }
@@ -44,8 +44,8 @@ export const underStudyCourseCommentaryHandler: RequestHandler<
   if (req.body.type === "get") {
     const { courseCode, teacherCode } = req.body;
 
-    if (!courseCode) return res.json(MissingArgResponse("courseCode"));
-    if (!teacherCode) return res.json(MissingArgResponse("teacherCode"));
+    if (!courseCode) return res.json(missingArgResponse("courseCode"));
+    if (!teacherCode) return res.json(missingArgResponse("teacherCode"));
 
     return res.json(await getUnderCommentary(cookieHeader, courseCode, teacherCode));
   }

@@ -5,7 +5,7 @@ import { request } from "@/utils/index.js";
 import { authEncrypt } from "./encrypt.js";
 import { AUTH_CAPTCHA_URL, AUTH_LOGIN_URL, AUTH_SERVER } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
-import { MissingArgResponse, MissingCredentialResponse, unknownResponse } from "../config/index.js";
+import { missingArgResponse, MissingCredentialResponse, unknownResponse } from "../config/index.js";
 import type { CommonFailedResponse } from "../typings.js";
 
 /**
@@ -169,7 +169,7 @@ export const authCaptchaHandler = request<AuthCaptchaResponse, AuthCaptchaOption
         const { id } = req.params;
         const cookieHeader = req.headers.cookie;
 
-        if (!id) return res.json(MissingArgResponse("id"));
+        if (!id) return res.json(missingArgResponse("id"));
         if (!cookieHeader) return MissingCredentialResponse;
 
         return res.json(await getAuthCaptcha(cookieHeader, id));
@@ -184,9 +184,9 @@ export const authCaptchaHandler = request<AuthCaptchaResponse, AuthCaptchaOption
       if ("id" in req.body) return res.json(await getAuthCaptcha(cookieHeader, req.body.id));
 
       if (!req.body.moveLength || !req.body.tracks)
-        return res.json(MissingArgResponse("moveLength, tracks"));
+        return res.json(missingArgResponse("moveLength, tracks"));
 
-      if (!req.body.safeValue) return res.json(MissingArgResponse("safeValue"));
+      if (!req.body.safeValue) return res.json(missingArgResponse("safeValue"));
 
       const result = await verifyAuthCaptcha(
         cookieHeader,
