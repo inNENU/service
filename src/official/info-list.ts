@@ -76,14 +76,11 @@ export const getOfficialInfoList = async ({
   );
 
   const data = [...LIST_REGEXP.exec(content)![1].matchAll(ITEM_REGEXP)].map(
-    ([, url, month, date, year, title, description, cover], index) => ({
-      title,
-      time: `${year}-${month}-${date}`,
-      pageView: pageViews[index],
-      description,
-      url,
-      ...(cover ? { cover: cover.startsWith(`/`) ? `${OFFICIAL_URL}${cover}` : cover } : {}),
-    }),
+    ([, url, month, date, year, title, description, cover], index) =>
+      Object.assign(
+        { title, time: `${year}-${month}-${date}`, pageView: pageViews[index], description, url },
+        cover ? { cover: cover.startsWith(`/`) ? `${OFFICIAL_URL}${cover}` : cover } : {},
+      ),
   );
 
   return {
