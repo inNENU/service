@@ -15,6 +15,9 @@ export default defineConfig([
         },
       },
     },
+    deps: {
+      onlyBundle: false,
+    },
   },
   {
     entry: "./lib/encrypt.js",
