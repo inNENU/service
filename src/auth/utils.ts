@@ -9,8 +9,7 @@ export const AUTH_INDEX_URL = `${AUTH_SERVER}/authserver/index.do`;
 export const RE_AUTH_URL = `${AUTH_SERVER}/authserver/reAuthCheck/reAuthLoginView.do?isMultifactor=true`;
 export const RESET_PREFIX = `${AUTH_SERVER}/retrieve-password`;
 export const RESET_SALT = "rjBFAaHsNkKAhpoi";
-export const SALT_REGEXP =
-  /input type="hidden" id="pwdEncryptSalt" value="([^"]+)" \/>/;
+export const SALT_REGEXP = /input type="hidden" id="pwdEncryptSalt" value="([^"]+)" \/>/;
 export const WEB_VPN_AUTH_DOMAIN = "authserver-443.webvpn.nenu.edu.cn";
 export const WEB_VPN_AUTH_SERVER = `https://${WEB_VPN_AUTH_DOMAIN}`;
 export const IMPROVE_INFO_URL = `${AUTH_SERVER}/authserver/improveInfo/improveUserInfo.do`;

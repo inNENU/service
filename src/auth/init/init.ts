@@ -3,23 +3,15 @@ import { CookieStore } from "@mptool/net";
 import {
   ActionFailType,
   MissingCredentialResponse,
-  UnknownResponse,
+  unknownResponse,
   WrongPasswordResponse,
 } from "@/config/index.js";
 import type { AccountInfo, CommonFailedResponse } from "@/typings.js";
 import { request } from "@/utils/index.js";
 
-import type {
-  AuthInfoFailedResponse,
-  AuthInfoSuccessResponse,
-} from "./info.js";
+import type { AuthInfoFailedResponse, AuthInfoSuccessResponse } from "./info.js";
 import { authEncrypt } from "../encrypt.js";
-import {
-  AUTH_LOGIN_URL,
-  IMPROVE_INFO_URL,
-  RE_AUTH_URL,
-  UPDATE_INFO_URL,
-} from "../utils.js";
+import { AUTH_LOGIN_URL, IMPROVE_INFO_URL, RE_AUTH_URL, UPDATE_INFO_URL } from "../utils.js";
 import { TEST_AUTH_INFO, getAuthInfo } from "./info.js";
 
 export interface InitAuthOptions extends AccountInfo {
@@ -67,7 +59,7 @@ export const initAuth = async (
       params,
     });
 
-    return UnknownResponse("未成功取得初始化信息，请重新输入学号");
+    return unknownResponse("未成功取得初始化信息，请重新输入学号");
   }
 
   const cookieStore = new CookieStore();
@@ -99,80 +91,82 @@ export const initAuth = async (
     )
       return WrongPasswordResponse;
 
-    if (resultContent.includes("该帐号已经被禁用"))
+    if (resultContent.includes("该帐号已经被禁用")) {
       return {
         success: false,
         type: ActionFailType.Forbidden,
         msg: "该帐号已经被禁用",
       };
+    }
 
-    const lockedResult = /<span>账号已冻结，预计解冻时间：(.*?)<\/span>/.exec(
-      resultContent,
-    );
+    const lockedResult = /<span>账号已冻结，预计解冻时间：(.*?)<\/span>/.exec(resultContent);
 
-    if (lockedResult)
+    if (lockedResult) {
       return {
         success: false,
         type: ActionFailType.AccountLocked,
         msg: `账号已冻结，预计解冻时间：${lockedResult[1]}`,
       };
+    }
 
-    if (resultContent.includes("该帐号未激活，请先完成帐号激活再登录"))
+    if (resultContent.includes("该帐号未激活，请先完成帐号激活再登录")) {
       return {
         success: false,
         type: ActionFailType.AccountLocked,
         msg: "该帐号未激活，请先完成帐号激活再登录",
       };
+    }
 
-    if (resultContent.includes("图形动态码错误"))
+    if (resultContent.includes("图形动态码错误")) {
       return {
         success: false,
         type: ActionFailType.WrongCaptcha,
         msg: "图形动态码错误，请重试",
       };
+    }
   }
 
   if (loginResponse.status === 200) {
-    if (resultContent.includes("无效的验证码"))
+    if (resultContent.includes("无效的验证码")) {
       return {
         success: false,
         type: ActionFailType.WrongCaptcha,
         msg: "验证码错误",
       };
+    }
 
     if (
       resultContent.includes("会话已失效，请刷新页面再登录") ||
       resultContent.includes("当前登录会话已失效，请重新登录！")
-    )
+    ) {
       return {
         success: false,
         type: ActionFailType.Expired,
         msg: "由于操作超时或在其他地方操作，会话已过期。请重新登录",
       };
+    }
 
-    if (resultContent.includes("当前账户已在其他PC端登录会话。"))
+    if (resultContent.includes("当前账户已在其他PC端登录会话。")) {
       return {
         success: false,
         type: ActionFailType.EnabledSSO,
         msg: "您已开启单点登录，请访问学校统一身份认证官网，在个人设置中关闭单点登录后重试。",
       };
+    }
 
-    if (resultContent.includes("<span>请输入验证码</span>"))
+    if (resultContent.includes("<span>请输入验证码</span>")) {
       return {
         success: false,
         type: ActionFailType.NeedCaptcha,
         msg: "需要验证码",
       };
+    }
   }
 
   if (loginResponse.status !== 302) {
-    console.error(
-      "Unknown login response during init: ",
-      loginResponse.status,
-      resultContent,
-    );
+    console.error("Unknown login response during init:", loginResponse.status, resultContent);
 
-    return UnknownResponse("登录失败");
+    return unknownResponse("登录失败");
   }
 
   if (location?.startsWith(AUTH_LOGIN_URL)) return WrongPasswordResponse;
@@ -182,7 +176,7 @@ export const initAuth = async (
       method: "POST",
       headers: {
         Accept: "application/json, text/javascript, */*; q=0.01",
-        Cookie: cookieHeader + ";" + cookieStore.getHeader(UPDATE_INFO_URL),
+        Cookie: `${cookieHeader};${cookieStore.getHeader(UPDATE_INFO_URL)}`,
         "User-Agent": "inNENU service",
       },
     });
@@ -196,13 +190,14 @@ export const initAuth = async (
     };
   }
 
-  if (location?.startsWith(RE_AUTH_URL))
+  if (location?.startsWith(RE_AUTH_URL)) {
     return {
       success: false,
       type: ActionFailType.NeedReAuth,
       msg: "需要二次认证",
       cookieStore,
     };
+  }
 
   const result = await getAuthInfo(
     {
@@ -224,32 +219,28 @@ export const initAuth = async (
   };
 };
 
-export const authInitHandler = request<
-  InitAuthResponse,
-  InitAuthOptions,
-  { id: string }
->(async (req, res) => {
-  const cookieHeader = req.headers.cookie;
+export const authInitHandler = request<InitAuthResponse, InitAuthOptions, { id: string }>(
+  async (req, res) => {
+    const cookieHeader = req.headers.cookie;
 
-  if (!cookieHeader) return MissingCredentialResponse;
+    if (!cookieHeader) return MissingCredentialResponse;
 
-  // Note: Return fake result for testing
-  if (cookieHeader.includes("TEST")) return res.json(TEST_AUTH_INFO);
+    // Note: Return fake result for testing
+    if (cookieHeader.includes("TEST")) return res.json(TEST_AUTH_INFO);
 
-  const result = await initAuth(req.body, cookieHeader);
+    const result = await initAuth(req.body, cookieHeader);
 
-  if ("cookieStore" in result) {
-    const cookies = result.cookieStore
-      .getAllCookies()
-      .map((item) => item.toJSON());
+    if ("cookieStore" in result) {
+      const cookies = result.cookieStore.getAllCookies().map((item) => item.toJSON());
 
-    cookies.forEach(({ name, value, ...rest }) => {
-      res.cookie(name, value, rest);
-    });
+      cookies.forEach(({ name, value, ...rest }) => {
+        res.cookie(name, value, rest);
+      });
 
-    // @ts-expect-error: cookieStore is not a JSON-serializable object
-    delete result.cookieStore;
-  }
+      // @ts-expect-error: cookieStore is not a JSON-serializable object
+      delete result.cookieStore;
+    }
 
-  return res.json(result);
-});
+    return res.json(result);
+  },
+);

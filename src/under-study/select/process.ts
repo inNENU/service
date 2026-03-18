@@ -1,9 +1,9 @@
 import {
   ActionFailType,
-  ExpiredResponse,
-  InvalidArgResponse,
-  MissingArgResponse,
-  UnknownResponse,
+  expiredResponse,
+  invalidArgResponse,
+  missingArgResponse,
+  unknownResponse,
 } from "@/config/index.js";
 import type { CommonFailedResponse, LoginOptions } from "@/typings.js";
 import { EDGE_USER_AGENT_HEADERS, request } from "@/utils/index.js";
@@ -45,9 +45,7 @@ export interface UnderSelectRemoveOptions extends LoginOptions {
   classCode?: string;
 }
 
-export type UnderSelectProcessOptions =
-  | UnderSelectAddOptions
-  | UnderSelectRemoveOptions;
+export type UnderSelectProcessOptions = UnderSelectAddOptions | UnderSelectRemoveOptions;
 
 interface RawUnderSelectProcessSuccessResponse {
   data: "";
@@ -105,18 +103,19 @@ export const addUnderSelectCourse = async (
     redirect: "manual",
   });
 
-  if (response.status !== 200) return ExpiredResponse;
+  if (response.status !== 200) return expiredResponse;
 
   const data = (await response.json()) as RawUnderSelectProcessResponse;
 
   if (data.code !== 0) {
     if (data.code === -1) {
-      if (data.message === "当前不是选课时间")
+      if (data.message === "当前不是选课时间") {
         return {
           success: false,
           type: ActionFailType.Closed,
           msg: data.message,
         };
+      }
 
       if (data.message === "选课人数超出，请选其他课程") {
         return {
@@ -171,21 +170,22 @@ export const removeUnderSelectCourse = async (
     redirect: "manual",
   });
 
-  if (response.status !== 200) return ExpiredResponse;
+  if (response.status !== 200) return expiredResponse;
 
   const data = (await response.json()) as RawUnderSelectProcessResponse;
 
   if (data.code !== 0) {
-    if (data.code === -1 && data.message === "当前不是选课时间")
+    if (data.code === -1 && data.message === "当前不是选课时间") {
       return {
         success: false,
         msg: data.message,
         type: ActionFailType.Closed,
       };
+    }
 
     console.error("不能识别", data.message);
 
-    return UnknownResponse(data.message);
+    return unknownResponse(data.message);
   }
 
   return { success: true };
@@ -199,16 +199,12 @@ export const underSelectProcessHandler = request<
 
   const cookieHeader = req.headers.cookie!;
 
-  if (!link) return res.json(MissingArgResponse("link"));
-  if (!classId) return res.json(MissingArgResponse("classId"));
+  if (!link) return res.json(missingArgResponse("link"));
+  if (!classId) return res.json(missingArgResponse("classId"));
 
-  if (type === "add") {
-    return res.json(await addUnderSelectCourse(req.body, cookieHeader));
-  }
+  if (type === "add") return res.json(await addUnderSelectCourse(req.body, cookieHeader));
 
-  if (type === "remove") {
-    return res.json(await removeUnderSelectCourse(req.body, cookieHeader));
-  }
+  if (type === "remove") return res.json(await removeUnderSelectCourse(req.body, cookieHeader));
 
-  return res.json(InvalidArgResponse("type"));
+  return res.json(invalidArgResponse("type"));
 });

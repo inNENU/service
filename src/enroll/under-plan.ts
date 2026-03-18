@@ -1,11 +1,8 @@
 import { request } from "@/utils/index.js";
 
 import type { ActionFailType } from "../config/index.js";
-import { InvalidArgResponse, MissingArgResponse } from "../config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-} from "../typings.js";
+import { invalidArgResponse, missingArgResponse } from "../config/index.js";
+import type { CommonFailedResponse, CommonSuccessResponse } from "../typings.js";
 
 export interface UnderEnrollPlanInfoOptions {
   type: "info";
@@ -31,49 +28,38 @@ interface RawUnderEnrollPlanOptionConfig {
   year: string;
 }
 
-type RawUnderEnrollPlanOptionInfo = Record<
-  /* province */ string,
-  RawUnderEnrollPlanOptionConfig[]
->;
+type RawUnderEnrollPlanOptionInfo = Record</* province */ string, RawUnderEnrollPlanOptionConfig[]>;
 
 type UnderEnrollPlanOptionInfo = Record<
   /* province */ string,
-  Record<
-    /* year */ string,
-    Record</* type */ string, /* major type */ string[]>
-  >
+  Record</* year */ string, Record</* type */ string, /* major type */ string[]>>
 >;
 
-export type UnderEnrollPlanInfoSuccessResponse =
-  CommonSuccessResponse<UnderEnrollPlanOptionInfo>;
+export type UnderEnrollPlanInfoSuccessResponse = CommonSuccessResponse<UnderEnrollPlanOptionInfo>;
 
-export type UnderEnrollPlanInfoResponse =
-  | UnderEnrollPlanInfoSuccessResponse
-  | CommonFailedResponse;
+export type UnderEnrollPlanInfoResponse = UnderEnrollPlanInfoSuccessResponse | CommonFailedResponse;
 
-export const getUnderEnrollInfo =
-  async (): Promise<UnderEnrollPlanInfoResponse> => {
-    // NOTE: year=2024 does not take any effect
-    const infoResponse = await fetch(`${INFO_URL}?which=plan`);
+export const getUnderEnrollInfo = async (): Promise<UnderEnrollPlanInfoResponse> => {
+  // NOTE: year=2024 does not take any effect
+  const infoResponse = await fetch(`${INFO_URL}?which=plan`);
 
-    const info = (await infoResponse.json()) as RawUnderEnrollPlanOptionInfo;
+  const info = (await infoResponse.json()) as RawUnderEnrollPlanOptionInfo;
 
-    return {
-      success: true,
-      data: Object.fromEntries(
-        Object.entries(info).map(([province, configs]) => {
-          const result: Record<string, Record<string, string[]>> = {};
+  return {
+    success: true,
+    data: Object.fromEntries(
+      Object.entries(info).map(([province, configs]) => {
+        const result: Record<string, Record<string, string[]>> = {};
 
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          configs.forEach(({ major_type, type, year }) => {
-            ((result[year] ??= {})[type] ??= []).push(major_type);
-          });
+        configs.forEach(({ major_type, type, year }) => {
+          ((result[year] ??= {})[type] ??= []).push(major_type);
+        });
 
-          return [province, result];
-        }),
-      ),
-    };
+        return [province, result];
+      }),
+    ),
   };
+};
 
 interface RawUnderEnrollPlanConfig {
   edu_cost: string;
@@ -106,9 +92,7 @@ export interface UnderEnrollPlanConfig {
   fee: string;
 }
 
-type UnderEnrollPlanQuerySuccessResponse = CommonSuccessResponse<
-  UnderEnrollPlanConfig[]
->;
+type UnderEnrollPlanQuerySuccessResponse = CommonSuccessResponse<UnderEnrollPlanConfig[]>;
 
 type UnderEnrollPlanQueryResponse =
   | UnderEnrollPlanQuerySuccessResponse
@@ -120,39 +104,30 @@ export const queryUnderEnrollPlan = async ({
   classType,
   majorType,
 }: UnderEnrollPlanQueryOptions): Promise<UnderEnrollPlanQueryResponse> => {
-  if (!province) return MissingArgResponse("province");
-  if (!year) return MissingArgResponse("year");
-  if (!classType) return MissingArgResponse("classType");
-  if (!majorType) return MissingArgResponse("majorType");
+  if (!province) return missingArgResponse("province");
+  if (!year) return missingArgResponse("year");
+  if (!classType) return missingArgResponse("classType");
+  if (!majorType) return missingArgResponse("majorType");
 
-  const queryResponse = await fetch(
-    `https://gkcx.nenu.edu.cn/api/user/queryPlan`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-      },
-      body: JSON.stringify({
-        province,
-        year,
-        major_type: classType,
-        type: majorType,
-      }),
+  const queryResponse = await fetch(`https://gkcx.nenu.edu.cn/api/user/queryPlan`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
     },
-  );
+    body: JSON.stringify({
+      province,
+      year,
+      major_type: classType,
+      type: majorType,
+    }),
+  });
 
   const result = (await queryResponse.json()) as RawUnderEnrollPlanResult;
 
   return {
     success: true,
     data: result.plans.map(
-      ({
-        major,
-        major_attr: majorAttr,
-        number,
-        edu_len: years,
-        edu_cost: fee,
-      }) => ({
+      ({ major, major_attr: majorAttr, number, edu_len: years, edu_cost: fee }) => ({
         major,
         majorAttr,
         count: number,
@@ -163,26 +138,19 @@ export const queryUnderEnrollPlan = async ({
   };
 };
 
-export type UnderEnrollPlanOptions =
-  | UnderEnrollPlanInfoOptions
-  | UnderEnrollPlanQueryOptions;
+export type UnderEnrollPlanOptions = UnderEnrollPlanInfoOptions | UnderEnrollPlanQueryOptions;
 
 export type UnderEnrollPlanResponse =
   | UnderEnrollPlanInfoResponse
   | UnderEnrollPlanQueryResponse
   | CommonFailedResponse<ActionFailType.InvalidArg>;
 
-export const underEnrollPlanHandler = request<
-  UnderEnrollPlanResponse,
-  UnderEnrollPlanOptions
->(async (req, res) => {
-  if (req.body.type === "info") {
-    return res.json(await getUnderEnrollInfo());
-  }
+export const underEnrollPlanHandler = request<UnderEnrollPlanResponse, UnderEnrollPlanOptions>(
+  async (req, res) => {
+    if (req.body.type === "info") return res.json(await getUnderEnrollInfo());
 
-  if (req.body.type === "query") {
-    return res.json(await queryUnderEnrollPlan(req.body));
-  }
+    if (req.body.type === "query") return res.json(await queryUnderEnrollPlan(req.body));
 
-  return res.json(InvalidArgResponse("type"));
-});
+    return res.json(invalidArgResponse("type"));
+  },
+);

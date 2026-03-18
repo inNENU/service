@@ -3,11 +3,7 @@ import { EDGE_USER_AGENT_HEADERS, request } from "@/utils/index.js";
 import type { UnderStudyLoginFailedResponse } from "./login.js";
 import { UNDER_STUDY_SERVER } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
-import {
-  ExpiredResponse,
-  TEST_INFO,
-  UnknownResponse,
-} from "../config/index.js";
+import { expiredResponse, TEST_INFO, unknownResponse } from "../config/index.js";
 import type { AccountInfo, CommonFailedResponse } from "../typings.js";
 
 const ID_REGEXP =
@@ -27,10 +23,8 @@ const GRADE_REGEXP =
 
 const LOCATION_REGEXP =
   /<td align="right">所在校区：<\/td>\s*<td><label style="width: 90px">(.*?)<\/label><\/td>/;
-const PEOPLE_WRAPPER_REGEXP =
-  /<select.+?title='民族'[^>]+>([\s\S]+?)<\/select>/;
-const PEOPLE_MATCH_REGEXP =
-  /<option\s+value='\d+'\s*?selected>(.*?)<\/option>/g;
+const PEOPLE_WRAPPER_REGEXP = /<select.+?title='民族'[^>]+>([\s\S]+?)<\/select>/;
+const PEOPLE_MATCH_REGEXP = /<option\s+value='\d+'\s*?selected>(.*?)<\/option>/g;
 
 const ID_CARD_REGEXP =
   /<td align="right">证件号码：<\/td>\s*<td><input\s+id="sfzh"[\s\S]*?value="(.*?)"/;
@@ -84,9 +78,7 @@ const TEST_INFO_RESULT: UnderStudyInfoSuccessResult = {
   data: TEST_INFO,
 };
 
-export const getUnderStudyInfo = async (
-  cookieHeader: string,
-): Promise<UnderStudyInfoResult> => {
+export const getUnderStudyInfo = async (cookieHeader: string): Promise<UnderStudyInfoResult> => {
   try {
     const infoResponse = await fetch(
       `${UNDER_STUDY_SERVER}/new/student/xjkpxx/edit.page?confirmInfo=`,
@@ -100,44 +92,47 @@ export const getUnderStudyInfo = async (
       },
     );
 
-    if (infoResponse.status === 302) return ExpiredResponse;
+    if (infoResponse.status === 302) return expiredResponse;
 
     const infoResult = await infoResponse.text();
 
-    const location = LOCATION_REGEXP.exec(infoResult)![1];
-    const idCard = ID_CARD_REGEXP.exec(infoResult)![1];
-    const peopleSelectContent = PEOPLE_WRAPPER_REGEXP.exec(infoResult)![1];
+    const [, location] = LOCATION_REGEXP.exec(infoResult)!;
+    const [, idCard] = ID_CARD_REGEXP.exec(infoResult)!;
+    const [, peopleSelectContent] = PEOPLE_WRAPPER_REGEXP.exec(infoResult)!;
+
+    const [, idStr] = ID_REGEXP.exec(infoResult)!;
+    const [, name] = NAME_REGEXP.exec(infoResult)!;
+    const [, org] = SCHOOL_REGEXP.exec(infoResult)!;
+    const [, major] = MAJOR_REGEXP.exec(infoResult)!;
+    const [, inYearStr] = IN_YEAR_REGEXP.exec(infoResult)!;
+    const [, gradeStr] = GRADE_REGEXP.exec(infoResult)!;
+    const [, people] = PEOPLE_MATCH_REGEXP.exec(peopleSelectContent)!;
 
     return {
       success: true,
       data: {
-        id: Number(ID_REGEXP.exec(infoResult)![1]),
-        name: NAME_REGEXP.exec(infoResult)![1],
+        id: Number(idStr),
+        name,
         idCard,
-        org: SCHOOL_REGEXP.exec(infoResult)![1],
+        org,
         orgId: -1,
-        major: MAJOR_REGEXP.exec(infoResult)![1],
+        major,
         majorId: "",
-        inYear: Number(IN_YEAR_REGEXP.exec(infoResult)![1]),
-        grade: Number(GRADE_REGEXP.exec(infoResult)![1]),
+        inYear: Number(inYearStr),
+        grade: Number(gradeStr),
         type: "本科生",
         typeId: "bks",
-        people: PEOPLE_MATCH_REGEXP.exec(peopleSelectContent)![1],
+        people,
         gender: Number(idCard[16]) % 2 === 0 ? "女" : "男",
         genderId: Number(idCard[16]) % 2 === 0 ? 2 : 1,
         birth: `${idCard.slice(6, 10)}-${idCard.slice(10, 12)}-${idCard.slice(12, 14)}`,
-        location:
-          location === "本部"
-            ? "benbu"
-            : location === "净月"
-              ? "jingyue"
-              : "unknown",
+        location: location === "本部" ? "benbu" : location === "净月" ? "jingyue" : "unknown",
       },
     };
   } catch (err) {
     console.error("获取人员信息失败", err);
 
-    return UnknownResponse("获取人员信息失败");
+    return unknownResponse("获取人员信息失败");
   }
 };
 
@@ -146,12 +141,10 @@ export type UnderStudyInfoResponse =
   | UnderStudyLoginFailedResponse
   | CommonFailedResponse<ActionFailType.MissingCredential>;
 
-export const underInfoHandler = request<UnderStudyInfoResponse, AccountInfo>(
-  async (req, res) => {
-    const cookieHeader = req.headers.cookie!;
+export const underInfoHandler = request<UnderStudyInfoResponse, AccountInfo>(async (req, res) => {
+  const cookieHeader = req.headers.cookie!;
 
-    if (cookieHeader.includes("TEST")) return res.json(TEST_INFO_RESULT);
+  if (cookieHeader.includes("TEST")) return res.json(TEST_INFO_RESULT);
 
-    return res.json(await getUnderStudyInfo(cookieHeader));
-  },
-);
+  return res.json(await getUnderStudyInfo(cookieHeader));
+});

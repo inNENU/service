@@ -2,10 +2,10 @@ import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 
 import {
   ActionFailType,
-  MissingArgResponse,
+  missingArgResponse,
   MissingCredentialResponse,
   TEST_ID,
-  UnknownResponse,
+  unknownResponse,
 } from "@/config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse } from "@/typings.js";
 import type { WechatMpCodeError } from "@/utils/index.js";
@@ -53,11 +53,10 @@ export const generateIdCode = async ({
   let connection: PoolConnection | null = null;
 
   try {
-    if (id.toString() === TEST_ID)
-      return UnknownResponse("不支持为测试账号生成身份码");
+    if (id.toString() === TEST_ID) return unknownResponse("不支持为测试账号生成身份码");
 
     if (!authToken || !id) return MissingCredentialResponse;
-    if (!appId) return MissingArgResponse("appId");
+    if (!appId) return missingArgResponse("appId");
 
     let existed = false;
     let uuid: string | null = null;
@@ -70,12 +69,13 @@ export const generateIdCode = async ({
       [id, authToken],
     );
 
-    if (!tokenRows.length)
+    if (!tokenRows.length) {
       return {
         success: false,
         type: ActionFailType.Expired,
         msg: "用户凭据已失效，无法取得身份信息，请重新登录。\n提示: 为了保证身份码的可靠性，您只能在最后一次登录的设备获取身份码。",
       };
+    }
 
     // check whether there is existing uuid
     const [rows] = await connection.execute<RowDataPacket[]>(
@@ -89,35 +89,33 @@ export const generateIdCode = async ({
       if (force) {
         uuid = getShortUUID();
 
-        await connection.execute(
-          "UPDATE `id_code` SET `uuid` = ?, `remark` = ? WHERE `uuid` = ?",
-          [uuid, remark, rows[0].uuid],
-        );
+        await connection.execute("UPDATE `id_code` SET `uuid` = ?, `remark` = ? WHERE `uuid` = ?", [
+          uuid,
+          remark,
+          rows[0].uuid,
+        ]);
       }
       // use old uuid
       else {
         existed = true;
-        uuid = (rows[0] as IDCodeData).uuid;
+        ({ uuid } = rows[0] as IDCodeData);
       }
     }
     // generate new uuid
     else {
       // remark must be provided
-      if (!remark) return MissingArgResponse("remark");
+      if (!remark) return missingArgResponse("remark");
 
       uuid = getShortUUID();
 
-      await connection.execute(
-        "INSERT INTO `id_code` (`uuid`, `id`, `remark`) VALUES (?, ?, ?)",
-        [uuid, id, remark],
-      );
+      await connection.execute("INSERT INTO `id_code` (`uuid`, `id`, `remark`) VALUES (?, ?, ?)", [
+        uuid,
+        id,
+        remark,
+      ]);
     }
 
-    const result = await getWechatMPCode(
-      appId,
-      "pkg/user/pages/account/login",
-      `verify:${uuid}`,
-    );
+    const result = await getWechatMPCode(appId, "pkg/user/pages/account/login", `verify:${uuid}`);
 
     if (result instanceof Buffer) {
       return {
@@ -129,15 +127,12 @@ export const generateIdCode = async ({
       };
     }
 
-    return UnknownResponse((result as WechatMpCodeError).errmsg);
+    return unknownResponse((result as WechatMpCodeError).errmsg);
   } finally {
     releaseConnection(connection);
   }
 };
 
-export const generateIdCodeHandler = request<
-  GenerateIdCodeResponse,
-  GenerateIdCodeOptions
->(async (req, res) => {
-  return res.json(await generateIdCode(req.body));
-});
+export const generateIdCodeHandler = request<GenerateIdCodeResponse, GenerateIdCodeOptions>(
+  async (req, res) => res.json(await generateIdCode(req.body)),
+);

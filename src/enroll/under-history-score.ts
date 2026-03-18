@@ -1,11 +1,8 @@
 import { request } from "@/utils/index.js";
 
 import type { ActionFailType } from "../config/index.js";
-import { InvalidArgResponse, MissingArgResponse } from "../config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-} from "../typings.js";
+import { invalidArgResponse, missingArgResponse } from "../config/index.js";
+import type { CommonFailedResponse, CommonSuccessResponse } from "../typings.js";
 
 export interface UnderHistoryScoreInfoOptions {
   type: "info";
@@ -38,44 +35,38 @@ type RawUnderHistoryScoreOptionInfo = Record<
 
 type UnderEnrollOptionInfo = Record<
   /* province */ string,
-  Record<
-    /* year */ string,
-    Record</* type */ string, /* major type */ string[]>
-  >
+  Record</* year */ string, Record</* type */ string, /* major type */ string[]>>
 >;
 
-export type UnderHistoryScoreInfoSuccessResponse =
-  CommonSuccessResponse<UnderEnrollOptionInfo>;
+export type UnderHistoryScoreInfoSuccessResponse = CommonSuccessResponse<UnderEnrollOptionInfo>;
 
 export type UnderHistoryScoreInfoResponse =
   | UnderHistoryScoreInfoSuccessResponse
   | CommonFailedResponse;
 
-export const getUnderHistoryScoreInfo =
-  async (): Promise<UnderHistoryScoreInfoResponse> => {
-    // NOTE: year=2023 does not take any effect
-    const infoResponse = await fetch(`${INFO_URL}?which=score`);
+export const getUnderHistoryScoreInfo = async (): Promise<UnderHistoryScoreInfoResponse> => {
+  // NOTE: year=2023 does not take any effect
+  const infoResponse = await fetch(`${INFO_URL}?which=score`);
 
-    const info = (await infoResponse.json()) as RawUnderHistoryScoreOptionInfo;
+  const info = (await infoResponse.json()) as RawUnderHistoryScoreOptionInfo;
 
-    return {
-      success: true,
-      data: Object.fromEntries(
-        Object.entries(info).map(([province, configs]) => {
-          const result: Record<string, Record<string, string[]>> = {};
+  return {
+    success: true,
+    data: Object.fromEntries(
+      Object.entries(info).map(([province, configs]) => {
+        const result: Record<string, Record<string, string[]>> = {};
 
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          configs.forEach(({ major_type, type, year }) => {
-            const current = ((result[year] ??= {})[type] ??= []);
+        configs.forEach(({ major_type, type, year }) => {
+          const current = ((result[year] ??= {})[type] ??= []);
 
-            if (!current.includes(major_type)) current.push(major_type);
-          });
+          if (!current.includes(major_type)) current.push(major_type);
+        });
 
-          return [province, result];
-        }),
-      ),
-    };
+        return [province, result];
+      }),
+    ),
   };
+};
 
 interface RawUnderHistoryScoreConfig {
   province: string;
@@ -127,13 +118,17 @@ export interface UnderHistoryScoreConfig {
   averageScore: number | null;
 }
 
-type UnderHistoryScoreQuerySuccessResponse = CommonSuccessResponse<
-  UnderHistoryScoreConfig[]
->;
+type UnderHistoryScoreQuerySuccessResponse = CommonSuccessResponse<UnderHistoryScoreConfig[]>;
 
 type UnderHistoryScoreQueryResponse =
   | UnderHistoryScoreQuerySuccessResponse
   | CommonFailedResponse<ActionFailType.MissingArg | ActionFailType.Unknown>;
+
+const getNumber = (text: string): number | null => {
+  const result = Number(text);
+
+  return Number.isNaN(result) || result < 0 ? null : result;
+};
 
 export const queryUnderHistoryScore = async ({
   province,
@@ -141,37 +136,28 @@ export const queryUnderHistoryScore = async ({
   classType,
   majorType,
 }: UnderHistoryScoreQueryOptions): Promise<UnderHistoryScoreQueryResponse> => {
-  if (!province) return MissingArgResponse("province");
+  if (!province) return missingArgResponse("province");
 
-  if (!year) return MissingArgResponse("year");
+  if (!year) return missingArgResponse("year");
 
-  if (!classType) return MissingArgResponse("classType");
+  if (!classType) return missingArgResponse("classType");
 
-  if (!majorType) return MissingArgResponse("majorType");
+  if (!majorType) return missingArgResponse("majorType");
 
-  const queryResponse = await fetch(
-    `https://gkcx.nenu.edu.cn/api/user/queryScore`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-      },
-      body: JSON.stringify({
-        province,
-        year,
-        major_type: classType,
-        type: majorType,
-      }),
+  const queryResponse = await fetch(`https://gkcx.nenu.edu.cn/api/user/queryScore`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
     },
-  );
+    body: JSON.stringify({
+      province,
+      year,
+      major_type: classType,
+      type: majorType,
+    }),
+  });
 
   const result = (await queryResponse.json()) as RawUnderHistoryScoreResult;
-
-  const getNumber = (text: string): number | null => {
-    const result = Number(text);
-
-    return Number.isNaN(result) || result < 0 ? null : result;
-  };
 
   return {
     success: true,
@@ -195,9 +181,7 @@ export const queryUnderHistoryScore = async ({
   };
 };
 
-export type UnderHistoryScoreOptions =
-  | UnderHistoryScoreInfoOptions
-  | UnderHistoryScoreQueryOptions;
+export type UnderHistoryScoreOptions = UnderHistoryScoreInfoOptions | UnderHistoryScoreQueryOptions;
 
 export type UnderHistoryScoreResponse =
   | UnderHistoryScoreInfoResponse
@@ -208,13 +192,9 @@ export const underHistoryScoreHandler = request<
   UnderHistoryScoreResponse,
   UnderHistoryScoreOptions
 >(async (req, res) => {
-  if (req.body.type === "info") {
-    return res.json(await getUnderHistoryScoreInfo());
-  }
+  if (req.body.type === "info") return res.json(await getUnderHistoryScoreInfo());
 
-  if (req.body.type === "query") {
-    return res.json(await queryUnderHistoryScore(req.body));
-  }
+  if (req.body.type === "query") return res.json(await queryUnderHistoryScore(req.body));
 
-  return res.json(InvalidArgResponse("type"));
+  return res.json(invalidArgResponse("type"));
 });

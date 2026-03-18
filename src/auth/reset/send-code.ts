@@ -1,4 +1,4 @@
-import { ActionFailType, UnknownResponse } from "@/config/index.js";
+import { ActionFailType, unknownResponse } from "@/config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse } from "@/typings.js";
 
 import { RESET_PAGE_URL } from "./utils.js";
@@ -105,10 +105,7 @@ export const sendCode = async (
 
   if (data.code !== "0") {
     if (data.message === "验证码错误") {
-      const captchaResponse = await getResetCaptcha(
-        cookieHeader,
-        RESET_PAGE_URL,
-      );
+      const captchaResponse = await getResetCaptcha(cookieHeader, RESET_PAGE_URL);
 
       if (!captchaResponse.success) return captchaResponse;
 
@@ -120,7 +117,7 @@ export const sendCode = async (
       };
     }
 
-    return UnknownResponse(data.message);
+    return unknownResponse(data.message);
   }
 
   return {

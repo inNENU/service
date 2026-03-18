@@ -12,13 +12,9 @@ import {
   RestrictedResponse,
   TEST_ID_NUMBER,
   TEST_LOGIN_RESULT,
-  UnknownResponse,
+  unknownResponse,
 } from "../config/index.js";
-import type {
-  AccountInfo,
-  CommonFailedResponse,
-  LoginOptions,
-} from "../typings.js";
+import type { AccountInfo, CommonFailedResponse, LoginOptions } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 import { vpnCASLogin } from "../vpn/index.js";
 
@@ -65,9 +61,7 @@ export const underStudyLogin = async (
   }
 
   const ticketResponse = await fetch(
-    webVPN
-      ? result.location.replace(UNDER_STUDY_SERVER, UNDER_STUDY_VPN_SERVER)
-      : result.location,
+    webVPN ? result.location.replace(UNDER_STUDY_SERVER, UNDER_STUDY_VPN_SERVER) : result.location,
     {
       headers: {
         Cookie: cookieStore.getHeader(result.location),
@@ -80,13 +74,9 @@ export const underStudyLogin = async (
 
   cookieStore.applyResponse(ticketResponse, result.location);
 
-  if (ticketResponse.status === 405) {
-    return RestrictedResponse;
-  }
+  if (ticketResponse.status === 405) return RestrictedResponse;
 
-  if (ticketResponse.status !== 302) {
-    return UnknownResponse("登录失败");
-  }
+  if (ticketResponse.status !== 302) return unknownResponse("登录失败");
 
   const finalLocation = ticketResponse.headers.get("Location");
 
@@ -101,17 +91,15 @@ export const underStudyLogin = async (
       signal: AbortSignal.timeout(10000),
     });
 
-    if (
-      ssoResponse.status === 302 &&
-      ssoResponse.headers.get("Location")?.startsWith(MAIN_URL)
-    )
+    if (ssoResponse.status === 302 && ssoResponse.headers.get("Location")?.startsWith(MAIN_URL)) {
       return {
         success: true,
         cookieStore,
       };
+    }
   }
 
-  return UnknownResponse("登录失败");
+  return unknownResponse("登录失败");
 };
 
 export interface UnderStudyLoginSuccessResponse {
@@ -129,13 +117,10 @@ export type UnderStudyLoginResponse =
   | UnderStudyLoginFailedResponse;
 
 export const loginToUnderStudy = request<
-  | UnderStudyLoginResponse
-  | CommonFailedResponse<ActionFailType.MissingCredential>,
+  UnderStudyLoginResponse | CommonFailedResponse<ActionFailType.MissingCredential>,
   LoginOptions
 >(async (req, res, next) => {
-  if (!req.body) {
-    return res.json(MissingCredentialResponse);
-  }
+  if (!req.body) return res.json(MissingCredentialResponse);
 
   const { id, password, authToken } = req.body;
 
@@ -149,33 +134,28 @@ export const loginToUnderStudy = request<
     return res.json(MissingCredentialResponse);
   }
 
-  return next();
+  next();
 });
 
-export const underStudyLoginHandler = request<
-  UnderStudyLoginResponse,
-  UnderStudyLoginOptions
->(async (req, res) => {
-  const result =
-    // fake result for testing
-    req.body.id === TEST_ID_NUMBER
-      ? TEST_LOGIN_RESULT
-      : await underStudyLogin(req.body);
+export const underStudyLoginHandler = request<UnderStudyLoginResponse, UnderStudyLoginOptions>(
+  async (req, res) => {
+    const result =
+      // fake result for testing
+      req.body.id === TEST_ID_NUMBER ? TEST_LOGIN_RESULT : await underStudyLogin(req.body);
 
-  if (result.success) {
-    const cookies = result.cookieStore
-      .getAllCookies()
-      .map((item) => item.toJSON());
+    if (result.success) {
+      const cookies = result.cookieStore.getAllCookies().map((item) => item.toJSON());
 
-    cookies.forEach(({ name, value, ...rest }) => {
-      res.cookie(name, value, rest);
-    });
+      cookies.forEach(({ name, value, ...rest }) => {
+        res.cookie(name, value, rest);
+      });
 
-    return res.json({
-      success: true,
-      cookies,
-    });
-  }
+      return res.json({
+        success: true,
+        cookies,
+      });
+    }
 
-  return res.json(result);
-});
+    return res.json(result);
+  },
+);

@@ -4,16 +4,8 @@ import { getAction } from "./action.js";
 import { gradSystemLogin } from "./login.js";
 import { GRAD_SYSTEM_SERVER, MAIN_URL } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import {
-  ActionFailType,
-  MissingCredentialResponse,
-  UnknownResponse,
-} from "../config/index.js";
-import type {
-  AccountInfo,
-  CommonFailedResponse,
-  CommonSuccessResponse,
-} from "../typings.js";
+import { ActionFailType, MissingCredentialResponse, unknownResponse } from "../config/index.js";
+import type { AccountInfo, CommonFailedResponse, CommonSuccessResponse } from "../typings.js";
 
 const TITLE_REG_EXP = /aField\s?="(.*?)"\.split\("\t"\);/;
 const VALUE_REG_EXP = /aDataLS\s?="(.*?)"\.split\("\t"\);/;
@@ -56,23 +48,21 @@ const getInfo = (content: string): GradStudentInfo => {
   const titles = TITLE_REG_EXP.exec(content)![1].split("\t");
   const values = VALUE_REG_EXP.exec(content)![1].split("\t");
 
-  const nameIndex = titles.findIndex((title) => title === "学生姓名");
-  const genderIndex = titles.findIndex((title) => title === "性别");
-  const idCardIndex = titles.findIndex((title) => title === "身份证号");
+  const nameIndex = titles.indexOf("学生姓名");
+  const genderIndex = titles.indexOf("性别");
+  const idCardIndex = titles.indexOf("身份证号");
   const idCard = values[idCardIndex];
-  const birth = idCard
-    .substring(6, 14)
-    .replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
-  const peopleIndex = titles.findIndex((title) => title === "民族");
-  const politicalTypeIndex = titles.findIndex((title) => title === "政治面貌");
+  const birth = idCard.slice(6, 14).replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
+  const peopleIndex = titles.indexOf("民族");
+  const politicalTypeIndex = titles.indexOf("政治面貌");
 
-  const idIndex = titles.findIndex((title) => title === "学号");
+  const idIndex = titles.indexOf("学号");
   const id = values[idIndex];
-  const schoolIndex = titles.findIndex((title) => title === "学院名称");
-  const majorIndex = titles.findIndex((title) => title === "专业名称");
-  const majorCodeIndex = titles.findIndex((title) => title === "专业代码");
-  const typeIndex = titles.findIndex((title) => title === "研究生类型");
-  const inDateIndex = titles.findIndex((title) => title === "入学日期");
+  const schoolIndex = titles.indexOf("学院名称");
+  const majorIndex = titles.indexOf("专业名称");
+  const majorCodeIndex = titles.indexOf("专业代码");
+  const typeIndex = titles.indexOf("研究生类型");
+  const inDateIndex = titles.indexOf("入学日期");
   const inDate = values[inDateIndex];
 
   return {
@@ -84,14 +74,14 @@ const getInfo = (content: string): GradStudentInfo => {
     politicalType: values[politicalTypeIndex],
     birth,
     id: Number(id),
-    grade: Number(id.substring(0, 4)),
+    grade: Number(id.slice(0, 4)),
     org: values[schoolIndex],
     orgId: 0,
     major: values[majorIndex],
     majorId: values[majorCodeIndex],
     type: values[typeIndex],
     typeId: "yjs",
-    inYear: Number(inDate.substring(0, 4)),
+    inYear: Number(inDate.slice(0, 4)),
     location: "unknown",
   };
 };
@@ -103,15 +93,12 @@ export type GradInfoResponse =
   | AuthLoginFailedResponse
   | CommonFailedResponse<ActionFailType.MissingCredential>;
 
-export const getGradInfo = async (
-  cookieHeader: string,
-): Promise<GradInfoResponse> => {
+export const getGradInfo = async (cookieHeader: string): Promise<GradInfoResponse> => {
   const result = await getAction(cookieHeader);
 
   if (result.success) {
     const { id } = result.data.actions.find(
-      ({ name }) =>
-        name === "显示硕士生信息采集" || name === "显示博士生信息采集",
+      ({ name }) => name === "显示硕士生信息采集" || name === "显示博士生信息采集",
     )!;
 
     const response = await fetch(
@@ -126,12 +113,13 @@ export const getGradInfo = async (
 
     const content = await response.text();
 
-    if (content.includes("错误:当前时间不在本功能有效时间范围内!"))
+    if (content.includes("错误:当前时间不在本功能有效时间范围内!")) {
       return {
         success: false,
         type: ActionFailType.Forbidden,
         msg: "功能当前暂未开放",
       };
+    }
 
     return {
       success: true,
@@ -139,23 +127,21 @@ export const getGradInfo = async (
     };
   }
 
-  return UnknownResponse("获取信息失败");
+  return unknownResponse("获取信息失败");
 };
 
-export const gradInfoHandler = request<GradInfoResponse, AccountInfo>(
-  async (req, res) => {
-    const { id, password, authToken } = req.body;
+export const gradInfoHandler = request<GradInfoResponse, AccountInfo>(async (req, res) => {
+  const { id, password, authToken } = req.body;
 
-    if (id && password && authToken) {
-      const result = await gradSystemLogin(req.body);
+  if (id && password && authToken) {
+    const result = await gradSystemLogin(req.body);
 
-      if (!result.success) return res.json(result);
+    if (!result.success) return res.json(result);
 
-      req.headers.cookie = result.cookieStore.getHeader(GRAD_SYSTEM_SERVER);
-    } else if (!req.headers.cookie) {
-      return res.json(MissingCredentialResponse);
-    }
+    req.headers.cookie = result.cookieStore.getHeader(GRAD_SYSTEM_SERVER);
+  } else if (!req.headers.cookie) {
+    return res.json(MissingCredentialResponse);
+  }
 
-    return res.json(await getGradInfo(req.headers.cookie));
-  },
-);
+  return res.json(await getGradInfo(req.headers.cookie));
+});

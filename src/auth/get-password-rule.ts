@@ -13,9 +13,7 @@ export interface GetPasswordRuleResponse {
   data: string[];
 }
 
-export const getPasswordRule = async (
-  cookieHeader: string,
-): Promise<GetPasswordRuleResponse> => {
+export const getPasswordRule = async (cookieHeader: string): Promise<GetPasswordRuleResponse> => {
   const response = await fetch(GET_PASSWORD_RULE, {
     method: "POST",
     headers: {

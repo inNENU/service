@@ -1,5 +1,6 @@
 import Client, { GetWeChGeneralRequest } from "@alicloud/alinlp20200629";
 import { Config } from "@alicloud/openapi-client";
+// oxlint-disable-next-line import/no-unassigned-import
 import "../config/loadEnv.js";
 
 interface NLPWeChGeneralResponse {
@@ -18,10 +19,10 @@ const config = new Config({
 });
 
 // @ts-expect-error: Type Error
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+// oxlint-disable-next-line typescript/no-unsafe-assignment
 const client: Client = Client.default
   ? // @ts-expect-error: Type Error
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    // oxlint-disable-next-line new-cap, typescript/no-unsafe-call
     new Client.default(config)
   : new Client(config);
 

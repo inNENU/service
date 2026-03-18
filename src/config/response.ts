@@ -1,34 +1,31 @@
 import type { CommonFailedResponse } from "../typings.js";
 import { ActionFailType } from "./actionFailType.js";
 
-export const MissingCredentialResponse: CommonFailedResponse<ActionFailType.MissingCredential> =
-  {
-    success: false,
-    type: ActionFailType.MissingCredential,
-    msg: "缺少用户凭据",
-  };
+export const MissingCredentialResponse: CommonFailedResponse<ActionFailType.MissingCredential> = {
+  success: false,
+  type: ActionFailType.MissingCredential,
+  msg: "缺少用户凭据",
+};
 
-export const ExpiredResponse: CommonFailedResponse<ActionFailType.Expired> = {
+export const expiredResponse: CommonFailedResponse<ActionFailType.Expired> = {
   success: false,
   type: ActionFailType.Expired,
   msg: "登录信息已过期，请重新登录",
 };
 
-export const RestrictedResponse: CommonFailedResponse<ActionFailType.Restricted> =
-  {
-    success: false,
-    type: ActionFailType.Restricted,
-    msg: "当前时段系统已关闭，请稍后重试",
-  };
+export const RestrictedResponse: CommonFailedResponse<ActionFailType.Restricted> = {
+  success: false,
+  type: ActionFailType.Restricted,
+  msg: "当前时段系统已关闭，请稍后重试",
+};
 
-export const WrongPasswordResponse: CommonFailedResponse<ActionFailType.WrongPassword> =
-  {
-    success: false,
-    type: ActionFailType.WrongPassword,
-    msg: "用户名或密码错误",
-  };
+export const WrongPasswordResponse: CommonFailedResponse<ActionFailType.WrongPassword> = {
+  success: false,
+  type: ActionFailType.WrongPassword,
+  msg: "用户名或密码错误",
+};
 
-export const DatabaseErrorResponse = (
+export const databaseErrorResponse = (
   msg: string,
 ): CommonFailedResponse<ActionFailType.DatabaseError> => ({
   success: false,
@@ -36,7 +33,7 @@ export const DatabaseErrorResponse = (
   msg,
 });
 
-export const MissingArgResponse = (
+export const missingArgResponse = (
   name = "必要",
 ): CommonFailedResponse<ActionFailType.MissingArg> => ({
   success: false,
@@ -44,15 +41,13 @@ export const MissingArgResponse = (
   msg: `缺少${name}参数`,
 });
 
-export const InvalidArgResponse = (
-  name = "",
-): CommonFailedResponse<ActionFailType.InvalidArg> => ({
+export const invalidArgResponse = (name = ""): CommonFailedResponse<ActionFailType.InvalidArg> => ({
   success: false,
   type: ActionFailType.InvalidArg,
   msg: `${name}参数非法`,
 });
 
-export const UnknownResponse = (msg: string): CommonFailedResponse => ({
+export const unknownResponse = (msg: string): CommonFailedResponse => ({
   success: false,
   type: ActionFailType.Unknown,
   msg,

@@ -4,8 +4,8 @@ import { getConnection, releaseConnection, request } from "@/utils/index.js";
 
 import type { ActionFailType } from "../config/index.js";
 import {
-  // DatabaseErrorResponse,
-  MissingArgResponse,
+  // databaseErrorResponse,
+  missingArgResponse,
   MissingCredentialResponse,
   WrongPasswordResponse,
 } from "../config/index.js";
@@ -27,44 +27,42 @@ export type MpRemoveResponse =
       | ActionFailType.Unknown
     >;
 
-export const mpRemoveHandler = request<MpRemoveResponse, MpRemoveOptions>(
-  async (req, res) => {
-    let connection: PoolConnection | null = null;
+export const mpRemoveHandler = request<MpRemoveResponse, MpRemoveOptions>(async (req, res) => {
+  let connection: PoolConnection | null = null;
 
-    try {
-      const { appId, id, authToken } = req.body;
+  try {
+    const { appId, id, authToken } = req.body;
 
-      if (!authToken || !id) return res.json(MissingCredentialResponse);
-      if (!appId) return res.json(MissingArgResponse("appId"));
+    if (!authToken || !id) return res.json(MissingCredentialResponse);
+    if (!appId) return res.json(missingArgResponse("appId"));
 
-      connection = await getConnection();
+    connection = await getConnection();
 
-      const [tokenResults] = await connection.execute<RowDataPacket[]>(
-        "SELECT * FROM `token` WHERE `appId` = ? AND `id` = ? AND `authToken` = ?",
-        [appId, id, authToken],
-      );
+    const [tokenResults] = await connection.execute<RowDataPacket[]>(
+      "SELECT * FROM `token` WHERE `appId` = ? AND `id` = ? AND `authToken` = ?",
+      [appId, id, authToken],
+    );
 
-      if (!tokenResults.length) return res.json(WrongPasswordResponse);
+    if (!tokenResults.length) return res.json(WrongPasswordResponse);
 
-      // FIXME: Add this back once we can fetch student info
-      // remove info from database
-      // try {
-      //   await connection.execute("DELETE FROM `student_info` WHERE `id` = ?", [
-      //     id,
-      //   ]);
-      //   await connection.execute(
-      //     "DELETE FROM `student_avatar` WHERE `id` = ?",
-      //     [id],
-      //   );
-      // } catch (err) {
-      //   console.error(err);
+    // FIXME: Add this back once we can fetch student info
+    // remove info from database
+    // try {
+    //   await connection.execute("DELETE FROM `student_info` WHERE `id` = ?", [
+    //     id,
+    //   ]);
+    //   await connection.execute(
+    //     "DELETE FROM `student_avatar` WHERE `id` = ?",
+    //     [id],
+    //   );
+    // } catch (err) {
+    //   console.error(err);
 
-      //   return res.json(DatabaseErrorResponse((err as Error).message));
-      // }
+    //   return res.json(databaseErrorResponse((err as Error).message));
+    // }
 
-      return res.json({ success: true });
-    } finally {
-      releaseConnection(connection);
-    }
-  },
-);
+    return res.json({ success: true });
+  } finally {
+    releaseConnection(connection);
+  }
+});

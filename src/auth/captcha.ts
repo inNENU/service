@@ -5,11 +5,7 @@ import { request } from "@/utils/index.js";
 import { authEncrypt } from "./encrypt.js";
 import { AUTH_CAPTCHA_URL, AUTH_LOGIN_URL, AUTH_SERVER } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
-import {
-  MissingArgResponse,
-  MissingCredentialResponse,
-  UnknownResponse,
-} from "../config/index.js";
+import { missingArgResponse, MissingCredentialResponse, unknownResponse } from "../config/index.js";
 import type { CommonFailedResponse } from "../typings.js";
 
 /**
@@ -21,6 +17,7 @@ export interface SliderTrackPoint {
   /** 滑块的垂直偏移量 */
   b: number;
   /** 时间差（毫秒） */
+  // oxlint-disable-next-line id-length
   c: number;
 }
 
@@ -79,9 +76,9 @@ export const getAuthCaptcha = async (
     const dataLength = imageBuffer.length;
 
     // Extract last 16 bytes as safeValue
-    for (let i = dataLength - 16; i < dataLength; i++) {
+    for (let i = dataLength - 16; i < dataLength; i++)
+      // oxlint-disable-next-line unicorn/prefer-code-point
       safeValue += String.fromCharCode(imageBuffer[i]);
-    }
 
     return {
       success: true,
@@ -93,10 +90,10 @@ export const getAuthCaptcha = async (
         safeValue,
       },
     };
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
 
-    return UnknownResponse("获取验证码失败");
+    return unknownResponse("获取验证码失败");
   }
 };
 
@@ -163,54 +160,46 @@ export interface VerifyAuthCaptchaResponse {
   success: boolean;
 }
 
-export type AuthCaptchaOptions =
-  | GetAuthCaptchaOptions
-  | VerifyAuthCaptchaOptions;
+export type AuthCaptchaOptions = GetAuthCaptchaOptions | VerifyAuthCaptchaOptions;
 
-export type AuthCaptchaResponse =
-  | GetAuthCaptchaResponse
-  | VerifyAuthCaptchaResponse;
+export type AuthCaptchaResponse = GetAuthCaptchaResponse | VerifyAuthCaptchaResponse;
 
-export const authCaptchaHandler = request<
-  AuthCaptchaResponse,
-  AuthCaptchaOptions,
-  { id?: string }
->(async (req, res) => {
-  try {
-    if (req.method === "GET") {
-      const id = req.params.id;
-      const cookieHeader = req.headers.cookie;
+export const authCaptchaHandler = request<AuthCaptchaResponse, AuthCaptchaOptions, { id?: string }>(
+  async (req, res) => {
+    try {
+      if (req.method === "GET") {
+        const { id } = req.params;
+        const cookieHeader = req.headers.cookie;
 
-      if (!id) return res.json(MissingArgResponse("id"));
+        if (!id) return res.json(missingArgResponse("id"));
+        if (!cookieHeader) return MissingCredentialResponse;
+
+        return res.json(await getAuthCaptcha(cookieHeader, id as string));
+      }
+
+      const cookieHeader = req.body?.cookie
+        ? req.body.cookie.map(({ name, value }) => `${name}=${value}`).join("; ")
+        : req.headers.cookie;
+
       if (!cookieHeader) return MissingCredentialResponse;
 
-      return res.json(await getAuthCaptcha(cookieHeader, id));
+      if ("id" in req.body) return res.json(await getAuthCaptcha(cookieHeader, req.body.id));
+
+      if (!req.body.moveLength || !req.body.tracks)
+        return res.json(missingArgResponse("moveLength, tracks"));
+
+      if (!req.body.safeValue) return res.json(missingArgResponse("safeValue"));
+
+      const result = await verifyAuthCaptcha(
+        cookieHeader,
+        req.body.moveLength,
+        req.body.tracks,
+        req.body.safeValue,
+      );
+
+      return res.json(result);
+    } catch {
+      return res.json(unknownResponse("验证码错误"));
     }
-
-    const cookieHeader = req.body?.cookie
-      ? req.body.cookie.map(({ name, value }) => `${name}=${value}`).join("; ")
-      : req.headers.cookie;
-
-    if (!cookieHeader) return MissingCredentialResponse;
-
-    if ("id" in req.body) {
-      return res.json(await getAuthCaptcha(cookieHeader, req.body.id));
-    }
-
-    if (!req.body.moveLength || !req.body.tracks)
-      return res.json(MissingArgResponse("moveLength, tracks"));
-
-    if (!req.body.safeValue) return res.json(MissingArgResponse("safeValue"));
-
-    const result = await verifyAuthCaptcha(
-      cookieHeader,
-      req.body.moveLength,
-      req.body.tracks,
-      req.body.safeValue,
-    );
-
-    return res.json(result);
-  } catch {
-    return res.json(UnknownResponse("验证码错误"));
-  }
-});
+  },
+);

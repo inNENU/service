@@ -5,14 +5,10 @@ import { isValidPathname, request } from "@/utils/index.js";
 
 import { OFFICIAL_URL, getOfficialPageView } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
-import { MissingArgResponse, UnknownResponse } from "../config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-} from "../typings.js";
+import { missingArgResponse, unknownResponse } from "../config/index.js";
+import type { CommonFailedResponse, CommonSuccessResponse } from "../typings.js";
 
-const INFO_REGEXP =
-  /<div class="ar_tit">\s*<h3>([^>]+)<\/h3>\s*<h6>([^]+?)<\/h6>/;
+const INFO_REGEXP = /<div class="ar_tit">\s*<h3>([^>]+)<\/h3>\s*<h6>([^]+?)<\/h6>/;
 const CONTENT_REGEXP =
   /<div class="v_news_content">([^]+?)<\/div>[^]+?<\/div>\s*<div id="div_vote_id">/;
 
@@ -43,34 +39,31 @@ export interface OfficialInfoData {
   content: RichTextNode[];
 }
 
-export type OfficialInfoDetailSuccessResponse =
-  CommonSuccessResponse<OfficialInfoData>;
+export type OfficialInfoDetailSuccessResponse = CommonSuccessResponse<OfficialInfoData>;
 
 export type OfficialInfoDetailResponse =
   | OfficialInfoDetailSuccessResponse
   | CommonFailedResponse<ActionFailType.MissingArg | ActionFailType.Unknown>;
 
-export const getOfficialInfoDetail = async (
-  url: string,
-): Promise<OfficialInfoDetailResponse> => {
-  if (!url) return MissingArgResponse("url");
+export const getOfficialInfoDetail = async (url: string): Promise<OfficialInfoDetailResponse> => {
+  if (!url) return missingArgResponse("url");
 
-  if (!isValidPathname(url)) return UnknownResponse("url参数不合法");
+  if (!isValidPathname(url)) return unknownResponse("url参数不合法");
 
   const response = await fetch(`${OFFICIAL_URL}/${url}`);
 
-  if (response.status !== 200) return UnknownResponse("请求失败");
+  if (response.status !== 200) return unknownResponse("请求失败");
 
   const text = await response.text();
 
   const [, title, info] = INFO_REGEXP.exec(text)!;
 
-  const time = TIME_REGEXP.exec(info)![1];
+  const [, time] = TIME_REGEXP.exec(info)!;
   const from = FROM_REGEXP.exec(info)?.[1];
   const author = AUTHOR_REGEXP.exec(info)?.[1];
   const editor = EDITOR_REGEXP.exec(info)?.[1];
   const [, owner, id] = PAGEVIEW_PARAMS_REGEXP.exec(info)!;
-  const content = CONTENT_REGEXP.exec(text)![1];
+  const [, content] = CONTENT_REGEXP.exec(text)!;
 
   const data = {
     title,
@@ -82,10 +75,10 @@ export const getOfficialInfoDetail = async (
     content: await getRichTextNodes(content, {
       transform: {
         // trim text node in p
+        // oxlint-disable-next-line id-length
         p: (node) => {
-          if (node.children?.length === 1 && node.children[0].type === "text") {
+          if (node.children?.length === 1 && node.children[0].type === "text")
             node.children[0].text = node.children[0].text.trim();
-          }
 
           return node;
         },
@@ -121,6 +114,4 @@ export const officialInfoDetailHandler = request<
   OfficialInfoDetailResponse,
   OfficialInfoDetailOptions,
   OfficialInfoDetailOptions
->(async (req, res) => {
-  return res.json(await getOfficialInfoDetail(req.query.url || req.body.url));
-});
+>(async (req, res) => res.json(await getOfficialInfoDetail(req.query.url || req.body.url)));

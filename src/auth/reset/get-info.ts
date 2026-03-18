@@ -1,4 +1,4 @@
-import { ActionFailType, UnknownResponse } from "@/config/index.js";
+import { ActionFailType, unknownResponse } from "@/config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse } from "@/typings.js";
 
 import type { ResetCaptchaInfo } from "../reset-captcha.js";
@@ -96,10 +96,7 @@ export const getInfo = async (
 
   if (data.code !== "0") {
     if (data.message === "验证码错误") {
-      const captchaResponse = await getResetCaptcha(
-        cookieHeader,
-        RESET_PAGE_URL,
-      );
+      const captchaResponse = await getResetCaptcha(cookieHeader, RESET_PAGE_URL);
 
       if (!captchaResponse.success) return captchaResponse;
 
@@ -111,15 +108,16 @@ export const getInfo = async (
       };
     }
 
-    return UnknownResponse(data.message);
+    return unknownResponse(data.message);
   }
 
   const captchaResponse = await getResetCaptcha(cookieHeader, RESET_PAGE_URL);
 
   if (!captchaResponse.success) return captchaResponse;
 
-  const { isAppealFlag, hideCellphone, hideEmail, sign, appealSign } =
-    JSON.parse(data.datas) as RawResetPasswordGetInfoParsedData;
+  const { isAppealFlag, hideCellphone, hideEmail, sign, appealSign } = JSON.parse(
+    data.datas,
+  ) as RawResetPasswordGetInfoParsedData;
 
   return {
     success: true,

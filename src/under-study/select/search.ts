@@ -1,16 +1,9 @@
 import type { ActionFailType } from "@/config/index.js";
-import { ExpiredResponse, MissingArgResponse } from "@/config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-  LoginOptions,
-} from "@/typings.js";
+import { expiredResponse, missingArgResponse } from "@/config/index.js";
+import type { CommonFailedResponse, CommonSuccessResponse, LoginOptions } from "@/typings.js";
 import { EDGE_USER_AGENT_HEADERS, request } from "@/utils/index.js";
 
-import type {
-  RawUnderSearchClassResponse,
-  UnderSelectCourseInfo,
-} from "./typings.js";
+import type { RawUnderSearchClassResponse, UnderSelectCourseInfo } from "./typings.js";
 import { getCourses } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
 import { UNDER_STUDY_SERVER } from "../utils.js";
@@ -42,9 +35,7 @@ export interface UnderSelectSearchOptions extends LoginOptions {
   office?: string;
 }
 
-export type UnderSelectSearchSuccessResponse = CommonSuccessResponse<
-  UnderSelectCourseInfo[]
->;
+export type UnderSelectSearchSuccessResponse = CommonSuccessResponse<UnderSelectCourseInfo[]>;
 
 export type UnderSelectSearchResponse =
   | UnderSelectSearchSuccessResponse
@@ -98,7 +89,7 @@ export const searchUnderSelectCourse = async (
     redirect: "manual",
   });
 
-  if (response.status !== 200) return ExpiredResponse;
+  if (response.status !== 200) return expiredResponse;
 
   const data = (await response.json()) as RawUnderSearchClassResponse;
 
@@ -114,7 +105,7 @@ export const underSelectSearchCourseHandler = request<
 >(async (req, res) => {
   const cookieHeader = req.headers.cookie!;
 
-  if (!req.body.link) return res.json(MissingArgResponse("link"));
+  if (!req.body.link) return res.json(missingArgResponse("link"));
 
   return res.json(await searchUnderSelectCourse(req.body, cookieHeader));
 });

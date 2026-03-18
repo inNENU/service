@@ -4,12 +4,8 @@ import { IE_8_USER_AGENT, getIETimeStamp } from "@/utils/index.js";
 
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ActionFailType, UnknownResponse } from "../config/index.js";
-import type {
-  CommonFailedResponse,
-  EmptyObject,
-  LoginOptions,
-} from "../typings.js";
+import { ActionFailType, unknownResponse } from "../config/index.js";
+import type { CommonFailedResponse, EmptyObject, LoginOptions } from "../typings.js";
 
 const nextLinkRegExp =
   /<input\s+type="button"\s+class="button"\s+onclick="window.location.href='([^']+)';"\s+value=" 下一步 "\/>/;
@@ -20,14 +16,11 @@ const info2RowRegExp =
   /<tr height="25px"\s*><td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<\/tr>/g;
 const readonlyRegExp = /<font[^>]+>ø<\/font>/;
 const inputRegExp = /<input[^>]*name="(.*?)"[^>]*value="(.*?)"[^>]*\/>/;
-const checkBoxRegExp =
-  /<input type="checkbox" value="(.*?)" id="gx" name="(.*?)"[^>]+\/>/;
+const checkBoxRegExp = /<input type="checkbox" value="(.*?)" id="gx" name="(.*?)"[^>]+\/>/;
 const selectRegExp = /<select[^>]+name="(.*?)"/;
 const optionRegExp = /<option value="([^"]+)">([^<]*?)<\/option>/g;
-const fieldsRegExp =
-  /<input\s+type="text"[^>]+name="(.*?)"\s+id=".*?"\s+value="(.*?)"[^>]+\/>/g;
-const hiddenFieldsRegExp =
-  /<input\s+type="hidden"[^>]+name="(.*?)"\s*value="(.*?)"\s*\/>/g;
+const fieldsRegExp = /<input\s+type="text"[^>]+name="(.*?)"\s+id=".*?"\s+value="(.*?)"[^>]+\/>/g;
+const hiddenFieldsRegExp = /<input\s+type="hidden"[^>]+name="(.*?)"\s*value="(.*?)"\s*\/>/g;
 const studyDataRegExp = /"brjl"\s*:\s*(\[.*?\])/;
 const familyDataRegExp = /"jtcy"\s*:\s*(\[.*?\])/;
 
@@ -108,19 +101,18 @@ export const getUnderStudentArchiveInfo = async (
 
   if (
     welcomePageContent.includes("您已经提交了报到") ||
-    /<input type="button" class="button" value="查看学籍信息"\s+onclick/.test(
-      welcomePageContent,
-    )
-  )
+    /<input type="button" class="button" value="查看学籍信息"\s+onclick/.test(welcomePageContent)
+  ) {
     return {
       success: false,
       type: ActionFailType.Existed,
       msg: "学籍已建立",
     };
+  }
 
   const link = nextLinkRegExp.exec(welcomePageContent)?.[1];
 
-  if (!link) return UnknownResponse("未找到注册学籍链接");
+  if (!link) return unknownResponse("未找到注册学籍链接");
 
   const infoResponse = await fetch(`${UNDER_SYSTEM_SERVER}${link}`, {
     headers: {
@@ -132,31 +124,31 @@ export const getUnderStudentArchiveInfo = async (
 
   const infoContent = await infoResponse.text();
 
-  if (infoContent.includes("不在控制范围内！"))
+  if (infoContent.includes("不在控制范围内！")) {
     return {
       success: false,
       type: ActionFailType.Existed,
       msg: "学籍已建立",
     };
+  }
 
-  const info = Array.from(infoContent.matchAll(infoRowRegExp)).map(
-    ([, ...matches]) =>
-      matches.map((item) => item.replace(/&nbsp;/g, " ").trim()),
+  const info = [...infoContent.matchAll(infoRowRegExp)].map(([, ...matches]) =>
+    matches.map((item) => item.replaceAll("&nbsp;", " ").trim()),
   );
 
-  const readonlyFields = info.filter(([, , editable]) =>
-    readonlyRegExp.test(editable),
-  );
+  // oxlint-disable-next-line unicorn/no-unreadable-array-destructuring
+  const readonlyFields = info.filter(([, , editable]) => readonlyRegExp.test(editable));
 
   const editableFields = info
+    // oxlint-disable-next-line unicorn/no-unreadable-array-destructuring
     .filter(([, , editable]) => !readonlyRegExp.test(editable))
     .map(([text, defaultValue, checkBox, inputOrSelect, remark]) => {
       const [, checkboxValue, checkboxName] = checkBoxRegExp.exec(checkBox)!;
 
-      const name = selectRegExp.exec(inputOrSelect)![1];
+      const [, name] = selectRegExp.exec(inputOrSelect)!;
 
-      const options = Array.from(inputOrSelect.matchAll(optionRegExp))
-        .map(([, value, text]) => ({ value, text }))
+      const options = [...inputOrSelect.matchAll(optionRegExp)]
+        .map(([, value, optionText]) => ({ value, text: optionText }))
         .filter(({ value }) => value);
 
       if (text === "火车到站") {
@@ -191,10 +183,12 @@ export const getUnderStudentArchiveInfo = async (
           checkboxName,
           checkboxValue,
           category,
-          values: values.map((item) => [
-            { text: "请选择", value: "" },
-            ...item.sort((a, b) => a.text.localeCompare(b.text)),
-          ]),
+          values: values.map((item) =>
+            // oxlint-disable-next-line unicorn/prefer-spread
+            [{ text: "请选择", value: "" }].concat(
+              item.sort((a, b) => a.text.localeCompare(b.text)),
+            ),
+          ),
           remark,
         };
       }
@@ -210,12 +204,14 @@ export const getUnderStudentArchiveInfo = async (
       };
     });
 
-  const hiddenFields = Array.from(infoContent.matchAll(hiddenFieldsRegExp)).map(
-    ([, name, value]) => ({ name, value }),
-  );
+  const hiddenFields = [...infoContent.matchAll(hiddenFieldsRegExp)].map(([, name, value]) => ({
+    name,
+    value,
+  }));
 
   return {
     success: true,
+    // oxlint-disable-next-line unicorn/no-unreadable-array-destructuring
     readonly: readonlyFields.map(([text, value, , , remark]) => {
       const realValue = /<font[^>]*>(.*)<\/font>/.exec(value)?.[1] ?? value;
 
@@ -228,6 +224,7 @@ export const getUnderStudentArchiveInfo = async (
     editable: editableFields,
     fields: [
       ...readonlyFields
+        // oxlint-disable-next-line unicorn/no-unreadable-array-destructuring
         .map(([, , , input]) => {
           const result = inputRegExp.exec(input);
 
@@ -235,9 +232,7 @@ export const getUnderStudentArchiveInfo = async (
 
           return null;
         })
-        .filter(
-          (item): item is { name: string; value: string } => item !== null,
-        ),
+        .filter((item): item is { name: string; value: string } => item != null),
       ...hiddenFields,
     ],
     path: pathRegExp.exec(infoContent)![1],
@@ -272,19 +267,16 @@ export const submitUnderStudentArchiveInfo = async (
       Cookie: cookieHeader,
       "User-Agent": IE_8_USER_AGENT,
     },
-    body: new URLSearchParams(
-      Object.fromEntries(fields.map(({ name, value }) => [name, value])),
-    ),
+    body: new URLSearchParams(Object.fromEntries(fields.map(({ name, value }) => [name, value]))),
   });
 
   const content = await submitResponse.text();
 
-  const inputs = Array.from(content.matchAll(info2RowRegExp))
-    .map(([, ...matches]) =>
-      matches.map((item) => item.replace(/&nbsp;/g, " ").trim()),
-    )
+  const inputs = [...content.matchAll(info2RowRegExp)]
+    .map(([, ...matches]) => matches.map((item) => item.replaceAll("&nbsp;", " ").trim()))
     .map(([text, input, remark]) => {
-      const [, name, value] = Array.from(input.matchAll(fieldsRegExp))[0];
+      // oxlint-disable-next-line prefer-destructuring
+      const [, name, value] = [...input.matchAll(fieldsRegExp)][0];
       const required = input.includes('<font color="red">*</font>');
 
       return {
@@ -296,9 +288,10 @@ export const submitUnderStudentArchiveInfo = async (
       };
     });
 
-  const newFields = Array.from(content.matchAll(hiddenFieldsRegExp)).map(
-    ([, name, value]) => ({ name, value }),
-  );
+  const newFields = [...content.matchAll(hiddenFieldsRegExp)].map(([, name, value]) => ({
+    name,
+    value,
+  }));
 
   return {
     success: true,
@@ -336,9 +329,7 @@ export const submitUnderStudentArchiveAddress = async (
       "Content-Type": "application/x-www-form-urlencoded",
       "User-Agent": IE_8_USER_AGENT,
     },
-    body: new URLSearchParams(
-      Object.fromEntries(fields.map(({ name, value }) => [name, value])),
-    ),
+    body: new URLSearchParams(Object.fromEntries(fields.map(({ name, value }) => [name, value]))),
   });
 
   const content = await submitResponse.text();
@@ -363,7 +354,7 @@ export const submitUnderStudentArchiveAddress = async (
       }))
     : [];
 
-  if (!study.length)
+  if (!study.length) {
     study.push({
       startTime: "",
       endTime: "",
@@ -371,8 +362,9 @@ export const submitUnderStudentArchiveAddress = async (
       title: "",
       witness: "",
     });
+  }
 
-  const newFields = Array.from(content.matchAll(hiddenFieldsRegExp))
+  const newFields = [...content.matchAll(hiddenFieldsRegExp)]
     .map(([, name, value]) => ({ name, value }))
     .filter((item) => item.name !== "jls");
 
@@ -426,17 +418,14 @@ export const submitUnderStudentArchiveStudy = async (
   );
 
   study.forEach(({ startTime, endTime, school, title, witness }, index) => {
-    if (startTime === "" || endTime === "" || school === "" || witness === "")
+    if (startTime === "" || endTime === "" || school === "" || witness === "") {
       throw new Error(
-        `第${
-          index + 1
-        }条学习与工作经历信息不完整。所有项目均为必填项，没有职务请填无。`,
+        `第${index + 1}条学习与工作经历信息不完整。所有项目均为必填项，没有职务请填无。`,
       );
+    }
 
     if (!/^\d{8}$/.test(startTime) || !/^\d{8}$/.test(endTime))
-      throw new Error(
-        `第${index + 1}条学习与工作经历时间格式不正确，格式应为 20010101`,
-      );
+      throw new Error(`第${index + 1}条学习与工作经历时间格式不正确，格式应为 20010101`);
 
     params[`qsrq${index + 1}`] = startTime;
     params[`zzrq${index + 1}`] = endTime;
@@ -479,7 +468,7 @@ export const submitUnderStudentArchiveStudy = async (
       }))
     : [];
 
-  if (!family.length)
+  if (!family.length) {
     family.push({
       relation: "",
       name: "",
@@ -487,8 +476,9 @@ export const submitUnderStudentArchiveStudy = async (
       title: "",
       phone: "",
     });
+  }
 
-  const newFields = Array.from(content.matchAll(hiddenFieldsRegExp))
+  const newFields = [...content.matchAll(hiddenFieldsRegExp)]
     .map(([, name, value]) => ({ name, value }))
     .filter((item) => item.name !== "jls");
 
@@ -541,10 +531,8 @@ export const submitUnderStudentArchiveFamily = async (
 
   family.forEach(({ name, relation, office, title, phone }, index) => {
     if (name === "") throw new Error(`第${index + 1}条家庭成员记录姓名缺失。`);
-    if (relation === "")
-      throw new Error(`第${index + 1}条家庭成员记录与本人关系缺失。`);
-    if (office === "")
-      throw new Error(`第${index + 1}条家庭成员记录工作地点缺失。`);
+    if (relation === "") throw new Error(`第${index + 1}条家庭成员记录与本人关系缺失。`);
+    if (office === "") throw new Error(`第${index + 1}条家庭成员记录工作地点缺失。`);
 
     params[`gxm${index + 1}`] = relation;
     params[`cyxm${index + 1}`] = name;
@@ -567,12 +555,13 @@ export const submitUnderStudentArchiveFamily = async (
 
   const content = await submitResponse.text();
 
-  if (content.includes("你已完成报到工作。"))
+  if (content.includes("你已完成报到工作。")) {
     return {
       success: true,
     };
+  }
 
-  return UnknownResponse("未知错误");
+  return unknownResponse("未知错误");
 };
 
 export const underCreateStudentArchiveHandler: RequestHandler<
@@ -585,28 +574,23 @@ export const underCreateStudentArchiveHandler: RequestHandler<
 > = async (req, res) => {
   const cookieHeader = req.headers.cookie!;
 
-  if (cookieHeader.includes("TEST"))
+  if (cookieHeader.includes("TEST")) {
     return res.json({
       success: false,
       msg: "已创建学籍",
     });
+  }
 
-  if (req.body.type === "get-info")
-    return res.json(await getUnderStudentArchiveInfo(cookieHeader));
+  if (req.body.type === "get-info") return res.json(await getUnderStudentArchiveInfo(cookieHeader));
 
   if (req.body.type === "submit-info")
-    return res.json(
-      await submitUnderStudentArchiveInfo(cookieHeader, req.body),
-    );
+    return res.json(await submitUnderStudentArchiveInfo(cookieHeader, req.body));
+
   if (req.body.type === "submit-study")
-    return res.json(
-      await submitUnderStudentArchiveStudy(cookieHeader, req.body),
-    );
+    return res.json(await submitUnderStudentArchiveStudy(cookieHeader, req.body));
 
   if (req.body.type === "submit-family")
-    return res.json(
-      await submitUnderStudentArchiveFamily(cookieHeader, req.body),
-    );
+    return res.json(await submitUnderStudentArchiveFamily(cookieHeader, req.body));
 
-  return res.json(UnknownResponse("未知操作"));
+  return res.json(unknownResponse("未知操作"));
 };

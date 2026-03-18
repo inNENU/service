@@ -3,12 +3,7 @@ import { CookieStore } from "@mptool/net";
 
 import { request } from "@/utils/index.js";
 
-import {
-  WHO_AUTH_URL,
-  WHO_HOMEPAGE,
-  WHO_SERVER,
-  WHO_SERVICE,
-} from "./utils.js";
+import { WHO_AUTH_URL, WHO_HOMEPAGE, WHO_SERVER, WHO_SERVICE } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { WEB_VPN_AUTH_SERVER, authLogin } from "../auth/index.js";
 import type { ActionFailType } from "../config/index.js";
@@ -16,13 +11,9 @@ import {
   MissingCredentialResponse,
   TEST_ID_NUMBER,
   TEST_LOGIN_RESULT,
-  UnknownResponse,
+  unknownResponse,
 } from "../config/index.js";
-import type {
-  AccountInfo,
-  CommonFailedResponse,
-  LoginOptions,
-} from "../typings.js";
+import type { AccountInfo, CommonFailedResponse, LoginOptions } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 import { vpnCASLogin } from "../vpn/index.js";
 
@@ -31,9 +22,7 @@ export interface WhoLoginSuccessResult {
   cookieStore: CookieStore;
 }
 
-export type WhoLoginFailedResponse =
-  | AuthLoginFailedResponse
-  | VPNLoginFailedResponse;
+export type WhoLoginFailedResponse = AuthLoginFailedResponse | VPNLoginFailedResponse;
 
 export type WhoLoginResult = WhoLoginSuccessResult | WhoLoginFailedResponse;
 
@@ -98,11 +87,7 @@ export const whoLogin = async (
     return result;
   }
 
-  console.log(
-    "location",
-    result.location,
-    cookieStore.getHeader(result.location),
-  );
+  console.log("location", result.location, cookieStore.getHeader(result.location));
 
   const ticketUrl = result.location;
   const ticketResponse = await fetch(ticketUrl, {
@@ -117,13 +102,9 @@ export const whoLogin = async (
   const finalLocation = ticketResponse.headers.get("Location");
 
   if (ticketResponse.status !== 302 || finalLocation !== WHO_HOMEPAGE) {
-    console.error(
-      "Login to Who failed",
-      ticketResponse.status,
-      await ticketResponse.text(),
-    );
+    console.error("Login to Who failed", ticketResponse.status, await ticketResponse.text());
 
-    return UnknownResponse("登录失败");
+    return unknownResponse("登录失败");
   }
 
   const finalResponse = await fetch(finalLocation, {
@@ -153,9 +134,7 @@ export const loginToWho = request<
   WhoLoginResponse | CommonFailedResponse<ActionFailType.MissingCredential>,
   LoginOptions
 >(async (req, res, next) => {
-  if (!req.body) {
-    return res.json(MissingCredentialResponse);
-  }
+  if (!req.body) return res.json(MissingCredentialResponse);
 
   const { id, password, authToken } = req.body;
 
@@ -169,29 +148,23 @@ export const loginToWho = request<
     return res.json(MissingCredentialResponse);
   }
 
-  return next();
+  next();
 });
 
-export const whoLoginHandler = request<WhoLoginResponse, AccountInfo>(
-  async (req, res) => {
-    const result =
-      // fake result for testing
-      req.body.id === TEST_ID_NUMBER
-        ? TEST_LOGIN_RESULT
-        : await whoLogin(req.body);
+export const whoLoginHandler = request<WhoLoginResponse, AccountInfo>(async (req, res) => {
+  const result =
+    // fake result for testing
+    req.body.id === TEST_ID_NUMBER ? TEST_LOGIN_RESULT : await whoLogin(req.body);
 
-    if (result.success) {
-      const cookies = result.cookieStore
-        .getAllCookies()
-        .map((item) => item.toJSON());
+  if (result.success) {
+    const cookies = result.cookieStore.getAllCookies().map((item) => item.toJSON());
 
-      cookies.forEach(({ name, value, ...rest }) => {
-        res.cookie(name, value, rest);
-      });
+    cookies.forEach(({ name, value, ...rest }) => {
+      res.cookie(name, value, rest);
+    });
 
-      return res.json({ success: true, cookies });
-    }
+    return res.json({ success: true, cookies });
+  }
 
-    return res.json(result);
-  },
-);
+  return res.json(result);
+});

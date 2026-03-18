@@ -11,13 +11,9 @@ import {
   MissingCredentialResponse,
   TEST_ID_NUMBER,
   TEST_LOGIN_RESULT,
-  UnknownResponse,
+  unknownResponse,
 } from "../config/index.js";
-import type {
-  AccountInfo,
-  CommonFailedResponse,
-  LoginOptions,
-} from "../typings.js";
+import type { AccountInfo, CommonFailedResponse, LoginOptions } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 import { vpnCASLogin } from "../vpn/index.js";
 
@@ -70,7 +66,7 @@ export const actionLogin = async (
       await ticketResponse.text(),
     );
 
-    return UnknownResponse("由于当前账户暂时未获权限，融合门户登录失败");
+    return unknownResponse("由于当前账户暂时未获权限，融合门户登录失败");
   }
 
   const finalLocation = ticketResponse.headers.get("Location");
@@ -94,7 +90,7 @@ export const actionLogin = async (
         await finalLocationResponse.text(),
       );
 
-      return UnknownResponse("登录失败");
+      return unknownResponse("登录失败");
     }
 
     const content = await finalLocationResponse.text();
@@ -119,7 +115,7 @@ export const actionLogin = async (
 
   console.error("action login failed", finalLocation);
 
-  return UnknownResponse("登录失败");
+  return unknownResponse("登录失败");
 };
 
 export interface ActionLoginSuccessResponse {
@@ -127,17 +123,12 @@ export interface ActionLoginSuccessResponse {
   cookies: CookieType[];
 }
 
-export type ActionLoginFailedResponse =
-  | AuthLoginFailedResponse
-  | VPNLoginFailedResponse;
+export type ActionLoginFailedResponse = AuthLoginFailedResponse | VPNLoginFailedResponse;
 
-export type ActionLoginResponse =
-  | ActionLoginSuccessResponse
-  | ActionLoginFailedResponse;
+export type ActionLoginResponse = ActionLoginSuccessResponse | ActionLoginFailedResponse;
 
 export const loginToAction = request<
-  | ActionLoginFailedResponse
-  | CommonFailedResponse<ActionFailType.MissingCredential>,
+  ActionLoginFailedResponse | CommonFailedResponse<ActionFailType.MissingCredential>,
   LoginOptions
 >(async (req, res, next) => {
   if (!req.body) return res.json(MissingCredentialResponse);
@@ -154,31 +145,24 @@ export const loginToAction = request<
     return res.json(MissingCredentialResponse);
   }
 
-  return next();
+  next();
 });
 
-export const actionLoginHandler = request<ActionLoginResponse, AccountInfo>(
-  async (req, res) => {
-    const result =
-      req.body.id === TEST_ID_NUMBER
-        ? TEST_LOGIN_RESULT
-        : await actionLogin(req.body);
+export const actionLoginHandler = request<ActionLoginResponse, AccountInfo>(async (req, res) => {
+  const result = req.body.id === TEST_ID_NUMBER ? TEST_LOGIN_RESULT : await actionLogin(req.body);
 
-    if (result.success) {
-      const cookies = result.cookieStore
-        .getAllCookies()
-        .map((item) => item.toJSON());
+  if (result.success) {
+    const cookies = result.cookieStore.getAllCookies().map((item) => item.toJSON());
 
-      cookies.forEach(({ name, value, ...rest }) => {
-        res.cookie(name, value, rest);
-      });
+    cookies.forEach(({ name, value, ...rest }) => {
+      res.cookie(name, value, rest);
+    });
 
-      return res.json({
-        success: true,
-        cookies,
-      });
-    }
+    return res.json({
+      success: true,
+      cookies,
+    });
+  }
 
-    return res.json(result);
-  },
-);
+  return res.json(result);
+});

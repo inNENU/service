@@ -1,28 +1,9 @@
 {
+  "extends": "@mr-hope/tsconfig/bundler.json",
   "compilerOptions": {
-    "useDefineForClassFields": true,
-    "forceConsistentCasingInFileNames": true,
-    "module": "ESNext",
-    "lib": ["ESNext", "DOM"],
-    "target": "ES2022",
-    "skipLibCheck": true,
-
-    /* Bundler mode */
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "moduleResolution": "Bundler",
-    "noEmit": true,
-    "verbatimModuleSyntax": true,
     "paths": {
       "@/*": ["./src/*"]
-    },
-
-    /* Linting */
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    }
   },
   "include": ["**/*.ts"]
 }

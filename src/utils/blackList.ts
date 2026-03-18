@@ -21,11 +21,12 @@ export const isInBlackList = async (
     if (idRows.length > 0) {
       console.info(`Blocking user ${id}`);
 
-      if (openid)
+      if (openid) {
         await connection.execute(
           "INSERT IGNORE INTO `openid_blacklist` (`openid`, `remark`) VALUES (?, ?)",
           [openid, `因登录 ${id} 添加`],
         );
+      }
 
       return true;
     }
@@ -40,16 +41,17 @@ export const isInBlackList = async (
     if (conditionRows.length > 0) {
       console.info("Blocking user %s due to condition", id, conditionRows[0]);
 
-      await connection.execute(
-        "INSERT IGNORE INTO `id_blacklist` (`id`, `remark`) VALUES (?, ?)",
-        [id, `因符合规则添加: ${JSON.stringify(conditionRows[0])}`],
-      );
+      await connection.execute("INSERT IGNORE INTO `id_blacklist` (`id`, `remark`) VALUES (?, ?)", [
+        id,
+        `因符合规则添加: ${JSON.stringify(conditionRows[0])}`,
+      ]);
 
-      if (openid)
+      if (openid) {
         await connection.execute(
           "INSERT IGNORE INTO `openid_blacklist` (`openid`, `remark`) VALUES (?, ?)",
           [openid, `因登录 ${id} 添加`],
         );
+      }
 
       return true;
     }

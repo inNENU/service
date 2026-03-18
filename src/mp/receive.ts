@@ -3,7 +3,9 @@ import type { PoolConnection } from "mysql2/promise";
 import { v7 } from "uuid";
 
 import { getConnection, releaseConnection, request } from "@/utils/index.js";
-import "../config/loadEnv.js";
+
+// oxlint-disable-next-line import/no-unassigned-import
+import "@/config/loadEnv.js";
 
 interface BaseMessage {
   ToUserName: string;
@@ -55,14 +57,15 @@ export const mpReceiveHandler = request<
     const { signature, timestamp, nonce } = req.query;
 
     if (
-      sha1([process.env.TOKEN, timestamp, nonce].sort().join("")) !== signature
-    ) {
+      sha1(
+        [process.env.TOKEN, timestamp, nonce]
+          .sort((a, b) => String(a ?? "").localeCompare(String(b ?? "")))
+          .join(""),
+      ) !== signature
+    )
       return res.status(403).send("Invalid signature");
-    }
 
-    if (req.method === "GET") {
-      return res.send(req.query.echostr);
-    }
+    if (req.method === "GET") return res.send(req.query.echostr);
 
     const { ToUserName, FromUserName, CreateTime, MsgType } = req.body;
 
@@ -84,11 +87,7 @@ export const mpReceiveHandler = request<
       console.error("Database error", err);
     }
 
-    if (
-      MsgType === "text" ||
-      MsgType === "image" ||
-      MsgType === "miniprogrampage"
-    ) {
+    if (MsgType === "text" || MsgType === "image" || MsgType === "miniprogrampage") {
       return res.json({
         ToUserName: FromUserName,
         FromUserName: ToUserName,

@@ -9,23 +9,17 @@ import { authLogin } from "../auth/index.js";
 import {
   ActionFailType,
   MissingCredentialResponse,
-  UnknownResponse,
+  unknownResponse,
   WAF_URL,
 } from "../config/index.js";
-import type {
-  AccountInfo,
-  CommonFailedResponse,
-  LoginOptions,
-} from "../typings.js";
+import type { AccountInfo, CommonFailedResponse, LoginOptions } from "../typings.js";
 
 export interface GradSystemLoginSuccessResult {
   success: true;
   cookieStore: CookieStore;
 }
 
-export type GradSystemLoginResult =
-  | GradSystemLoginSuccessResult
-  | AuthLoginFailedResponse;
+export type GradSystemLoginResult = GradSystemLoginSuccessResult | AuthLoginFailedResponse;
 
 export const gradSystemLogin = async (
   options: AccountInfo,
@@ -53,23 +47,20 @@ export const gradSystemLogin = async (
   cookieStore.applyResponse(ticketResponse, result.location);
 
   if (ticketResponse.status !== 302) {
-    console.log(
-      "Failed to resolve ticket response",
-      result.location,
-      ticketResponse.status,
-    );
+    console.log("Failed to resolve ticket response", result.location, ticketResponse.status);
 
-    return UnknownResponse("登录失败");
+    return unknownResponse("登录失败");
   }
 
   const finalLocation = ticketResponse.headers.get("Location");
 
-  if (finalLocation?.includes(WAF_URL))
+  if (finalLocation?.includes(WAF_URL)) {
     return {
       success: false,
       type: ActionFailType.Forbidden,
       msg: "此账户无法登录研究生教学服务系统",
     };
+  }
 
   if (finalLocation === CALLBACK_URL) {
     const indexResponse = await fetch(finalLocation, {
@@ -86,7 +77,7 @@ export const gradSystemLogin = async (
     };
   }
 
-  return UnknownResponse("登录失败");
+  return unknownResponse("登录失败");
 };
 
 export interface GradSystemLoginSuccessResponse {
@@ -94,18 +85,13 @@ export interface GradSystemLoginSuccessResponse {
   cookies: CookieType[];
 }
 
-export type GradSystemLoginResponse =
-  | GradSystemLoginSuccessResponse
-  | AuthLoginFailedResponse;
+export type GradSystemLoginResponse = GradSystemLoginSuccessResponse | AuthLoginFailedResponse;
 
 export const loginToGradSystem = request<
-  | GradSystemLoginResponse
-  | CommonFailedResponse<ActionFailType.MissingCredential>,
+  GradSystemLoginResponse | CommonFailedResponse<ActionFailType.MissingCredential>,
   LoginOptions
 >(async (req, res, next) => {
-  if (!req.body) {
-    return res.json(MissingCredentialResponse);
-  }
+  if (!req.body) return res.json(MissingCredentialResponse);
 
   const { id, password, authToken } = req.body;
 
@@ -119,29 +105,26 @@ export const loginToGradSystem = request<
     return res.json(MissingCredentialResponse);
   }
 
-  return next();
+  next();
 });
 
-export const gradSystemLoginHandler = request<
-  GradSystemLoginResponse,
-  AccountInfo
->(async (req, res) => {
-  const result = await gradSystemLogin(req.body);
+export const gradSystemLoginHandler = request<GradSystemLoginResponse, AccountInfo>(
+  async (req, res) => {
+    const result = await gradSystemLogin(req.body);
 
-  if (result.success) {
-    const cookies = result.cookieStore
-      .getAllCookies()
-      .map((item) => item.toJSON());
+    if (result.success) {
+      const cookies = result.cookieStore.getAllCookies().map((item) => item.toJSON());
 
-    cookies.forEach(({ name, value, ...rest }) => {
-      res.cookie(name, value, rest);
-    });
+      cookies.forEach(({ name, value, ...rest }) => {
+        res.cookie(name, value, rest);
+      });
 
-    return res.json({
-      success: true,
-      cookies,
-    });
-  }
+      return res.json({
+        success: true,
+        cookies,
+      });
+    }
 
-  return res.json(result);
-});
+    return res.json(result);
+  },
+);

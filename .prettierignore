@@ -1,6 +1,0 @@
-cache/**
-dist/**
-node_modules/**
-temp/**
-
-pnpm-lock.yaml

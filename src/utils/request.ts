@@ -11,13 +11,13 @@ import type { ParsedQs } from "qs";
 import type { EmptyObject } from "../typings.js";
 
 export type CustomRequestHandler<
-  P = ParamsDictionary,
+  Params = ParamsDictionary,
   ResBody = unknown,
   ReqBody = unknown,
   ReqQuery = ParsedQs,
   LocalsObj extends Record<string, unknown> = Record<string, unknown>,
 > = (
-  req: Request<P, ResBody, ReqBody, ReqQuery, LocalsObj>,
+  req: Request<Params, ResBody, ReqBody, ReqQuery, LocalsObj>,
   res: Response<ResBody, LocalsObj>,
   next: NextFunction,
 ) => unknown;
@@ -35,8 +35,6 @@ export const request =
   async (req, res, next) => {
     try {
       await handler(req, res, next);
-
-      return;
     } catch (err) {
       next(err);
     }

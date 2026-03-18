@@ -15,7 +15,7 @@ import {
 } from "./utils.js";
 import {
   ActionFailType,
-  UnknownResponse,
+  unknownResponse,
   WrongPasswordResponse,
   getRandomBlacklistHint,
 } from "../config/index.js";
@@ -58,15 +58,16 @@ export const authLogin = async ({
 }: AuthLoginOptions & {
   cookieStore?: CookieStore;
 }): Promise<AuthLoginResult> => {
-  if (await isInBlackList(id))
+  if (await isInBlackList(id)) {
     return {
       success: false,
       type: ActionFailType.BlackList,
       msg: getRandomBlacklistHint(),
     };
+  }
 
   // FIXME:
-  // return UnknownResponse(
+  // return unknownResponse(
   //   // "教育部网络安全演练期间，小程序账号功能暂不可用。预计持续两周",
   //   "放假期间，小程序暂不可用",
   // );
@@ -100,12 +101,13 @@ export const authLogin = async ({
   if (loginPageResponse.status === 302) {
     const location = loginPageResponse.headers.get("Location");
 
-    if (isReAuthPage(server, location))
+    if (isReAuthPage(server, location)) {
       return {
         success: false,
         type: ActionFailType.NeedReAuth,
         msg: "需要二次认证，请重新登录",
       };
+    }
 
     return {
       success: true,
@@ -116,12 +118,12 @@ export const authLogin = async ({
 
   if (loginPageResponse.status !== 200) {
     console.error(
-      "Unknown login page status: ",
+      "Unknown login page status:",
       loginPageResponse.status,
       await loginPageResponse.text(),
     );
 
-    return UnknownResponse("未知错误");
+    return unknownResponse("未知错误");
   }
 
   const content = await loginPageResponse.text();
@@ -139,8 +141,8 @@ export const authLogin = async ({
     };
   }
 
-  const salt = SALT_REGEXP.exec(content)![1];
-  const execution = /name="execution" value="(.*?)"/.exec(content)![1];
+  const [, salt] = SALT_REGEXP.exec(content)!;
+  const [, execution] = /name="execution" value="(.*?)"/.exec(content)!;
 
   cookieStore.set({
     name: "org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE",
@@ -160,17 +162,17 @@ export const authLogin = async ({
 
   cookieStore.applyResponse(captchaCheckResponse, server);
 
-  const { isNeed: needCaptcha } =
-    await (captchaCheckResponse.json() as Promise<{
-      isNeed: boolean;
-    }>);
+  const { isNeed: needCaptcha } = await (captchaCheckResponse.json() as Promise<{
+    isNeed: boolean;
+  }>);
 
-  if (needCaptcha)
+  if (needCaptcha) {
     return {
       success: false,
       type: ActionFailType.NeedCaptcha,
       msg: "需要验证码，请重新登录",
     };
+  }
 
   const response = await fetch(url, {
     method: "POST",
@@ -199,8 +201,7 @@ export const authLogin = async ({
   cookieStore.applyResponse(response, server);
 
   if (response.status === 302) {
-    if (location?.startsWith(`${server}/authserver/login`))
-      return WrongPasswordResponse;
+    if (location?.startsWith(`${server}/authserver/login`)) return WrongPasswordResponse;
 
     return {
       success: true,
@@ -216,56 +217,60 @@ export const authLogin = async ({
     )
       return WrongPasswordResponse;
 
-    if (resultContent.includes("图形动态码错误"))
+    if (resultContent.includes("图形动态码错误")) {
       return {
         success: false,
         type: ActionFailType.WrongCaptcha,
         msg: "图形动态码错误，请重试",
       };
+    }
 
-    if (resultContent.includes("该帐号已经被禁用"))
+    if (resultContent.includes("该帐号已经被禁用")) {
       return {
         success: false,
         type: ActionFailType.Forbidden,
         msg: "该帐号已经被禁用",
       };
+    }
 
-    const lockedResult = /<span>账号已冻结，预计解冻时间：(.*?)<\/span>/.exec(
-      resultContent,
-    );
+    const lockedResult = /<span>账号已冻结，预计解冻时间：(.*?)<\/span>/.exec(resultContent);
 
-    if (lockedResult)
+    if (lockedResult) {
       return {
         success: false,
         type: ActionFailType.AccountLocked,
         msg: `账号已冻结，预计解冻时间：${lockedResult[1]}`,
       };
+    }
   }
 
   if (response.status === 200) {
     if (
       resultContent.includes("会话已失效，请刷新页面再登录") ||
       resultContent.includes("当前登录会话已失效，请重新登录！")
-    )
+    ) {
       return {
         success: false,
         type: ActionFailType.Expired,
         msg: "由于操作超时或在其他地方操作，会话已过期。请重新登录",
       };
+    }
 
-    if (resultContent.includes("当前账户已在其他PC端登录会话。"))
+    if (resultContent.includes("当前账户已在其他PC端登录会话。")) {
       return {
         success: false,
         type: ActionFailType.EnabledSSO,
         msg: "您已开启单点登录，请访问学校统一身份认证官网，在个人设置中关闭单点登录后重试。",
       };
+    }
 
-    if (resultContent.includes("<span>请输入验证码</span>"))
+    if (resultContent.includes("<span>请输入验证码</span>")) {
       return {
         success: false,
         type: ActionFailType.NeedCaptcha,
         msg: "需要验证码，请重新登录。",
       };
+    }
 
     if (
       resultContent.includes("不允许使用认证服务来认证您访问的目标应用。") ||
@@ -281,9 +286,9 @@ export const authLogin = async ({
     }
   }
 
-  console.error("Unknown login response: ", response.status, resultContent);
+  console.error("Unknown login response:", response.status, resultContent);
 
-  return UnknownResponse("未知错误");
+  return unknownResponse("未知错误");
 };
 
 export interface AuthLoginSuccessResponse {
@@ -292,30 +297,24 @@ export interface AuthLoginSuccessResponse {
   location: string;
 }
 
-export type AuthLoginResponse =
-  | AuthLoginSuccessResponse
-  | AuthLoginFailedResponse;
+export type AuthLoginResponse = AuthLoginSuccessResponse | AuthLoginFailedResponse;
 
-export const authLoginHandler = request<AuthLoginResponse, AuthLoginOptions>(
-  async (req, res) => {
-    const result = await authLogin(req.body);
+export const authLoginHandler = request<AuthLoginResponse, AuthLoginOptions>(async (req, res) => {
+  const result = await authLogin(req.body);
 
-    if (result.success) {
-      const cookies = result.cookieStore
-        .getAllCookies()
-        .map((item) => item.toJSON());
+  if (result.success) {
+    const cookies = result.cookieStore.getAllCookies().map((item) => item.toJSON());
 
-      cookies.forEach(({ name, value, ...rest }) => {
-        res.cookie(name, value, rest);
-      });
+    cookies.forEach(({ name, value, ...rest }) => {
+      res.cookie(name, value, rest);
+    });
 
-      return res.json({
-        success: true,
-        cookies,
-        location: result.location,
-      });
-    }
+    return res.json({
+      success: true,
+      cookies,
+      location: result.location,
+    });
+  }
 
-    return res.json(result);
-  },
-);
+  return res.json(result);
+});

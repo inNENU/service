@@ -30,9 +30,7 @@ export interface CommonListSuccessResponse<T = EmptyObject> {
   total: number;
 }
 
-export interface CommonFailedResponse<
-  T extends ActionFailType = ActionFailType.Unknown,
-> {
+export interface CommonFailedResponse<T extends ActionFailType = ActionFailType.Unknown> {
   success: false;
   type: T;
   msg: string;

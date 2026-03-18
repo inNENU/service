@@ -6,14 +6,12 @@ import { mysqlPool } from "@/utils/index.js";
  * 数据库连接池监控器
  */
 export class DatabaseMonitor {
-  private pool: Pool;
-  private intervalId?: NodeJS.Timeout;
+  private intervalId?: ReturnType<typeof setInterval> | null;
   private activeConnections = 0;
   private queuedRequests = 0;
   private totalConnections = 0;
 
-  constructor(pool: Pool) {
-    this.pool = pool;
+  constructor(private pool: Pool) {
     this.setupPoolEventListeners();
   }
 
@@ -23,16 +21,13 @@ export class DatabaseMonitor {
   private setupPoolEventListeners(): void {
     // 监听连接获取事件
     this.pool.on("acquire", () => {
-      this.activeConnections++;
-      this.totalConnections = Math.max(
-        this.totalConnections,
-        this.activeConnections,
-      );
+      this.activeConnections += 1;
+      this.totalConnections = Math.max(this.totalConnections, this.activeConnections);
     });
 
     // 监听连接入队事件
     this.pool.on("enqueue", () => {
-      this.queuedRequests++;
+      this.queuedRequests += 1;
     });
 
     // this.pool.on("connection", () => {
@@ -48,6 +43,8 @@ export class DatabaseMonitor {
 
   /**
    * 获取连接池统计信息
+   *
+   * @returns 连接池的当前状态统计信息
    */
   getPoolStats(): {
     activeConnections: number;
@@ -69,8 +66,10 @@ export class DatabaseMonitor {
 
   /**
    * 开始监控连接池状态
+   *
+   * @param intervalMs 监控间隔时间（毫秒），默认为 5 分钟
    */
-  startMonitoring(intervalMs = /** 5 min */ 300000): void {
+  startMonitoring(intervalMs = 300000): void {
     if (this.intervalId) {
       console.warn("监控已经在运行中");
 
@@ -90,7 +89,7 @@ export class DatabaseMonitor {
   stopMonitoring(): void {
     if (this.intervalId) {
       clearInterval(this.intervalId);
-      this.intervalId = undefined;
+      this.intervalId = null;
     }
   }
 
@@ -102,35 +101,26 @@ export class DatabaseMonitor {
       const stats = this.getPoolStats();
 
       console.info("=== 数据库连接池状态 ===");
-      console.info(
-        `活跃连接数: ${stats.activeConnections}/${stats.connectionLimit}`,
-      );
-      console.info(
-        `排队请求数: ${stats.queuedRequests} (限制: ${stats.queueLimit || "无限制"})`,
-      );
+      console.info(`活跃连接数: ${stats.activeConnections}/${stats.connectionLimit}`);
+      console.info(`排队请求数: ${stats.queuedRequests} (限制: ${stats.queueLimit || "无限制"})`);
       console.info(`历史最大连接数: ${stats.totalConnections}`);
 
       // 计算连接池使用率
-      const usagePercent = (
-        (stats.activeConnections / stats.connectionLimit) *
-        100
-      ).toFixed(1);
+      const usagePercent = ((stats.activeConnections / stats.connectionLimit) * 100).toFixed(1);
 
       console.info(`连接池使用率: ${usagePercent}%`);
 
       // 如果使用率过高，发出警告
-      if (parseFloat(usagePercent) > 80) {
+      if (Number.parseFloat(usagePercent) > 80)
         console.warn(`⚠️  连接池使用率过高: ${usagePercent}%`);
-      }
 
       // 如果有排队请求，发出警告
-      if (stats.queuedRequests > 0) {
+      if (stats.queuedRequests > 0)
         console.warn(`⚠️  有 ${stats.queuedRequests} 个请求在排队等待连接`);
-      }
 
       console.info("========================");
-    } catch (error) {
-      console.error("获取连接池状态失败:", error);
+    } catch (err) {
+      console.error("获取连接池状态失败:", err);
     }
   }
 
@@ -144,6 +134,8 @@ export class DatabaseMonitor {
 
   /**
    * 获取连接池健康状态
+   *
+   * @returns 数据库是否健康以及错误信息（如果有）
    */
   async getHealthStatus(): Promise<{
     healthy: boolean;
@@ -160,14 +152,14 @@ export class DatabaseMonitor {
         return {
           healthy: true,
         };
-      } catch (error) {
+      } catch (err) {
         this.pool.releaseConnection(connection);
-        throw error;
+        throw err;
       }
-    } catch (error) {
+    } catch (err) {
       return {
         healthy: false,
-        errorMessage: (error as Error).message,
+        errorMessage: (err as Error).message,
       };
     }
   }
@@ -177,6 +169,7 @@ export const databaseMonitor = new DatabaseMonitor(mysqlPool);
 
 databaseMonitor.startMonitoring();
 
+// oxlint-disable-next-line unicorn/prefer-top-level-await
 void databaseMonitor.getHealthStatus().then((status) => {
   console.log("Database Health Status:", status);
 });

@@ -1,14 +1,10 @@
 import {
   ActionFailType,
-  ExpiredResponse,
-  MissingArgResponse,
-  UnknownResponse,
+  expiredResponse,
+  missingArgResponse,
+  unknownResponse,
 } from "@/config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-  LoginOptions,
-} from "@/typings.js";
+import type { CommonFailedResponse, CommonSuccessResponse, LoginOptions } from "@/typings.js";
 import { EDGE_USER_AGENT_HEADERS, request } from "@/utils/index.js";
 
 import type { SelectOptionConfig } from "./store.js";
@@ -31,10 +27,8 @@ const COURSE_TYPE_ITEM_REGEXP = /<option value='(.+?)' >(.*?)<\/option>/g;
 const CURRENT_GRADE_REGEXP = /<option value='(\d+)' selected>\1<\/option>/;
 const MAJORS_REGEXP =
   /<select id='zydm' name='zydm'.*?><option value=''>\(全部\)<\/option>(.*?)<\/select>/;
-const MAJOR_ITEM_REGEXP =
-  /<option value='(\d+?)' (?:selected)?>\d+-(.*?)<\/option>/g;
-const CURRENT_MAJOR_REGEXP =
-  /<option value='(\d{6,7})' selected>\d+-(.*?)<\/option>/;
+const MAJOR_ITEM_REGEXP = /<option value='(\d+?)' (?:selected)?>\d+-(.*?)<\/option>/g;
+const CURRENT_MAJOR_REGEXP = /<option value='(\d{6,7})' selected>\d+-(.*?)<\/option>/;
 const INFO_TITLE_REGEXP =
   /<span id="title">(.*?)学期&nbsp;&nbsp;(.*?)&nbsp;&nbsp;(?:<span.*?>(.*?)<\/span>)?<\/span>/;
 const ALLOWED_INFO_REGEXP =
@@ -42,14 +36,12 @@ const ALLOWED_INFO_REGEXP =
 
 const setMajors = (content: string): void => {
   if (!majorsStore.state.length) {
-    const majorText = MAJORS_REGEXP.exec(content)![1];
+    const [, majorText] = MAJORS_REGEXP.exec(content)!;
 
-    const majors = Array.from(majorText.matchAll(MAJOR_ITEM_REGEXP)).map(
-      ([, value, name]) => ({
-        value,
-        name,
-      }),
-    );
+    const majors = [...majorText.matchAll(MAJOR_ITEM_REGEXP)].map(([, value, name]) => ({
+      value,
+      name,
+    }));
 
     majorsStore.setState(majors);
   }
@@ -57,14 +49,14 @@ const setMajors = (content: string): void => {
 
 const setCourseOffices = (content: string): void => {
   if (!officesStore.state.length) {
-    const courseOfficeText = COURSE_OFFICES_REGEXP.exec(content)![1];
+    const [, courseOfficeText] = COURSE_OFFICES_REGEXP.exec(content)!;
 
-    const offices = Array.from(
-      courseOfficeText.matchAll(COURSE_OFFICE_ITEM_REGEXP),
-    ).map(([, value, name]) => ({
-      value,
-      name,
-    }));
+    const offices = [...courseOfficeText.matchAll(COURSE_OFFICE_ITEM_REGEXP)].map(
+      ([, value, name]) => ({
+        value,
+        name,
+      }),
+    );
 
     officesStore.setState(offices);
   }
@@ -72,11 +64,9 @@ const setCourseOffices = (content: string): void => {
 
 const setCourseTypes = (content: string): void => {
   if (!typesStore.state.length) {
-    const courseTypeText = COURSE_TYPES_REGEXP.exec(content)![1];
+    const [, courseTypeText] = COURSE_TYPES_REGEXP.exec(content)!;
 
-    const types = Array.from(
-      courseTypeText.matchAll(COURSE_TYPE_ITEM_REGEXP),
-    ).map(([, value, name]) => ({
+    const types = [...courseTypeText.matchAll(COURSE_TYPE_ITEM_REGEXP)].map(([, value, name]) => ({
       value,
       name,
     }));
@@ -87,14 +77,12 @@ const setCourseTypes = (content: string): void => {
 
 const setAreas = (content: string): void => {
   if (!areasStore.state.length) {
-    const areaText = AREAS_REGEXP.exec(content)![1];
+    const [, areaText] = AREAS_REGEXP.exec(content)!;
 
-    const areas = Array.from(areaText.matchAll(AREA_ITEM_REGEXP)).map(
-      ([, value, name]) => ({
-        value,
-        name,
-      }),
-    );
+    const areas = [...areaText.matchAll(AREA_ITEM_REGEXP)].map(([, value, name]) => ({
+      value,
+      name,
+    }));
 
     areasStore.setState(areas);
   }
@@ -150,36 +138,27 @@ export interface UnderSelectDisallowedInfo extends UnderSelectBaseInfo {
   canSelect: false;
 }
 
-export type UnderSelectInfo =
-  | UnderSelectAllowedInfo
-  | UnderSelectDisallowedInfo;
+export type UnderSelectInfo = UnderSelectAllowedInfo | UnderSelectDisallowedInfo;
 
 const getSelectInfo = (content: string): UnderSelectInfo => {
   const [, term, name, canCancelText = ""] = INFO_TITLE_REGEXP.exec(content)!;
 
   const canSelect = !content.includes("现在不是选课时间");
 
-  const currentArea = name.includes("本部")
-    ? "本部"
-    : name.includes("净月")
-      ? "净月"
-      : "";
+  const currentArea = name.includes("本部") ? "本部" : name.includes("净月") ? "净月" : "";
   const currentGrade = Number(CURRENT_GRADE_REGEXP.exec(content)![1]);
+  // oxlint-disable-next-line prefer-destructuring
   const currentMajor = CURRENT_MAJOR_REGEXP.exec(content)![2];
 
   const currentYear = new Date().getFullYear();
-  const grades = Array(6)
-    .fill(null)
-    .map((_, i) => currentYear - i);
+  const grades = Array.from({ length: 6 }, (_, i) => currentYear - i);
 
   setAreas(content);
   setCourseOffices(content);
   setCourseTypes(content);
   setMajors(content);
 
-  const currentMajorConfig = majorsStore.state.find(
-    (major) => major.name === currentMajor,
-  )!;
+  const currentMajorConfig = majorsStore.state.find((major) => major.name === currentMajor)!;
 
   const state = {
     term,
@@ -238,9 +217,7 @@ const checkCourseCommentary = async (
   try {
     const content = await response.text();
 
-    if (content.includes("评价已完成")) {
-      return { completed: true, msg: "已完成评教" };
-    }
+    if (content.includes("评价已完成")) return { completed: true, msg: "已完成评教" };
 
     if (content.includes("下次可检查时间为：")) {
       const time = /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.exec(content)?.[0];
@@ -248,9 +225,7 @@ const checkCourseCommentary = async (
       return { completed: false, msg: `检查过于频繁，请于 ${time} 后重试` };
     }
 
-    if (content.includes("评价未完成")) {
-      return { completed: false, msg: "未完成评教" };
-    }
+    if (content.includes("评价未完成")) return { completed: false, msg: "未完成评教" };
 
     return {
       completed: false,
@@ -259,12 +234,11 @@ const checkCourseCommentary = async (
   } catch (err) {
     console.error(err);
 
-    throw new Error("评教检查失败");
+    throw new Error("评教检查失败", { cause: err });
   }
 };
 
-export type UnderSelectInfoSuccessResponse =
-  CommonSuccessResponse<UnderSelectInfo>;
+export type UnderSelectInfoSuccessResponse = CommonSuccessResponse<UnderSelectInfo>;
 
 export type UnderSelectInfoResponse =
   | UnderSelectInfoSuccessResponse
@@ -293,11 +267,11 @@ export const getUnderSelectInfo = async (
     redirect: "manual",
   });
 
-  if (response.status !== 200) return ExpiredResponse;
+  if (response.status !== 200) return expiredResponse;
 
   let content = await response.text();
 
-  if (/<title>.*?评教检查<\/title>/.exec(content)) {
+  if (/<title>.*?评教检查<\/title>/.test(content)) {
     const { completed } = await checkCourseCommentary(
       cookieHeader,
       /xnxqdm=(\d+)'/.exec(content)![1],
@@ -323,7 +297,7 @@ export const getUnderSelectInfo = async (
       redirect: "manual",
     });
 
-    if (recheckResponse.status !== 200) return ExpiredResponse;
+    if (recheckResponse.status !== 200) return expiredResponse;
 
     content = await recheckResponse.text();
   }
@@ -342,19 +316,16 @@ export const getUnderSelectInfo = async (
   };
 };
 
-export const underStudySelectInfoHandler = request<
-  UnderSelectInfoResponse,
-  UnderSelectInfoOptions
->(async (req, res) => {
-  const cookieHeader = req.headers.cookie!;
-  const { link } = req.body;
+export const underStudySelectInfoHandler = request<UnderSelectInfoResponse, UnderSelectInfoOptions>(
+  async (req, res) => {
+    const cookieHeader = req.headers.cookie!;
+    const { link } = req.body;
 
-  if (!link) return res.json(MissingArgResponse("link"));
+    if (!link) return res.json(missingArgResponse("link"));
 
-  if (cookieHeader.includes("TEST"))
-    return res.json(
-      UnknownResponse("因子系统逻辑复杂，测试账号暂不提供选课操作模拟"),
-    );
+    if (cookieHeader.includes("TEST"))
+      return res.json(unknownResponse("因子系统逻辑复杂，测试账号暂不提供选课操作模拟"));
 
-  return res.json(await getUnderSelectInfo(cookieHeader, link));
-});
+    return res.json(await getUnderSelectInfo(cookieHeader, link));
+  },
+);

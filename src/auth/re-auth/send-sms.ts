@@ -1,14 +1,10 @@
 import {
   ActionFailType,
-  MissingArgResponse,
+  missingArgResponse,
   MissingCredentialResponse,
-  UnknownResponse,
+  unknownResponse,
 } from "@/config/index.js";
-import type {
-  CommonFailedResponse,
-  CommonSuccessResponse,
-  EmptyObject,
-} from "@/typings.js";
+import type { CommonFailedResponse, CommonSuccessResponse, EmptyObject } from "@/typings.js";
 import { request } from "@/utils/index.js";
 
 import { AUTH_SERVER, RE_AUTH_URL } from "../utils.js";
@@ -76,23 +72,22 @@ export const sendReAuthSMS = async (
 
   const result = (await response.json()) as RawReAuthSMSResponse;
 
-  if (result.res === "code_time_fail")
+  if (result.res === "code_time_fail") {
     return {
       success: false,
       type: ActionFailType.TooFrequent,
       msg: result.returnMessage,
       codeTime: result.codeTime,
     };
+  }
 
   if (result.res !== "success") {
-    console.error("二次认证验证码失败: ", result);
+    console.error("二次认证验证码失败:", result);
 
     if (result.returnMessage === "发送验证码失败，请联系管理员！")
-      return UnknownResponse(
-        "二次认证验证码发送失败，请联系信息化办公室 0431-85099005",
-      );
+      return unknownResponse("二次认证验证码发送失败，请联系信息化办公室 0431-85099005");
 
-    return UnknownResponse(result.returnMessage);
+    return unknownResponse(result.returnMessage);
   }
 
   return {
@@ -104,16 +99,14 @@ export const sendReAuthSMS = async (
   };
 };
 
-export const startReAuthHandler = request<
-  ReAuthSMSResponse,
-  EmptyObject,
-  { id: string }
->(async (req, res) => {
-  const cookieHeader = req.headers.cookie;
-  const { id } = req.query;
+export const startReAuthHandler = request<ReAuthSMSResponse, EmptyObject, { id: string }>(
+  async (req, res) => {
+    const cookieHeader = req.headers.cookie;
+    const { id } = req.query;
 
-  if (!cookieHeader) return MissingCredentialResponse;
-  if (!id) return MissingArgResponse("id");
+    if (!cookieHeader) return MissingCredentialResponse;
+    if (!id) return missingArgResponse("id");
 
-  return res.json(await sendReAuthSMS(cookieHeader, id));
-});
+    return res.json(await sendReAuthSMS(cookieHeader, id));
+  },
+);
