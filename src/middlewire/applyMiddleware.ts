@@ -21,10 +21,10 @@ export const applyMiddleware = (app: Express): void => {
   app.use((_req, res, next) => {
     const originalJson = res.json;
 
-    // eslint-disable-next-line no-shadow, @typescript-eslint/explicit-function-return-type
+    // oxlint-disable-next-line no-shadow, typescript/explicit-function-return-type
     res.json = function json(...args: Parameters<typeof originalJson>) {
       // @ts-expect-error: Express type issue
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      // oxlint-disable-next-line typescript/no-unsafe-assignment
       [res.body] = args;
 
       return Reflect.apply(originalJson, this, args);

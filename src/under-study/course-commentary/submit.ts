@@ -58,7 +58,7 @@ export const submitUnderCourseCommentary = async (
         .toString(),
       dt: JSON.stringify([
         ...questions.map(({ txdm, zbdm, title }, index) => {
-          const { text, value, score } = questions[index].options[answers[index]];
+          const { text: optionText, value, score } = questions[index].options[answers[index]];
 
           return {
             txdm,
@@ -66,7 +66,7 @@ export const submitUnderCourseCommentary = async (
             zbmc: title,
             zbxmdm: value,
             fz: score,
-            dtjg: text,
+            dtjg: optionText,
           };
         }),
         {

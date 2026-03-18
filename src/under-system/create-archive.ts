@@ -136,17 +136,19 @@ export const getUnderStudentArchiveInfo = async (
     matches.map((item) => item.replaceAll("&nbsp;", " ").trim()),
   );
 
+  // oxlint-disable-next-line unicorn/no-unreadable-array-destructuring
   const readonlyFields = info.filter(([, , editable]) => readonlyRegExp.test(editable));
 
   const editableFields = info
+    // oxlint-disable-next-line unicorn/no-unreadable-array-destructuring
     .filter(([, , editable]) => !readonlyRegExp.test(editable))
     .map(([text, defaultValue, checkBox, inputOrSelect, remark]) => {
       const [, checkboxValue, checkboxName] = checkBoxRegExp.exec(checkBox)!;
 
-      const name = selectRegExp.exec(inputOrSelect)![1];
+      const [, name] = selectRegExp.exec(inputOrSelect)!;
 
       const options = [...inputOrSelect.matchAll(optionRegExp)]
-        .map(([, value, text]) => ({ value, text }))
+        .map(([, value, optionText]) => ({ value, text: optionText }))
         .filter(({ value }) => value);
 
       if (text === "火车到站") {
@@ -181,10 +183,12 @@ export const getUnderStudentArchiveInfo = async (
           checkboxName,
           checkboxValue,
           category,
-          values: values.map((item) => [
-            { text: "请选择", value: "" },
-            ...item.sort((a, b) => a.text.localeCompare(b.text)),
-          ]),
+          values: values.map((item) =>
+            [
+              { text: "请选择", value: "" },
+              // oxlint-disable-next-line unicorn/prefer-spread
+            ].concat(item.sort((a, b) => a.text.localeCompare(b.text))),
+          ),
           remark,
         };
       }
@@ -207,6 +211,7 @@ export const getUnderStudentArchiveInfo = async (
 
   return {
     success: true,
+    // oxlint-disable-next-line unicorn/no-unreadable-array-destructuring
     readonly: readonlyFields.map(([text, value, , , remark]) => {
       const realValue = /<font[^>]*>(.*)<\/font>/.exec(value)?.[1] ?? value;
 
@@ -219,6 +224,7 @@ export const getUnderStudentArchiveInfo = async (
     editable: editableFields,
     fields: [
       ...readonlyFields
+        // oxlint-disable-next-line unicorn/no-unreadable-array-destructuring
         .map(([, , , input]) => {
           const result = inputRegExp.exec(input);
 
@@ -269,6 +275,7 @@ export const submitUnderStudentArchiveInfo = async (
   const inputs = [...content.matchAll(info2RowRegExp)]
     .map(([, ...matches]) => matches.map((item) => item.replaceAll("&nbsp;", " ").trim()))
     .map(([text, input, remark]) => {
+      // oxlint-disable-next-line prefer-destructuring
       const [, name, value] = [...input.matchAll(fieldsRegExp)][0];
       const required = input.includes('<font color="red">*</font>');
 

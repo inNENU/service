@@ -55,7 +55,7 @@ const getWeekRange = (timeText: string): number[] => {
         return Array.from({ length: range[1] - range[0] + 1 }, (_, index) => index + range[0]);
       }),
     )
-    .flat(2);
+    .flat(2 /* number[] */);
 };
 
 const getClassIndex = (timeText: string): [number, number] => {
@@ -63,7 +63,7 @@ const getClassIndex = (timeText: string): [number, number] => {
 
   return match
     .map(([, startIndex, endIndex]) => [Number(startIndex), Number(endIndex)])
-    .flat(2) as [number, number];
+    .flat(2 /* [number, number] */) as [number, number];
 };
 
 const getCourses = (content: string): LegacyTableData =>
@@ -101,13 +101,12 @@ const getCourses = (content: string): LegacyTableData =>
       return result.map(({ weeks, ...item }) => {
         const locations = weeks.map((week) => item.locations[week.toString()]);
 
-        return {
-          ...item,
+        return Object.assign(item, {
           teacher: item.teachers.join("，"),
           weeks: weeks.sort((a, b) => a - b),
           locations,
           location: [...new Set(locations)].join("，"),
-        };
+        });
       });
     }),
   );

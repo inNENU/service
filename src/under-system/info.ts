@@ -77,22 +77,23 @@ export interface UnderStudentInfo {
 const getInfo = (content: string): UnderStudentInfo => {
   const [, name] = NAME_REGEXP.exec(content)!;
   const gender = GENDER_REGEXP.exec(content)![1] as "男" | "女";
-  const people = PEOPLE_REGEXP.exec(content)![1];
-  const idCard = ID_CARD_REGEXP.exec(content)![1];
-  const politicalType = POLITICAL_TYPE_REGEXP.exec(content)![1];
+  const [, people] = PEOPLE_REGEXP.exec(content)!;
+  const [, idCard] = ID_CARD_REGEXP.exec(content)!;
+  const [, politicalType] = POLITICAL_TYPE_REGEXP.exec(content)!;
   const birth = idCard.slice(6, 14).replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
 
-  const id = ID_REGEXP.exec(content)![1];
-  const school = SCHOOL_REGEXP.exec(content)![1];
-  const major = MAJOR_REGEXP.exec(content)![1];
-  const majorType = MAJOR_TYPE_REGEXP.exec(content)![1];
-  const inDate = IN_DATE_REGEXP.exec(content)![1];
+  const [, id] = ID_REGEXP.exec(content)!;
+  const [, school] = SCHOOL_REGEXP.exec(content)!;
+  const [, major] = MAJOR_REGEXP.exec(content)!;
+  const [, majorType] = MAJOR_TYPE_REGEXP.exec(content)!;
+  const [, inDate] = IN_DATE_REGEXP.exec(content)!;
 
-  const language = LANGUAGE_REGEXP.exec(content)![1];
-  const candidateId = Number(CULTIVATE_ID.exec(content)![1]);
-  const cultivateType = CULTIVATE_TYPE_REGEXP.exec(content)![1];
-  const candidateType = CANDIDATE_TYPE_REGEXP.exec(content)![1];
-  const province = PROVINCE_REGEXP.exec(content)![1];
+  const [, language] = LANGUAGE_REGEXP.exec(content)!;
+  const [, candidateIdStr] = CULTIVATE_ID.exec(content)!;
+  const [, cultivateType] = CULTIVATE_TYPE_REGEXP.exec(content)!;
+  const [, candidateType] = CANDIDATE_TYPE_REGEXP.exec(content)!;
+  const [, province] = PROVINCE_REGEXP.exec(content)!;
+  const candidateId = Number(candidateIdStr);
 
   return {
     name,

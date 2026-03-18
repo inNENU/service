@@ -1,3 +1,4 @@
+// oxlint-disable-next-line unicorn/prefer-spread
 export const generateRandomString = (length: number, dic = "0123456789".split("")): string => {
   const result = [];
 

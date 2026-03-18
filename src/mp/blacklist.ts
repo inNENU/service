@@ -25,7 +25,7 @@ export const mpBlacklistHandler = request<BlacklistResponse, BlacklistOptions, B
     return res.json({
       success: true,
       data: {
-        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+        // oxlint-disable-next-line typescript/prefer-nullish-coalescing
         inBlacklist: await isInBlackList(Number(id), openid || null),
       },
     });

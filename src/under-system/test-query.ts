@@ -69,7 +69,7 @@ export const underTestQueryHandler = request<UnderTestQueyResponse, LoginOptions
 
     const applyContent = await applyListResponse.text();
 
-    const applyTable = tableRegExp.exec(applyContent)![0];
+    const [applyTable] = tableRegExp.exec(applyContent)!;
 
     const applyList = [...applyTable.matchAll(applyRowRexExp)].map(([, url, name, time, type]) => ({
       name,

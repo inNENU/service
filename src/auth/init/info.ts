@@ -132,7 +132,7 @@ export const getAuthInfo = async (
       );
 
       if (infoRows.length > 0) {
-        const infoData = infoRows[0];
+        const [infoData] = infoRows;
 
         // FIXME: 先直接使用原信息
         // 90 天内更新过信息，直接使用原信息

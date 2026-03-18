@@ -95,17 +95,17 @@ export const getGradEnrollPlan = async (): Promise<GradEnrollResponse> => {
         ];
 
         info.majors = await Promise.all(
-          majorCodes.map(async ([, code], index) => {
+          majorCodes.map(async ([, majorCode], index) => {
             const [, majorName] = majorNameRegExp[index];
 
             const majorTypeRegExp = new RegExp(
-              `dXYName\\['${name}'\\]\\['(${code})'\\]\\.push\\("<tr><td colspan=4><b>\\1\\s+\\S+【(\\S+)】<\\/b><\\/td><\\/tr>"`,
+              `dXYName\\['${name}'\\]\\['(${majorCode})'\\]\\.push\\("<tr><td colspan=4><b>\\1\\s+\\S+【(\\S+)】<\\/b><\\/td><\\/tr>"`,
             );
 
-            const startLine = `dXYName['${name}']['${code}'].push("<tr>");`;
+            const startLine = `dXYName['${name}']['${majorCode}'].push("<tr>");`;
 
             const start = content.indexOf(startLine) + startLine.length;
-            const end = content.lastIndexOf(`dXYName['${name}']['${code}'].push("</tr>");`);
+            const end = content.lastIndexOf(`dXYName['${name}']['${majorCode}'].push("</tr>");`);
             const majorContent = content.slice(start, end);
 
             const lines = [
@@ -114,7 +114,7 @@ export const getGradEnrollPlan = async (): Promise<GradEnrollResponse> => {
 
             return {
               name: majorName,
-              code,
+              code: majorCode,
               type: majorTypeRegExp.exec(content)?.[2] ?? "",
               content: await getRichTextNodes(
                 `<table>${TABLE_HEADER}<tr>${lines.join("\n")}</tr></table>`,

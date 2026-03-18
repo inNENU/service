@@ -61,7 +61,7 @@ const getExamPlaces = (content: string): ExamPlace[] =>
   });
 
 export const getExamList = async (cookieHeader: string, value: string): Promise<ExamPlace[]> => {
-  const response = await fetch(QUERY_URL, {
+  const searchResponse = await fetch(QUERY_URL, {
     method: "POST",
     headers: {
       Cookie: cookieHeader,
@@ -75,10 +75,10 @@ export const getExamList = async (cookieHeader: string, value: string): Promise<
     }),
   });
 
-  const content = await response.text();
+  const content = await searchResponse.text();
 
   // We force writing these 2 field to ensure we care getting the default table structure
-  const tableFields = tableFieldsRegExp.exec(content)![1];
+  const [, tableFields] = tableFieldsRegExp.exec(content)!;
   const otherFields = String(otherFieldsRegExp.exec(content)?.[1]);
   const totalPages = Number(totalPagesRegExp.exec(content)![1]);
 
@@ -114,7 +114,7 @@ export const getExamList = async (cookieHeader: string, value: string): Promise<
         otherFields: DEFAULT_OTHER_FIELD,
       });
 
-      const response = await fetch(INFO_URL, {
+      const placeResponse = await fetch(INFO_URL, {
         method: "POST",
         headers: {
           Cookie: cookieHeader,
@@ -125,7 +125,7 @@ export const getExamList = async (cookieHeader: string, value: string): Promise<
         body: params.toString(),
       });
 
-      const responseText = await response.text();
+      const responseText = await placeResponse.text();
 
       const newExamPlaces = getExamPlaces(responseText);
 

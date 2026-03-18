@@ -57,7 +57,7 @@ export const getCourseTable = (classes: RawUnderCourseTableItem[]): TableData =>
   classes.forEach(
     ({
       kcmc: name,
-      xq: week,
+      xq: dayOfWeek,
       zc: weeksText,
       ps: startClassIndex,
       pe: endClassIndex,
@@ -70,16 +70,16 @@ export const getCourseTable = (classes: RawUnderCourseTableItem[]): TableData =>
       const location = Object.fromEntries(
         locationsText.split(",").map((item) => {
           const temp = item.split("-");
-          const week = temp.pop()!;
+          const weekNumber = temp.pop()!;
 
-          return [week, temp.join("-")];
+          return [weekNumber, temp.join("-")];
         }),
       );
 
       const key = JSON.stringify({
         name,
         teachersName,
-        week,
+        week: dayOfWeek,
         startTime,
         endTime,
       });
@@ -107,7 +107,7 @@ export const getCourseTable = (classes: RawUnderCourseTableItem[]): TableData =>
         classIndex: [Number(startClassIndex), Number(endClassIndex)],
       };
 
-      tableData[Math.floor(Number(startClassIndex) / 2)][Number(week) - 1].push(classData);
+      tableData[Math.floor(Number(startClassIndex) / 2)][Number(dayOfWeek) - 1].push(classData);
       store.set(key, classData);
     },
   );

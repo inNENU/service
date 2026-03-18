@@ -77,11 +77,11 @@ export const getGradRecommendPlan = async (): Promise<GradRecommendPlanResponse>
 
   const schoolInfo: GradRecommendSchoolPlan[] = await Promise.all(
     [...content.matchAll(schoolInfoRegExp)].map(
-      async ([, site, code, name, contact, phone, mail]) => {
+      async ([, site, schoolCode, name, contact, phone, mail]) => {
         const info: GradRecommendSchoolPlan = {
           name,
           site,
-          code,
+          code: schoolCode,
           contact,
           phone,
           mail,
@@ -97,18 +97,18 @@ export const getGradRecommendPlan = async (): Promise<GradRecommendPlanResponse>
         ];
 
         info.majors = await Promise.all(
-          majorCodes.map(async ([, code], index) => {
+          majorCodes.map(async ([, majorCode], index) => {
             const [, majorName] = majorNameRegExp[index];
 
             const lines = [
               ...content.matchAll(
-                new RegExp(`dXYName\\['${name}'\\]\\['${code}'\\]\\.push\\('(.*)'\\)`, "g"),
+                new RegExp(`dXYName\\['${name}'\\]\\['${majorCode}'\\]\\.push\\('(.*)'\\)`, "g"),
               ),
             ].map(([, line]) => line.replaceAll(/<\/?center>/g, ""));
 
             return {
               name: majorName,
-              code,
+              code: majorCode,
               content: await getRichTextNodes(`<table>${TABLE_HEADER}${lines.join("\n")}</table>`),
             };
           }),

@@ -53,6 +53,7 @@ export interface ChangeMajorPlan {
 
 const getPlans = (content: string): ChangeMajorPlan[] =>
   [...content.matchAll(PLAN_REGEXP)].map(
+    // oxlint-disable-next-line unicorn/no-unreadable-array-destructuring
     ([
       ,
       ,
@@ -91,7 +92,7 @@ export const getPlanList = async (
   content: string,
 ): Promise<ChangeMajorPlan[]> => {
   // We force writing these 2 field to ensure we care getting the default table structure
-  const tableFields = tableFieldsRegExp.exec(content)![1];
+  const [, tableFields] = tableFieldsRegExp.exec(content)!;
   const otherFields = String(otherFieldsRegExp.exec(content)?.[1]);
   const totalPages = Number(totalPagesRegExp.exec(content)![1]);
 

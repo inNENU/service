@@ -36,7 +36,7 @@ const ALLOWED_INFO_REGEXP =
 
 const setMajors = (content: string): void => {
   if (!majorsStore.state.length) {
-    const majorText = MAJORS_REGEXP.exec(content)![1];
+    const [, majorText] = MAJORS_REGEXP.exec(content)!;
 
     const majors = [...majorText.matchAll(MAJOR_ITEM_REGEXP)].map(([, value, name]) => ({
       value,
@@ -49,7 +49,7 @@ const setMajors = (content: string): void => {
 
 const setCourseOffices = (content: string): void => {
   if (!officesStore.state.length) {
-    const courseOfficeText = COURSE_OFFICES_REGEXP.exec(content)![1];
+    const [, courseOfficeText] = COURSE_OFFICES_REGEXP.exec(content)!;
 
     const offices = [...courseOfficeText.matchAll(COURSE_OFFICE_ITEM_REGEXP)].map(
       ([, value, name]) => ({
@@ -64,7 +64,7 @@ const setCourseOffices = (content: string): void => {
 
 const setCourseTypes = (content: string): void => {
   if (!typesStore.state.length) {
-    const courseTypeText = COURSE_TYPES_REGEXP.exec(content)![1];
+    const [, courseTypeText] = COURSE_TYPES_REGEXP.exec(content)!;
 
     const types = [...courseTypeText.matchAll(COURSE_TYPE_ITEM_REGEXP)].map(([, value, name]) => ({
       value,
@@ -77,7 +77,7 @@ const setCourseTypes = (content: string): void => {
 
 const setAreas = (content: string): void => {
   if (!areasStore.state.length) {
-    const areaText = AREAS_REGEXP.exec(content)![1];
+    const [, areaText] = AREAS_REGEXP.exec(content)!;
 
     const areas = [...areaText.matchAll(AREA_ITEM_REGEXP)].map(([, value, name]) => ({
       value,
@@ -147,6 +147,7 @@ const getSelectInfo = (content: string): UnderSelectInfo => {
 
   const currentArea = name.includes("本部") ? "本部" : name.includes("净月") ? "净月" : "";
   const currentGrade = Number(CURRENT_GRADE_REGEXP.exec(content)![1]);
+  // oxlint-disable-next-line prefer-destructuring
   const currentMajor = CURRENT_MAJOR_REGEXP.exec(content)![2];
 
   const currentYear = new Date().getFullYear();

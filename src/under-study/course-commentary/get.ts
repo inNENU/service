@@ -50,7 +50,7 @@ const TEXT_REGEXP =
   /<div class="question".+?data-txdm="(\d+)" data-zbdm="(\d+)">\s+<h3>(.*?)(?:<span class="zbsx" style="color:red;">.*?<\/span>)?\s+<\/h3>\s+<textarea.+?name="(\d+)"[^]+?data-fz="(.*?)"/;
 
 const getCourseInfo = (html: string): UnderCourseCommentaryInfo => {
-  const paramText = PARAMS_REGEXP.exec(html)![1];
+  const [, paramText] = PARAMS_REGEXP.exec(html)!;
 
   const params = Object.fromEntries(
     paramText
