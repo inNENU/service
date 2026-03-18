@@ -184,10 +184,10 @@ export const getUnderStudentArchiveInfo = async (
           checkboxValue,
           category,
           values: values.map((item) =>
-            [
-              { text: "请选择", value: "" },
-              // oxlint-disable-next-line unicorn/prefer-spread
-            ].concat(item.sort((a, b) => a.text.localeCompare(b.text))),
+            // oxlint-disable-next-line unicorn/prefer-spread
+            [{ text: "请选择", value: "" }].concat(
+              item.sort((a, b) => a.text.localeCompare(b.text)),
+            ),
           ),
           remark,
         };
