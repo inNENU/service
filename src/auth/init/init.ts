@@ -9,9 +9,9 @@ import {
 import type { AccountInfo, CommonFailedResponse } from "@/typings.js";
 import { request } from "@/utils/index.js";
 
-import type { AuthInfoFailedResponse, AuthInfoSuccessResponse } from "./info.js";
 import { authEncrypt } from "../encrypt.js";
 import { AUTH_LOGIN_URL, IMPROVE_INFO_URL, RE_AUTH_URL, UPDATE_INFO_URL } from "../utils.js";
+import type { AuthInfoFailedResponse, AuthInfoSuccessResponse } from "./info.js";
 import { TEST_AUTH_INFO, getAuthInfo } from "./info.js";
 
 export interface InitAuthOptions extends AccountInfo {

@@ -1,11 +1,11 @@
 import { expiredResponse } from "@/config/index.js";
 import type { CommonSuccessResponse } from "@/typings.js";
 
-import type { BorrowBookData, RawBorrowBooksData } from "./converter.js";
-import { getBorrowBookData } from "./converter.js";
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
 import type { VPNLoginFailedResponse } from "../../vpn/index.js";
 import { ACTION_SERVER } from "../utils.js";
+import type { BorrowBookData, RawBorrowBooksData } from "./converter.js";
+import { getBorrowBookData } from "./converter.js";
 
 const BORROW_BOOKS_URL = `${ACTION_SERVER}/basicInfo/getBookBorrow`;
 

@@ -7,9 +7,9 @@ import {
 import type { CommonSuccessResponse, LoginOptions } from "@/typings.js";
 import { EDGE_USER_AGENT_HEADERS, request } from "@/utils/index.js";
 
-import type { RawUnderCourseTableItem, TableClassData, TableData } from "./typings.js";
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
 import { UNDER_STUDY_SERVER } from "../utils.js";
+import type { RawUnderCourseTableItem, TableClassData, TableData } from "./typings.js";
 
 export interface UnderCourseTableOptions extends LoginOptions {
   /** 查询时间 */

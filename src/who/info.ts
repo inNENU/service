@@ -1,9 +1,9 @@
 import { request } from "@/utils/index.js";
 
-import type { WhoLoginFailedResponse } from "./login.js";
-import { WHO_SERVER, getWhoTime } from "./utils.js";
 import { TEST_GRADE, TEST_ID_NUMBER, unknownResponse } from "../config/index.js";
 import type { CommonSuccessResponse } from "../typings.js";
+import type { WhoLoginFailedResponse } from "./login.js";
+import { WHO_SERVER, getWhoTime } from "./utils.js";
 
 interface RawWhoInfoData {
   userId: string;

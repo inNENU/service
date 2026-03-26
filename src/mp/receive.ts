@@ -3,7 +3,6 @@ import type { PoolConnection } from "mysql2/promise";
 import { v7 } from "uuid";
 
 import { getConnection, releaseConnection, request } from "@/utils/index.js";
-
 // oxlint-disable-next-line import/no-unassigned-import
 import "@/config/loadEnv.js";
 

@@ -1,11 +1,11 @@
 import { ActionFailType, unknownResponse } from "@/config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse } from "@/typings.js";
 
-import { RESET_PAGE_URL } from "./utils.js";
 import { authEncrypt } from "../encrypt.js";
 import type { ResetCaptchaInfo } from "../reset-captcha.js";
 import { getResetCaptcha } from "../reset-captcha.js";
 import { RESET_PREFIX, RESET_SALT } from "../utils.js";
+import { RESET_PAGE_URL } from "./utils.js";
 
 const SEND_CODE_URL = `${RESET_PREFIX}/passwordRetrieve/sendCode`;
 

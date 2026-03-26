@@ -2,11 +2,11 @@ import type { PoolConnection } from "mysql2/promise";
 
 import { getConnection, releaseConnection, request } from "@/utils/index.js";
 
-import type { MyLoginFailedResponse } from "./login.js";
-import { MY_SERVER } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
 import { expiredResponse, TEST_INFO, unknownResponse } from "../config/index.js";
 import type { AccountInfo, CommonFailedResponse } from "../typings.js";
+import type { MyLoginFailedResponse } from "./login.js";
+import { MY_SERVER } from "./utils.js";
 
 type RawInfo =
   | {

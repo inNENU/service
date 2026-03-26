@@ -3,13 +3,13 @@ import { getRichTextNodes } from "@mptool/parser";
 
 import { request } from "@/utils/index.js";
 
-import { ACTION_SERVER, INFO_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import type { ActionFailType } from "../config/index.js";
 import { expiredResponse, missingArgResponse } from "../config/index.js";
 import { MY_SERVER } from "../my/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse, LoginOptions } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
+import { ACTION_SERVER, INFO_SERVER } from "./utils.js";
 
 const ID_TITLE_REGEXP = /var title = '(.*?)';/;
 const ID_FROM_REGEXP = /var ly = '(.*?)'/;

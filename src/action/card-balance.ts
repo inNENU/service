@@ -1,10 +1,10 @@
 import { request } from "@/utils/index.js";
 
-import { ACTION_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { expiredResponse, unknownResponse } from "../config/index.js";
 import type { CommonSuccessResponse } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
+import { ACTION_SERVER } from "./utils.js";
 
 const CARD_BALANCE_URL = `${ACTION_SERVER}/soapBasic/postSoap`;
 const CARD_BALANCE_PARAMS =

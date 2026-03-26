@@ -3,7 +3,6 @@ import { CookieStore } from "@mptool/net";
 
 import { request } from "@/utils/index.js";
 
-import { CALLBACK_URL, GRAD_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { authLogin } from "../auth/index.js";
 import {
@@ -13,6 +12,7 @@ import {
   WAF_URL,
 } from "../config/index.js";
 import type { AccountInfo, CommonFailedResponse, LoginOptions } from "../typings.js";
+import { CALLBACK_URL, GRAD_SYSTEM_SERVER } from "./utils.js";
 
 export interface GradSystemLoginSuccessResult {
   success: true;

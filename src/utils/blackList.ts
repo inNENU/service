@@ -1,7 +1,7 @@
 import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 
-import { getConnection, releaseConnection } from "./mysql.js";
 import type { WhoInfoData } from "../who/info.js";
+import { getConnection, releaseConnection } from "./mysql.js";
 
 export const isInBlackList = async (
   id: number,

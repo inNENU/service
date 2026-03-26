@@ -1,6 +1,6 @@
-import { MY_MAIN_PAGE, MY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { expiredResponse, unknownResponse } from "../config/index.js";
+import { MY_MAIN_PAGE, MY_SERVER } from "./utils.js";
 
 interface RawProcessResult {
   success: boolean;

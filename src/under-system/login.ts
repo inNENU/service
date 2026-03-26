@@ -3,7 +3,6 @@ import { CookieStore } from "@mptool/net";
 
 import { IE_8_USER_AGENT, request } from "@/utils/index.js";
 
-import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/login.js";
 import { authLogin } from "../auth/login.js";
 import { WEB_VPN_AUTH_SERVER } from "../auth/utils.js";
@@ -18,6 +17,7 @@ import {
 import type { AccountInfo, CommonFailedResponse, LoginOptions } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 import { vpnCASLogin } from "../vpn/index.js";
+import { UNDER_SYSTEM_SERVER } from "./utils.js";
 
 export interface UnderSystemLoginSuccessResult {
   success: true;

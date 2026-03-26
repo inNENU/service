@@ -2,11 +2,11 @@ import type { CookieType } from "@mptool/net";
 
 import { request } from "@/utils/index.js";
 
-import { authEncrypt } from "./encrypt.js";
-import { AUTH_CAPTCHA_URL, AUTH_LOGIN_URL, AUTH_SERVER } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
 import { missingArgResponse, MissingCredentialResponse, unknownResponse } from "../config/index.js";
 import type { CommonFailedResponse } from "../typings.js";
+import { authEncrypt } from "./encrypt.js";
+import { AUTH_CAPTCHA_URL, AUTH_LOGIN_URL, AUTH_SERVER } from "./utils.js";
 
 /**
  * 滑块轨迹点接口

@@ -1,11 +1,11 @@
 import { IE_8_USER_AGENT, getIETimeStamp, request } from "@/utils/index.js";
 
-import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { ActionFailType, expiredResponse } from "../config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse, LoginOptions } from "../typings.js";
 import type { TableClassData } from "../under-study/index.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
+import { UNDER_SYSTEM_SERVER } from "./utils.js";
 
 const semesterStartTime: Record<string, string> = {
   "2023-2024-2": "2024-02-27T16:00:00Z",

@@ -1,9 +1,9 @@
 import { EDGE_USER_AGENT_HEADERS, request } from "@/utils/index.js";
 
-import { UNDER_STUDY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { expiredResponse, unknownResponse } from "../config/index.js";
 import type { LoginOptions } from "../typings.js";
+import { UNDER_STUDY_SERVER } from "./utils.js";
 
 export interface UnderGradeListOptions extends LoginOptions {
   /** 查询时间 */

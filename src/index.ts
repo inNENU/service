@@ -2,8 +2,8 @@ import type { Response } from "express";
 import express from "express";
 
 import { actionRouter } from "./action/index.js";
-import { authRouter } from "./auth/index.js";
 import { authCenterRouter } from "./auth-center/index.js";
+import { authRouter } from "./auth/index.js";
 import { unknownResponse } from "./config/index.js";
 import { enrollRouter } from "./enroll/index.js";
 import { gradRouter } from "./grad-system/index.js";

@@ -1,5 +1,6 @@
 import Client, { GetWeChGeneralRequest } from "@alicloud/alinlp20200629";
 import { Config } from "@alicloud/openapi-client";
+
 // oxlint-disable-next-line import/no-unassigned-import
 import "../config/loadEnv.js";
 

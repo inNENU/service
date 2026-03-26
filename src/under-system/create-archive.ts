@@ -2,10 +2,10 @@ import type { RequestHandler } from "express";
 
 import { IE_8_USER_AGENT, getIETimeStamp } from "@/utils/index.js";
 
-import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { ActionFailType, unknownResponse } from "../config/index.js";
 import type { CommonFailedResponse, EmptyObject, LoginOptions } from "../typings.js";
+import { UNDER_SYSTEM_SERVER } from "./utils.js";
 
 const nextLinkRegExp =
   /<input\s+type="button"\s+class="button"\s+onclick="window.location.href='([^']+)';"\s+value=" 下一步 "\/>/;

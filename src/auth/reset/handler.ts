@@ -3,6 +3,9 @@ import { invalidArgResponse, MissingCredentialResponse } from "@/config/index.js
 import type { CommonFailedResponse } from "@/typings.js";
 import { request } from "@/utils/index.js";
 
+import type { CheckPasswordOptions, CheckPasswordResponse } from "../check-password.js";
+import { checkPassword } from "../check-password.js";
+import { getResetCaptcha } from "../reset-captcha.js";
 import type { ResetPasswordGetInfoOptions, ResetPasswordGetInfoResponse } from "./get-info.js";
 import { getInfo } from "./get-info.js";
 import type { ResetPasswordSetOptions, ResetPasswordSetResponse } from "./reset-password.js";
@@ -13,10 +16,7 @@ import type {
   ResetPasswordVerifyCodeOptions,
   ResetPasswordVerifyCodeResponse,
 } from "./validate-code.js";
-import type { CheckPasswordOptions, CheckPasswordResponse } from "../check-password.js";
 import { validateCode } from "./validate-code.js";
-import { checkPassword } from "../check-password.js";
-import { getResetCaptcha } from "../reset-captcha.js";
 
 export type ResetPasswordOptions =
   | ResetPasswordGetInfoOptions

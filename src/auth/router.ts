@@ -2,16 +2,16 @@ import { Router } from "express";
 import { ipKeyGenerator, rateLimit } from "express-rate-limit";
 import type { Request } from "express-serve-static-core";
 
+import { ActionFailType } from "../config/index.js";
+import type { EmptyObject } from "../typings.js";
 import { activateHandler } from "./activate/index.js";
 import { authCaptchaHandler } from "./captcha.js";
 import { authEncryptHandler } from "./encrypt.js";
 import { authInitHandler, authInitInfoHandler } from "./init/index.js";
 import { authLoginHandler } from "./login.js";
 import { startReAuthHandler, verifyReAuthHandler } from "./re-auth/index.js";
-import { resetPasswordHandler } from "./reset/index.js";
 import { resetCaptchaHandler } from "./reset-captcha.js";
-import { ActionFailType } from "../config/index.js";
-import type { EmptyObject } from "../typings.js";
+import { resetPasswordHandler } from "./reset/index.js";
 
 const loginLimiter = rateLimit({
   windowMs: 60000, // 1 分钟

@@ -3,7 +3,6 @@ import { CookieStore } from "@mptool/net";
 
 import { request } from "@/utils/index.js";
 
-import { OA_ENTRANCE_PAGE, OA_MAIN_PAGE, OA_WEB_VPN_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { WEB_VPN_AUTH_SERVER, authLogin } from "../auth/index.js";
 import type { ActionFailType } from "../config/index.js";
@@ -16,6 +15,7 @@ import {
 import type { AccountInfo, CommonFailedResponse, LoginOptions } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 import { vpnCASLogin } from "../vpn/index.js";
+import { OA_ENTRANCE_PAGE, OA_MAIN_PAGE, OA_WEB_VPN_SERVER } from "./utils.js";
 
 export interface OALoginSuccessResult {
   success: true;

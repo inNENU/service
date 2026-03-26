@@ -7,11 +7,11 @@ import {
 import type { CommonFailedResponse, CommonSuccessResponse, LoginOptions } from "@/typings.js";
 import { EDGE_USER_AGENT_HEADERS, request } from "@/utils/index.js";
 
+import type { AuthLoginFailedResponse } from "../../auth/index.js";
+import { UNDER_STUDY_SERVER } from "../utils.js";
 import type { SelectOptionConfig } from "./store.js";
 import { areasStore, majorsStore, officesStore, typesStore } from "./store.js";
 import { COURSE_CATEGORIES } from "./utils.js";
-import type { AuthLoginFailedResponse } from "../../auth/index.js";
-import { UNDER_STUDY_SERVER } from "../utils.js";
 
 const CHECK_URL = `${UNDER_STUDY_SERVER}/new/student/xsxk/checkFinishPj`;
 

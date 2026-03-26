@@ -1,10 +1,10 @@
 import { EDGE_USER_AGENT_HEADERS, request } from "@/utils/index.js";
 
-import type { UnderStudyLoginFailedResponse } from "./login.js";
-import { UNDER_STUDY_SERVER } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
 import { expiredResponse, TEST_INFO, unknownResponse } from "../config/index.js";
 import type { AccountInfo, CommonFailedResponse } from "../typings.js";
+import type { UnderStudyLoginFailedResponse } from "./login.js";
+import { UNDER_STUDY_SERVER } from "./utils.js";
 
 const ID_REGEXP =
   /<td align="right" style="width: 90px">学号：<\/td>\s*<td align="left"><label style="width: 90px">(.*?)<\/label><\/td>/;

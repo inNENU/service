@@ -1,7 +1,7 @@
-import { authEncrypt } from "./encrypt.js";
-import { RESET_PREFIX, RESET_SALT } from "./utils.js";
 import { unknownResponse } from "../config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse } from "../typings.js";
+import { authEncrypt } from "./encrypt.js";
+import { RESET_PREFIX, RESET_SALT } from "./utils.js";
 
 export interface CheckPasswordOptions {
   type: "check-password";

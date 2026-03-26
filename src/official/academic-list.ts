@@ -1,8 +1,8 @@
 import { request } from "@/utils/index.js";
 
-import { OFFICIAL_URL, getOfficialPageView } from "./utils.js";
 import { unknownResponse } from "../config/index.js";
 import type { CommonFailedResponse, CommonListSuccessResponse } from "../typings.js";
+import { OFFICIAL_URL, getOfficialPageView } from "./utils.js";
 
 const LIST_REGEXP = /<ul class=".*? xsyg">([^]+?)<\/ul>/;
 const ITEM_REGEXP =

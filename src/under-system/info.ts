@@ -2,11 +2,11 @@ import type { RequestHandler } from "express";
 
 import { IE_8_USER_AGENT, getIETimeStamp } from "@/utils/index.js";
 
-import { underSystemLogin } from "./login.js";
-import { UNDER_SYSTEM_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { MissingCredentialResponse, unknownResponse } from "../config/index.js";
 import type { EmptyObject, LoginOptions } from "../typings.js";
+import { underSystemLogin } from "./login.js";
+import { UNDER_SYSTEM_SERVER } from "./utils.js";
 
 const NAME_REGEXP = /<td>姓&nbsp;名<\/td>\s+<td colspan="3">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/;
 const GENDER_REGEXP = /<td>性&nbsp;别<\/td>\s+<td colspan="2">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/;

@@ -3,9 +3,9 @@ import { expiredResponse, unknownResponse } from "@/config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse, LoginOptions } from "@/typings.js";
 import { EDGE_USER_AGENT_HEADERS } from "@/utils/index.js";
 
+import { UNDER_STUDY_SERVER } from "../utils.js";
 import type { UnderCourseCommentaryInfo } from "./get.js";
 import type { RawUnderCourseCommentaryFailResult } from "./utils.js";
-import { UNDER_STUDY_SERVER } from "../utils.js";
 
 interface RawUnderCourseCommentarySubmitSuccessResult {
   code: 0;

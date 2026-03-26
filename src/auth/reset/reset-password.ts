@@ -1,9 +1,9 @@
 import { unknownResponse } from "@/config/index.js";
 import type { CommonFailedResponse } from "@/typings.js";
 
-import { RESET_PAGE_URL } from "./utils.js";
 import { authEncrypt } from "../encrypt.js";
 import { RESET_PREFIX, RESET_SALT } from "../utils.js";
+import { RESET_PAGE_URL } from "./utils.js";
 
 const RESET_PASSWORD_URL = `${RESET_PREFIX}/passwordRetrieve/resetPassword`;
 

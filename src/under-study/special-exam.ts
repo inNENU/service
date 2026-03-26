@@ -1,9 +1,9 @@
 import { EDGE_USER_AGENT_HEADERS, request } from "@/utils/index.js";
 
-import { UNDER_STUDY_SERVER } from "./utils.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { expiredResponse, unknownResponse } from "../config/index.js";
 import type { CommonSuccessResponse } from "../typings.js";
+import { UNDER_STUDY_SERVER } from "./utils.js";
 
 interface RawUnderSpecialExamItem {
   /** 考试成绩 */

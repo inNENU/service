@@ -1,9 +1,9 @@
 import { request } from "@/utils/index.js";
 
-import { OFFICIAL_URL, getOfficialPageView } from "./utils.js";
 import type { ActionFailType } from "../config/index.js";
 import { invalidArgResponse, unknownResponse } from "../config/index.js";
 import type { CommonFailedResponse, CommonListSuccessResponse } from "../typings.js";
+import { OFFICIAL_URL, getOfficialPageView } from "./utils.js";
 
 const LIST_REGEXP = /<ul class=".*? dsyw">([^]+?)<\/ul>/;
 const ITEM_REGEXP =
