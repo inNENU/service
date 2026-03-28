@@ -55,7 +55,7 @@
     "oxlint-tsgolint": "0.17.4",
     "picocolors": "1.1.1",
     "qrcode": "1.5.4",
-    "tsdown": "0.21.5",
+    "tsdown": "0.21.7",
     "typescript": "6.0.2",
     "unrun": "0.2.33",
     "uuid": "13.0.0"
