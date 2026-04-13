@@ -102,7 +102,7 @@ export const getCourseTable = (classes: RawUnderCourseTableItem[]): TableData =>
         name,
         teachers: teachersName.split(","),
         time: `${startTime} - ${endTime}`,
-        weeks: weeks,
+        weeks,
         locations: location,
         classIndex: [Number(startClassIndex), Number(endClassIndex)],
       };

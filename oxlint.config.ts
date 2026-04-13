@@ -1,7 +1,7 @@
 import { defineHopeConfig } from "oxc-config-hope/oxlint";
 
 export default defineHopeConfig({
-  ignorePatterns: ["lib/"],
+  ignore: ["lib/"],
   node: true,
   rules: {
     complexity: "off",

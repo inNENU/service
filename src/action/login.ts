@@ -130,6 +130,7 @@ export type ActionLoginResponse = ActionLoginSuccessResponse | ActionLoginFailed
 export const loginToAction = request<
   ActionLoginFailedResponse | CommonFailedResponse<ActionFailType.MissingCredential>,
   LoginOptions
+  // oxlint-disable-next-line typescript/consistent-return
 >(async (req, res, next) => {
   if (!req.body) return res.json(MissingCredentialResponse);
 

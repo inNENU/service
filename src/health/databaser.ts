@@ -11,7 +11,7 @@ export class DatabaseMonitor {
   private queuedRequests = 0;
   private totalConnections = 0;
 
-  constructor(private pool: Pool) {
+  constructor(private readonly pool: Pool) {
     this.setupPoolEventListeners();
   }
 

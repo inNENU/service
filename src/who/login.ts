@@ -133,6 +133,7 @@ export type WhoLoginResponse = WhoLoginSuccessResponse | WhoLoginFailedResponse;
 export const loginToWho = request<
   WhoLoginResponse | CommonFailedResponse<ActionFailType.MissingCredential>,
   LoginOptions
+  // oxlint-disable-next-line typescript/consistent-return
 >(async (req, res, next) => {
   if (!req.body) return res.json(MissingCredentialResponse);
 

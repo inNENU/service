@@ -58,6 +58,7 @@ export const mpReceiveHandler = request<
     if (
       sha1(
         [process.env.TOKEN, timestamp, nonce]
+          // oxlint-disable-next-line typescript/no-unnecessary-type-conversion
           .sort((a, b) => String(a ?? "").localeCompare(String(b ?? "")))
           .join(""),
       ) !== signature

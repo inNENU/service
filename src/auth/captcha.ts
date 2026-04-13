@@ -164,6 +164,7 @@ export type AuthCaptchaOptions = GetAuthCaptchaOptions | VerifyAuthCaptchaOption
 
 export type AuthCaptchaResponse = GetAuthCaptchaResponse | VerifyAuthCaptchaResponse;
 
+// oxlint-disable-next-line typescript/no-unnecessary-type-arguments
 export const authCaptchaHandler = request<AuthCaptchaResponse, AuthCaptchaOptions, { id?: string }>(
   async (req, res) => {
     try {

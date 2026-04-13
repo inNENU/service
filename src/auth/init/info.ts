@@ -88,7 +88,7 @@ const getTempInfo = (id: number): WhoInfoData => {
     major: "未知专业",
     majorId: "",
     inYear: grade,
-    grade: grade,
+    grade,
     type: "",
     typeId: typeNumber === 0 ? "bks" : typeNumber === 1 || typeNumber === 2 ? "yjs" : "unknown",
     people: "",

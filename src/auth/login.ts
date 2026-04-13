@@ -79,7 +79,7 @@ export const authLogin = async ({
   cookieStore.set({
     name: "MULTIFACTOR_USERS",
     value: authToken,
-    domain: domain,
+    domain,
     httpOnly: true,
     expires: new Date("2092-08-12T17:46:12.361Z"),
   });
