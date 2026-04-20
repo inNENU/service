@@ -145,7 +145,6 @@ interface WeatherRawResponse {
  *
  * @param icon 天气代码
  * @param isDay 当前是否是白天
- *
  * @returns 天气代码
  */
 const getWeatherCode = (icon: string, isDay: boolean): string =>

@@ -8,7 +8,7 @@ import { OA_WEB_VPN_SERVER } from "./utils.js";
 interface RawOAInfoData {
   /** 学号 */
   loginId: string;
-  /** OA ID  */
+  /** OA ID */
   id: string;
   /** 姓，通常是空的 */
   firstName: "";

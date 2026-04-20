@@ -31,20 +31,20 @@ export interface NoticeListOptions extends LoginOptions {
 
 interface RawNoticeItem {
   LLCS: number;
-  /** time */
+  /** Time */
   FBSJ: string;
-  /** title */
+  /** Title */
   KEYWORDS_: string;
-  /** id */
+  /** Id */
   ID__: string;
   SFZD: string;
   FLAG: string;
-  /** index */
+  /** Index */
   RN: number;
-  /** from */
+  /** From */
   CJBM: string;
   TYPE: "notice" | "news";
-  /** url */
+  /** Url */
   URL: string | null;
 }
 

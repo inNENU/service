@@ -1,6 +1,4 @@
-/**
- * 各个服务的健康检查函数
- */
+/** 各个服务的健康检查函数 */
 
 // 导入各模块的服务器地址
 import { AUTH_SERVER } from "../auth/utils.js";
@@ -148,6 +146,7 @@ export const checkGradEnrollmentHealth = (): Promise<ServiceHealthStatus> =>
 
 /**
  * 执行所有服务的健康检查
+ *
  * 注意：这是一个重型操作，建议配合速率限制使用
  *
  * @returns 各服务的健康状态列表

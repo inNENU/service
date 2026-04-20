@@ -8,9 +8,7 @@ import type { CommonFailedResponse } from "../typings.js";
 import { authEncrypt } from "./encrypt.js";
 import { AUTH_CAPTCHA_URL, AUTH_LOGIN_URL, AUTH_SERVER } from "./utils.js";
 
-/**
- * 滑块轨迹点接口
- */
+/** 滑块轨迹点接口 */
 export interface SliderTrackPoint {
   /** 滑块的水平位置（距离） */
   a: number;

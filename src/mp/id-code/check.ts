@@ -34,13 +34,9 @@ export interface IdCodeInfo {
   createTime: string;
   remark: string;
 
-  /**
-   * @description Only available for admin
-   */
+  /** Only available for admin */
   id: number | null;
-  /**
-   * @description Only available for admin
-   */
+  /** Only available for admin */
   gender: string | null;
 }
 

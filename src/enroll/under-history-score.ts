@@ -14,7 +14,7 @@ export interface UnderHistoryScoreQueryOptions {
   province: string;
   /** 年份 */
   year: string;
-  /**类型 */
+  /** 类型 */
   classType: string;
   /** 专业类型 */
   majorType: string;

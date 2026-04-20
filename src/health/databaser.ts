@@ -2,9 +2,7 @@ import type { Pool } from "mysql2/promise";
 
 import { mysqlPool } from "@/utils/index.js";
 
-/**
- * 数据库连接池监控器
- */
+/** 数据库连接池监控器 */
 export class DatabaseMonitor {
   private intervalId?: ReturnType<typeof setInterval> | null;
   private activeConnections = 0;
@@ -15,9 +13,7 @@ export class DatabaseMonitor {
     this.setupPoolEventListeners();
   }
 
-  /**
-   * 设置连接池事件监听器
-   */
+  /** 设置连接池事件监听器 */
   private setupPoolEventListeners(): void {
     // 监听连接获取事件
     this.pool.on("acquire", () => {
@@ -83,9 +79,7 @@ export class DatabaseMonitor {
     this.logPoolStatus();
   }
 
-  /**
-   * 停止监控
-   */
+  /** 停止监控 */
   stopMonitoring(): void {
     if (this.intervalId) {
       clearInterval(this.intervalId);
@@ -93,9 +87,7 @@ export class DatabaseMonitor {
     }
   }
 
-  /**
-   * 记录连接池状态
-   */
+  /** 记录连接池状态 */
   private logPoolStatus(): void {
     try {
       const stats = this.getPoolStats();
@@ -124,9 +116,7 @@ export class DatabaseMonitor {
     }
   }
 
-  /**
-   * 重置统计计数器
-   */
+  /** 重置统计计数器 */
   resetStats(): void {
     this.totalConnections = this.activeConnections;
     console.info("连接池统计计数器已重置");
