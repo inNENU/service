@@ -57,7 +57,7 @@
     "tsdown": "0.21.7",
     "typescript": "6.0.2",
     "unrun": "0.2.34",
-    "uuid": "13.0.0"
+    "uuid": "14.0.0"
   },
   "nano-staged": {
     "**/*": "oxfmt --no-error-on-unmatched-pattern",
