@@ -55,7 +55,7 @@
     "picocolors": "1.1.1",
     "qrcode": "1.5.4",
     "tsdown": "0.21.7",
-    "typescript": "6.0.2",
+    "typescript": "6.0.3",
     "unrun": "0.2.34",
     "uuid": "14.0.0"
   },
