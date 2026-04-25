@@ -17,7 +17,7 @@
   "devDependencies": {
     "@alicloud/alinlp20200629": "3.1.0",
     "@alicloud/openapi-client": "0.4.15",
-    "@commitlint/cli": "20.5.0",
+    "@commitlint/cli": "20.5.2",
     "@commitlint/config-conventional": "20.5.0",
     "@mptool/net": "0.13.0",
     "@mptool/parser": "0.13.0",
