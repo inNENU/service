@@ -27,8 +27,8 @@ importers:
         specifier: 0.13.0
         version: 0.13.0(miniprogram-api-typings@5.1.2)
       '@mptool/parser':
-        specifier: 0.13.0
-        version: 0.13.0(miniprogram-api-typings@5.1.2)
+        specifier: 0.14.0
+        version: 0.14.0(miniprogram-api-typings@5.1.2)
       '@mr-hope/tsconfig':
         specifier: 0.0.3
         version: 0.0.3(typescript@6.0.3)
@@ -316,13 +316,18 @@ packages:
     peerDependencies:
       miniprogram-api-typings: ^5.0.0
 
-  '@mptool/parser@0.13.0':
-    resolution: {integrity: sha512-kSCPKOsoPYhw2OWf+4wZxd/h0BsPpzBiGiDwY+oQ8/gKqJ/2BlbuCCTYUY8Xv05cbkFj3pL906XBjdxWhKrN5A==}
+  '@mptool/parser@0.14.0':
+    resolution: {integrity: sha512-oQvbR8jnQacnHrC3VTH9DUHvX3CYlQRG7pcnc4cuj/kTLnlXNCiPT2RAf4wu/lX+IIX2I1pMqyT7A31PMmO7sw==}
     peerDependencies:
       miniprogram-api-typings: ^5.0.0
 
   '@mptool/shared@0.13.0':
     resolution: {integrity: sha512-QQ9AIvqc2FDnv5ok57dACAKuSF4Coea8Fq6yilCpEYaGMhd2ADqN/4I6jt1eDvykn+1uyP4e84B0M4eiSdKCwg==}
+    peerDependencies:
+      miniprogram-api-typings: ^5.0.0
+
+  '@mptool/shared@0.14.0':
+    resolution: {integrity: sha512-SATBRE7WxrzLJMOnkI+OsZ4dPGG28l5JMJiCOpCAB+upss+fQqW0T/KUDp60GFZbLUz60RiWx9x+IJXnPXlExQ==}
     peerDependencies:
       miniprogram-api-typings: ^5.0.0
 
@@ -2111,14 +2116,18 @@ snapshots:
       '@mptool/shared': 0.13.0(miniprogram-api-typings@5.1.2)
       miniprogram-api-typings: 5.1.2
 
-  '@mptool/parser@0.13.0(miniprogram-api-typings@5.1.2)':
+  '@mptool/parser@0.14.0(miniprogram-api-typings@5.1.2)':
     dependencies:
-      '@mptool/shared': 0.13.0(miniprogram-api-typings@5.1.2)
+      '@mptool/shared': 0.14.0(miniprogram-api-typings@5.1.2)
       cheerio: 1.2.0
       domhandler: 6.0.1
       miniprogram-api-typings: 5.1.2
 
   '@mptool/shared@0.13.0(miniprogram-api-typings@5.1.2)':
+    dependencies:
+      miniprogram-api-typings: 5.1.2
+
+  '@mptool/shared@0.14.0(miniprogram-api-typings@5.1.2)':
     dependencies:
       miniprogram-api-typings: 5.1.2
 
