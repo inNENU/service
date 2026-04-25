@@ -19,7 +19,7 @@
     "@alicloud/openapi-client": "0.4.15",
     "@commitlint/cli": "20.5.0",
     "@commitlint/config-conventional": "20.5.0",
-    "@mptool/net": "0.13.0",
+    "@mptool/net": "0.14.0",
     "@mptool/parser": "0.13.0",
     "@mr-hope/tsconfig": "0.0.3",
     "@types/compression": "1.8.1",
