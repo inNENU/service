@@ -46,7 +46,7 @@
     "iconv-lite": "0.7.0",
     "js-sha1": "0.7.0",
     "morgan": "1.10.1",
-    "mysql2": "3.22.1",
+    "mysql2": "3.22.2",
     "nano-staged": "1.0.2",
     "oxc-config-hope": "0.3.0",
     "oxfmt": "0.45.0",
