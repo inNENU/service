@@ -24,8 +24,8 @@ importers:
         specifier: 20.5.0
         version: 20.5.0
       '@mptool/net':
-        specifier: 0.13.0
-        version: 0.13.0(miniprogram-api-typings@5.1.2)
+        specifier: 0.14.0
+        version: 0.14.0(miniprogram-api-typings@5.1.2)
       '@mptool/parser':
         specifier: 0.13.0
         version: 0.13.0(miniprogram-api-typings@5.1.2)
@@ -311,8 +311,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@mptool/net@0.13.0':
-    resolution: {integrity: sha512-zEwA2YQQcqjYBz4nIMeVY1Bt0CVXAiSEjysqWe/s94lEerN93/RyhMUBT7YlwcpnhjBgIFjWFy2iE3xrNmD/Dg==}
+  '@mptool/net@0.14.0':
+    resolution: {integrity: sha512-nTY6vjl51PnIDNc6ricyoe+fLgUiGF/Xj1mhUpFgbj4SSng7T4wbY9RN3rjNyoeRuGrRAQsDbUO/Zchzn/J1Hw==}
     peerDependencies:
       miniprogram-api-typings: ^5.0.0
 
@@ -323,6 +323,11 @@ packages:
 
   '@mptool/shared@0.13.0':
     resolution: {integrity: sha512-QQ9AIvqc2FDnv5ok57dACAKuSF4Coea8Fq6yilCpEYaGMhd2ADqN/4I6jt1eDvykn+1uyP4e84B0M4eiSdKCwg==}
+    peerDependencies:
+      miniprogram-api-typings: ^5.0.0
+
+  '@mptool/shared@0.14.0':
+    resolution: {integrity: sha512-SATBRE7WxrzLJMOnkI+OsZ4dPGG28l5JMJiCOpCAB+upss+fQqW0T/KUDp60GFZbLUz60RiWx9x+IJXnPXlExQ==}
     peerDependencies:
       miniprogram-api-typings: ^5.0.0
 
@@ -2106,9 +2111,9 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@mptool/net@0.13.0(miniprogram-api-typings@5.1.2)':
+  '@mptool/net@0.14.0(miniprogram-api-typings@5.1.2)':
     dependencies:
-      '@mptool/shared': 0.13.0(miniprogram-api-typings@5.1.2)
+      '@mptool/shared': 0.14.0(miniprogram-api-typings@5.1.2)
       miniprogram-api-typings: 5.1.2
 
   '@mptool/parser@0.13.0(miniprogram-api-typings@5.1.2)':
@@ -2119,6 +2124,10 @@ snapshots:
       miniprogram-api-typings: 5.1.2
 
   '@mptool/shared@0.13.0(miniprogram-api-typings@5.1.2)':
+    dependencies:
+      miniprogram-api-typings: 5.1.2
+
+  '@mptool/shared@0.14.0(miniprogram-api-typings@5.1.2)':
     dependencies:
       miniprogram-api-typings: 5.1.2
 
