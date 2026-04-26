@@ -30,8 +30,8 @@ importers:
         specifier: 0.13.0
         version: 0.13.0(miniprogram-api-typings@5.1.2)
       '@mr-hope/tsconfig':
-        specifier: 0.0.3
-        version: 0.0.3(typescript@6.0.3)
+        specifier: 0.0.4
+        version: 0.0.4(typescript@6.0.3)
       '@types/compression':
         specifier: 1.8.1
         version: 1.8.1
@@ -326,8 +326,8 @@ packages:
     peerDependencies:
       miniprogram-api-typings: ^5.0.0
 
-  '@mr-hope/tsconfig@0.0.3':
-    resolution: {integrity: sha512-dpgwNf6puCRKL+JiR1CIXxlpon4eM/0yZN0c6W2riE4St/A+hu+GdbpLD9tgsGQw3E9abKj98mDTapt29Yg01g==}
+  '@mr-hope/tsconfig@0.0.4':
+    resolution: {integrity: sha512-sHD3OmpHV4hxZDTjdp/0hyUifITCwEN4xHvYQkl779mtpeDZOVj69kj+SJ5+nav+3m9EUx4Q1MgxzQbZlaxwPA==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
       typescript: '>=5.4.0'
@@ -2122,7 +2122,7 @@ snapshots:
     dependencies:
       miniprogram-api-typings: 5.1.2
 
-  '@mr-hope/tsconfig@0.0.3(typescript@6.0.3)':
+  '@mr-hope/tsconfig@0.0.4(typescript@6.0.3)':
     dependencies:
       typescript: 6.0.3
 
