@@ -51,7 +51,7 @@
     "oxc-config-hope": "0.3.0",
     "oxfmt": "0.45.0",
     "oxlint": "1.60.0",
-    "oxlint-tsgolint": "0.21.1",
+    "oxlint-tsgolint": "0.22.1",
     "picocolors": "1.1.1",
     "qrcode": "1.5.4",
     "tsdown": "0.21.9",
