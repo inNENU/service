@@ -25,6 +25,7 @@ export const oaCheckHandler = request<CookieVerifyResponse, CookieOptions>(async
 
     return res.json({
       success: true,
+      // oxlint-disable-next-line no-underscore-dangle
       valid: ecodeData.status && "_user" in ecodeData._data,
     });
   } catch {

@@ -17,11 +17,11 @@
   "devDependencies": {
     "@alicloud/alinlp20200629": "3.1.0",
     "@alicloud/openapi-client": "0.4.15",
-    "@commitlint/cli": "20.5.0",
+    "@commitlint/cli": "20.5.2",
     "@commitlint/config-conventional": "20.5.0",
-    "@mptool/net": "0.13.0",
-    "@mptool/parser": "0.13.0",
-    "@mr-hope/tsconfig": "0.0.3",
+    "@mptool/net": "0.14.0",
+    "@mptool/parser": "0.14.0",
+    "@mr-hope/tsconfig": "0.0.4",
     "@types/compression": "1.8.1",
     "@types/cookie-parser": "1.4.10",
     "@types/cors": "2.8.19",
@@ -41,22 +41,22 @@
     "domhandler": "^6.0.1",
     "dotenv": "17.4.2",
     "express": "5.2.1",
-    "express-rate-limit": "8.3.2",
+    "express-rate-limit": "8.4.1",
     "husky": "9.1.7",
     "iconv-lite": "0.7.0",
     "js-sha1": "0.7.0",
     "morgan": "1.10.1",
-    "mysql2": "3.22.1",
+    "mysql2": "3.22.3",
     "nano-staged": "1.0.2",
-    "oxc-config-hope": "0.3.0",
-    "oxfmt": "0.45.0",
-    "oxlint": "1.60.0",
-    "oxlint-tsgolint": "0.21.1",
+    "oxc-config-hope": "0.3.2",
+    "oxfmt": "0.47.0",
+    "oxlint": "1.62.0",
+    "oxlint-tsgolint": "0.22.1",
     "picocolors": "1.1.1",
     "qrcode": "1.5.4",
-    "tsdown": "0.21.9",
+    "tsdown": "0.21.10",
     "typescript": "6.0.3",
-    "unrun": "0.2.36",
+    "unrun": "0.2.37",
     "uuid": "14.0.0"
   },
   "nano-staged": {
@@ -71,5 +71,5 @@
   "engines": {
     "node": ">= 20.19"
   },
-  "packageManager": "pnpm@10.33.0"
+  "packageManager": "pnpm@10.33.2"
 }

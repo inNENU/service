@@ -70,12 +70,14 @@ export const getOAInfo = async (cookieHeader: string): Promise<OAInfoResponse> =
     _data: { _user: RawOAInfoData } | Record<never, never>;
   };
 
+  // oxlint-disable-next-line no-underscore-dangle
   if (!ecodeData.status || !("_user" in ecodeData._data)) {
     console.error("获取 OA 信息失败", ecodeData);
 
     return unknownResponse("获取 OA 信息失败");
   }
 
+  // oxlint-disable-next-line no-underscore-dangle
   const { id, loginId, resourceName, departmentName, departmentId } = ecodeData._data._user;
 
   return {

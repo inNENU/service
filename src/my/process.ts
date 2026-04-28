@@ -49,7 +49,9 @@ export const getProcess = async (
 
     return {
       success: true,
+      // oxlint-disable-next-line no-underscore-dangle
       taskId: content.TASK_ID_,
+      // oxlint-disable-next-line no-underscore-dangle
       instanceId: content.PROC_INST_ID_,
       formPath: content.formPath,
       realFormPath: content.realFormPath,
