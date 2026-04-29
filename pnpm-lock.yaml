@@ -25,10 +25,10 @@ importers:
         version: 20.5.0
       '@mptool/net':
         specifier: 0.14.0
-        version: 0.14.0(miniprogram-api-typings@5.1.2)
+        version: 0.14.0(miniprogram-api-typings@5.1.3)
       '@mptool/parser':
         specifier: 0.14.0
-        version: 0.14.0(miniprogram-api-typings@5.1.2)
+        version: 0.14.0(miniprogram-api-typings@5.1.3)
       '@mr-hope/tsconfig':
         specifier: 0.0.4
         version: 0.0.4(typescript@6.0.3)
@@ -1361,8 +1361,8 @@ packages:
   minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
 
-  miniprogram-api-typings@5.1.2:
-    resolution: {integrity: sha512-+4tABz3krRZu0EFO9obYwsfNC5Grpc5v49ZZc9qNzHRUHvKnM6G/n8/LnJBQCFht9dymhRnRx3FKcJ6TmzfmwA==}
+  miniprogram-api-typings@5.1.3:
+    resolution: {integrity: sha512-qU9YqepEvUJ8wcqw3Kku2hPBN8IuSQjbhnIlkm/8GVyP7WftTboc6fC68AVoc/TfOSfugotMg5XknQhH2J8/kg==}
 
   moment-timezone@0.5.48:
     resolution: {integrity: sha512-f22b8LV1gbTO2ms2j2z13MuPogNoh5UzxL3nzNAYKGraILnbGc9NEE6dyiiiLv46DGRb8A4kg8UKWLjPthxBHw==}
@@ -1672,8 +1672,8 @@ packages:
     resolution: {integrity: sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==}
     engines: {node: '>=8'}
 
-  tinyexec@1.1.1:
-    resolution: {integrity: sha512-VKS/ZaQhhkKFMANmAOhhXVoIfBXblQxGX1myCQ2faQrfmobMftXeJPcZGp0gS07ocvGJWDLZGyOZDadDBqYIJg==}
+  tinyexec@1.1.2:
+    resolution: {integrity: sha512-dAqSqE/RabpBKI8+h26GfLq6Vb3JVXs30XYQjdMjaj/c2tS8IYYMbIzP599KtRj7c57/wYApb3QjgRgXmrCukA==}
     engines: {node: '>=18'}
 
   tinyglobby@0.2.16:
@@ -1948,7 +1948,7 @@ snapshots:
       '@commitlint/load': 20.5.2(@types/node@24.12.2)(typescript@6.0.3)
       '@commitlint/read': 20.5.0(conventional-commits-parser@6.4.0)
       '@commitlint/types': 20.5.0
-      tinyexec: 1.1.1
+      tinyexec: 1.1.2
       yargs: 17.7.2
     transitivePeerDependencies:
       - '@types/node'
@@ -2023,7 +2023,7 @@ snapshots:
       '@commitlint/types': 20.5.0
       git-raw-commits: 5.0.1(conventional-commits-parser@6.4.0)
       minimist: 1.2.8
-      tinyexec: 1.1.1
+      tinyexec: 1.1.2
     transitivePeerDependencies:
       - conventional-commits-filter
       - conventional-commits-parser
@@ -2106,21 +2106,21 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@mptool/net@0.14.0(miniprogram-api-typings@5.1.2)':
+  '@mptool/net@0.14.0(miniprogram-api-typings@5.1.3)':
     dependencies:
-      '@mptool/shared': 0.14.0(miniprogram-api-typings@5.1.2)
-      miniprogram-api-typings: 5.1.2
+      '@mptool/shared': 0.14.0(miniprogram-api-typings@5.1.3)
+      miniprogram-api-typings: 5.1.3
 
-  '@mptool/parser@0.14.0(miniprogram-api-typings@5.1.2)':
+  '@mptool/parser@0.14.0(miniprogram-api-typings@5.1.3)':
     dependencies:
-      '@mptool/shared': 0.14.0(miniprogram-api-typings@5.1.2)
+      '@mptool/shared': 0.14.0(miniprogram-api-typings@5.1.3)
       cheerio: 1.2.0
       domhandler: 6.0.1
-      miniprogram-api-typings: 5.1.2
+      miniprogram-api-typings: 5.1.3
 
-  '@mptool/shared@0.14.0(miniprogram-api-typings@5.1.2)':
+  '@mptool/shared@0.14.0(miniprogram-api-typings@5.1.3)':
     dependencies:
-      miniprogram-api-typings: 5.1.2
+      miniprogram-api-typings: 5.1.3
 
   '@mr-hope/tsconfig@0.0.4(typescript@6.0.3)':
     dependencies:
@@ -2959,7 +2959,7 @@ snapshots:
 
   minimist@1.2.8: {}
 
-  miniprogram-api-typings@5.1.2: {}
+  miniprogram-api-typings@5.1.3: {}
 
   moment-timezone@0.5.48:
     dependencies:
@@ -3315,7 +3315,7 @@ snapshots:
     dependencies:
       ansi-regex: 5.0.1
 
-  tinyexec@1.1.1: {}
+  tinyexec@1.1.2: {}
 
   tinyglobby@0.2.16:
     dependencies:
@@ -3341,7 +3341,7 @@ snapshots:
       rolldown: 1.0.0-rc.17
       rolldown-plugin-dts: 0.23.2(rolldown@1.0.0-rc.17)(typescript@6.0.3)
       semver: 7.7.4
-      tinyexec: 1.1.1
+      tinyexec: 1.1.2
       tinyglobby: 0.2.16
       tree-kill: 1.2.2
       unconfig-core: 7.5.0
