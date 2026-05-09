@@ -1,7 +1,7 @@
 import type { CommonFailedResponse, CommonSuccessResponse } from "../typings.js";
 import { MAIN_ACTIONS_URL, MAIN_URL } from "./utils.js";
 
-const ACTION_REG_EXP = /xPageIDs\s*=\s*'(.*?)';[^]+xPageAbc\s*=\s*'(.*?)';/;
+const ACTION_REG_EXP = /xPageIDs\s*=\s*'(.*?)';[^]+xPageAbc\s*=\s*'(.*?)';/u;
 
 export interface GradAction {
   name: string;

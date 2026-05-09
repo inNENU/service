@@ -9,7 +9,7 @@ import { morganMiddleware } from "./morgan.js";
 export const applyMiddleware = (app: Express): void => {
   app.use(
     cors({
-      origin: ["https://servicewechat.com", /^https:\/\/.*\.innenu\.com$/, "https://innenu.com"],
+      origin: ["https://servicewechat.com", /^https:\/\/.*\.innenu\.com$/u, "https://innenu.com"],
     }),
   );
   app.use(cookieParser());

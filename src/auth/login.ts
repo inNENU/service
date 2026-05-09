@@ -142,7 +142,7 @@ export const authLogin = async ({
   }
 
   const [, salt] = SALT_REGEXP.exec(content)!;
-  const [, execution] = /name="execution" value="(.*?)"/.exec(content)!;
+  const [, execution] = /name="execution" value="(.*?)"/u.exec(content)!;
 
   cookieStore.set({
     name: "org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE",
@@ -233,7 +233,7 @@ export const authLogin = async ({
       };
     }
 
-    const lockedResult = /<span>账号已冻结，预计解冻时间：(.*?)<\/span>/.exec(resultContent);
+    const lockedResult = /<span>账号已冻结，预计解冻时间：(.*?)<\/span>/u.exec(resultContent);
 
     if (lockedResult) {
       return {

@@ -8,28 +8,28 @@ import type { EmptyObject, LoginOptions } from "../typings.js";
 import { underSystemLogin } from "./login.js";
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 
-const NAME_REGEXP = /<td>姓&nbsp;名<\/td>\s+<td colspan="3">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/;
-const GENDER_REGEXP = /<td>性&nbsp;别<\/td>\s+<td colspan="2">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/;
-const PEOPLE_REGEXP = /<td>民&nbsp;族<\/td>\s+<td colspan="3">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/;
+const NAME_REGEXP = /<td>姓&nbsp;名<\/td>\s+<td colspan="3">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/u;
+const GENDER_REGEXP = /<td>性&nbsp;别<\/td>\s+<td colspan="2">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/u;
+const PEOPLE_REGEXP = /<td>民&nbsp;族<\/td>\s+<td colspan="3">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/u;
 const POLITICAL_TYPE_REGEXP =
-  /<td>政治面貌<\/td>\s+<td colspan="2">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/;
-const ID_CARD_REGEXP = /<td>身份证号<\/td>\s+<td colspan="3">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/;
+  /<td>政治面貌<\/td>\s+<td colspan="2">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/u;
+const ID_CARD_REGEXP = /<td>身份证号<\/td>\s+<td colspan="3">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/u;
 
 const ID_REGEXP =
-  /<td>学&nbsp;籍&nbsp;号<\/td>\s+<td colspan="3">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/;
-const SCHOOL_REGEXP = /<td>就读学院<\/td>\s+<td colspan="3">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/;
-const MAJOR_REGEXP = /<td>就读专业<\/td>\s+<td colspan="3">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/;
-const MAJOR_TYPE_REGEXP = /<td>专业类别<\/td>\s+<td colspan="2">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/;
-const IN_DATE_REGEXP = /<td>入学日期<\/td>\s+<td colspan="2">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/;
+  /<td>学&nbsp;籍&nbsp;号<\/td>\s+<td colspan="3">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/u;
+const SCHOOL_REGEXP = /<td>就读学院<\/td>\s+<td colspan="3">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/u;
+const MAJOR_REGEXP = /<td>就读专业<\/td>\s+<td colspan="3">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/u;
+const MAJOR_TYPE_REGEXP = /<td>专业类别<\/td>\s+<td colspan="2">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/u;
+const IN_DATE_REGEXP = /<td>入学日期<\/td>\s+<td colspan="2">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/u;
 
-const LANGUAGE_REGEXP = /<td>高考语种<\/td>\s+<td colspan="3">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/;
+const LANGUAGE_REGEXP = /<td>高考语种<\/td>\s+<td colspan="3">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/u;
 const CULTIVATE_ID =
-  /<td>考&nbsp;生&nbsp;号<\/td>\s+<td colspan="3">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/;
+  /<td>考&nbsp;生&nbsp;号<\/td>\s+<td colspan="3">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/u;
 const CULTIVATE_TYPE_REGEXP =
-  /<td>培养方式<\/td>\s+<td colspan="2">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/;
-const PROVINCE_REGEXP = /<td>生源省份<\/td>\s+<td colspan="2">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/;
+  /<td>培养方式<\/td>\s+<td colspan="2">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/u;
+const PROVINCE_REGEXP = /<td>生源省份<\/td>\s+<td colspan="2">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/u;
 const CANDIDATE_TYPE_REGEXP =
-  /<td>考生类别<\/td>\s+<td colspan="2">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/;
+  /<td>考生类别<\/td>\s+<td colspan="2">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/u;
 
 export const STUDENT_ARCHIVE_QUERY_URL = `${UNDER_SYSTEM_SERVER}/xszhxxAction.do?method=addStudentPic_xszc`;
 
@@ -80,7 +80,7 @@ const getInfo = (content: string): UnderStudentInfo => {
   const [, people] = PEOPLE_REGEXP.exec(content)!;
   const [, idCard] = ID_CARD_REGEXP.exec(content)!;
   const [, politicalType] = POLITICAL_TYPE_REGEXP.exec(content)!;
-  const birth = idCard.slice(6, 14).replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
+  const birth = idCard.slice(6, 14).replace(/(\d{4})(\d{2})(\d{2})/u, "$1-$2-$3");
 
   const [, id] = ID_REGEXP.exec(content)!;
   const [, school] = SCHOOL_REGEXP.exec(content)!;
@@ -108,7 +108,7 @@ const getInfo = (content: string): UnderStudentInfo => {
     school,
     major,
     majorType,
-    inDate: inDate.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3"),
+    inDate: inDate.replace(/(\d{4})(\d{2})(\d{2})/u, "$1-$2-$3"),
 
     language,
     candidateId,

@@ -7,27 +7,27 @@ import type { UnderStudyLoginFailedResponse } from "./login.js";
 import { UNDER_STUDY_SERVER } from "./utils.js";
 
 const ID_REGEXP =
-  /<td align="right" style="width: 90px">学号：<\/td>\s*<td align="left"><label style="width: 90px">(.*?)<\/label><\/td>/;
-const NAME_REGEXP = /title="学生姓名" value="(.*?)"/;
+  /<td align="right" style="width: 90px">学号：<\/td>\s*<td align="left"><label style="width: 90px">(.*?)<\/label><\/td>/u;
+const NAME_REGEXP = /title="学生姓名" value="(.*?)"/u;
 const IN_YEAR_REGEXP =
-  /<td align="right" style="width: 100px">入学年份：<\/td>\s*<td align="left"><label style="width: 90px">(.*?)<\/label><\/td>/;
+  /<td align="right" style="width: 100px">入学年份：<\/td>\s*<td align="left"><label style="width: 90px">(.*?)<\/label><\/td>/u;
 const SCHOOL_REGEXP =
-  /<td\s+align="right">院系名称：<\/td>\s*<td><label style="width: 90px">(.*?)<\/label><\/td>/;
+  /<td\s+align="right">院系名称：<\/td>\s*<td><label style="width: 90px">(.*?)<\/label><\/td>/u;
 const MAJOR_REGEXP =
-  /<td\s+align="right">专业：<\/td>\s*<td\s*><label style="width: 90px">\s+(.*?)-?\s+<\/label><\/td>/;
+  /<td\s+align="right">专业：<\/td>\s*<td\s*><label style="width: 90px">\s+(.*?)-?\s+<\/label><\/td>/u;
 
 const GRADE_REGEXP =
-  /<td\s+align="right">所在年级：<\/td>\s*<td align="left"><label style="width: 90px">(.*?)<\/label><\/td>/;
+  /<td\s+align="right">所在年级：<\/td>\s*<td align="left"><label style="width: 90px">(.*?)<\/label><\/td>/u;
 // <td align="right">所在校区：</td>
 // <td><label style="width: 90px">本部</label></td>
 
 const LOCATION_REGEXP =
-  /<td align="right">所在校区：<\/td>\s*<td><label style="width: 90px">(.*?)<\/label><\/td>/;
-const PEOPLE_WRAPPER_REGEXP = /<select.+?title='民族'[^>]+>([\s\S]+?)<\/select>/;
-const PEOPLE_MATCH_REGEXP = /<option\s+value='\d+'\s*?selected>(.*?)<\/option>/g;
+  /<td align="right">所在校区：<\/td>\s*<td><label style="width: 90px">(.*?)<\/label><\/td>/u;
+const PEOPLE_WRAPPER_REGEXP = /<select.+?title='民族'[^>]+>([\s\S]+?)<\/select>/u;
+const PEOPLE_MATCH_REGEXP = /<option\s+value='\d+'\s*?selected>(.*?)<\/option>/gu;
 
 const ID_CARD_REGEXP =
-  /<td align="right">证件号码：<\/td>\s*<td><input\s+id="sfzh"[\s\S]*?value="(.*?)"/;
+  /<td align="right">证件号码：<\/td>\s*<td><input\s+id="sfzh"[\s\S]*?value="(.*?)"/u;
 
 export interface UnderStudyInfo {
   /** 用户学号 */

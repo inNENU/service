@@ -19,11 +19,11 @@ import {
 } from "./utils.js";
 
 const selectRegExp =
-  /<select\s+name="kskzid"\s+id="kskzid"[^>]*><option value="">---请选择---<\/option>([^]*?)<\/select>/;
-const optionRegExp = /<option value="([^"]+)">([^<]+)<\/option>/g;
+  /<select\s+name="kskzid"\s+id="kskzid"[^>]*><option value="">---请选择---<\/option>([^]*?)<\/select>/u;
+const optionRegExp = /<option value="([^"]+)">([^<]+)<\/option>/gu;
 
 const examRegExp =
-  /<tr[^>]*><td[^>]*>.*?<\/td>\s*<td[^>]*>.*?<\/td>\s*<td[^>]*>.*?<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<\/tr>/g;
+  /<tr[^>]*><td[^>]*>.*?<\/td>\s*<td[^>]*>.*?<\/td>\s*<td[^>]*>.*?<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<\/tr>/gu;
 
 const DEFAULT_TABLE_FIELD =
   "学号:0:1:90:xh,姓名:1:1:90:xm,课程名称:2:1:130:course_name,考试时间:3:1:260:kw0403.ksqssj,校区名称:4:1:200:xqmc,教学楼:5:1:300:jxl,考场:6:1:420:kw0404.kcmc";

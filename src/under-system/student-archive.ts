@@ -5,14 +5,14 @@ import { ActionFailType, unknownResponse } from "../config/index.js";
 import type { CommonFailedResponse, LoginOptions } from "../typings.js";
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 
-const infoRegExp = /<td>(\S+)<\/td>\s+<td colspan="\d">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/g;
+const infoRegExp = /<td>(\S+)<\/td>\s+<td colspan="\d">(?:&nbsp;)*(.*?)(?:&nbsp;)*<\/td>/gu;
 const studyRegExp =
-  /<td {2}>(\S+)<\/td>\s*<td {2}>(\S+)<\/td>\s*<td\scolspan="4">(\S+)<\/td>\s*<td {2}>(\S+)<\/td>\s*<td\scolspan="2">(\S+)<\/td>\s*<td {2}>(\S+)<\/td>/g;
+  /<td {2}>(\S+)<\/td>\s*<td {2}>(\S+)<\/td>\s*<td\scolspan="4">(\S+)<\/td>\s*<td {2}>(\S+)<\/td>\s*<td\scolspan="2">(\S+)<\/td>\s*<td {2}>(\S+)<\/td>/gu;
 const familyRegExp =
-  /<td {2}>(\S+)<\/td>\s*<td {2}>(\S+)<\/td>\s*<td\scolspan="2">(\S+)<\/td>\s*<td\scolspan="2">(\S+)<\/td>\s*<td\scolspan="3">(\S+)<\/td>\s*<td {2}>(\S+)<\/td/g;
-const pathRegExp = /var newwin = window.showModalDialog\("(.+?)"\);/;
+  /<td {2}>(\S+)<\/td>\s*<td {2}>(\S+)<\/td>\s*<td\scolspan="2">(\S+)<\/td>\s*<td\scolspan="2">(\S+)<\/td>\s*<td\scolspan="3">(\S+)<\/td>\s*<td {2}>(\S+)<\/td/gu;
+const pathRegExp = /var newwin = window.showModalDialog\("(.+?)"\);/u;
 const registerButtonRegExp =
-  /<input\s+type="button"\s+id="zc"\s+class="button"\s+value="确定注册"\s+onclick="bc\(\)"\/>/;
+  /<input\s+type="button"\s+id="zc"\s+class="button"\s+value="确定注册"\s+onclick="bc\(\)"\/>/u;
 
 const UNDER_STUDENT_ARCHIVE_QUERY_URL = `${UNDER_SYSTEM_SERVER}/xszhxxAction.do?method=addStudentPic_xszc`;
 
@@ -107,7 +107,7 @@ const getStudentArchive = async (
       ({ name, relation, office, title, phone, remark }) =>
         name || relation || office || title || phone || remark,
     );
-  const [examImageLink, archiveImageLink] = [...content.matchAll(/var url\s*=\s*"(.*)"/g)].map(
+  const [examImageLink, archiveImageLink] = [...content.matchAll(/var url\s*=\s*"(.*)"/gu)].map(
     ([, url]) => url,
   );
 
@@ -189,7 +189,7 @@ export const getUnderStudentArchive = async (
   return unknownResponse("获取学籍信息失败");
 };
 
-const alertRegExp = /window.alert\('(.+?)'\)/;
+const alertRegExp = /window.alert\('(.+?)'\)/u;
 
 export interface RegisterUnderStudentArchiveOptions extends LoginOptions {
   type?: "register";

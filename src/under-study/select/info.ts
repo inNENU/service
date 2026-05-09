@@ -16,23 +16,23 @@ import { COURSE_CATEGORIES } from "./utils.js";
 const CHECK_URL = `${UNDER_STUDY_SERVER}/new/student/xsxk/checkFinishPj`;
 
 const COURSE_OFFICES_REGEXP =
-  /<select id='kkyxdm' name='kkyxdm'.*?><option value=''>\(请选择\)<\/option>(.*?)<\/select>/;
-const COURSE_OFFICE_ITEM_REGEXP = /<option value='(.+?)' >\d+-(.*?)<\/option>/g;
+  /<select id='kkyxdm' name='kkyxdm'.*?><option value=''>\(请选择\)<\/option>(.*?)<\/select>/u;
+const COURSE_OFFICE_ITEM_REGEXP = /<option value='(.+?)' >\d+-(.*?)<\/option>/gu;
 const AREAS_REGEXP =
-  /<select id='xqdm' name='xqdm'.*?><option value=''>\(请选择\)<\/option>(.*?)<\/select>/;
-const AREA_ITEM_REGEXP = /<option value='(.+?)' >\d+-(.*?)<\/option>/g;
+  /<select id='xqdm' name='xqdm'.*?><option value=''>\(请选择\)<\/option>(.*?)<\/select>/u;
+const AREA_ITEM_REGEXP = /<option value='(.+?)' >\d+-(.*?)<\/option>/gu;
 const COURSE_TYPES_REGEXP =
-  /<select id='kcdldm' name='kcdldm'.*?><option value=''>\(请选择\)<\/option>(.*?)<\/select>/;
-const COURSE_TYPE_ITEM_REGEXP = /<option value='(.+?)' >(.*?)<\/option>/g;
-const CURRENT_GRADE_REGEXP = /<option value='(\d+)' selected>\1<\/option>/;
+  /<select id='kcdldm' name='kcdldm'.*?><option value=''>\(请选择\)<\/option>(.*?)<\/select>/u;
+const COURSE_TYPE_ITEM_REGEXP = /<option value='(.+?)' >(.*?)<\/option>/gu;
+const CURRENT_GRADE_REGEXP = /<option value='(\d+)' selected>\1<\/option>/u;
 const MAJORS_REGEXP =
-  /<select id='zydm' name='zydm'.*?><option value=''>\(全部\)<\/option>(.*?)<\/select>/;
-const MAJOR_ITEM_REGEXP = /<option value='(\d+?)' (?:selected)?>\d+-(.*?)<\/option>/g;
-const CURRENT_MAJOR_REGEXP = /<option value='(\d{6,7})' selected>\d+-(.*?)<\/option>/;
+  /<select id='zydm' name='zydm'.*?><option value=''>\(全部\)<\/option>(.*?)<\/select>/u;
+const MAJOR_ITEM_REGEXP = /<option value='(\d+?)' (?:selected)?>\d+-(.*?)<\/option>/gu;
+const CURRENT_MAJOR_REGEXP = /<option value='(\d{6,7})' selected>\d+-(.*?)<\/option>/u;
 const INFO_TITLE_REGEXP =
-  /<span id="title">(.*?)学期&nbsp;&nbsp;(.*?)&nbsp;&nbsp;(?:<span.*?>(.*?)<\/span>)?<\/span>/;
+  /<span id="title">(.*?)学期&nbsp;&nbsp;(.*?)&nbsp;&nbsp;(?:<span.*?>(.*?)<\/span>)?<\/span>/u;
 const ALLOWED_INFO_REGEXP =
-  /<span id="sub-title">\s+?<div id="text">现在是(.*?)时间\s+（(\d\d:\d\d:\d\d)--(\d\d:\d\d:\d\d)）/;
+  /<span id="sub-title">\s+?<div id="text">现在是(.*?)时间\s+（(\d\d:\d\d:\d\d)--(\d\d:\d\d:\d\d)）/u;
 
 const setMajors = (content: string): void => {
   if (!majorsStore.state.length) {
@@ -220,7 +220,7 @@ const checkCourseCommentary = async (
     if (content.includes("评价已完成")) return { completed: true, msg: "已完成评教" };
 
     if (content.includes("下次可检查时间为：")) {
-      const time = /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.exec(content)?.[0];
+      const time = /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/u.exec(content)?.[0];
 
       return { completed: false, msg: `检查过于频繁，请于 ${time} 后重试` };
     }
@@ -271,10 +271,10 @@ export const getUnderSelectInfo = async (
 
   let content = await response.text();
 
-  if (/<title>.*?评教检查<\/title>/.test(content)) {
+  if (/<title>.*?评教检查<\/title>/u.test(content)) {
     const { completed } = await checkCourseCommentary(
       cookieHeader,
-      /xnxqdm=(\d+)'/.exec(content)![1],
+      /xnxqdm=(\d+)'/u.exec(content)![1],
       categoryUrl,
     );
 

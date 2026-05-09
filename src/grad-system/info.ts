@@ -7,8 +7,8 @@ import { getAction } from "./action.js";
 import { gradSystemLogin } from "./login.js";
 import { GRAD_SYSTEM_SERVER, MAIN_URL } from "./utils.js";
 
-const TITLE_REG_EXP = /aField\s?="(.*?)"\.split\("\t"\);/;
-const VALUE_REG_EXP = /aDataLS\s?="(.*?)"\.split\("\t"\);/;
+const TITLE_REG_EXP = /aField\s?="(.*?)"\.split\("\t"\);/u;
+const VALUE_REG_EXP = /aDataLS\s?="(.*?)"\.split\("\t"\);/u;
 
 export interface GradStudentInfo {
   /** 姓名 */
@@ -52,7 +52,7 @@ const getInfo = (content: string): GradStudentInfo => {
   const genderIndex = titles.indexOf("性别");
   const idCardIndex = titles.indexOf("身份证号");
   const idCard = values[idCardIndex];
-  const birth = idCard.slice(6, 14).replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
+  const birth = idCard.slice(6, 14).replace(/(\d{4})(\d{2})(\d{2})/u, "$1-$2-$3");
   const peopleIndex = titles.indexOf("民族");
   const politicalTypeIndex = titles.indexOf("政治面貌");
 

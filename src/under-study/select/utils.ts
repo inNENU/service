@@ -64,9 +64,9 @@ export const getClasses = (records: RawUnderSelectClassItem[]): UnderSelectClass
       jxbdm: classCode,
       kcrwdm: classId,
     }) => {
-      const classInfos = (/^复制(.*)-1$/.exec(rawClassInfo)?.[1] ?? rawClassInfo).split(",");
+      const classInfos = (/^复制(.*)-1$/u.exec(rawClassInfo)?.[1] ?? rawClassInfo).split(",");
 
-      const isTarget = classInfos.every((info) => /^\d{4}.+$/.exec(info));
+      const isTarget = classInfos.every((info) => /^\d{4}.+$/u.exec(info));
 
       return {
         name,

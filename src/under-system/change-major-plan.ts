@@ -15,10 +15,10 @@ import {
   totalPagesRegExp,
 } from "./utils.js";
 
-const HEADER_REGEXP = /<title>(.*)<\/title>/;
+const HEADER_REGEXP = /<title>(.*)<\/title>/u;
 
 const PLAN_REGEXP =
-  /<tr[^>]*><td[^>]*>.*?<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<\/tr>/g;
+  /<tr[^>]*><td[^>]*>.*?<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<td[^>]*>(.*?)<\/td>\s*<\/tr>/gu;
 
 const DEFAULT_TABLE_FIELD =
   "控制名称:12:1:100:e.kzmc,学院:11:1:150:c.dwmc,专业名称:10:1:150:zymc,接收科类:16:1:80:zykl,考核方式:3:1:70:zzykhfs.dmmc,考核时间:4:1:110:khsj,考核地点:5:1:80:khdd,拟转入人数:6:1:90:zrrs,报名人数:17:1:90:jyzrrs,转入条件:15:1:60:zrtj,联系人:18:1:90:lxr,咨询电话:19:1:100:lxdh";
@@ -79,8 +79,8 @@ const getPlans = (content: string): ChangeMajorPlan[] =>
       current: Number(current),
       requirement: requirement
         .replaceAll("准入考核内容", "\n准入考核内容")
-        .replaceAll(/(\d+)\./g, "\n$1.")
-        .replaceAll(/([一二三四五六七八九十]+)、/g, "\n$1、")
+        .replaceAll(/(\d+)\./gu, "\n$1.")
+        .replaceAll(/([一二三四五六七八九十]+)、/gu, "\n$1、")
         .trim(),
       contact,
       phone,

@@ -8,21 +8,21 @@ import type { CommonFailedResponse, EmptyObject, LoginOptions } from "../typings
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 
 const nextLinkRegExp =
-  /<input\s+type="button"\s+class="button"\s+onclick="window.location.href='([^']+)';"\s+value=" 下一步 "\/>/;
-const pathRegExp = /<form action="([^"]+)"/;
+  /<input\s+type="button"\s+class="button"\s+onclick="window.location.href='([^']+)';"\s+value=" 下一步 "\/>/u;
+const pathRegExp = /<form action="([^"]+)"/u;
 const infoRowRegExp =
-  /<tr height="25px"\s*><td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<\/tr>/g;
+  /<tr height="25px"\s*><td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<\/tr>/gu;
 const info2RowRegExp =
-  /<tr height="25px"\s*><td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<\/tr>/g;
-const readonlyRegExp = /<font[^>]+>ø<\/font>/;
-const inputRegExp = /<input[^>]*name="(.*?)"[^>]*value="(.*?)"[^>]*\/>/;
-const checkBoxRegExp = /<input type="checkbox" value="(.*?)" id="gx" name="(.*?)"[^>]+\/>/;
-const selectRegExp = /<select[^>]+name="(.*?)"/;
-const optionRegExp = /<option value="([^"]+)">([^<]*?)<\/option>/g;
-const fieldsRegExp = /<input\s+type="text"[^>]+name="(.*?)"\s+id=".*?"\s+value="(.*?)"[^>]+\/>/g;
-const hiddenFieldsRegExp = /<input\s+type="hidden"[^>]+name="(.*?)"\s*value="(.*?)"\s*\/>/g;
-const studyDataRegExp = /"brjl"\s*:\s*(\[.*?\])/;
-const familyDataRegExp = /"jtcy"\s*:\s*(\[.*?\])/;
+  /<tr height="25px"\s*><td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<\/tr>/gu;
+const readonlyRegExp = /<font[^>]+>ø<\/font>/u;
+const inputRegExp = /<input[^>]*name="(.*?)"[^>]*value="(.*?)"[^>]*\/>/u;
+const checkBoxRegExp = /<input type="checkbox" value="(.*?)" id="gx" name="(.*?)"[^>]+\/>/u;
+const selectRegExp = /<select[^>]+name="(.*?)"/u;
+const optionRegExp = /<option value="([^"]+)">([^<]*?)<\/option>/gu;
+const fieldsRegExp = /<input\s+type="text"[^>]+name="(.*?)"\s+id=".*?"\s+value="(.*?)"[^>]+\/>/gu;
+const hiddenFieldsRegExp = /<input\s+type="hidden"[^>]+name="(.*?)"\s*value="(.*?)"\s*\/>/gu;
+const studyDataRegExp = /"brjl"\s*:\s*(\[.*?\])/u;
+const familyDataRegExp = /"jtcy"\s*:\s*(\[.*?\])/u;
 
 export interface UnderArchiveFieldInfo {
   name: string;
@@ -101,7 +101,7 @@ export const getUnderStudentArchiveInfo = async (
 
   if (
     welcomePageContent.includes("您已经提交了报到") ||
-    /<input type="button" class="button" value="查看学籍信息"\s+onclick/.test(welcomePageContent)
+    /<input type="button" class="button" value="查看学籍信息"\s+onclick/u.test(welcomePageContent)
   ) {
     return {
       success: false,
@@ -213,7 +213,7 @@ export const getUnderStudentArchiveInfo = async (
     success: true,
     // oxlint-disable-next-line unicorn/no-unreadable-array-destructuring
     readonly: readonlyFields.map(([text, value, , , remark]) => {
-      const realValue = /<font[^>]*>(.*)<\/font>/.exec(value)?.[1] ?? value;
+      const realValue = /<font[^>]*>(.*)<\/font>/u.exec(value)?.[1] ?? value;
 
       return {
         text,
@@ -424,7 +424,7 @@ export const submitUnderStudentArchiveStudy = async (
       );
     }
 
-    if (!/^\d{8}$/.test(startTime) || !/^\d{8}$/.test(endTime))
+    if (!/^\d{8}$/u.test(startTime) || !/^\d{8}$/u.test(endTime))
       throw new Error(`第${index + 1}条学习与工作经历时间格式不正确，格式应为 20010101`);
 
     params[`qsrq${index + 1}`] = startTime;

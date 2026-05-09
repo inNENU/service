@@ -95,7 +95,7 @@ export const actionLogin = async (
 
     const content = await finalLocationResponse.text();
 
-    const info = /pfs.comm.showDialog\("(.*?)",/.exec(content)?.[1];
+    const info = /pfs.comm.showDialog\("(.*?)",/u.exec(content)?.[1];
 
     if (info) {
       console.error("action login forbidden:", info);

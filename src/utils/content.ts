@@ -6,7 +6,7 @@ export const readResponseContent = async (response: Response, encoding = "gbk"):
 export const getResponseContent = async (response: Response): Promise<string> => {
   const contentTypeHeader = response.headers.get("Content-Type");
 
-  if (contentTypeHeader && /charset=gbk/i.test(contentTypeHeader))
+  if (contentTypeHeader && /charset=gbk/iu.test(contentTypeHeader))
     return iconv.decode(Buffer.from(await response.arrayBuffer()), "gbk");
 
   return response.text();

@@ -99,7 +99,7 @@ export const initAuth = async (
       };
     }
 
-    const lockedResult = /<span>账号已冻结，预计解冻时间：(.*?)<\/span>/.exec(resultContent);
+    const lockedResult = /<span>账号已冻结，预计解冻时间：(.*?)<\/span>/u.exec(resultContent);
 
     if (lockedResult) {
       return {

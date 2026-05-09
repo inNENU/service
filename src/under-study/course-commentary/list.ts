@@ -10,7 +10,7 @@ import type { RawUnderCourseCommentaryFailResult } from "./utils.js";
 const MAIN_URL = `${UNDER_STUDY_SERVER}/new/student/teapj`;
 const LIST_URL = `${UNDER_STUDY_SERVER}/new/student/teapj/pjDatas`;
 
-const SELECTED_OPTION_REG = /<option value='([^']*?)' selected>([^<]*?)<\/option>/;
+const SELECTED_OPTION_REG = /<option value='([^']*?)' selected>([^<]*?)<\/option>/u;
 
 const getCurrentTime = async (cookieHeader: string): Promise<{ time: string; value: string }> => {
   const response = await fetch(MAIN_URL, {

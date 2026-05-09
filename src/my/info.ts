@@ -157,7 +157,7 @@ export const getMyInfo = async (cookieHeader: string): Promise<MyInfoResult> => 
       };
 
       // fix grad birth
-      if (/[A-Z]/.test(personInfo.csrq)) {
+      if (/[A-Z]/u.test(personInfo.csrq)) {
         const [day, month, year] = personInfo.csrq.split("-");
 
         const monthMap: Record<string, string> = {

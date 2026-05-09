@@ -97,11 +97,11 @@ const BUILD_IN_COLUMNS = [
   "CREATOR__",
   "PID__",
 ];
-const FIELD_INFO_REGEXP = /var fieldinfo = \[([^\]]+)\];\s/;
+const FIELD_INFO_REGEXP = /var fieldinfo = \[([^\]]+)\];\s/u;
 const FIELD_REG_EXP =
-  /{"LABEL":".*?","ORDER_TYPE":.*?,"ORDER_PRIORITY":.*?,"DATA_TYPE":.*?,"COLUMN_NAME":"(.*?)","QUERY_TYPE":null}/g;
-const USER_ID_REG_EXP = /"LOGINNAME":"(\d+)",/;
-const FORM_ID_REG_EXP = /"FORM_ID":"(.*?)",/;
+  /\{"LABEL":".*?","ORDER_TYPE":.*?,"ORDER_PRIORITY":.*?,"DATA_TYPE":.*?,"COLUMN_NAME":"(.*?)","QUERY_TYPE":null\}/gu;
+const USER_ID_REG_EXP = /"LOGINNAME":"(\d+)",/u;
+const FORM_ID_REG_EXP = /"FORM_ID":"(.*?)",/u;
 
 export type MyActionItem<T extends Record<string, unknown>> = {
   PID__: null;

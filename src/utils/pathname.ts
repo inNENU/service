@@ -5,7 +5,7 @@ export const isValidPathname = (pathname: string): boolean => {
     pathname.startsWith("http:") ||
     pathname.startsWith("https:") ||
     pathname.includes("..") ||
-    !/^[a-zA-Z0-9\-_./]+$/.test(pathname)
+    !/^[a-zA-Z0-9\-_./]+$/u.test(pathname)
   )
     return false;
 

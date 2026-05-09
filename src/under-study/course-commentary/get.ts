@@ -42,12 +42,12 @@ export interface UnderCourseCommentaryInfo {
   };
 }
 
-const PARAMS_REGEXP = /'\/new\/student\/teapj\/savePj',\s+\{\s+([^]*?)\s+wtpf:/;
-const PARAMS_ITEM_REGEXP = /\b([^:]+): ?'([^']+)',/;
+const PARAMS_REGEXP = /'\/new\/student\/teapj\/savePj',\s+\{\s+([^]*?)\s+wtpf:/u;
+const PARAMS_ITEM_REGEXP = /\b([^:]+): ?'([^']+)',/u;
 const OPTIONS_REGEXP =
-  /<div class="question".+?data-txdm="(\d+)" data-zbdm="(\d+)">\s+<h3>(.*?)(?:<span class="zbsx" style="color:red;">.*?<\/span>)?\s+<\/h3>\s+<input.+?name="(\d+)"\s+?value="(\d+)"[^]+?data-fz="(.+?)"\s+data-mc="(.+?)" \/>[^]+?<input.+?name="(\d+)"\s+?value="(\d+)"[^]+?data-fz="(.+?)"\s+data-mc="(.+?)" \/>[^]+?<input.+?name="(\d+)"\s+?value="(\d+)"[^]+?data-fz="(.+?)"\s+data-mc="(.+?)" \/>[^]+?<input.+?name="(\d+)"\s+?value="(\d+)"[^]+?data-fz="(.+?)"\s+data-mc="(.+?)" \/>[^]+?<input.+?name="(\d+)"\s+?value="(\d+)"[^]+?data-fz="(.+?)"\s+data-mc="(.+?)" \/>[^]+?<input.+?name="(\d+)"\s+?value="(\d+)"[^]+?data-fz="(.+?)"\s+data-mc="(.+?)" \/>[^]+?<\/div>/g;
+  /<div class="question".+?data-txdm="(\d+)" data-zbdm="(\d+)">\s+<h3>(.*?)(?:<span class="zbsx" style="color:red;">.*?<\/span>)?\s+<\/h3>\s+<input.+?name="(\d+)"\s+?value="(\d+)"[^]+?data-fz="(.+?)"\s+data-mc="(.+?)" \/>[^]+?<input.+?name="(\d+)"\s+?value="(\d+)"[^]+?data-fz="(.+?)"\s+data-mc="(.+?)" \/>[^]+?<input.+?name="(\d+)"\s+?value="(\d+)"[^]+?data-fz="(.+?)"\s+data-mc="(.+?)" \/>[^]+?<input.+?name="(\d+)"\s+?value="(\d+)"[^]+?data-fz="(.+?)"\s+data-mc="(.+?)" \/>[^]+?<input.+?name="(\d+)"\s+?value="(\d+)"[^]+?data-fz="(.+?)"\s+data-mc="(.+?)" \/>[^]+?<input.+?name="(\d+)"\s+?value="(\d+)"[^]+?data-fz="(.+?)"\s+data-mc="(.+?)" \/>[^]+?<\/div>/gu;
 const TEXT_REGEXP =
-  /<div class="question".+?data-txdm="(\d+)" data-zbdm="(\d+)">\s+<h3>(.*?)(?:<span class="zbsx" style="color:red;">.*?<\/span>)?\s+<\/h3>\s+<textarea.+?name="(\d+)"[^]+?data-fz="(.*?)"/;
+  /<div class="question".+?data-txdm="(\d+)" data-zbdm="(\d+)">\s+<h3>(.*?)(?:<span class="zbsx" style="color:red;">.*?<\/span>)?\s+<\/h3>\s+<textarea.+?name="(\d+)"[^]+?data-fz="(.*?)"/u;
 
 const getCourseInfo = (html: string): UnderCourseCommentaryInfo => {
   const [, paramText] = PARAMS_REGEXP.exec(html)!;

@@ -6,12 +6,12 @@ import type { LoginOptions } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 import { UNDER_SYSTEM_SERVER } from "./utils.js";
 
-const idCardRegExp = /\[身份证号:(.{18})\]/;
-const tableRegExp = /<table[^>]*?id=mxh[^>]*?>[^]*?<\/table>/;
+const idCardRegExp = /\[身份证号:(.{18})\]/u;
+const tableRegExp = /<table[^>]*?id=mxh[^>]*?>[^]*?<\/table>/u;
 const applyRowRexExp =
-  /<tr[^>]+funBM\('(.*?)'\)[^>]+>\s*<td[^>]+>.*?<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>/g;
+  /<tr[^>]+funBM\('(.*?)'\)[^>]+>\s*<td[^>]+>.*?<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>/gu;
 const resultRowRexExp =
-  /<tr[^>]+>\s*<td[^>]+>.*?<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>/g;
+  /<tr[^>]+>\s*<td[^>]+>.*?<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>\s*<td[^>]+>(.*?)<\/td>/gu;
 
 export interface ApplyTest {
   url: string;

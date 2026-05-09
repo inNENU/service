@@ -10,7 +10,7 @@ import type { CommonFailedResponse, CommonSuccessResponse } from "../typings.js"
 
 const POST_RECOMMEND_PLAN_URL = "https://pg.nenu.edu.cn/yjsy/HData/ZSB/ZSJZ2024-TM-1.html";
 const schoolInfoRegExp =
-  /bXYName\['.*?']="<tr><td colspan=6><a href='(.*?)' target='_blank'>([^<]+) ([^<]+)<\/a><br>联系方式：(\S+?)，(\S+?)，(\S+?)<\/td><\/tr>";/g;
+  /bXYName\['.*?'\]="<tr><td colspan=6><a href='(.*?)' target='_blank'>([^<]+) ([^<]+)<\/a><br>联系方式：(\S+?)，(\S+?)，(\S+?)<\/td><\/tr>";/gu;
 
 const TABLE_HEADER = `<tr><th>招生专业</th><th>研究方向</th><th>学习方式</th><th>招生类型</th><th>拟接收人数</th><th>备注</th></tr>`;
 
@@ -89,11 +89,11 @@ export const getGradRecommendPlan = async (): Promise<GradRecommendPlanResponse>
         };
 
         const majorCodes = [
-          ...content.matchAll(new RegExp(`cXYName\\['${name}'\\]\\.push\\('([^']+)'\\)`, "g")),
+          ...content.matchAll(new RegExp(`cXYName\\['${name}'\\]\\.push\\('([^']+)'\\)`, "gu")),
         ];
 
         const majorNameRegExp = [
-          ...content.matchAll(new RegExp(`fXYName\\['${name}'\\]\\.push\\('([^']+)'\\)`, "g")),
+          ...content.matchAll(new RegExp(`fXYName\\['${name}'\\]\\.push\\('([^']+)'\\)`, "gu")),
         ];
 
         info.majors = await Promise.all(
@@ -102,9 +102,9 @@ export const getGradRecommendPlan = async (): Promise<GradRecommendPlanResponse>
 
             const lines = [
               ...content.matchAll(
-                new RegExp(`dXYName\\['${name}'\\]\\['${majorCode}'\\]\\.push\\('(.*)'\\)`, "g"),
+                new RegExp(`dXYName\\['${name}'\\]\\['${majorCode}'\\]\\.push\\('(.*)'\\)`, "gu"),
               ),
-            ].map(([, line]) => line.replaceAll(/<\/?center>/g, ""));
+            ].map(([, line]) => line.replaceAll(/<\/?center>/gu, ""));
 
             return {
               name: majorName,

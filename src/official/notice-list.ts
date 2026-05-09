@@ -5,10 +5,10 @@ import type { CommonFailedResponse, CommonListSuccessResponse } from "../typings
 import { OFFICIAL_URL, getOfficialPageView } from "./utils.js";
 
 const ITEM_REGEXP =
-  /data-aos="fade-up">\s*<a href="([^"]+)"[^>]+>\s+<div class="time">\s+<h3>(.*?)\.(.*?)<\/h3>\s*<h6>(.*?)<\/h6>\s*<\/div>\s*<div[^>]*>\s*<h4[^>]*>(.*)<\/h4>\s+<h6>(.*?)<span>/g;
-const TOTAL_REGEXP = /<span class="p_t">共(\d+)条<\/span>/;
+  /data-aos="fade-up">\s*<a href="([^"]+)"[^>]+>\s+<div class="time">\s+<h3>(.*?)\.(.*?)<\/h3>\s*<h6>(.*?)<\/h6>\s*<\/div>\s*<div[^>]*>\s*<h4[^>]*>(.*)<\/h4>\s+<h6>(.*?)<span>/gu;
+const TOTAL_REGEXP = /<span class="p_t">共(\d+)条<\/span>/u;
 const PAGEVIEW_PARAMS_REGEXP =
-  /_showDynClickBatch\(\[[^\]]+\],\s*\[([^\]]+)\],\s*"wbnews",\s*(\d+)\)/;
+  /_showDynClickBatch\(\[[^\]]+\],\s*\[([^\]]+)\],\s*"wbnews",\s*(\d+)\)/u;
 
 export interface OfficialNoticeListOptions {
   current?: number;
@@ -53,7 +53,7 @@ export const getOfficialNoticeList = async ({
   const [, pageIds, owner] = PAGEVIEW_PARAMS_REGEXP.exec(content)!;
 
   const pageViews = await Promise.all(
-    pageIds.split(/,\s*/).map((id) => getOfficialPageView(id, owner)),
+    pageIds.split(/,\s*/u).map((id) => getOfficialPageView(id, owner)),
   );
 
   const data = [...content.matchAll(ITEM_REGEXP)].map(
