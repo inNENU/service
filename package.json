@@ -50,7 +50,7 @@
     "nano-staged": "1.0.2",
     "oxc-config-hope": "0.3.4",
     "oxfmt": "0.48.0",
-    "oxlint": "1.63.0",
+    "oxlint": "1.71.0",
     "oxlint-tsgolint": "0.23.0",
     "picocolors": "1.1.1",
     "qrcode": "1.5.4",
