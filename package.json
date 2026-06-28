@@ -45,7 +45,7 @@
     "husky": "9.1.7",
     "iconv-lite": "0.7.2",
     "js-sha1": "0.7.0",
-    "morgan": "1.10.1",
+    "morgan": "1.11.0",
     "mysql2": "3.22.5",
     "nano-staged": "1.0.2",
     "oxc-config-hope": "0.3.4",
