@@ -260,6 +260,8 @@ export const submitUnderStudentArchiveInfo = async (
   cookieHeader: string,
   { path, fields }: UnderCreateStudentArchiveSubmitInfoOptions,
 ): Promise<UnderCreateStudentArchiveSubmitInfoResponse> => {
+  const submitFields = Object.fromEntries(fields.map(({ name, value }) => [name, value]));
+
   const submitResponse = await fetch(`${UNDER_SYSTEM_SERVER}${path}`, {
     method: "POST",
     headers: {
@@ -267,7 +269,7 @@ export const submitUnderStudentArchiveInfo = async (
       Cookie: cookieHeader,
       "User-Agent": IE_8_USER_AGENT,
     },
-    body: new URLSearchParams(Object.fromEntries(fields.map(({ name, value }) => [name, value]))),
+    body: new URLSearchParams(submitFields),
   });
 
   const content = await submitResponse.text();
@@ -322,6 +324,8 @@ export const submitUnderStudentArchiveAddress = async (
   cookieHeader: string,
   { path, fields }: UnderCreateStudentArchiveSubmitAddressOptions,
 ): Promise<UnderCreateStudentArchiveSubmitAddressSuccessResponse> => {
+  const addressFields = Object.fromEntries(fields.map(({ name, value }) => [name, value]));
+
   const submitResponse = await fetch(`${UNDER_SYSTEM_SERVER}${path}`, {
     method: "POST",
     headers: {
@@ -329,7 +333,7 @@ export const submitUnderStudentArchiveAddress = async (
       "Content-Type": "application/x-www-form-urlencoded",
       "User-Agent": IE_8_USER_AGENT,
     },
-    body: new URLSearchParams(Object.fromEntries(fields.map(({ name, value }) => [name, value]))),
+    body: new URLSearchParams(addressFields),
   });
 
   const content = await submitResponse.text();

@@ -11,6 +11,7 @@ export default defineHopeConfig({
     "new-cap": ["warn", { capIsNewExceptions: ["Router"] }],
     "no-console": "off",
     "no-warning-comments": "off",
+    "prefer-named-capture-group": "off",
     "prefer-object-spread": "off",
 
     "import/max-dependencies": "off",

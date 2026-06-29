@@ -36,6 +36,7 @@ export const request =
     try {
       await handler(req, res, next);
     } catch (err) {
+      // oxlint-disable-next-line node/callback-return
       next(err);
     }
   };

@@ -265,17 +265,17 @@ export const applyEmail = async (
 
     const APPLY_URL = `${OA_WEB_VPN_SERVER}/api/workflow/reqform/conformCheck`;
 
+    const resetParams = Object.fromEntries(
+      Object.entries(applyResetBody).map(([key, value]) => [key, value.toString()]),
+    );
+
     await fetch(APPLY_URL, {
       method: "POST",
       headers: {
         Accept: "application/json, text/javascript, */*; q=0.01",
         Cookie: cookieHeader,
       },
-      body: new URLSearchParams(
-        Object.fromEntries(
-          Object.entries(applyResetBody).map(([key, value]) => [key, value.toString()]),
-        ),
-      ),
+      body: new URLSearchParams(resetParams),
     });
 
     const applyBody: Record<string, string | number | boolean> = {
@@ -290,17 +290,17 @@ export const applyEmail = async (
       wfTestStr: "",
     };
 
+    const applyParams = Object.fromEntries(
+      Object.entries(applyBody).map(([key, value]) => [key, value.toString()]),
+    );
+
     const applyEmailResponse = await fetch(APPLY_URL, {
       method: "POST",
       headers: {
         Accept: "application/json, text/javascript, */*; q=0.01",
         Cookie: cookieHeader,
       },
-      body: new URLSearchParams(
-        Object.fromEntries(
-          Object.entries(applyBody).map(([key, value]) => [key, value.toString()]),
-        ),
-      ),
+      body: new URLSearchParams(applyParams),
     });
 
     const applyEmailData = (await applyEmailResponse.json()) as {
@@ -337,6 +337,10 @@ export const applyEmail = async (
       wfTestStr: "",
     };
 
+    const operationParams = Object.fromEntries(
+      Object.entries(operationBody).map(([key, value]) => [key, value.toString()]),
+    );
+
     const operationResponse = await fetch(
       `${OA_WEB_VPN_SERVER}/api/workflow/reqform/requestOperation`,
       {
@@ -345,11 +349,7 @@ export const applyEmail = async (
           Accept: "application/json, text/javascript, */*; q=0.01",
           Cookie: cookieHeader,
         },
-        body: new URLSearchParams(
-          Object.fromEntries(
-            Object.entries(operationBody).map(([key, value]) => [key, value.toString()]),
-          ),
-        ),
+        body: new URLSearchParams(operationParams),
       },
     );
 

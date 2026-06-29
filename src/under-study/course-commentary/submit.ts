@@ -43,6 +43,33 @@ export const submitUnderCourseCommentary = async (
   cookieHeader: string,
   { commentary, params, questions, text, answers }: SubmitUnderCourseCommentaryOptions,
 ): Promise<SubmitUnderCourseCommentaryResponse> => {
+  const totalScore = answers.reduce(
+    (acc, answer, index) => acc + questions[index].options[answer].score,
+    0,
+  );
+
+  const dt = [
+    ...questions.map(({ txdm, zbdm, title }, index) => {
+      const { text: optionText, value, score } = questions[index].options[answers[index]];
+
+      return {
+        txdm,
+        zbdm,
+        zbmc: title,
+        zbxmdm: value,
+        fz: score,
+        dtjg: optionText,
+      };
+    }),
+    {
+      txdm: text.txdm,
+      zbdm: text.zbdm,
+      zbmc: text.title,
+      fz: 0,
+      dtjg: commentary,
+    },
+  ];
+
   const response = await fetch(`${UNDER_STUDY_SERVER}/new/student/teapj/savePj`, {
     method: "POST",
     headers: {
@@ -53,30 +80,8 @@ export const submitUnderCourseCommentary = async (
     },
     body: new URLSearchParams({
       ...params,
-      wtpf: answers
-        .reduce((acc, answer, index) => acc + questions[index].options[answer].score, 0)
-        .toString(),
-      dt: JSON.stringify([
-        ...questions.map(({ txdm, zbdm, title }, index) => {
-          const { text: optionText, value, score } = questions[index].options[answers[index]];
-
-          return {
-            txdm,
-            zbdm,
-            zbmc: title,
-            zbxmdm: value,
-            fz: score,
-            dtjg: optionText,
-          };
-        }),
-        {
-          txdm: text.txdm,
-          zbdm: text.zbdm,
-          zbmc: text.title,
-          fz: 0,
-          dtjg: commentary,
-        },
-      ]),
+      wtpf: totalScore.toString(),
+      dt: JSON.stringify(dt),
     }),
   });
 

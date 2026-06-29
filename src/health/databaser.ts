@@ -9,7 +9,7 @@ export class DatabaseMonitor {
   private queuedRequests = 0;
   private totalConnections = 0;
 
-  public constructor(private readonly pool: Pool) {
+  constructor(private readonly pool: Pool) {
     this.setupPoolEventListeners();
   }
 
@@ -42,7 +42,7 @@ export class DatabaseMonitor {
    *
    * @returns 连接池的当前状态统计信息
    */
-  public getPoolStats(): {
+  getPoolStats(): {
     activeConnections: number;
     queuedRequests: number;
     totalConnections: number;
@@ -65,7 +65,7 @@ export class DatabaseMonitor {
    *
    * @param intervalMs 监控间隔时间（毫秒），默认为 5 分钟
    */
-  public startMonitoring(intervalMs = 300000): void {
+  startMonitoring(intervalMs = 300000): void {
     if (this.intervalId) {
       console.warn("监控已经在运行中");
 
@@ -80,7 +80,7 @@ export class DatabaseMonitor {
   }
 
   /** 停止监控 */
-  public stopMonitoring(): void {
+  stopMonitoring(): void {
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
@@ -103,8 +103,7 @@ export class DatabaseMonitor {
       console.info(`连接池使用率: ${usagePercent}%`);
 
       // 如果使用率过高，发出警告
-      if (Number.parseFloat(usagePercent) > 80)
-        console.warn(`⚠️  连接池使用率过高: ${usagePercent}%`);
+      if (Number(usagePercent) > 80) console.warn(`⚠️  连接池使用率过高: ${usagePercent}%`);
 
       // 如果有排队请求，发出警告
       if (stats.queuedRequests > 0)
@@ -117,7 +116,7 @@ export class DatabaseMonitor {
   }
 
   /** 重置统计计数器 */
-  public resetStats(): void {
+  resetStats(): void {
     this.totalConnections = this.activeConnections;
     console.info("连接池统计计数器已重置");
   }
@@ -127,7 +126,7 @@ export class DatabaseMonitor {
    *
    * @returns 数据库是否健康以及错误信息（如果有）
    */
-  public async getHealthStatus(): Promise<{
+  async getHealthStatus(): Promise<{
     healthy: boolean;
     errorMessage?: string;
   }> {

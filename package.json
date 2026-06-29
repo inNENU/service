@@ -17,8 +17,8 @@
   "devDependencies": {
     "@alicloud/alinlp20200629": "3.1.0",
     "@alicloud/openapi-client": "0.4.15",
-    "@commitlint/cli": "21.0.0",
-    "@commitlint/config-conventional": "21.0.0",
+    "@commitlint/cli": "21.1.0",
+    "@commitlint/config-conventional": "21.1.0",
     "@mptool/net": "0.14.0",
     "@mptool/parser": "0.14.0",
     "@mr-hope/tsconfig": "0.0.4",
@@ -29,7 +29,7 @@
     "@types/express": "5.0.6",
     "@types/express-serve-static-core": "5.1.1",
     "@types/morgan": "1.9.10",
-    "@types/node": "24.12.3",
+    "@types/node": "24.13.2",
     "@types/qrcode": "1.5.6",
     "@types/qs": "6.15.1",
     "cheerio": "1.2.0",
@@ -45,16 +45,16 @@
     "husky": "9.1.7",
     "iconv-lite": "0.7.2",
     "js-sha1": "0.7.0",
-    "morgan": "1.10.1",
+    "morgan": "1.11.0",
     "mysql2": "3.22.5",
     "nano-staged": "1.0.2",
-    "oxc-config-hope": "0.3.4",
-    "oxfmt": "0.48.0",
-    "oxlint": "1.63.0",
+    "oxc-config-hope": "0.3.9",
+    "oxfmt": "0.56.0",
+    "oxlint": "1.71.0",
     "oxlint-tsgolint": "0.23.0",
     "picocolors": "1.1.1",
     "qrcode": "1.5.4",
-    "tsdown": "0.22.0",
+    "tsdown": "0.22.3",
     "typescript": "6.0.3",
     "uuid": "14.0.1"
   },
@@ -70,16 +70,16 @@
   "devEngines": {
     "packageManager": {
       "name": "pnpm",
-      "version": "11.0.9",
+      "version": "11.9.0",
       "onFail": "download"
     },
     "runtime": {
       "name": "node",
-      "version": "^24.15.0",
+      "version": "^24.17.0",
       "onFail": "error"
     }
   },
   "engines": {
-    "node": "^22.18.0 || >=24"
+    "node": "^22.22.0 || ^24.17.0 || ^26.3.0"
   }
 }
