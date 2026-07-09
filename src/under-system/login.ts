@@ -56,7 +56,7 @@ export const underSystemLogin = async (
       success: false,
       type: result.type,
       msg: result.msg,
-    } as AuthLoginFailedResponse;
+    };
   }
 
   const ticketResponse = await fetch(result.location, {

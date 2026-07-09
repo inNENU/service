@@ -171,7 +171,7 @@ export const underExamPlaceHandler: RequestHandler<EmptyObject, EmptyObject, Log
           })),
         },
       ],
-    } as UnderExamPlaceSuccessResponse);
+    });
   }
 
   const response = await fetch(INFO_URL, {
@@ -196,5 +196,5 @@ export const underExamPlaceHandler: RequestHandler<EmptyObject, EmptyObject, Log
   return res.json({
     success: true,
     data,
-  } as UnderExamPlaceSuccessResponse);
+  });
 };

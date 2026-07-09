@@ -143,7 +143,7 @@ export const getUnderInfo = async (cookieHeader: string): Promise<UnderInfoRespo
     return {
       success: true,
       info,
-    } as UnderInfoSuccessResponse;
+    };
   }
 
   return unknownResponse("获取学籍信息失败");
@@ -175,6 +175,6 @@ export const underInfoHandler: RequestHandler<EmptyObject, EmptyObject, LoginOpt
     return res.json({
       success: false,
       msg: message,
-    } as AuthLoginFailedResponse);
+    });
   }
 };

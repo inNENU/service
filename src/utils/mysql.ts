@@ -9,7 +9,7 @@ export const mysqlPool = createPool({
   host: process.env.MYSQL_HOST ?? "localhost",
   port: process.env.MYSQL_PORT ? Number(process.env.MYSQL_PORT) : 3306,
   database: process.env.MYSQL_DATABASE ?? "innenu-service",
-  user: process.env.MYSQL_USER ?? "innenu",
+  user: process.env.MYSQL_USER ?? "innenu-service",
   password: process.env.MYSQL_PASSWORD,
   connectTimeout: 3000,
   connectionLimit: 100,

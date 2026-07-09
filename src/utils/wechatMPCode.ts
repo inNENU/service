@@ -11,9 +11,7 @@ export const getWechatMPCode = async (
   scene: string,
   env: "release" | "trial" | "develop" = "release",
 ): Promise<Buffer | WechatMpCodeError> => {
-  const accessToken = await getWechatAccessToken(
-    appId as "wx33acb831ee1831a5" | "wx2550e3fd373b79a8",
-  );
+  const accessToken = await getWechatAccessToken(appId);
 
   const response = await fetch(
     `https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=${accessToken}`,

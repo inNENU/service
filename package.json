@@ -17,8 +17,6 @@
   "devDependencies": {
     "@alicloud/alinlp20200629": "3.1.0",
     "@alicloud/openapi-client": "0.4.15",
-    "@commitlint/cli": "21.1.0",
-    "@commitlint/config-conventional": "21.1.0",
     "@mptool/net": "0.14.0",
     "@mptool/parser": "0.14.0",
     "@mr-hope/tsconfig": "0.0.4",
@@ -27,7 +25,7 @@
     "@types/cors": "2.8.19",
     "@types/crypto-js": "4.2.2",
     "@types/express": "5.0.6",
-    "@types/express-serve-static-core": "5.1.1",
+    "@types/express-serve-static-core": "5.1.2",
     "@types/morgan": "1.9.10",
     "@types/node": "24.13.2",
     "@types/qrcode": "1.5.6",
@@ -43,34 +41,30 @@
     "express": "5.2.1",
     "express-rate-limit": "8.5.2",
     "husky": "9.1.7",
-    "iconv-lite": "0.7.2",
+    "iconv-lite": "0.7.3",
     "js-sha1": "0.7.0",
     "morgan": "1.11.0",
-    "mysql2": "3.22.5",
+    "mysql2": "3.22.6",
     "nano-staged": "1.0.2",
     "oxc-config-hope": "0.3.9",
-    "oxfmt": "0.56.0",
-    "oxlint": "1.71.0",
-    "oxlint-tsgolint": "0.23.0",
+    "oxfmt": "0.58.0",
+    "oxlint": "1.73.0",
+    "oxlint-tsgolint": "0.24.0",
     "picocolors": "1.1.1",
     "qrcode": "1.5.4",
     "tsdown": "0.22.3",
     "typescript": "6.0.3",
+    "unrun": "0.3.1",
     "uuid": "14.0.1"
   },
   "nano-staged": {
     "**/*": "oxfmt --no-error-on-unmatched-pattern",
     "*.{js,ts}": "oxlint --fix --deny-warnings --report-unused-disable-directives"
   },
-  "commitlint": {
-    "extends": [
-      "@commitlint/config-conventional"
-    ]
-  },
   "devEngines": {
     "packageManager": {
       "name": "pnpm",
-      "version": "11.9.0",
+      "version": "11.10.0",
       "onFail": "download"
     },
     "runtime": {

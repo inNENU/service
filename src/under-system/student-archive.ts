@@ -183,7 +183,7 @@ export const getUnderStudentArchive = async (
     return {
       success: true,
       info,
-    } as UnderGetStudentArchiveSuccessResponse;
+    };
   }
 
   return unknownResponse("获取学籍信息失败");

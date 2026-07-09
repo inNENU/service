@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  deploy-github:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -44,41 +44,7 @@ jobs:
         with:
           branch: deploy
           folder: dist
+          single-commit: true
 
-  deploy-server:
-    runs-on: ubuntu-latest
-    needs: deploy-github
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        with:
-          ref: deploy
-          fetch-depth: 0
-
-      - name: Configuration environment
-        env:
-          HOST: service.innenu.com
-          SSH_PORT: ${{ secrets.SSH_PORT }}
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        run: |
-          mkdir -p ~/.ssh/
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-
-          echo "Host $HOST" >> ~/.ssh/config
-          echo "  HostName $HOST" >> ~/.ssh/config
-          echo "  Port $SSH_PORT" >> ~/.ssh/config
-          echo "  User git" >> ~/.ssh/config
-          echo "  IdentityFile ~/.ssh/id_ed25519" >> ~/.ssh/config
-          echo "  StrictHostKeyChecking no" >> ~/.ssh/config
-
-          git config --global user.name 'Mr.Hope'
-          git config --global user.email 'mister-hope@outlook.com'
-
-      - name: Deploy
-        env:
-          HOST: service.innenu.com
-          DEST: /www/wwwroot/innenu-service
-        run: |
-          git push -f git@$HOST:$DEST deploy
-          ssh git@$HOST "cd $DEST && git reset --hard HEAD"
+      - name: Trigger Hook
+        run: curl -s "${{ secrets.BT_WEBHOOK_URL }}"
