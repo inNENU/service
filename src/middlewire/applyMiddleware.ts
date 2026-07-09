@@ -7,6 +7,7 @@ import { json, static as staticMiddleware } from "express";
 import { morganMiddleware } from "./morgan.js";
 
 export const applyMiddleware = (app: Express): void => {
+  app.set("trust proxy", 1);
   app.use(
     cors({
       origin: ["https://servicewechat.com", /^https:\/\/.*\.innenu\.com$/u, "https://innenu.com"],
