@@ -4,7 +4,7 @@ configDependencies:
 enableGlobalVirtualStore: true
 
 overrides:
-  iconv-lite: 0.7.2
+  iconv-lite: 0.7.3
 
 packageExtensions:
   "@alicloud/credentials@2.4.5":
