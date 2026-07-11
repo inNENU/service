@@ -27,7 +27,7 @@
     "@types/express": "5.0.6",
     "@types/express-serve-static-core": "5.1.2",
     "@types/morgan": "1.9.10",
-    "@types/node": "24.13.2",
+    "@types/node": "24.13.3",
     "@types/qrcode": "1.5.6",
     "@types/qs": "6.15.1",
     "cheerio": "1.2.0",
