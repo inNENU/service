@@ -46,7 +46,7 @@
     "morgan": "1.11.0",
     "mysql2": "3.22.6",
     "nano-staged": "1.0.2",
-    "oxc-config-hope": "0.3.9",
+    "oxc-config-hope": "0.3.12",
     "oxfmt": "0.58.0",
     "oxlint": "1.73.0",
     "oxlint-tsgolint": "0.24.0",
