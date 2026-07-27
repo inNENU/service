@@ -35,57 +35,57 @@ const ALLOWED_INFO_REGEXP =
   /<span id="sub-title">\s+?<div id="text">现在是(.*?)时间\s+（(\d\d:\d\d:\d\d)--(\d\d:\d\d:\d\d)）/u;
 
 const setMajors = (content: string): void => {
-  if (!majorsStore.state.length) {
-    const [, majorText] = MAJORS_REGEXP.exec(content)!;
+  if (majorsStore.isValid()) return;
 
-    const majors = [...majorText.matchAll(MAJOR_ITEM_REGEXP)].map(([, value, name]) => ({
-      value,
-      name,
-    }));
+  const [, majorText] = MAJORS_REGEXP.exec(content)!;
 
-    majorsStore.setState(majors);
-  }
+  const majors = [...majorText.matchAll(MAJOR_ITEM_REGEXP)].map(([, value, name]) => ({
+    value,
+    name,
+  }));
+
+  majorsStore.setState(majors);
 };
 
 const setCourseOffices = (content: string): void => {
-  if (!officesStore.state.length) {
-    const [, courseOfficeText] = COURSE_OFFICES_REGEXP.exec(content)!;
+  if (officesStore.isValid()) return;
 
-    const offices = [...courseOfficeText.matchAll(COURSE_OFFICE_ITEM_REGEXP)].map(
-      ([, value, name]) => ({
-        value,
-        name,
-      }),
-    );
+  const [, courseOfficeText] = COURSE_OFFICES_REGEXP.exec(content)!;
 
-    officesStore.setState(offices);
-  }
+  const offices = [...courseOfficeText.matchAll(COURSE_OFFICE_ITEM_REGEXP)].map(
+    ([, value, name]) => ({
+      value,
+      name,
+    }),
+  );
+
+  officesStore.setState(offices);
 };
 
 const setCourseTypes = (content: string): void => {
-  if (!typesStore.state.length) {
-    const [, courseTypeText] = COURSE_TYPES_REGEXP.exec(content)!;
+  if (typesStore.isValid()) return;
 
-    const types = [...courseTypeText.matchAll(COURSE_TYPE_ITEM_REGEXP)].map(([, value, name]) => ({
-      value,
-      name,
-    }));
+  const [, courseTypeText] = COURSE_TYPES_REGEXP.exec(content)!;
 
-    typesStore.setState(types);
-  }
+  const types = [...courseTypeText.matchAll(COURSE_TYPE_ITEM_REGEXP)].map(([, value, name]) => ({
+    value,
+    name,
+  }));
+
+  typesStore.setState(types);
 };
 
 const setAreas = (content: string): void => {
-  if (!areasStore.state.length) {
-    const [, areaText] = AREAS_REGEXP.exec(content)!;
+  if (areasStore.isValid()) return;
 
-    const areas = [...areaText.matchAll(AREA_ITEM_REGEXP)].map(([, value, name]) => ({
-      value,
-      name,
-    }));
+  const [, areaText] = AREAS_REGEXP.exec(content)!;
 
-    areasStore.setState(areas);
-  }
+  const areas = [...areaText.matchAll(AREA_ITEM_REGEXP)].map(([, value, name]) => ({
+    value,
+    name,
+  }));
+
+  areasStore.setState(areas);
 };
 
 export interface UnderSelectInfoOptions extends LoginOptions {
