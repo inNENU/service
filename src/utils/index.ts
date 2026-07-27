@@ -15,3 +15,4 @@ export * from "./splitWords.js";
 export * from "./wechatAccessToken.js";
 export * from "./wechatMPCode.js";
 export * from "./ua.js";
+export * from "./validate.js";

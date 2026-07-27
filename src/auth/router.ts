@@ -4,6 +4,7 @@ import type { Request } from "express-serve-static-core";
 
 import { ActionFailType } from "../config/index.js";
 import type { EmptyObject } from "../typings.js";
+import { validate } from "../utils/validate.js";
 import { activateHandler } from "./activate/index.js";
 import { authCaptchaHandler } from "./captcha.js";
 import { authEncryptHandler } from "./encrypt.js";
@@ -12,6 +13,7 @@ import { authLoginHandler } from "./login.js";
 import { startReAuthHandler, verifyReAuthHandler } from "./re-auth/index.js";
 import { resetCaptchaHandler } from "./reset-captcha.js";
 import { resetPasswordHandler } from "./reset/index.js";
+import { authActivateSchema, authInitSchema, authLoginSchema, reAuthSchema } from "./schemas.js";
 
 const loginLimiter = rateLimit({
   windowMs: 60000, // 1 分钟
@@ -46,15 +48,15 @@ const captchaLimiter = rateLimit({
 const authRouter = Router();
 
 authRouter.get("/activate", activateHandler);
-authRouter.post("/activate", activateHandler);
+authRouter.post("/activate", validate(authActivateSchema), activateHandler);
 authRouter.post("/encrypt", authEncryptHandler);
 authRouter.get("/auth-captcha", captchaLimiter, authCaptchaHandler);
 authRouter.post("/auth-captcha", captchaLimiter, authCaptchaHandler);
 authRouter.get("/init", loginLimiter, authInitInfoHandler);
-authRouter.post("/init", loginLimiter, authInitHandler);
-authRouter.post("/login", loginLimiter, authLoginHandler);
+authRouter.post("/init", loginLimiter, validate(authInitSchema), authInitHandler);
+authRouter.post("/login", loginLimiter, validate(authLoginSchema), authLoginHandler);
 authRouter.get("/re-auth", captchaLimiter, startReAuthHandler);
-authRouter.post("/re-auth", captchaLimiter, verifyReAuthHandler);
+authRouter.post("/re-auth", captchaLimiter, validate(reAuthSchema), verifyReAuthHandler);
 authRouter.get("/reset-captcha", captchaLimiter, resetCaptchaHandler);
 authRouter.get("/reset-password", resetPasswordHandler);
 authRouter.post("/reset-password", resetPasswordHandler);

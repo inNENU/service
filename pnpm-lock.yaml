@@ -296,6 +296,10 @@ packageExtensionsChecksum: sha256-9bldEK25VQ+SDrBwEi1LFbqQjKppWv/C+gMEl9bWjPQ=
 importers:
 
   .:
+    dependencies:
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
     devDependencies:
       '@alicloud/alinlp20200629':
         specifier: 3.1.0
@@ -2085,6 +2089,9 @@ packages:
   yuku-parser@0.8.0:
     resolution: {integrity: sha512-obrazyE8Cyh79xTQS9wv44khnhvkXG1CDSSy0bg+Pjjla+iXkKXK2b6+LTYXSN3qvVfQxc0MN5qhNKYr9sl3Zw==}
 
+  zod@4.4.3:
+    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
+
 snapshots:
 
   '@alicloud/alinlp20200629@3.1.0':
@@ -3598,3 +3605,5 @@ snapshots:
       '@yuku-parser/binding-linux-x64-musl': 0.8.0
       '@yuku-parser/binding-win32-arm64': 0.8.0
       '@yuku-parser/binding-win32-x64': 0.8.0
+
+  zod@4.4.3: {}
