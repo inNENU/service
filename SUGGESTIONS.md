@@ -16,9 +16,11 @@ VPN CAS 登录 → 统一身份认证 → ticket 兑换 → session 验证 → C
 
 建议将通用流程抽象为 `src/auth/login-pipeline.ts`，各模块传入差异化配置（服务器 URL、service 参数、额外验证步骤）即可。这将消除 ~500+ 行重复代码。
 
-### 2. 添加请求参数校验
+### 2. 添加请求参数校验（进行中）
 
-当前所有 handler 直接使用 `req.body` 和 `req.query`，没有任何校验。建议引入 [Zod](https://zod.dev/) 对每个接口的入参进行 schema 校验，避免因参数缺失/格式错误导致的运行时异常。
+当前所有 handler 直接使用 `req.body` 和 `req.query`，没有任何校验。已引入 [Zod](https://zod.dev/)，`src/utils/validate.ts` 提供校验中间件，`src/auth/schemas.ts` 定义 auth 模块 schema。
+
+剩余工作：为其他模块（action、my、oa、under-study 等）添加 schema 和校验中间件。
 
 ```typescript
 import { z } from "zod";
