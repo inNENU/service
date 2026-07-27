@@ -31,19 +31,31 @@ const loginLimiter = rateLimit({
   },
 });
 
+const captchaLimiter = rateLimit({
+  windowMs: 60000, // 1 分钟
+  max: 5,
+  legacyHeaders: false,
+  standardHeaders: true,
+  message: {
+    success: false,
+    type: ActionFailType.TooFrequent,
+    msg: "请求过于频繁，请稍后再试",
+  },
+});
+
 const authRouter = Router();
 
 authRouter.get("/activate", activateHandler);
 authRouter.post("/activate", activateHandler);
 authRouter.post("/encrypt", authEncryptHandler);
-authRouter.get("/auth-captcha", authCaptchaHandler);
-authRouter.post("/auth-captcha", authCaptchaHandler);
+authRouter.get("/auth-captcha", captchaLimiter, authCaptchaHandler);
+authRouter.post("/auth-captcha", captchaLimiter, authCaptchaHandler);
 authRouter.get("/init", loginLimiter, authInitInfoHandler);
-authRouter.post("/init", authInitHandler);
-authRouter.post("/login", authLoginHandler);
-authRouter.get("/re-auth", startReAuthHandler);
-authRouter.post("/re-auth", verifyReAuthHandler);
-authRouter.get("/reset-captcha", resetCaptchaHandler);
+authRouter.post("/init", loginLimiter, authInitHandler);
+authRouter.post("/login", loginLimiter, authLoginHandler);
+authRouter.get("/re-auth", captchaLimiter, startReAuthHandler);
+authRouter.post("/re-auth", captchaLimiter, verifyReAuthHandler);
+authRouter.get("/reset-captcha", captchaLimiter, resetCaptchaHandler);
 authRouter.get("/reset-password", resetPasswordHandler);
 authRouter.post("/reset-password", resetPasswordHandler);
 
