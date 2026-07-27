@@ -10,7 +10,7 @@ import { gradRouter } from "./grad-system/index.js";
 import { healthCheckHandler, healthCheckRateLimit } from "./health/index.js";
 import { homeHandler } from "./home.js";
 import { libraryRouter } from "./library/index.js";
-import { applyMiddleware } from "./middlewire/index.js";
+import { applyMiddleware } from "./middleware/index.js";
 import { mpRouter } from "./mp/index.js";
 import { myRouter } from "./my/index.js";
 import { oaRouter } from "./oa/index.js";
