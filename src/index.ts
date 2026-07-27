@@ -1,4 +1,4 @@
-import type { Response } from "express";
+import type { ErrorRequestHandler } from "express";
 import express from "express";
 
 import { actionRouter } from "./action/index.js";
@@ -54,13 +54,31 @@ app.use("/who", whoRouter);
 
 app.get("/weather", weatherHandler);
 
-// @ts-expect-error: Express type issue
-app.use((err: Error, _req: Request, res: Response, _next: () => void) => {
+const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   console.error(err);
 
-  res.status(500).json(unknownResponse(err.message ?? "未知错误"));
+  res.status(500).json(unknownResponse(err instanceof Error ? err.message : "未知错误"));
+};
+
+app.use(errorHandler);
+
+const server = app.listen(port, () => {
+  console.info(`Service is started on port ${port}`);
 });
 
-app.listen(port, () => {
-  console.info(`Service is started on port ${port}`);
+// 优雅关闭
+const gracefulShutdown = (signal: string): void => {
+  console.info(`${signal} received, shutting down gracefully...`);
+  server.close(() => {
+    console.info("Server closed");
+    // oxlint-disable-next-line unicorn/no-process-exit
+    process.exit(0);
+  });
+};
+
+process.on("SIGTERM", () => {
+  gracefulShutdown("SIGTERM");
+});
+process.on("SIGINT", () => {
+  gracefulShutdown("SIGINT");
 });
