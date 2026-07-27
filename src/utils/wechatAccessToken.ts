@@ -8,9 +8,9 @@ export const getWechatAccessToken = async (appId: string): Promise<string> => {
     return currentAccessToken[appId].token;
 
   const response = await fetch(
-    `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${appId}&secret=${appIdInfo[
-      appId as AppID
-    ]!}`,
+    `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${appId}&secret=${
+      appIdInfo[appId as AppID]!
+    }`,
   );
 
   const { access_token: accessToken, expires_in: expiresIn } = (await response.json()) as {
