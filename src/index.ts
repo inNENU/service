@@ -16,11 +16,12 @@ import { myRouter } from "./my/index.js";
 import { oaRouter } from "./oa/index.js";
 import { officialRouter } from "./official/index.js";
 import { testRouter } from "./test/index.js";
+import { toolsRouter } from "./tools/index.js";
+import { weatherRouter } from "./tools/weather/index.js";
 import { underStudyRouter } from "./under-study/index.js";
 import { underSystemRouter } from "./under-system/index.js";
 import { captureError, patchFetch, reportMemoryUsage } from "./utils/index.js";
 import { vpnRouter } from "./vpn/index.js";
-import { weatherHandler } from "./weather.js";
 import { whoRouter } from "./who/index.js";
 
 const app = express();
@@ -50,9 +51,8 @@ app.use("/under-system", underSystemRouter);
 app.use("/vpn", vpnRouter);
 app.use("/who", whoRouter);
 
-/*  ------------ 天气 ------------ */
-
-app.get("/weather", weatherHandler);
+app.use("/tools", toolsRouter);
+app.use("/weather", weatherRouter);
 
 const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   console.error(err);
