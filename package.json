@@ -42,7 +42,7 @@
     "domhandler": "^6.0.1",
     "dotenv": "17.4.2",
     "express": "5.2.1",
-    "express-rate-limit": "8.6.0",
+    "express-rate-limit": "8.6.1",
     "husky": "9.1.7",
     "iconv-lite": "0.7.3",
     "js-sha1": "0.7.0",
