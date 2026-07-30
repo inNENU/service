@@ -374,8 +374,8 @@ importers:
         specifier: 5.2.1
         version: 5.2.1
       express-rate-limit:
-        specifier: 8.6.0
-        version: 8.6.0(@types/express@5.0.6)(express@5.2.1)
+        specifier: 8.6.1
+        version: 8.6.1(@types/express@5.0.6)(express@5.2.1)
       husky:
         specifier: 9.1.7
         version: 9.1.7
@@ -1442,8 +1442,8 @@ packages:
     resolution: {integrity: sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg==}
     engines: {node: '>= 0.6'}
 
-  express-rate-limit@8.6.0:
-    resolution: {integrity: sha512-XKJXDsASUOo0LLtFwW5hCcQGH0N4WQc/Rn8/Pvoia+TJFOkkFPvrtW9lZOeeNcxQJspvOIERMwiRLsVFlhHEkA==}
+  express-rate-limit@8.6.1:
+    resolution: {integrity: sha512-0D493aP61w0TJ2A0wy27riRsO7FMQ7FK+KUHOKCSfPvYo0R55aiC6emCVgFUeShH0fq0ICPVzNcgoS+BsbXQCA==}
     engines: {node: '>= 16'}
     peerDependencies:
       '@types/express': '>=4.11'
@@ -2886,7 +2886,7 @@ snapshots:
 
   etag@1.8.1: {}
 
-  express-rate-limit@8.6.0(@types/express@5.0.6)(express@5.2.1):
+  express-rate-limit@8.6.1(@types/express@5.0.6)(express@5.2.1):
     dependencies:
       debug: 4.4.3
       express: 5.2.1
