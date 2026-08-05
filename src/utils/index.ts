@@ -7,6 +7,7 @@ export * from "./request.js";
 export * from "./helpers.js";
 export * from "./ie.js";
 export * from "./memory.js";
+export * from "./migrate.js";
 export * from "./mysql.js";
 export * from "./pathFetch.js";
 export * from "./pathname.js";

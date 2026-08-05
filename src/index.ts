@@ -20,7 +20,7 @@ import { toolsRouter } from "./tools/index.js";
 import { weatherRouter } from "./tools/weather/index.js";
 import { underStudyRouter } from "./under-study/index.js";
 import { underSystemRouter } from "./under-system/index.js";
-import { captureError, patchFetch, reportMemoryUsage } from "./utils/index.js";
+import { captureError, migrateDatabase, patchFetch, reportMemoryUsage } from "./utils/index.js";
 import { vpnRouter } from "./vpn/index.js";
 import { whoRouter } from "./who/index.js";
 
@@ -61,6 +61,9 @@ const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
 };
 
 app.use(errorHandler);
+
+// 启动时自动校验并补全数据库结构（缺失的表/字段/查阅数据自动补齐，幂等，不清空数据）
+await migrateDatabase();
 
 const server = app.listen(port, () => {
   console.info(`Service is started on port ${port}`);

@@ -42,6 +42,10 @@ export type AuthActivateInput = z.infer<typeof authActivateSchema>;
 /** 二次认证 */
 export const reAuthSchema = z.object({
   id: z.number().int().positive(),
+  smsCode: z.string(),
+  password: z.string(),
+  openid: z.string(),
+  appId: z.union([z.string(), z.number()]),
   authToken: z.string().optional(),
 });
 
