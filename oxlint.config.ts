@@ -29,17 +29,11 @@ export default defineHopeConfig(
       "typescript/strict-boolean-expressions": "off",
 
       "unicorn/prefer-global-this": "off",
-
-      "vitest/expect-expect": "off",
-      "vitest/no-conditional-expect": "off",
-      "vitest/no-conditional-in-test": "off",
-      "vitest/no-hooks": "off",
-      "vitest/consistent-test-filename": "off",
-      "vitest/prefer-lowercase-title": "off",
     },
   },
   {
-    files: ["__tests__/**"],
+    files: ["**/__tests__/**"],
+    plugins: ["vitest"],
     rules: {
       "max-classes-per-file": "off",
       "no-await-in-loop": "off",
@@ -61,9 +55,12 @@ export default defineHopeConfig(
       "typescript/require-await": "off",
 
       "vitest/expect-expect": "off",
+      "vitest/max-expects": "off",
       "vitest/no-conditional-expect": "off",
       "vitest/no-conditional-in-test": "off",
       "vitest/no-hooks": "off",
+      "vitest/no-importing-vitest-globals": "off",
+      "vitest/prefer-to-be-truthy": "off",
     },
   },
 );

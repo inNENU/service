@@ -18,7 +18,3 @@ export const FALLBACK_SEMESTER = "2025-2026-1";
 
 /** 旧系统可用学期（本科旧系统，需 < 2024） */
 export const LEGACY_SEMESTER = "2023-2024-2";
-
-/** 图书馆开放时段（白天应有读者的时间窗，时） */
-export const LIBRARY_OPEN_START_HOUR = 8;
-export const LIBRARY_OPEN_END_HOUR = 21;

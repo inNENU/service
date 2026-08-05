@@ -193,4 +193,4 @@ const main = async (): Promise<void> => {
 };
 
 // oxlint-disable-next-line unicorn/prefer-top-level-await -- 交互式脚本需保持同步退出
-main();
+void main();

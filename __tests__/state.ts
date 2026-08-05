@@ -16,6 +16,16 @@ export interface AccountsFile {
   graduate: AccountCredentials;
 }
 
+/** 招生查询测试信息（temp/enroll-info.json）：真实考生信息由用户手动填写，git 忽略 */
+export interface EnrollInfo {
+  /** 考生姓名 */
+  name: string;
+  /** 身份证号 */
+  id: string;
+  /** 考生号（学号） */
+  testId: string;
+}
+
 /** 单个账号的二次认证登录态 */
 export interface AccountAuth {
   id: number;
@@ -34,6 +44,18 @@ export interface AuthStateFile {
 
 const ACCOUNTS_PATH = new URL("../temp/accounts.json", import.meta.url);
 const AUTH_STATE_PATH = new URL("../temp/auth-state.json", import.meta.url);
+const ENROLL_INFO_PATH = new URL("../temp/enroll-info.json", import.meta.url);
+
+/** 读取招生查询测试信息（文件缺失时抛错） */
+export const readEnrollInfo = (): EnrollInfo => {
+  try {
+    return JSON.parse(readFileSync(ENROLL_INFO_PATH, "utf8")) as EnrollInfo;
+  } catch {
+    throw new Error(
+      "无法读取 temp/enroll-info.json，请先创建该文件（git 忽略），内容为 { name, id, testId }",
+    );
+  }
+};
 
 /** 读取账号文件 */
 export const readAccounts = (): AccountsFile => {

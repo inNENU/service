@@ -15,6 +15,7 @@
     "prepare": "husky",
     "test": "vitest run",
     "test:init-db": "unrun scripts/init-db.ts",
+    "test:open": "cross-env TEST_NO_AUTH=1 vitest run __tests__/home __tests__/health __tests__/library __tests__/official __tests__/enroll __tests__/test __tests__/tools",
     "test:provision": "unrun __tests__/provision.ts"
   },
   "devDependencies": {

@@ -66,18 +66,23 @@ export default async function setup(): Promise<() => void> {
   console.log("=== [setup 2/3] 检查本地服务 ===");
   const stop = await ensureService();
 
-  console.log("=== [setup 3/3] 检查登录态 ===");
-  const state = readAuthState();
+  // test:open 只跑公开端点，无需登录态
+  if (process.env.TEST_NO_AUTH === "1") {
+    console.log("[setup] 跳过登录态检查（test:open 仅公开端点）");
+  } else {
+    console.log("=== [setup 3/3] 检查登录态 ===");
+    const state = readAuthState();
 
-  if (!state.undergraduate?.authToken && !state.graduate?.authToken) {
-    stop();
+    if (!state.undergraduate?.authToken && !state.graduate?.authToken) {
+      stop();
 
-    throw new Error("未找到登录态，请先运行 pnpm test:provision（需要短信二次认证）");
+      throw new Error("未找到登录态，请先运行 pnpm test:provision（需要短信二次认证）");
+    }
+
+    console.log(
+      `[setup] 登录态: 本科 ${state.undergraduate?.authToken ? "✓" : "✗"} / 研究生 ${state.graduate?.authToken ? "✓" : "✗"}`,
+    );
   }
-
-  console.log(
-    `[setup] 登录态: 本科 ${state.undergraduate?.authToken ? "✓" : "✗"} / 研究生 ${state.graduate?.authToken ? "✓" : "✗"}`,
-  );
 
   return () => {
     stop();
