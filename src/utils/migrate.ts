@@ -1,3 +1,5 @@
+/* oxlint-disable eslint/no-await-in-loop -- 迁移需串行执行保证顺序 */
+
 /**
  * 数据库结构自动校验与补全（migration）
  *
@@ -212,12 +214,10 @@ export const migrateDatabase = async (): Promise<void> => {
 
     for (const table of SCHEMA) {
       // 1. 表缺失 → 创建
-      // oxlint-disable-next-line eslint/no-await-in-loop -- 迁移需串行执行保证顺序
       await connection.query(buildCreateSql(table));
 
       // 2. 字段缺失 → 补齐
       for (const [column, definition] of Object.entries(table.columns)) {
-        // oxlint-disable-next-line eslint/no-await-in-loop -- 迁移需串行执行保证顺序
         await connection.query(
           `ALTER TABLE \`${table.name}\` ADD COLUMN IF NOT EXISTS \`${column}\` ${definition}`,
         );
@@ -227,7 +227,6 @@ export const migrateDatabase = async (): Promise<void> => {
       const seed = SEED_DATA[table.name];
 
       if (seed?.rows.length) {
-        // oxlint-disable-next-line eslint/no-await-in-loop -- 迁移需串行执行保证顺序
         const [countRows] = await connection.query<RowDataPacket[]>(
           `SELECT COUNT(*) AS count FROM \`${table.name}\``,
         );
@@ -237,7 +236,6 @@ export const migrateDatabase = async (): Promise<void> => {
             .map(() => `(${seed.columns.map(() => "?").join(",")})`)
             .join(",");
 
-          // oxlint-disable-next-line eslint/no-await-in-loop -- 迁移需串行执行保证顺序
           await connection.query(
             `INSERT IGNORE INTO \`${table.name}\` (\`${seed.columns.join("`,`")}\`) VALUES ${placeholders}`,
             seed.rows.flat(),

@@ -4,6 +4,7 @@ export default defineHopeConfig(
   {
     ignore: ["lib/"],
     node: true,
+    vitest: true,
     rules: {
       complexity: "off",
       "max-depth": "off",
@@ -40,6 +41,15 @@ export default defineHopeConfig(
   {
     files: ["__tests__/**"],
     rules: {
+      "max-classes-per-file": "off",
+      "no-await-in-loop": "off",
+      "no-empty-function": "off",
+      "no-undefined": "off",
+
+      "jsdoc/require-param": "off",
+      "jsdoc/require-returns": "off",
+
+      "typescript/no-explicit-any": "off",
       "typescript/no-floating-promises": "off",
       "typescript/no-unsafe-assignment": "off",
       "typescript/no-unsafe-member-access": "off",
@@ -49,26 +59,11 @@ export default defineHopeConfig(
       "typescript/no-confusing-void-expression": "off",
       "typescript/use-unknown-in-catch-callback-variable": "off",
       "typescript/require-await": "off",
-      "typescript/no-explicit-any": "off",
+
       "vitest/expect-expect": "off",
       "vitest/no-conditional-expect": "off",
       "vitest/no-conditional-in-test": "off",
       "vitest/no-hooks": "off",
-      "vitest/consistent-test-filename": "off",
-      "typescript/prefer-regexp-exec": "off",
-      "jsdoc/require-param": "off",
-      "jsdoc/require-returns": "off",
-      "max-classes-per-file": "off",
-      "no-map-spread": "off",
-      "switch-case-braces": "off",
-      "require-unicode-regexp": "off",
-      "prefer-import-meta-properties": "off",
-      "max-lines": "off",
-      "no-await-in-loop": "off",
-      "no-promise-executor-return": "off",
-      "no-empty-function": "off",
-      "prefer-set-has": "off",
-      "no-undefined": "off",
     },
   },
 );

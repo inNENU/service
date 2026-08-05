@@ -12,7 +12,10 @@
     "dev": "tsdown -w",
     "lint": "oxlint --fix --deny-warnings --report-unused-disable-directives && oxfmt",
     "lint:check": "oxlint --deny-warnings --report-unused-disable-directives && oxfmt --check",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test": "vitest run",
+    "test:init-db": "unrun scripts/init-db.ts",
+    "test:provision": "unrun __tests__/provision.ts"
   },
   "devDependencies": {
     "@alicloud/alinlp20200629": "3.1.0",
@@ -56,6 +59,7 @@
     "typescript": "7.0.2",
     "unrun": "0.3.1",
     "uuid": "14.0.1",
+    "vitest": "^4.1.10",
     "zod": "^4.4.3"
   },
   "nano-staged": {
