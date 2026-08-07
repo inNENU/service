@@ -182,7 +182,6 @@ export const actionLogin = async (
   });
 
   cookieStore.applyResponse(finalResponse, finalLocation);
-  console.log("step3");
 
   if (finalResponse.status !== 301) {
     console.error(
