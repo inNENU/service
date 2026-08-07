@@ -25,7 +25,7 @@ export default defineConfig([
     entry: "./lib/encrypt.js",
     dts: false,
     fixedExtension: false,
-    target: "es2017",
+    target: "es2024",
     minify: !isDev,
   },
 ]);

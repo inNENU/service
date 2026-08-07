@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { rateLimit } from "express-rate-limit";
 
+import { isDevelopment } from "@/config/index.js";
 import { request } from "@/utils/index.js";
 
 import type { WeatherData, WeatherOptions, WeatherRawResponse } from "./typings.js";
@@ -11,6 +12,7 @@ export type { WeatherData } from "./typings.js";
 const weatherLimiter = rateLimit({
   windowMs: 60000, // 1 分钟
   max: 30,
+  skip: () => isDevelopment,
   legacyHeaders: false,
   standardHeaders: true,
 });

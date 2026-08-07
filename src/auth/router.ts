@@ -2,7 +2,7 @@ import { Router } from "express";
 import { ipKeyGenerator, rateLimit } from "express-rate-limit";
 import type { Request } from "express-serve-static-core";
 
-import { ActionFailType } from "../config/index.js";
+import { ActionFailType, isDevelopment } from "../config/index.js";
 import type { EmptyObject } from "../typings.js";
 import { validate } from "../utils/validate.js";
 import { activateHandler } from "./activate/index.js";
@@ -18,6 +18,7 @@ import { authActivateSchema, authInitSchema, authLoginSchema, reAuthSchema } fro
 const loginLimiter = rateLimit({
   windowMs: 60000, // 1 分钟
   max: 3,
+  skip: () => isDevelopment,
   legacyHeaders: false,
   standardHeaders: true,
   keyGenerator: (req: Request<EmptyObject, EmptyObject, { id?: number }, { id?: number }>) =>
@@ -36,6 +37,7 @@ const loginLimiter = rateLimit({
 const captchaLimiter = rateLimit({
   windowMs: 60000, // 1 分钟
   max: 5,
+  skip: () => isDevelopment,
   legacyHeaders: false,
   standardHeaders: true,
   message: {
