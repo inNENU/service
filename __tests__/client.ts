@@ -1,11 +1,12 @@
 /**
  * 测试 HTTP 客户端
  *
- * Node 环境无跨域限制，直接向本地服务发起请求。 Cookie 由测试端自行管理：解析所有 Set-Cookie 并按名称覆盖存储， 每次请求把全部 cookie 作为 Cookie
- * 头带上（与服务端行为一致）。
+ * 复用 @mptool/net 的 CookieStore（与服务器端/小程序端同一套逻辑）管理 cookie： - 本地服务通过 Set-Cookie 下发的 cookie 按对应域存入 -
+ * 登录接口 body 中的 cookies 数组由 loginSystem 显式写入 - 请求本地服务时只带本地域的 cookie；外部域 cookie 由 /check 按系统域单独上传
  */
+import { CookieStore } from "@mptool/net";
+
 import { BASE_URL, REQUEST_TIMEOUT } from "./config.js";
-import { CookieJar } from "./cookiJar.js";
 
 export interface ApiResponse<T = any> {
   status: number;
@@ -13,14 +14,20 @@ export interface ApiResponse<T = any> {
 }
 
 export class ApiClient {
-  readonly jar = new CookieJar();
+  readonly jar = new CookieStore();
 
   async request<T = any>(method: string, path: string, body?: unknown): Promise<ApiResponse<T>> {
     const response = await fetch(`${BASE_URL}${path}`, {
       method,
       headers: {
         "Content-Type": "application/json",
-        Cookie: this.jar.getHeader(),
+        // 本地服务依赖 req.headers.cookie 原样转发外部系统请求（loginToAction 中间件），
+        // 因此请求本地服务时携带 CookieStore 中的全部 cookie；
+        // 会话校验（/check）才由 checkSession 按系统域单独上传相关 cookie
+        Cookie: this.jar
+          .getAllCookies()
+          .map((cookie) => cookie.toString())
+          .join("; "),
       },
       body: body === undefined ? undefined : JSON.stringify(body),
       signal: AbortSignal.timeout(REQUEST_TIMEOUT),
@@ -28,7 +35,7 @@ export class ApiClient {
       redirect: "manual",
     });
 
-    this.jar.applySetCookie(response.headers);
+    this.jar.applyHeader(response.headers, BASE_URL);
 
     const text = await response.text();
     let parsed: T;

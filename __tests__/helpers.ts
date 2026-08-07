@@ -1,10 +1,22 @@
 /** 测试公共辅助函数：系统登录、会话校验、统一严格断言 */
+import { Cookie } from "@mptool/net";
+import type { CookieType } from "@mptool/net";
 import { expect } from "vitest";
 
 import type { ApiResponse } from "./client.js";
 import { ApiClient } from "./client.js";
 import type { AccountAuth } from "./state.js";
 import { readAccounts, readAuthState } from "./state.js";
+
+/** 各系统会话校验对应的服务器域名（/check 只上传该域相关 cookie，与小程序端一致） */
+const SYSTEM_DOMAINS: Record<string, string> = {
+  action: "m-443.webvpn.nenu.edu.cn",
+  "auth-center": "authserver.nenu.edu.cn",
+  my: "my-443.webvpn.nenu.edu.cn",
+  oa: "oa-443.webvpn.nenu.edu.cn",
+  "under-study": "bkjx.nenu.edu.cn",
+  "under-system": "dsjx.webvpn.nenu.edu.cn",
+};
 
 /**
  * 获取某角色的登录态（本科/研究生）
@@ -48,6 +60,10 @@ export const loginSystem = async (system: string, account: AccountAuth): Promise
   expect(res.status, `/${system}/login 返回 HTTP ${res.status}`).toBe(200);
   expect(res.body, `/${system}/login 失败`).toHaveProperty("success", true);
 
+  // 登录接口在响应体中返回外部系统 cookies，显式写入 CookieStore（复用其按域管理）
+  if (Array.isArray(res.body.cookies))
+    client.jar.apply(res.body.cookies.map((cookie: CookieType) => new Cookie(cookie)));
+
   return client;
 };
 
@@ -63,7 +79,13 @@ export const checkSession = async (
   system: string,
   label: string,
 ): Promise<void> => {
-  const res = await client.post(`/${system}/check`, { cookies: client.jar.toJSON() });
+  // 只上传与该系统验证域相关的 cookie，避免把跨域同名 cookie 全部塞给服务端
+  const domain = SYSTEM_DOMAINS[system];
+  const cookies = (domain ? client.jar.getCookies({ domain }) : client.jar.getAllCookies()).map(
+    (cookie) => cookie.toJSON(),
+  );
+
+  const res = await client.post(`/${system}/check`, { cookies });
 
   expect(res.status, `${label}: /${system}/check 返回 HTTP ${res.status}`).toBe(200);
   expect(res.body, `${label}: /${system}/check 响应异常`).toHaveProperty("success", true);
