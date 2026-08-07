@@ -9,7 +9,7 @@ import { expiredResponse, missingArgResponse } from "../config/index.js";
 import { MY_SERVER } from "../my/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse, LoginOptions } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
-import { ACTION_SERVER, INFO_SERVER } from "./utils.js";
+import { ACTION_443_SERVER, INFO_SERVER } from "./utils.js";
 
 const ID_TITLE_REGEXP = /var title = '(.*?)';/u;
 const ID_FROM_REGEXP = /var ly = '(.*?)'/u;
@@ -84,7 +84,7 @@ export const getNoticeDetailById = async (
   cookieHeader: string,
   noticeID: string,
 ): Promise<NoticeResponse> => {
-  const url = `${ACTION_SERVER}/page/viewNews?ID=${noticeID}`;
+  const url = `${ACTION_443_SERVER}/page/viewNews?ID=${noticeID}`;
 
   const response = await fetch(url, {
     headers: {
@@ -113,7 +113,7 @@ export const getNoticeDetailById = async (
         a: (node) => {
           const href = node.attrs?.href;
 
-          if (href && !href.startsWith(ACTION_SERVER) && !href.startsWith(MY_SERVER))
+          if (href && !href.startsWith(ACTION_443_SERVER) && !href.startsWith(MY_SERVER))
             node.children?.push({ type: "text", text: ` (${href})` });
 
           return node;
@@ -173,7 +173,7 @@ export const getNoticeDetailByUrl = async (
 
           if (
             href &&
-            !href.startsWith(ACTION_SERVER) &&
+            !href.startsWith(ACTION_443_SERVER) &&
             !href.startsWith(INFO_SERVER) &&
             !href.startsWith(MY_SERVER)
           )

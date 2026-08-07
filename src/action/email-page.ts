@@ -4,19 +4,11 @@ import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { expiredResponse, unknownResponse } from "../config/index.js";
 import type { CommonSuccessResponse, LoginOptions } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
-import { ACTION_MAIN_PAGE, ACTION_SERVER } from "./utils.js";
-
-const EMAIL_PAGE_URL = `${ACTION_SERVER}/extract/sendRedirect2Email`;
-const EMAIL_URL = `${ACTION_SERVER}/extract/sendRedirect2EmailPage`;
-
-export interface ActionEmailPageOptions extends LoginOptions {
-  /** 邮件 ID */
-  mid?: string;
-}
+import { ACTION_LOGIN_ENDPOINT, ACTION_ENDPOINT } from "./utils.js";
 
 interface RawEmailPageResponse {
-  success: boolean;
-  url: string;
+  ok: boolean;
+  data: string;
 }
 
 export type ActionEmailPageSuccessResponse = CommonSuccessResponse<string>;
@@ -31,22 +23,16 @@ const TEST_EMAIL_PAGE_RESPONSE: ActionEmailPageSuccessResponse = {
   data: "https://www.example.com",
 };
 
-export const getEmailPage = async (
-  cookieHeader: string,
-  mid?: string,
-): Promise<ActionEmailPageResponse> => {
-  const response = await fetch(mid ? EMAIL_PAGE_URL : EMAIL_URL, {
+export const getEmailPage = async (cookieHeader: string): Promise<ActionEmailPageResponse> => {
+  const response = await fetch(ACTION_ENDPOINT, {
     method: "POST",
     headers: {
       Accept: "application/json, text/javascript, */*; q=0.01",
-      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+      "Content-Type": "application/json; charset=UTF-8",
       Cookie: cookieHeader,
-      Referer: ACTION_MAIN_PAGE,
+      Referer: ACTION_LOGIN_ENDPOINT,
     },
-    body: new URLSearchParams({
-      ...(mid ? { domain: "nenu.edu.cn", mid } : {}),
-      account_name: "",
-    }),
+    body: JSON.stringify({ action: "index-wdyj", owner: "" }),
     redirect: "manual",
   });
 
@@ -54,22 +40,20 @@ export const getEmailPage = async (
 
   const result = (await response.json()) as RawEmailPageResponse;
 
-  if (!result.success) return unknownResponse("获取邮件页面失败");
+  if (!result.ok) return unknownResponse("获取邮件页面失败");
 
   return {
     success: true,
-    data: result.url,
+    data: result.data,
   };
 };
 
-export const actionEmailPageHandler = request<
-  ActionEmailPageResponse,
-  ActionEmailPageOptions,
-  ActionEmailPageOptions
->(async (req, res) => {
-  const cookieHeader = req.headers.cookie!;
+export const actionEmailPageHandler = request<ActionEmailPageResponse, LoginOptions, LoginOptions>(
+  async (req, res) => {
+    const cookieHeader = req.headers.cookie!;
 
-  if (cookieHeader.includes("TEST")) return res.json(TEST_EMAIL_PAGE_RESPONSE);
+    if (cookieHeader.includes("TEST")) return res.json(TEST_EMAIL_PAGE_RESPONSE);
 
-  return res.json(await getEmailPage(cookieHeader, req.body.mid));
-});
+    return res.json(await getEmailPage(cookieHeader));
+  },
+);

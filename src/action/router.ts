@@ -1,7 +1,5 @@
 import { Router } from "express";
 
-import { borrowBooksHandler } from "./borrow-books/index.js";
-import { cardBalanceHandler } from "./card-balance.js";
 import { actionCheckHandler } from "./check.js";
 import { actionEmailPageHandler } from "./email-page.js";
 import { actionLoginHandler, loginToAction } from "./login.js";
@@ -17,8 +15,6 @@ actionRouter.post("/check", actionCheckHandler);
 
 actionRouter.use(loginToAction);
 
-actionRouter.post("/borrow-books", borrowBooksHandler);
-actionRouter.post("/card-balance", cardBalanceHandler);
 actionRouter.get("/email-page", actionEmailPageHandler);
 actionRouter.post("/email-page", actionEmailPageHandler);
 actionRouter.post("/recent-email", actionRecentEmailHandler);

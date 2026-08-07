@@ -15,7 +15,7 @@ import {
 import type { AccountInfo, CommonFailedResponse, LoginOptions } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
 import { vpnCASLogin } from "../vpn/index.js";
-import { ACTION_MAIN_PAGE, ACTION_SERVER } from "./utils.js";
+import { ACTION_443_SERVER, ACTION_LOGIN_ENDPOINT, ACTION_SERVER } from "./utils.js";
 
 export interface ActionLoginSuccessResult {
   success: true;
@@ -35,9 +35,37 @@ export const actionLogin = async (
 
   if (!vpnLoginResult.success) return vpnLoginResult;
 
+  const mainResponse = await fetch(ACTION_443_SERVER, {
+    headers: {
+      Cookie: cookieStore.getHeader(ACTION_443_SERVER),
+    },
+    redirect: "manual",
+  });
+
+  if (mainResponse.status !== 302) {
+    console.error(
+      "action login failed with unknown mainResponse",
+      mainResponse.status,
+      mainResponse,
+      await mainResponse.text(),
+    );
+
+    return unknownResponse("未知错误");
+  }
+
+  cookieStore.applyResponse(mainResponse, ACTION_443_SERVER);
+
+  // const mainLocation = mainResponse.headers.get("Location")!;
+
+  // if (!mainLocation.startsWith(ACTION_MAIN_PAGE)) {
+  //   console.error("action login failed with unknown main location", mainLocation);
+
+  //   return unknownResponse("未知错误");
+  // }
+
   const result = await authLogin({
     ...options,
-    service: ACTION_MAIN_PAGE,
+    service: ACTION_LOGIN_ENDPOINT,
     webVPN: true,
     cookieStore,
   });
@@ -48,7 +76,14 @@ export const actionLogin = async (
     return result;
   }
 
-  const ticketResponse = await fetch(result.location, {
+  // https://m-443.webvpn.nenu.edu.cn/system/resource/code/auth/clogin.jsp?ticket=XXX
+  if (!result.location.startsWith(ACTION_LOGIN_ENDPOINT)) {
+    console.error("action login failed with unknown ticket location", result.location);
+
+    return unknownResponse("unknown");
+  }
+
+  const ticket443Response = await fetch(result.location, {
     headers: {
       Cookie: cookieStore.getHeader(result.location),
       Referer: WEB_VPN_AUTH_SERVER,
@@ -56,66 +91,166 @@ export const actionLogin = async (
     redirect: "manual",
   });
 
-  cookieStore.applyResponse(ticketResponse, result.location);
+  cookieStore.applyResponse(ticket443Response, result.location);
 
-  if (ticketResponse.status !== 302) {
+  if (ticket443Response.status !== 302) {
     console.error(
       "action login failed with unknown ticketResponse",
+      ticket443Response.status,
+      ticket443Response,
+      await ticket443Response.text(),
+    );
+
+    return unknownResponse("unknown");
+  }
+
+  // https://m.webvpn.nenu.edu.cn/system/resource/code/auth/clogin.jsp?ticket=XXX
+  const ticketLocation = ticket443Response.headers.get("Location")!;
+
+  if (!ticketLocation.startsWith(ACTION_SERVER)) {
+    console.error("action login failed with unknown ticketResponse location", ticketLocation);
+
+    return unknownResponse("unknown");
+  }
+
+  const ticketResponse = await fetch(ticketLocation, {
+    headers: {
+      Cookie: cookieStore.getHeader(ticketLocation),
+      Referer: WEB_VPN_AUTH_SERVER,
+    },
+    redirect: "manual",
+  });
+
+  cookieStore.applyResponse(ticketResponse, ticketLocation);
+
+  if (ticketResponse.status !== 301) {
+    console.error(
+      "action login failed with unknown ticket",
       ticketResponse.status,
       ticketResponse,
       await ticketResponse.text(),
     );
 
-    return unknownResponse("由于当前账户暂时未获权限，融合门户登录失败");
+    return unknownResponse("登录失败");
   }
 
-  const finalLocation = ticketResponse.headers.get("Location");
+  // https://m-443.webvpn.nenu.edu.cn/system/resource/code/auth/clogin.jsp
+  const mainPageLocation = ticketResponse.headers.get("Location")!;
 
-  if (finalLocation?.startsWith(ACTION_MAIN_PAGE)) {
-    const finalLocationResponse = await fetch(finalLocation, {
-      headers: {
-        Cookie: cookieStore.getHeader(finalLocation),
-        Referer: ACTION_SERVER,
-      },
-      redirect: "manual",
-    });
+  if (mainPageLocation !== ACTION_LOGIN_ENDPOINT) {
+    console.error("action login failed with unknown main page location", mainPageLocation);
 
-    cookieStore.applyResponse(finalLocationResponse, finalLocation);
+    return unknownResponse("unknown");
+  }
 
-    if (finalLocationResponse.status !== 200) {
-      console.error(
-        "action login failed",
-        finalLocationResponse.status,
-        finalLocationResponse,
-        await finalLocationResponse.text(),
-      );
+  const mainPageResponse = await fetch(mainPageLocation, {
+    headers: {
+      Cookie: cookieStore.getHeader(mainPageLocation),
+      Referer: ticketLocation,
+    },
+    redirect: "manual",
+  });
 
-      return unknownResponse("登录失败");
-    }
+  cookieStore.applyResponse(mainPageResponse, mainPageLocation);
 
-    const content = await finalLocationResponse.text();
+  if (mainPageResponse.status !== 302) {
+    console.error(
+      "action login failed with unknown pure action status code",
+      mainPageResponse.status,
+      mainPageResponse,
+      await mainPageResponse.text(),
+    );
 
-    const info = /pfs.comm.showDialog\("(.*?)",/u.exec(content)?.[1];
+    return unknownResponse("登录失败");
+  }
 
-    if (info) {
-      console.error("action login forbidden:", info);
+  // https://m.webvpn.nenu.edu.cn/index.jsp?null
+  const finalLocation = mainPageResponse.headers.get("Location")!;
 
-      return {
-        success: false,
-        type: ActionFailType.Forbidden,
-        msg: info,
-      };
-    }
+  if (finalLocation !== `${ACTION_SERVER}/index.jsp?null`) {
+    console.error("action login failed with unknown final location", finalLocation);
+
+    return unknownResponse("unknown");
+  }
+
+  const finalResponse = await fetch(finalLocation, {
+    headers: {
+      Cookie: cookieStore.getHeader(finalLocation),
+      Referer: mainPageLocation,
+    },
+    redirect: "manual",
+  });
+
+  cookieStore.applyResponse(finalResponse, finalLocation);
+  console.log("step3");
+
+  if (finalResponse.status !== 301) {
+    console.error(
+      "action login failed with unknown final status code",
+      finalResponse.status,
+      finalResponse,
+      await finalResponse.text(),
+    );
+
+    return unknownResponse("登录失败");
+  }
+
+  // https://m-443.webvpn.nenu.edu.cn/index.jsp?null
+  const final443Location = finalResponse.headers.get("Location")!;
+
+  if (final443Location !== `${ACTION_443_SERVER}/index.jsp?null`) {
+    console.error("action login failed with unknown final 443 location", final443Location);
+
+    return unknownResponse("登录失败");
+  }
+
+  const final443Response = await fetch(final443Location, {
+    headers: {
+      Cookie: cookieStore.getHeader(final443Location),
+      Referer: finalLocation,
+    },
+    redirect: "manual",
+  });
+
+  if (final443Response.status !== 200) {
+    console.error(
+      "action login failed with unknown action final status code",
+      final443Response.status,
+      final443Response,
+      await final443Response.text(),
+    );
+
+    return unknownResponse("登录失败");
+  }
+
+  cookieStore.applyResponse(final443Response, final443Location);
+
+  const content = await final443Response.text();
+
+  if (!content.includes("融合门户")) {
+    console.error("action login failed", content.slice(0, 200));
+
+    return unknownResponse("登录失败");
+  }
+
+  console.log(content);
+
+  const info = /pfs.comm.showDialog\("(.*?)",/u.exec(content)?.[1];
+
+  if (info) {
+    console.error("action login forbidden:", info);
 
     return {
-      success: true,
-      cookieStore,
+      success: false,
+      type: ActionFailType.Forbidden,
+      msg: info,
     };
   }
 
-  console.error("action login failed", finalLocation);
-
-  return unknownResponse("登录失败");
+  return {
+    success: true,
+    cookieStore,
+  };
 };
 
 export interface ActionLoginSuccessResponse {
@@ -141,7 +276,7 @@ export const loginToAction = request<
 
     if (!result.success) return res.json(result);
 
-    req.headers.cookie = result.cookieStore.getHeader(ACTION_SERVER);
+    req.headers.cookie = result.cookieStore.getHeader(ACTION_443_SERVER);
   } else if (!req.headers.cookie) {
     return res.json(MissingCredentialResponse);
   }

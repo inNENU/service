@@ -4,9 +4,7 @@ import type { ActionFailType } from "../config/index.js";
 import { expiredResponse, unknownResponse } from "../config/index.js";
 import type { CommonFailedResponse, CommonListSuccessResponse, LoginOptions } from "../typings.js";
 import type { ActionLoginResponse } from "./login.js";
-import { ACTION_SERVER, INFO_BASE_SERVER } from "./utils.js";
-
-const NOTICE_LIST_QUERY_URL = `${ACTION_SERVER}/page/queryList`;
+import { ACTION_443_SERVER, ACTION_ENDPOINT, INFO_BASE_SERVER } from "./utils.js";
 
 export interface NoticeListOptions extends LoginOptions {
   /**
@@ -30,30 +28,34 @@ export interface NoticeListOptions extends LoginOptions {
 }
 
 interface RawNoticeItem {
-  LLCS: number;
-  /** Time */
-  FBSJ: string;
-  /** Title */
-  KEYWORDS_: string;
-  /** Id */
-  ID__: string;
-  SFZD: string;
-  FLAG: string;
-  /** Index */
-  RN: number;
-  /** From */
-  CJBM: string;
-  TYPE: "notice" | "news";
-  /** Url */
-  URL: string | null;
+  /** 通知 ID */
+  id: string;
+  /** 原始链接 */
+  url: string;
+  /** 发布时间 */
+  fbsj: string;
+  /** 短日期 */
+  dateStr: string;
+  /** 显示标题 */
+  showTitle: string;
+  /** 提示标题 */
+  tipsTitle: string;
+  /** 发布单位 */
+  fbdw: string;
+  /** 创建时间 */
+  cjsj: string;
+  /** 浏览次数 */
+  llcs: string;
+  sfdz: string;
+  fbzt: string;
 }
 
-interface RawNoticeListData {
+interface RawNoticeListSuccessResponse {
+  ok: true;
   data: RawNoticeItem[];
-  pageIndex: number;
-  totalPage: number;
+  pageNumber: number;
   pageSize: number;
-  totalCount: number;
+  allNum: number;
 }
 
 export interface NoticeInfo {
@@ -65,11 +67,11 @@ export interface NoticeInfo {
 }
 
 const getNoticeItem = ({
-  ID__: id,
-  CJBM: from,
-  KEYWORDS_: title,
-  FBSJ: time,
-  URL: url,
+  id,
+  fbdw: from,
+  fbsj: time,
+  showTitle: title,
+  url,
 }: RawNoticeItem): NoticeInfo => ({
   id,
   title,
@@ -84,6 +86,8 @@ export interface NoticeListSuccessResponse extends CommonListSuccessResponse<Not
   size: number;
   count: number;
 }
+
+export type RawNoticeListResponse = RawNoticeListSuccessResponse | { ok: false; msg: string };
 
 export type NoticeListResponse =
   | NoticeListSuccessResponse
@@ -110,44 +114,52 @@ export const getNoticeList = async (
   size: number,
   current: number,
 ): Promise<NoticeListResponse> => {
-  const response = await fetch(NOTICE_LIST_QUERY_URL, {
+  const treeid = type === "news" ? "1041" : "1121";
+
+  const response = await fetch(`${ACTION_ENDPOINT}?NOWPAGE=${current}`, {
     method: "POST",
     headers: {
       Accept: "application/json, text/javascript, */*; q=0.01",
-      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+      "Content-Type": "application/json; charset=UTF-8",
       Cookie: cookieHeader,
-      Referer: `${ACTION_SERVER}/basicInfo/studentPageTurn?type=lifeschool`,
+      // The system forces the referer
+      Referer: `${ACTION_443_SERVER}/listrq.jsp?urltype=tree.TreeTempUrl&wbtreeid=${treeid}`,
     },
-    body: new URLSearchParams({
-      type,
-      _search: "false",
-      nd: Date.now().toString(),
-      limit: size.toString(),
-      page: current.toString(),
+    body: JSON.stringify({
+      owner: "",
+      action: "notice-list",
+      pageSize: size,
+      pageNumber: current,
+      treeid,
     }),
     redirect: "manual",
   });
 
   if (response.status === 302) return expiredResponse;
 
-  const { data, pageIndex, pageSize, totalCount, totalPage } =
-    (await response.json()) as RawNoticeListData;
+  const result = (await response.json()) as RawNoticeListResponse;
 
-  if (!data.length) return unknownResponse(`获取公告列表失败: ${JSON.stringify(data, null, 2)}`);
+  if (result.ok) {
+    const { data, pageNumber, pageSize, allNum } = result;
 
-  return {
-    success: true,
-    data: data.map((item) => getNoticeItem(item)),
-    count: totalCount,
-    size: pageSize,
-    current: pageIndex,
-    total: totalPage,
-  };
+    if (!data.length) return unknownResponse(`获取公告列表失败: ${JSON.stringify(data, null, 2)}`);
+
+    return {
+      success: true,
+      data: data.map((item) => getNoticeItem(item)),
+      count: allNum,
+      size: pageSize,
+      current: pageNumber,
+      total: Math.ceil(allNum / pageSize),
+    };
+  }
+
+  return unknownResponse(result.msg);
 };
 
 export const noticeListHandler = request<NoticeListResponse, NoticeListOptions>(
   async (req, res) => {
-    const { type = "notice", size = 20, current = 1 } = req.body;
+    const { type = "notice", size = 14, current = 1 } = req.body;
 
     const cookieHeader = req.headers.cookie!;
 

@@ -4,56 +4,24 @@ import type { AuthLoginFailedResponse } from "../auth/index.js";
 import { ActionFailType } from "../config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
-import { ACTION_MAIN_PAGE, ACTION_SERVER } from "./utils.js";
-
-const EMAIL_INFO_URL = `${ACTION_SERVER}/extract/getEmailInfo`;
+import { ACTION_LOGIN_ENDPOINT, ACTION_ENDPOINT } from "./utils.js";
 
 interface RawEmailData {
-  /** 发件人 */
-  from: string;
-  /** 邮件ID */
-  id: string;
-  /** 接收日期 */
-  receivedDate: number;
-  /** 发送日期 */
-  sentDate: number;
-  /** 偶见大小 */
-  size: number;
-
-  /** 邮件主题 */
+  /** 主题 */
   subject: string;
-  to: string;
-
-  fid: 1;
-  flags: {
-    read: boolean;
-    popRead: boolean;
-    attached: boolean;
-  };
+  /** 日期 */
+  sqsj: string;
+  /** 邮件 id */
+  id: string;
 }
 
 interface RawRecentMailSuccessResponse {
-  success: true;
-  count: string;
-  emailList: {
-    suc: true;
-    ver: 0;
-    /** 账户名称 */
-    account_name: string;
-    con: {
-      /** 总数 */
-      total: number;
-      var: RawEmailData[];
-    };
-  };
+  ok: true;
+  data: RawEmailData[];
 }
 
 interface RawRecentMailFailedResponse {
-  emailList: {
-    suc: false;
-    ver: 0;
-    error_code: string;
-  };
+  ok: false;
 }
 
 type RawRecentMailResponse = RawRecentMailSuccessResponse | RawRecentMailFailedResponse;
@@ -62,40 +30,12 @@ export interface EmailData {
   /** 邮件主题 */
   subject: string;
   /** 接收日期 */
-  receivedDate: number;
-  /** 发件人姓名 */
-  name: string;
-  /** 发件人邮件 */
-  email: string;
+  date: string;
   /** 邮件 ID */
-  mid: string;
-  /** 是否已读 */
-  unread: boolean;
+  id: string;
 }
 
-const getRecentEmailData = ({
-  subject,
-  receivedDate,
-  from,
-  id,
-  flags,
-}: RawEmailData): EmailData => ({
-  subject,
-  receivedDate,
-  name: /"(.*)"/u.exec(from)?.[1] ?? from,
-  email: /<(.*)>/u.exec(from)?.[1] ?? from,
-  mid: id,
-  unread: !flags.read,
-});
-
-export interface RecentMailData {
-  /** 未读数 */
-  unread: number;
-  /** 近期邮件 */
-  emails: EmailData[];
-}
-
-export type RecentMailSuccessResponse = CommonSuccessResponse<RecentMailData>;
+export type RecentMailSuccessResponse = CommonSuccessResponse<EmailData[]>;
 
 export type RecentMailFailedResponse = CommonFailedResponse<
   ActionFailType.MissingCredential | ActionFailType.NotInitialized | ActionFailType.Unknown
@@ -109,40 +49,35 @@ export type ActionRecentMailResponse =
 
 const TEST_RECENT_EMAIL_RESPONSE: RecentMailSuccessResponse = {
   success: true,
-  data: {
-    unread: 1,
-    emails: Array.from({ length: 10 }, (): EmailData => ({
-      subject: "测试邮件",
-      receivedDate: Date.now(),
-      name: "测试用户",
-      email: "admin@example.com",
-      mid: "1",
-      unread: true,
-    })),
-  },
+  data: Array.from({ length: 10 }, (): EmailData => ({
+    subject: "测试邮件",
+    date: "01-01",
+    id: "1",
+  })),
 };
 
 export const getRecentEmails = async (cookieHeader: string): Promise<ActionRecentMailResponse> => {
-  const checkResponse = await fetch(EMAIL_INFO_URL, {
+  const emailReponse = await fetch(ACTION_ENDPOINT, {
     method: "POST",
     headers: {
       Accept: "application/json, text/javascript, */*; q=0.01",
-      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+      "Content-Type": "application/json; charset=UTF-8",
       Cookie: cookieHeader,
-      Referer: ACTION_MAIN_PAGE,
+      Referer: ACTION_LOGIN_ENDPOINT,
     },
-    body: `domain=nenu.edu.cn&type=1&format=json`,
+    body: JSON.stringify({ action: "index-wdyj", owner: "" }),
   });
 
-  const checkResult = (await checkResponse.json()) as RawRecentMailResponse;
+  const result = (await emailReponse.json()) as RawRecentMailResponse;
 
-  if ("success" in checkResult && checkResult.success && checkResult.emailList.con) {
+  if (result.ok) {
     return {
       success: true,
-      data: {
-        unread: Number(checkResult.count),
-        emails: checkResult.emailList.con.var.map(getRecentEmailData),
-      },
+      data: result.data.map(({ subject, sqsj, id }: RawEmailData): EmailData => ({
+        subject,
+        date: sqsj,
+        id,
+      })),
     };
   }
 
