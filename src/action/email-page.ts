@@ -32,7 +32,7 @@ export const getEmailPage = async (cookieHeader: string): Promise<ActionEmailPag
       Cookie: cookieHeader,
       Referer: ACTION_LOGIN_ENDPOINT,
     },
-    body: JSON.stringify({ action: "index-wdyj", owner: "" }),
+    body: JSON.stringify({ action: "getMidUrl" }),
     redirect: "manual",
   });
 
