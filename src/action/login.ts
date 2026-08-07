@@ -233,8 +233,6 @@ export const actionLogin = async (
     return unknownResponse("登录失败");
   }
 
-  console.log(content);
-
   const info = /pfs.comm.showDialog\("(.*?)",/u.exec(content)?.[1];
 
   if (info) {

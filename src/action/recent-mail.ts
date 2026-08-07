@@ -1,10 +1,11 @@
 import { request } from "@/utils/index.js";
 
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { ActionFailType } from "../config/index.js";
+import { unknownResponse } from "../config/index.js";
+import type { ActionFailType } from "../config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
-import { ACTION_LOGIN_ENDPOINT, ACTION_ENDPOINT } from "./utils.js";
+import { ACTION_443_SERVER, ACTION_ENDPOINT } from "./utils.js";
 
 interface RawEmailData {
   /** 主题 */
@@ -22,6 +23,7 @@ interface RawRecentMailSuccessResponse {
 
 interface RawRecentMailFailedResponse {
   ok: false;
+  msg: string;
 }
 
 type RawRecentMailResponse = RawRecentMailSuccessResponse | RawRecentMailFailedResponse;
@@ -63,7 +65,8 @@ export const getRecentEmails = async (cookieHeader: string): Promise<ActionRecen
       Accept: "application/json, text/javascript, */*; q=0.01",
       "Content-Type": "application/json; charset=UTF-8",
       Cookie: cookieHeader,
-      Referer: ACTION_LOGIN_ENDPOINT,
+      // The system forces referer
+      Referer: ACTION_443_SERVER,
     },
     body: JSON.stringify({ action: "index-wdyj", owner: "" }),
   });
@@ -81,11 +84,7 @@ export const getRecentEmails = async (cookieHeader: string): Promise<ActionRecen
     };
   }
 
-  return {
-    success: false,
-    type: ActionFailType.NotInitialized,
-    msg: "用户无邮箱或未初始化邮箱",
-  };
+  return unknownResponse(result.msg);
 };
 
 export const actionRecentEmailHandler = request<ActionRecentMailResponse>(async (req, res) => {
