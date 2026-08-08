@@ -182,12 +182,10 @@ export const getWhoInfo = async (id: number, cookieHeader: string): Promise<WhoI
   };
 };
 
-export const whoInfoHandler = request<WhoInfoResponse, Record<string, never>, { id: number }>(
-  async (req, res) => {
-    const cookieHeader = req.headers.cookie!;
+export const whoInfoHandler = request<WhoInfoResponse, { id: number }>(async (req, res) => {
+  const cookieHeader = req.headers.cookie!;
 
-    if (cookieHeader.includes("TEST")) return res.json(TEST_WHO_INFO);
+  if (cookieHeader.includes("TEST")) return res.json(TEST_WHO_INFO);
 
-    return res.json(await getWhoInfo(req.body.id, cookieHeader));
-  },
-);
+  return res.json(await getWhoInfo(req.body.id, cookieHeader));
+});

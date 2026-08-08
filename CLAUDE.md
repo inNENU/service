@@ -207,6 +207,38 @@ try {
 1. 在 `src/config/actionFailType.ts` 的 `ActionFailType` 枚举中添加值
 2. 在 `src/typings.ts` 的 `CommonFailedResponse` 联合类型中添加对应类型
 
+### 请求参数校验（Zod）
+
+所有**有请求体（body）的接口**都应通过 Zod 校验中间件 `validate(schema)` 校验参数：
+
+```typescript
+// 1. 在模块目录创建 schemas.ts
+import { z } from "zod";
+
+export const loginSchema = z.object({
+  id: z.number().int().positive(),
+  password: z.string().min(1).max(128),
+  authToken: z.string().min(1),
+});
+
+// 2. 在 router.ts 中接入
+import { validate } from "@/utils/index.js";
+myRouter.post("/login", validate(loginSchema), loginHandler);
+```
+
+**强制约定（新增接口必须遵守）**：
+
+1. **每个有 body 的路由必须接 `validate(schema)`**，否则 `pnpm lint:check` 会失败（核查脚本 `scripts/check-validation.ts` 自动检查）。
+2. **每个 schema 字段必须在 `src/utils/validate.ts` 的 `FIELD_NAMES` 中配置中文名**，否则前端会收到英文参数名（如 `gradeCode参数非法`）。核查脚本同样会自动检查。
+3. 返回给前端的是中文、明确、可读的错误指令：
+   - 缺失必填字段 → `{ type: "missing-arg", msg: "缺少学号参数" }`
+   - 类型/取值错误 → `{ type: "invalid-arg", msg: "学号参数非法" }`
+   - 顶层 refine 校验失败 → 返回 schema 中自定义的中文 message
+4. **判别联合接口**（按 `type` 分发，如 `oa/email-apply`、`course-commentary`、`select/process`）使用 `z.discriminatedUnion("type", [...])`。
+5. **无 body 的接口**（纯 cookie 操作、GET 探活、stub 等）不需要接 validate；如需豁免，在 `scripts/check-validation.ts` 的 `POST_SKIP_ROUTES` 白名单中按 `模块:路径` 添加并注明原因。
+
+**修改后必须验证**：`pnpm lint:check`（含核查脚本）通过 + `pnpm build` 后重启服务测试实际错误输出（⚠️ 打包后 Zod 错误 message 会缩短，依赖原始 body 判断缺失，务必以 build 后为准测试）。
+
 ### 数据库查询
 
 ```typescript
