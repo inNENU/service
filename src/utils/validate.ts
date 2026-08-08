@@ -71,7 +71,6 @@ const FIELD_NAMES: Record<string, string> = {
   year: "年份",
   classType: "科类",
   majorType: "计划类型",
-  nd: "招生年份",
   // 扩展信息
   webVPN: "VPN",
   username: "用户名",

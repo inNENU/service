@@ -36,7 +36,7 @@ export type UnderPlanInput = z.infer<typeof underPlanSchema>;
 
 /** 研究生招生计划（enroll /grad-plan） */
 export const gradEnrollPlanSchema = z.object({
-  nd: z.number().int().positive().optional(),
+  year: z.number().int().positive().optional(),
 });
 
 export type GradEnrollPlanInput = z.infer<typeof gradEnrollPlanSchema>;

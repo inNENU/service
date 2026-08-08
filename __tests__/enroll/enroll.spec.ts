@@ -79,15 +79,15 @@ describe("招生 /enroll", () => {
   });
 
   it("研究生招生计划 POST /enroll/grad-plan 指定年份 2025", async () => {
-    const res = await client.post("/enroll/grad-plan", { nd: 2025 });
+    const res = await client.post("/enroll/grad-plan", { year: 2025 });
 
-    if (!expectSuccess(res, "/enroll/grad-plan nd=2025")) return;
+    if (!expectSuccess(res, "/enroll/grad-plan year=2025")) return;
     expect(Array.isArray(res.body.data), "data 应为数组").toBe(true);
     expect(res.body.data.length, "应包含至少一个院部").toBeGreaterThan(0);
   });
 
   it("研究生招生计划 POST /enroll/grad-plan 非法年份", async () => {
-    const res = await client.post("/enroll/grad-plan", { nd: 2024 });
+    const res = await client.post("/enroll/grad-plan", { year: 2024 });
 
     expect(res.status).toBe(200);
     expect(res.body, "应返回失败信封").toHaveProperty("success", false);

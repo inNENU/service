@@ -68,7 +68,7 @@ export interface GradEnrollSchoolPlan {
 
 export interface GradEnrollPlanOptions {
   /** 招生年份（2025 或 2026），缺省为最新年份 2026 */
-  nd?: number;
+  year?: number;
 }
 
 export type GradEnrollSuccessResponse = CommonSuccessResponse<GradEnrollSchoolPlan[]>;
@@ -356,5 +356,5 @@ export const getGradEnrollPlan = async (year: number): Promise<GradEnrollRespons
 };
 
 export const gradEnrollPlanHandler = request<GradEnrollResponse, GradEnrollPlanOptions>(
-  async (req, res) => res.json(await getGradEnrollPlan(req.body.nd ?? 2026)),
+  async (req, res) => res.json(await getGradEnrollPlan(req.body.year ?? 2026)),
 );
