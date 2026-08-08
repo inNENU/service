@@ -21,7 +21,7 @@
   "devDependencies": {
     "@alicloud/alinlp20200629": "3.1.0",
     "@alicloud/openapi-client": "0.4.15",
-    "@mptool/net": "0.14.0",
+    "@mptool/net": "0.16.3",
     "@mptool/parser": "0.14.0",
     "@mr-hope/tsconfig": "0.0.4",
     "@types/compression": "1.8.1",

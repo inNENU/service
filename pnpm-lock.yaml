@@ -219,8 +219,8 @@ importers:
         specifier: 0.4.15
         version: 0.4.15
       '@mptool/net':
-        specifier: 0.14.0
-        version: 0.14.0(miniprogram-api-typings@5.2.2)
+        specifier: 0.16.3
+        version: 0.16.3(miniprogram-api-typings@5.2.2)
       '@mptool/parser':
         specifier: 0.14.0
         version: 0.14.0(miniprogram-api-typings@5.2.2)
@@ -383,8 +383,8 @@ packages:
   '@jridgewell/sourcemap-codec@1.5.5':
     resolution: {integrity: sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==}
 
-  '@mptool/net@0.14.0':
-    resolution: {integrity: sha512-nTY6vjl51PnIDNc6ricyoe+fLgUiGF/Xj1mhUpFgbj4SSng7T4wbY9RN3rjNyoeRuGrRAQsDbUO/Zchzn/J1Hw==}
+  '@mptool/net@0.16.3':
+    resolution: {integrity: sha512-4A8irQoL1AxA/eKJCSqD9/uvVFaAUmeBtmocSHqYGaHAM1ECQzW9ffYEdXLUs54Y2evj7QoARrYDgFPdKrgNmg==}
     peerDependencies:
       miniprogram-api-typings: ^5.0.0
 
@@ -395,6 +395,11 @@ packages:
 
   '@mptool/shared@0.14.0':
     resolution: {integrity: sha512-SATBRE7WxrzLJMOnkI+OsZ4dPGG28l5JMJiCOpCAB+upss+fQqW0T/KUDp60GFZbLUz60RiWx9x+IJXnPXlExQ==}
+    peerDependencies:
+      miniprogram-api-typings: ^5.0.0
+
+  '@mptool/shared@0.16.3':
+    resolution: {integrity: sha512-d4TkHDzlpAxIMHAUPq3xTCxu0XabTs6oQ28p65d+C53ofmXhdEftR3yU7ske8S5y4ljDzceht5uN93SB6BGucA==}
     peerDependencies:
       miniprogram-api-typings: ^5.0.0
 
@@ -1272,6 +1277,7 @@ packages:
 
   crypto-js@4.2.0:
     resolution: {integrity: sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==}
+    deprecated: Active development of CryptoJS has been discontinued. This library is no longer maintained.
 
   css-select@5.2.2:
     resolution: {integrity: sha512-TizTzUddG/xYLA3NXodFM0fSbNizXjOKhqiQQwvhlspadZokn1KDy0NZFS0wuEubIYAV5/c1/lAr0TaaFXEXzw==}
@@ -2380,9 +2386,9 @@ snapshots:
 
   '@jridgewell/sourcemap-codec@1.5.5': {}
 
-  '@mptool/net@0.14.0(miniprogram-api-typings@5.2.2)':
+  '@mptool/net@0.16.3(miniprogram-api-typings@5.2.2)':
     dependencies:
-      '@mptool/shared': 0.14.0(miniprogram-api-typings@5.2.2)
+      '@mptool/shared': 0.16.3(miniprogram-api-typings@5.2.2)
       miniprogram-api-typings: 5.2.2
 
   '@mptool/parser@0.14.0(miniprogram-api-typings@5.2.2)':
@@ -2393,6 +2399,10 @@ snapshots:
       miniprogram-api-typings: 5.2.2
 
   '@mptool/shared@0.14.0(miniprogram-api-typings@5.2.2)':
+    dependencies:
+      miniprogram-api-typings: 5.2.2
+
+  '@mptool/shared@0.16.3(miniprogram-api-typings@5.2.2)':
     dependencies:
       miniprogram-api-typings: 5.2.2
 
