@@ -301,6 +301,18 @@ const buildSchoolPlans = async (
  * @param plans 招生计划
  * @returns 替换完成后的招生计划
  */
+/**
+ * 将逗号分隔的文本分行；若为多行则在开头补换行，让 "初试科目:" 标签独占一行
+ *
+ * @param text 原始文本
+ * @returns 处理后的文本
+ */
+const formatGradEnrollText = (text: string): string => {
+  const content = text.replaceAll(",", "\n");
+
+  return content.includes("\n") ? `\n${content}` : content;
+};
+
 const normalizeGradEnrollPlan = (plans: GradEnrollSchoolPlan[]): GradEnrollSchoolPlan[] =>
   plans.map((school) => ({
     ...school,
@@ -308,8 +320,8 @@ const normalizeGradEnrollPlan = (plans: GradEnrollSchoolPlan[]): GradEnrollSchoo
       ...major,
       directions: major.directions.map((direction) => ({
         ...direction,
-        subjects: direction.subjects.replaceAll(",", "\n"),
-        note: direction.note.replaceAll(",", "\n"),
+        subjects: formatGradEnrollText(direction.subjects),
+        note: formatGradEnrollText(direction.note),
       })),
     })),
   }));
