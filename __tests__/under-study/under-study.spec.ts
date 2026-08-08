@@ -49,6 +49,31 @@ const GRADE_KEYS = [
 ];
 const DETAIL_KEYS = ["name", "score", "percent"];
 const SPECIAL_KEYS = ["semester", "time", "name", "grade", "gradeCode"];
+const STUDY_PLAN_KEYS = ["planId", "planCode", "grade", "major", "planType", "note"];
+const STUDY_PLAN_COURSE_KEYS = [
+  "name",
+  "courseCode",
+  "credit",
+  "hours",
+  "semester",
+  "studyType",
+  "examType",
+  "category",
+  "gradeMethod",
+];
+const TASK_KEYS = [
+  "name",
+  "courseCode",
+  "teachers",
+  "classId",
+  "className",
+  "credit",
+  "hours",
+  "examType",
+  "category",
+  "classSize",
+  "note",
+];
 const EXAM_KEYS = [
   "name",
   "courseCode",
@@ -191,6 +216,38 @@ describe("本科教务（新）/under-study", () => {
     });
 
     expectDataArray(res, EXAM_KEYS, "exam-arrangement", ["expired"]);
+  });
+
+  it("学习计划 POST /under-study/study-plan list", async () => {
+    const res = await client.post("/under-study/study-plan", { type: "list" });
+
+    expectDataArray(res, STUDY_PLAN_KEYS, "study-plan list", ["expired"]);
+  });
+
+  it("学习计划 POST /under-study/study-plan detail", async () => {
+    const list = await client.post("/under-study/study-plan", { type: "list" });
+
+    if (list.body?.success !== true || list.body?.data?.length === 0)
+      expect.fail("学习计划为空，无法测试明细");
+
+    const res = await client.post("/under-study/study-plan", {
+      type: "detail",
+      planCode: list.body.data[0].planCode,
+    });
+
+    if (!expectSuccess(res, "study-plan detail", ["expired"])) return;
+
+    expect(Array.isArray(res.body.data), "明细 data 应为数组").toBe(true);
+    expect(res.body.total, "应包含 total").toBeTypeOf("number");
+    expect(res.body.current, "应包含 current").toBeTypeOf("number");
+    expectArrayItems(res.body.data, STUDY_PLAN_COURSE_KEYS, "study-plan detail");
+  });
+
+  it("上课任务 POST /under-study/task", async () => {
+    const res = await client.post("/under-study/task");
+
+    // 暑假可能无上课任务（data 可为空数组）
+    expectDataArray(res, TASK_KEYS, "task", ["expired"]);
   });
 
   it("课程表 POST /under-study/course-table", async () => {

@@ -38,3 +38,23 @@ export const examArrangementSchema = z.object({
 });
 
 export type ExamArrangementInput = z.infer<typeof examArrangementSchema>;
+
+/** 学习计划请求（under-study /study-plan 判别联合） */
+export const underStudyPlanSchema = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("list") }),
+  z.object({
+    type: z.literal("detail"),
+    planCode: z.string().min(1),
+    page: z.number().int().positive().optional(),
+    rows: z.number().int().positive().optional(),
+  }),
+]);
+
+export type UnderStudyPlanInput = z.infer<typeof underStudyPlanSchema>;
+
+/** 上课任务请求（under-study /task，全部参数可选） */
+export const underStudyTaskSchema = z.object({
+  time: z.string().optional(),
+});
+
+export type UnderStudyTaskInput = z.infer<typeof underStudyTaskSchema>;

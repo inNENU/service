@@ -16,9 +16,13 @@ import {
   gradeDetailSchema,
   gradeListSchema,
   underStudyLoginSchema,
+  underStudyPlanSchema,
+  underStudyTaskSchema,
 } from "./schemas.js";
 import { selectRouter } from "./select/index.js";
 import { underStudySpecialExamHandler } from "./special-exam.js";
+import { underStudyStudyPlanHandler } from "./study-plan.js";
+import { underStudyTaskHandler } from "./task.js";
 
 const underStudyRouter = Router();
 
@@ -44,5 +48,7 @@ underStudyRouter.post(
   underStudyExamArrangementHandler,
 );
 underStudyRouter.post("/special-exam", underStudySpecialExamHandler);
+underStudyRouter.post("/study-plan", validate(underStudyPlanSchema), underStudyStudyPlanHandler);
+underStudyRouter.post("/task", validate(underStudyTaskSchema), underStudyTaskHandler);
 
 export { underStudyRouter };

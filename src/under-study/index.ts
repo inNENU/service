@@ -9,4 +9,6 @@ export * from "./info.js";
 export * from "./router.js";
 export * from "./select/index.js";
 export * from "./special-exam.js";
+export * from "./study-plan.js";
+export * from "./task.js";
 export * from "./utils.js";
