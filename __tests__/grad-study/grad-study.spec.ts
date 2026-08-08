@@ -30,6 +30,17 @@ const GRADE_KEYS = [
 /** 研究生当前学期（dsyjs 格式，如 202502 = 2025 学年第二学期） */
 const GRAD_SEMESTER = "202502";
 
+const COMMENTARY_KEYS = [
+  "term",
+  "endDate",
+  "name",
+  "courseCode",
+  "teacherName",
+  "teacherCode",
+  "teachingLinkName",
+  "commentaryCode",
+];
+
 const account = getAccount("graduate");
 
 describe("研究生教务 /grad-study", () => {
@@ -69,5 +80,14 @@ describe("研究生教务 /grad-study", () => {
       expect(Array.isArray(row), "课表行应为数组").toBe(true);
       expect(row).toHaveLength(7);
     }
+  });
+
+  it("评教列表 POST /grad-study/course-commentary", async () => {
+    if (!account) throw new Error("缺少研究生登录态，请先运行 pnpm test:provision");
+
+    // 不传 time，由服务端自动探测学期（dsyjs 学期代码格式与 bkjx 不同）
+    const res = await client.post("/grad-study/course-commentary", { type: "list" });
+
+    expectDataArray(res, COMMENTARY_KEYS, "course-commentary list", ["expired"]);
   });
 });

@@ -2,9 +2,7 @@ import type { ActionFailType } from "@/config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse, LoginOptions } from "@/typings.js";
 import { EDGE_USER_AGENT_HEADERS } from "@/utils/index.js";
 
-import { UNDER_STUDY_SERVER } from "../utils.js";
-
-export interface GetUnderCourseCommentaryOptions extends LoginOptions {
+export interface GetCourseCommentaryOptions extends LoginOptions {
   type: "get";
   /** 教师代码 */
   teacherCode: string;
@@ -12,9 +10,7 @@ export interface GetUnderCourseCommentaryOptions extends LoginOptions {
   courseCode: string;
 }
 
-const ANSWER_URL = `${UNDER_STUDY_SERVER}/new/student/teapj/pj.page`;
-
-export interface UnderCourseCommentaryInfo {
+export interface CourseCommentaryInfo {
   /** 参数 */
   params: Record<string, string>;
   /** 问题 */
@@ -49,7 +45,7 @@ const OPTIONS_REGEXP =
 const TEXT_REGEXP =
   /<div class="question".+?data-txdm="(\d+)" data-zbdm="(\d+)">\s+<h3>(.*?)(?:<span class="zbsx" style="color:red;">.*?<\/span>)?\s+<\/h3>\s+<textarea.+?name="(\d+)"[^]+?data-fz="(.*?)"/u;
 
-const getCourseInfo = (html: string): UnderCourseCommentaryInfo => {
+const getCourseInfo = (html: string): CourseCommentaryInfo => {
   const [, paramText] = PARAMS_REGEXP.exec(html)!;
 
   const params = Object.fromEntries(
@@ -93,11 +89,10 @@ const getCourseInfo = (html: string): UnderCourseCommentaryInfo => {
   };
 };
 
-export type UnderCourseCommentaryGetSuccessResponse =
-  CommonSuccessResponse<UnderCourseCommentaryInfo>;
+export type CourseCommentaryGetSuccessResponse = CommonSuccessResponse<CourseCommentaryInfo>;
 
-export type UnderCourseCommentaryGetResponse =
-  | UnderCourseCommentaryGetSuccessResponse
+export type CourseCommentaryGetResponse =
+  | CourseCommentaryGetSuccessResponse
   | CommonFailedResponse<
       | ActionFailType.Expired
       | ActionFailType.MissingArg
@@ -105,21 +100,22 @@ export type UnderCourseCommentaryGetResponse =
       | ActionFailType.Unknown
     >;
 
-export const getUnderCommentary = async (
+export const getCommentary = async (
   cookieHeader: string,
   courseCode: string,
   teacherCode: string,
-): Promise<UnderCourseCommentaryGetResponse> => {
+  server: string,
+): Promise<CourseCommentaryGetResponse> => {
   const urlParams = new URLSearchParams({
     teadm: teacherCode,
     dgksdm: courseCode,
     _: Date.now().toString(),
   }).toString();
 
-  const response = await fetch(`${ANSWER_URL}?${urlParams}`, {
+  const response = await fetch(`${server}/new/student/teapj/pj.page?${urlParams}`, {
     headers: {
       Cookie: cookieHeader,
-      Referer: `${UNDER_STUDY_SERVER}/new/student/teapj`,
+      Referer: `${server}/new/student/teapj`,
       ...EDGE_USER_AGENT_HEADERS,
     },
   });

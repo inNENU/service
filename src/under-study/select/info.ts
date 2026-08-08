@@ -5,7 +5,7 @@ import { getSelectInfo } from "../../study/select/index.js";
 import type { SelectInfoOptions, SelectInfoResponse } from "../../study/select/index.js";
 import { UNDER_STUDY_SERVER } from "../utils.js";
 
-export const underStudySelectInfoHandler = request<SelectInfoResponse, SelectInfoOptions>(
+export const underSelectInfoHandler = request<SelectInfoResponse, SelectInfoOptions>(
   async (req, res) => {
     const cookieHeader = req.headers.cookie!;
     const { link } = req.body;

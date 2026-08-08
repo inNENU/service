@@ -86,7 +86,7 @@ export type SelectCategoryResponse =
       ActionFailType.NotInitialized | ActionFailType.MissingCredential | ActionFailType.Unknown
     >;
 
-export const TEST_UNDER_SELECT_CATEGORY_RESPONSE: SelectCategorySuccessResponse = {
+export const TEST_SELECT_CATEGORY_RESPONSE: SelectCategorySuccessResponse = {
   success: true,
   data: {
     allowed: [],

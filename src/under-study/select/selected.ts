@@ -5,14 +5,13 @@ import { getSelectedCourses } from "../../study/select/index.js";
 import type { SelectSelectedOptions, SelectSelectedResponse } from "../../study/select/index.js";
 import { UNDER_STUDY_SERVER } from "../utils.js";
 
-export const underSelectSelectedCourseHandler = request<
-  SelectSelectedResponse,
-  SelectSelectedOptions
->(async (req, res) => {
-  const { link } = req.body;
-  const cookieHeader = req.headers.cookie!;
+export const underSelectSelectedHandler = request<SelectSelectedResponse, SelectSelectedOptions>(
+  async (req, res) => {
+    const { link } = req.body;
+    const cookieHeader = req.headers.cookie!;
 
-  if (!link) return res.json(missingArgResponse("link"));
+    if (!link) return res.json(missingArgResponse("link"));
 
-  return res.json(await getSelectedCourses(link, cookieHeader, UNDER_STUDY_SERVER));
-});
+    return res.json(await getSelectedCourses(link, cookieHeader, UNDER_STUDY_SERVER));
+  },
+);

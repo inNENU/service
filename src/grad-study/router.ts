@@ -1,6 +1,7 @@
 import { Router } from "express";
 
 import { gradStudyCheckHandler } from "./check.js";
+import { gradStudyCourseCommentaryHandler } from "./course-commentary/index.js";
 import { gradStudyCourseTableHandler } from "./course-table/index.js";
 import { gradGradeDetailHandler } from "./grade-detail.js";
 import { gradGradeListHandler } from "./grade-list.js";
@@ -17,6 +18,7 @@ gradStudyRouter.use(loginToGradStudy);
 gradStudyRouter.post("/course-table", gradStudyCourseTableHandler);
 gradStudyRouter.post("/grade-detail", gradGradeDetailHandler);
 gradStudyRouter.post("/grade-list", gradGradeListHandler);
+gradStudyRouter.post("/course-commentary", gradStudyCourseCommentaryHandler);
 gradStudyRouter.use("/select", gradStudySelectRouter);
 
 export { gradStudyRouter };

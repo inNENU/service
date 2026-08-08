@@ -3,22 +3,20 @@ import { expiredResponse, unknownResponse } from "@/config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse, LoginOptions } from "@/typings.js";
 import { EDGE_USER_AGENT_HEADERS } from "@/utils/index.js";
 
-import { UNDER_STUDY_SERVER } from "../utils.js";
-import type { UnderCourseCommentaryInfo } from "./get.js";
-import type { RawUnderCourseCommentaryFailResult } from "./utils.js";
+import type { CourseCommentaryInfo } from "./get.js";
+import type { RawCourseCommentaryFailResult } from "./utils.js";
 
-interface RawUnderCourseCommentarySubmitSuccessResult {
+interface RawCourseCommentarySubmitSuccessResult {
   code: 0;
   data: "";
   message: "评价成功";
 }
 
-type RawUnderCourseCommentarySubmitResult =
-  | RawUnderCourseCommentarySubmitSuccessResult
-  | RawUnderCourseCommentaryFailResult;
+type RawCourseCommentarySubmitResult =
+  | RawCourseCommentarySubmitSuccessResult
+  | RawCourseCommentaryFailResult;
 
-export interface SubmitUnderCourseCommentaryOptions
-  extends LoginOptions, UnderCourseCommentaryInfo {
+export interface SubmitCourseCommentaryOptions extends LoginOptions, CourseCommentaryInfo {
   type: "submit";
   /** 选项 */
   answers: number[];
@@ -26,23 +24,24 @@ export interface SubmitUnderCourseCommentaryOptions
   commentary: string;
 }
 
-export type SubmitUnderCourseCommentarySuccessResponse = CommonSuccessResponse<string>;
+export type SubmitCourseCommentarySuccessResponse = CommonSuccessResponse<string>;
 
-export type SubmitUnderCourseCommentaryFailResponse = CommonFailedResponse<
+export type SubmitCourseCommentaryFailResponse = CommonFailedResponse<
   | ActionFailType.Expired
   | ActionFailType.MissingArg
   | ActionFailType.MissingCredential
   | ActionFailType.Unknown
 >;
 
-export type SubmitUnderCourseCommentaryResponse =
-  | SubmitUnderCourseCommentarySuccessResponse
-  | SubmitUnderCourseCommentaryFailResponse;
+export type SubmitCourseCommentaryResponse =
+  | SubmitCourseCommentarySuccessResponse
+  | SubmitCourseCommentaryFailResponse;
 
-export const submitUnderCourseCommentary = async (
+export const submitCommentary = async (
   cookieHeader: string,
-  { commentary, params, questions, text, answers }: SubmitUnderCourseCommentaryOptions,
-): Promise<SubmitUnderCourseCommentaryResponse> => {
+  { commentary, params, questions, text, answers }: SubmitCourseCommentaryOptions,
+  server: string,
+): Promise<SubmitCourseCommentaryResponse> => {
   const totalScore = answers.reduce(
     (acc, answer, index) => acc + questions[index].options[answer].score,
     0,
@@ -70,12 +69,12 @@ export const submitUnderCourseCommentary = async (
     },
   ];
 
-  const response = await fetch(`${UNDER_STUDY_SERVER}/new/student/teapj/savePj`, {
+  const response = await fetch(`${server}/new/student/teapj/savePj`, {
     method: "POST",
     headers: {
       Accept: "application/json; charset=UTF-8",
       Cookie: cookieHeader,
-      Referer: `${UNDER_STUDY_SERVER}/new/student/teapj`,
+      Referer: `${server}/new/student/teapj`,
       ...EDGE_USER_AGENT_HEADERS,
     },
     body: new URLSearchParams({
@@ -87,7 +86,7 @@ export const submitUnderCourseCommentary = async (
 
   if (response.headers.get("Content-Type")?.includes("text/html")) return expiredResponse;
 
-  const data = (await response.json()) as RawUnderCourseCommentarySubmitResult;
+  const data = (await response.json()) as RawCourseCommentarySubmitResult;
 
   if (data.code === 0) {
     return {

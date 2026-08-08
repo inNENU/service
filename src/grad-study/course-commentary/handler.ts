@@ -17,7 +17,7 @@ import type {
   SubmitCourseCommentaryOptions,
   ViewCourseCommentaryOptions,
 } from "../../study/course-commentary/index.js";
-import { UNDER_STUDY_SERVER } from "../utils.js";
+import { GRAD_STUDY_SERVER } from "../utils.js";
 
 type CourseCommentaryOptions =
   | ListCourseCommentaryOptions
@@ -25,7 +25,7 @@ type CourseCommentaryOptions =
   | GetCourseCommentaryOptions
   | SubmitCourseCommentaryOptions;
 
-export const underStudyCourseCommentaryHandler: RequestHandler<
+export const gradStudyCourseCommentaryHandler: RequestHandler<
   EmptyObject,
   EmptyObject,
   CourseCommentaryOptions
@@ -35,7 +35,7 @@ export const underStudyCourseCommentaryHandler: RequestHandler<
   if (req.body.type === "list") {
     if (cookieHeader.includes("TEST")) return res.json(COURSE_COMMENTARY_LIST_TEST_RESPONSE);
 
-    return res.json(await listCommentary(cookieHeader, req.body.time, UNDER_STUDY_SERVER));
+    return res.json(await listCommentary(cookieHeader, req.body.time, GRAD_STUDY_SERVER));
   }
 
   if (req.body.type === "view") {
@@ -45,9 +45,7 @@ export const underStudyCourseCommentaryHandler: RequestHandler<
 
     if (!commentaryCode) return res.json(missingArgResponse("commentaryCode"));
 
-    return res.json(
-      await viewCommentary(cookieHeader, req.body.commentaryCode, UNDER_STUDY_SERVER),
-    );
+    return res.json(await viewCommentary(cookieHeader, req.body.commentaryCode, GRAD_STUDY_SERVER));
   }
 
   if (req.body.type === "get") {
@@ -56,11 +54,11 @@ export const underStudyCourseCommentaryHandler: RequestHandler<
     if (!courseCode) return res.json(missingArgResponse("courseCode"));
     if (!teacherCode) return res.json(missingArgResponse("teacherCode"));
 
-    return res.json(await getCommentary(cookieHeader, courseCode, teacherCode, UNDER_STUDY_SERVER));
+    return res.json(await getCommentary(cookieHeader, courseCode, teacherCode, GRAD_STUDY_SERVER));
   }
 
   if (req.body.type === "submit")
-    return res.json(await submitCommentary(cookieHeader, req.body, UNDER_STUDY_SERVER));
+    return res.json(await submitCommentary(cookieHeader, req.body, GRAD_STUDY_SERVER));
 
   return res.json(invalidArgResponse("type"));
 };

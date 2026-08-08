@@ -1,4 +1,4 @@
-export interface RawUnderCourseCommentaryFailResult {
+export interface RawCourseCommentaryFailResult {
   code: number;
   data: string;
   message: string;

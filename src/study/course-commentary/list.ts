@@ -4,20 +4,19 @@ import type { CommonFailedResponse, CommonSuccessResponse, LoginOptions } from "
 import { EDGE_USER_AGENT_HEADERS } from "@/utils/index.js";
 
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
-import { UNDER_STUDY_SERVER } from "../utils.js";
-import type { RawUnderCourseCommentaryFailResult } from "./utils.js";
-
-const MAIN_URL = `${UNDER_STUDY_SERVER}/new/student/teapj`;
-const LIST_URL = `${UNDER_STUDY_SERVER}/new/student/teapj/pjDatas`;
+import type { RawCourseCommentaryFailResult } from "./utils.js";
 
 const SELECTED_OPTION_REG = /<option value='([^']*?)' selected>([^<]*?)<\/option>/u;
 
-const getCurrentTime = async (cookieHeader: string): Promise<{ time: string; value: string }> => {
-  const response = await fetch(MAIN_URL, {
+const getCurrentTime = async (
+  cookieHeader: string,
+  server: string,
+): Promise<{ time: string; value: string }> => {
+  const response = await fetch(`${server}/new/student/teapj`, {
     headers: {
       Cookie: cookieHeader,
       ...EDGE_USER_AGENT_HEADERS,
-      referer: `${UNDER_STUDY_SERVER}/new/student/teapj`,
+      referer: `${server}/new/student/teapj`,
     },
   });
 
@@ -34,7 +33,7 @@ const getCurrentTime = async (cookieHeader: string): Promise<{ time: string; val
   };
 };
 
-interface RawUnderCourseCommentaryListResultItem {
+interface RawCourseCommentaryListResultItem {
   rownum_: number;
   /** 教师编号 */
   teabh: string;
@@ -63,17 +62,17 @@ interface RawUnderCourseCommentaryListResultItem {
   xsdm: string;
 }
 
-interface RawUnderCourseCommentaryListSuccessResult {
+interface RawCourseCommentaryListSuccessResult {
   data: "";
-  rows: RawUnderCourseCommentaryListResultItem[];
+  rows: RawCourseCommentaryListResultItem[];
   total: number;
 }
 
-type RawUnderCourseCommentaryListResult =
-  | RawUnderCourseCommentaryListSuccessResult
-  | RawUnderCourseCommentaryFailResult;
+type RawCourseCommentaryListResult =
+  | RawCourseCommentaryListSuccessResult
+  | RawCourseCommentaryFailResult;
 
-export interface UnderCourseCommentaryItem {
+export interface CourseCommentaryItem {
   /** 修读学期 */
   term: string;
   /** 结课日期 */
@@ -92,9 +91,7 @@ export interface UnderCourseCommentaryItem {
   commentaryCode: string;
 }
 
-const getCourseList = (
-  records: RawUnderCourseCommentaryListResultItem[],
-): UnderCourseCommentaryItem[] =>
+const getCourseList = (records: RawCourseCommentaryListResultItem[]): CourseCommentaryItem[] =>
   records.map(
     ({
       xnxqmc: term,
@@ -117,52 +114,50 @@ const getCourseList = (
     }),
   );
 
-export interface ListUnderCourseCommentaryOptions extends LoginOptions {
+export interface ListCourseCommentaryOptions extends LoginOptions {
   type: "list";
   /** 查询时间 */
   time?: string;
 }
 
-export type UnderCourseCommentaryListSuccessResponse = CommonSuccessResponse<
-  UnderCourseCommentaryItem[]
->;
+export type CourseCommentaryListSuccessResponse = CommonSuccessResponse<CourseCommentaryItem[]>;
 
-export type UnderCourseCommentaryListResponse =
-  | UnderCourseCommentaryListSuccessResponse
+export type CourseCommentaryListResponse =
+  | CourseCommentaryListSuccessResponse
   | AuthLoginFailedResponse
   | CommonFailedResponse<
       ActionFailType.Expired | ActionFailType.MissingCredential | ActionFailType.Unknown
     >;
 
-export const UNDER_COURSE_COMMENTARY_LIST_TEST_RESPONSE: UnderCourseCommentaryListSuccessResponse =
-  {
-    success: true,
-    data: [
-      {
-        term: "2020-2021-2",
-        endDate: "2021-01-01",
-        name: "测试课程",
-        courseCode: "TEST",
-        teacherName: "测试教师",
-        teacherCode: "TEST",
-        teachingLinkName: "测试环节",
-        commentaryCode: "TEST",
-      },
-    ],
-  };
+export const COURSE_COMMENTARY_LIST_TEST_RESPONSE: CourseCommentaryListSuccessResponse = {
+  success: true,
+  data: [
+    {
+      term: "2020-2021-2",
+      endDate: "2021-01-01",
+      name: "测试课程",
+      courseCode: "TEST",
+      teacherName: "测试教师",
+      teacherCode: "TEST",
+      teachingLinkName: "测试环节",
+      commentaryCode: "TEST",
+    },
+  ],
+};
 
-export const listUnderCourseCommentary = async (
+export const listCommentary = async (
   cookieHeader: string,
-  time?: string,
-): Promise<UnderCourseCommentaryListResponse> => {
-  const commentaryTime = time ?? (await getCurrentTime(cookieHeader)).value;
+  time: string | undefined,
+  server: string,
+): Promise<CourseCommentaryListResponse> => {
+  const commentaryTime = time ?? (await getCurrentTime(cookieHeader, server)).value;
 
-  const response = await fetch(LIST_URL, {
+  const response = await fetch(`${server}/new/student/teapj/pjDatas`, {
     method: "POST",
     headers: {
       Accept: "application/json, text/javascript, */*; q=0.01",
       Cookie: cookieHeader,
-      Referer: `${UNDER_STUDY_SERVER}/new/student/teapj`,
+      Referer: `${server}/new/student/teapj`,
       ...EDGE_USER_AGENT_HEADERS,
     },
     body: new URLSearchParams({
@@ -178,7 +173,7 @@ export const listUnderCourseCommentary = async (
 
   if (response.headers.get("Content-Type")?.includes("text/html")) return expiredResponse;
 
-  const data = (await response.json()) as RawUnderCourseCommentaryListResult;
+  const data = (await response.json()) as RawCourseCommentaryListResult;
 
   if ("code" in data) {
     if (data.message === "尚未登录，请先登录") return expiredResponse;

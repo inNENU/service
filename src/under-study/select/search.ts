@@ -5,7 +5,7 @@ import { searchSelectCourses } from "../../study/select/index.js";
 import type { SelectSearchOptions, SelectSearchResponse } from "../../study/select/index.js";
 import { UNDER_STUDY_SERVER } from "../utils.js";
 
-export const underSelectSearchCourseHandler = request<SelectSearchResponse, SelectSearchOptions>(
+export const underSelectSearchHandler = request<SelectSearchResponse, SelectSearchOptions>(
   async (req, res) => {
     const cookieHeader = req.headers.cookie!;
 
