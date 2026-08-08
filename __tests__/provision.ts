@@ -83,7 +83,9 @@ const provisionAccount = async (
 
   // 若已有有效登录态（如刚在其他端登录过），直接复用
   if (loginResult.body?.success === true) {
-    const authToken = client.jar.get("MULTIFACTOR_USERS");
+    const authToken = client.jar
+      .getAllCookies()
+      .find((cookie) => cookie.name === "MULTIFACTOR_USERS")?.value;
 
     if (authToken) {
       console.log(`[${label}] 检测到已有有效登录态，直接复用 authToken`);
@@ -91,7 +93,7 @@ const provisionAccount = async (
       return {
         id,
         authToken,
-        cookies: client.jar.toJSON(),
+        cookies: client.jar.getAllCookies().map((cookie) => cookie.toJSON()),
         provisionedAt: new Date().toISOString(),
       };
     }
