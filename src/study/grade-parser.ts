@@ -1,4 +1,4 @@
-export interface RawUnderGradeResultItem {
+export interface RawGradeResultItem {
   /** 修读学期 */
   xnxqmc: string;
   /** 课程名称 */
@@ -68,9 +68,9 @@ export interface RawUnderGradeResultItem {
   wzcbz: "";
 }
 
-export interface RawUnderGradeSuccessResult {
+export interface RawGradeSuccessResult {
   data: "";
-  rows: RawUnderGradeResultItem[];
+  rows: RawGradeResultItem[];
   total: number;
 }
 
@@ -80,9 +80,9 @@ export interface RawUnderGradeFailedResult {
   message: string;
 }
 
-export type RawUnderGradeResult = RawUnderGradeSuccessResult | RawUnderGradeFailedResult;
+export type RawGradeResult = RawGradeSuccessResult | RawUnderGradeFailedResult;
 
-export interface UnderStudyGradeResult {
+export interface StudyGradeResult {
   /** 修读时间 */
   time: string;
   /** 课程 id */
@@ -112,12 +112,12 @@ export interface UnderStudyGradeResult {
   examType: "正常考试" | "校际交流" | "补考";
 }
 
-export interface UnderGradeListSuccessResponse {
+export interface GradeListSuccessResponse {
   success: true;
-  data: UnderStudyGradeResult[];
+  data: StudyGradeResult[];
 }
 
-export const getGradeLists = (records: RawUnderGradeResultItem[]): UnderStudyGradeResult[] =>
+export const getGradeLists = (records: RawGradeResultItem[]): StudyGradeResult[] =>
   records.map(
     ({
       xnxqmc,
@@ -152,7 +152,7 @@ export const getGradeLists = (records: RawUnderGradeResultItem[]): UnderStudyGra
     }),
   );
 
-export const TEST_UNDER_GRADE_LIST_RESPONSE: UnderGradeListSuccessResponse = {
+export const GRADE_LIST_TEST_RESPONSE: GradeListSuccessResponse = {
   success: true,
   data: Array.from({ length: 10 }, (_, i) => ({
     time: `${new Date().getFullYear() - 1}-${new Date().getFullYear()}`,

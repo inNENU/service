@@ -13,8 +13,6 @@ import type { SelectOptionConfig } from "./store.js";
 import { areasStore, majorsStore, officesStore, typesStore } from "./store.js";
 import { COURSE_CATEGORIES } from "./utils.js";
 
-const CHECK_URL = `${UNDER_STUDY_SERVER}/new/student/xsxk/checkFinishPj`;
-
 const COURSE_OFFICES_REGEXP =
   /<select id='kkyxdm' name='kkyxdm'.*?><option value=''>\(请选择\)<\/option>(.*?)<\/select>/u;
 const COURSE_OFFICE_ITEM_REGEXP = /<option value='(.+?)' >\d+-(.*?)<\/option>/gu;
@@ -140,7 +138,7 @@ export interface UnderSelectDisallowedInfo extends UnderSelectBaseInfo {
 
 export type UnderSelectInfo = UnderSelectAllowedInfo | UnderSelectDisallowedInfo;
 
-const getSelectInfo = (content: string): UnderSelectInfo => {
+const parseSelectInfo = (content: string): UnderSelectInfo => {
   const [, term, name, canCancelText = ""] = INFO_TITLE_REGEXP.exec(content)!;
 
   const canSelect = !content.includes("现在不是选课时间");
@@ -199,18 +197,22 @@ const checkCourseCommentary = async (
   cookieHeader: string,
   term: string,
   categoryUrl: string,
+  server: string,
 ): Promise<{ completed: boolean; msg: string }> => {
-  const response = await fetch(`${CHECK_URL}?xnxqdm=${term}&_=${Date.now()}`, {
-    headers: {
-      // Accept: "application/json; q=0.01",
-      Cookie: cookieHeader,
-      DNT: "1",
-      Referer: categoryUrl,
-      "X-Requested-With": "XMLHttpRequest",
-      ...EDGE_USER_AGENT_HEADERS,
+  const response = await fetch(
+    `${server}/new/student/xsxk/checkFinishPj?xnxqdm=${term}&_=${Date.now()}`,
+    {
+      headers: {
+        // Accept: "application/json; q=0.01",
+        Cookie: cookieHeader,
+        DNT: "1",
+        Referer: categoryUrl,
+        "X-Requested-With": "XMLHttpRequest",
+        ...EDGE_USER_AGENT_HEADERS,
+      },
+      signal: AbortSignal.timeout(10000),
     },
-    signal: AbortSignal.timeout(10000),
-  });
+  );
 
   if (response.status !== 200) throw new Error(`status: ${response.status}`);
 
@@ -251,17 +253,18 @@ export type UnderSelectInfoResponse =
       | ActionFailType.Unknown
     >;
 
-export const getUnderSelectInfo = async (
+export const getSelectInfo = async (
   cookieHeader: string,
   link: string,
+  server: string,
 ): Promise<UnderSelectInfoResponse> => {
-  const categoryUrl = `${UNDER_STUDY_SERVER}${link}`;
+  const categoryUrl = `${server}${link}`;
 
   const response = await fetch(categoryUrl, {
     headers: {
       "Cache-Control": "max-age=0",
       Cookie: cookieHeader,
-      Referer: `${UNDER_STUDY_SERVER}/new/student/xsxk/xklx`,
+      Referer: `${server}/new/student/xsxk/xklx`,
       ...EDGE_USER_AGENT_HEADERS,
     },
     redirect: "manual",
@@ -276,6 +279,7 @@ export const getUnderSelectInfo = async (
       cookieHeader,
       /xnxqdm=(\d+)'/u.exec(content)![1],
       categoryUrl,
+      server,
     );
 
     if (!completed) {
@@ -291,7 +295,7 @@ export const getUnderSelectInfo = async (
       headers: {
         "Cache-Control": "max-age=0",
         Cookie: cookieHeader,
-        Referer: `${UNDER_STUDY_SERVER}/new/student/xsxk/xklx`,
+        Referer: `${server}/new/student/xsxk/xklx`,
         ...EDGE_USER_AGENT_HEADERS,
       },
       redirect: "manual",
@@ -312,7 +316,7 @@ export const getUnderSelectInfo = async (
 
   return {
     success: true,
-    data: getSelectInfo(content),
+    data: parseSelectInfo(content),
   };
 };
 
@@ -326,6 +330,6 @@ export const underStudySelectInfoHandler = request<UnderSelectInfoResponse, Unde
     if (cookieHeader.includes("TEST"))
       return res.json(unknownResponse("因子系统逻辑复杂，测试账号暂不提供选课操作模拟"));
 
-    return res.json(await getUnderSelectInfo(cookieHeader, link));
+    return res.json(await getSelectInfo(cookieHeader, link, UNDER_STUDY_SERVER));
   },
 );

@@ -79,11 +79,12 @@ export type UnderSelectProcessResponse =
       | ActionFailType.MissingCredential
     >;
 
-export const addUnderSelectCourse = async (
+export const addSelectCourse = async (
   options: UnderSelectAddOptions,
   cookieHeader: string,
+  server: string,
 ): Promise<UnderSelectProcessResponse> => {
-  const page = `${UNDER_STUDY_SERVER}${options.link}`;
+  const page = `${server}${options.link}`;
 
   const response = await fetch(`${page}/add`, {
     method: "POST",
@@ -148,11 +149,12 @@ export const addUnderSelectCourse = async (
   return { success: true };
 };
 
-export const removeUnderSelectCourse = async (
+export const removeSelectCourse = async (
   options: UnderSelectRemoveOptions,
   cookieHeader: string,
+  server: string,
 ): Promise<UnderSelectProcessResponse> => {
-  const page = `${UNDER_STUDY_SERVER}${options.link}`;
+  const page = `${server}${options.link}`;
 
   const response = await fetch(`${page}/cancel`, {
     method: "POST",
@@ -202,9 +204,11 @@ export const underSelectProcessHandler = request<
   if (!link) return res.json(missingArgResponse("link"));
   if (!classId) return res.json(missingArgResponse("classId"));
 
-  if (type === "add") return res.json(await addUnderSelectCourse(req.body, cookieHeader));
+  if (type === "add")
+    return res.json(await addSelectCourse(req.body, cookieHeader, UNDER_STUDY_SERVER));
 
-  if (type === "remove") return res.json(await removeUnderSelectCourse(req.body, cookieHeader));
+  if (type === "remove")
+    return res.json(await removeSelectCourse(req.body, cookieHeader, UNDER_STUDY_SERVER));
 
   return res.json(invalidArgResponse("type"));
 });

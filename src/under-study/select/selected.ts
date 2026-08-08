@@ -32,18 +32,19 @@ export type UnderSelectSelectedResponse =
   | AuthLoginFailedResponse
   | CommonFailedResponse<ActionFailType.MissingArg | ActionFailType.Unknown>;
 
-export const getUnderSelectSelectedCourse = async (
+export const getSelectedCourses = async (
   link: string,
   cookieHeader: string,
+  server: string,
 ): Promise<UnderSelectSelectedResponse> => {
-  const infoUrl = `${UNDER_STUDY_SERVER}${link}/yxkc`;
+  const infoUrl = `${server}${link}/yxkc`;
 
   const response = await fetch(infoUrl, {
     method: "POST",
     headers: {
       Accept: "application/json, text/javascript, */*; q=0.01",
       Cookie: cookieHeader,
-      Referer: `${UNDER_STUDY_SERVER}${link}`,
+      Referer: `${server}${link}`,
       ...EDGE_USER_AGENT_HEADERS,
     },
     body: new URLSearchParams({
@@ -74,5 +75,5 @@ export const underSelectSelectedCourseHandler = request<
 
   if (!link) return res.json(missingArgResponse("link"));
 
-  return res.json(await getUnderSelectSelectedCourse(link, cookieHeader));
+  return res.json(await getSelectedCourses(link, cookieHeader, UNDER_STUDY_SERVER));
 });

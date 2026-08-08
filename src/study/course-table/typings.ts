@@ -1,4 +1,4 @@
-export interface RawUnderCourseTableItem {
+export interface RawCourseTableItem {
   /* ========= 课程基础信息 ========== */
 
   /**
@@ -132,7 +132,15 @@ export interface RawUnderCourseTableItem {
    */
   jssj: string;
 
-  bapjxcd: "0";
+  /**
+   * 是否不安排教学场地
+   *
+   * 1=无固定教室（如网课、实践考察课），0=正常排教室。 注意：无教室课不一定是网课（如实践课仍排标准时间）
+   *
+   * @example
+   *   "1";
+   */
+  bapjxcd: "0" | "1";
   jxhjmc: "理论课时";
   kkxqdm: "MW";
   kcdldm: "03";
@@ -164,6 +172,12 @@ export interface TableClassData {
   weeks: number[];
   locations: string[];
   classIndex: [number, number];
+  /**
+   * 是否为网课
+   *
+   * 课程整个时间段与所有标准教学大节（每天 6 节）都不重叠时视为网课。 教学系统不允许同一时间选两门课，网课只能排在标准教学时间之外
+   */
+  isOnline: boolean;
 }
 
 export type TableCellData = TableClassData[];

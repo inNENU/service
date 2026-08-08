@@ -20,7 +20,6 @@ import { testRouter } from "./test/index.js";
 import { toolsRouter } from "./tools/index.js";
 import { weatherRouter } from "./tools/weather/index.js";
 import { underStudyRouter } from "./under-study/index.js";
-import { underSystemRouter } from "./under-system/index.js";
 import { captureError, migrateDatabase, patchFetch, reportMemoryUsage } from "./utils/index.js";
 import { vpnRouter } from "./vpn/index.js";
 import { whoRouter } from "./who/index.js";
@@ -49,7 +48,6 @@ app.use("/my", myRouter);
 app.use("/oa", oaRouter);
 app.use("/test", testRouter);
 app.use("/under-study", underStudyRouter);
-app.use("/under-system", underSystemRouter);
 app.use("/vpn", vpnRouter);
 app.use("/who", whoRouter);
 

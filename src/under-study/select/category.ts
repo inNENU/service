@@ -44,14 +44,12 @@ export interface UnderSelectCategoryInfo {
   disallowed: UnderSelectDisallowedCategoryItem[];
 }
 
-const CATEGORY_PAGE = `${UNDER_STUDY_SERVER}/new/student/xsxk/`;
-
 const ALLOWED_CATEGORY_ITEM_REGEXP =
   /<div id="bb2"[^]+?lay-tips="选课学期:(.*?)\s*<br>现在是(.*?)阶段\s*<br>(.*?)\s*"\s+lay-iframe="(.*?)"\s+data-href="(.*?)">[^]+?<div class="description">([^]+?)<br>([^]+?)<br><\/div>/gu;
 const DISALLOWED_CATEGORY_ITEM_REGEXP =
   /<div id="bb1"[^]+?lay-tips="选课学期:(.*?)\s*<br>\s*([^"]+?)\s*"\s+lay-iframe="(.*?)"\s+data-href="(.*?)"/gu;
 
-const getSelectCategories = (content: string): UnderSelectCategoryInfo => ({
+const parseSelectCategories = (content: string): UnderSelectCategoryInfo => ({
   allowed: [...content.matchAll(ALLOWED_CATEGORY_ITEM_REGEXP)].map(
     ([, term, stage, canRemoveText, name, link, startTime, endTime]) => ({
       term,
@@ -105,13 +103,14 @@ const TEST_UNDER_SELECT_CATEGORY_RESPONSE: UnderSelectCategorySuccessResponse = 
   },
 };
 
-export const getUnderSelectCategories = async (
+export const getSelectCategories = async (
   cookieHeader: string,
+  server: string,
 ): Promise<UnderSelectCategoryResponse> => {
-  const response = await fetch(CATEGORY_PAGE, {
+  const response = await fetch(`${server}/new/student/xsxk/`, {
     headers: {
       Cookie: cookieHeader,
-      Referer: `${UNDER_STUDY_SERVER}/new/welcome.page?ui=new`,
+      Referer: `${server}/new/welcome.page?ui=new`,
       ...EDGE_USER_AGENT_HEADERS,
     },
     redirect: "manual",
@@ -131,7 +130,7 @@ export const getUnderSelectCategories = async (
 
   return {
     success: true,
-    data: getSelectCategories(content),
+    data: parseSelectCategories(content),
   };
 };
 
@@ -140,5 +139,5 @@ export const underSelectCategoryHandler = request<UnderSelectCategoryResponse>(a
 
   if (cookieHeader.includes("TEST")) return res.json(TEST_UNDER_SELECT_CATEGORY_RESPONSE);
 
-  return res.json(await getUnderSelectCategories(cookieHeader));
+  return res.json(await getSelectCategories(cookieHeader, UNDER_STUDY_SERVER));
 });
