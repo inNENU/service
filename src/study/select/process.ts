@@ -4,7 +4,7 @@ import { EDGE_USER_AGENT_HEADERS } from "@/utils/index.js";
 
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
 
-export interface UnderSelectAddOptions extends LoginOptions {
+export interface SelectAddOptions extends LoginOptions {
   type: "add";
   /** 课程分类链接 */
   link: string;
@@ -23,7 +23,7 @@ export interface UnderSelectAddOptions extends LoginOptions {
   weight?: number;
 }
 
-export interface UnderSelectRemoveOptions extends LoginOptions {
+export interface SelectRemoveOptions extends LoginOptions {
   type: "remove";
   /** 课程分类链接 */
   link: string;
@@ -38,30 +38,28 @@ export interface UnderSelectRemoveOptions extends LoginOptions {
   classCode?: string;
 }
 
-export type UnderSelectProcessOptions = UnderSelectAddOptions | UnderSelectRemoveOptions;
+export type SelectProcessOptions = SelectAddOptions | SelectRemoveOptions;
 
-interface RawUnderSelectProcessSuccessResponse {
+interface RawSelectProcessSuccessResponse {
   data: "";
   code: 0;
   message: string;
 }
 
-interface RawUnderSelectProcessFailResponse {
+interface RawSelectProcessFailResponse {
   data: "";
   code: -1;
   message: string;
 }
 
-type RawUnderSelectProcessResponse =
-  | RawUnderSelectProcessSuccessResponse
-  | RawUnderSelectProcessFailResponse;
+type RawSelectProcessResponse = RawSelectProcessSuccessResponse | RawSelectProcessFailResponse;
 
-export interface UnderSelectProcessSuccessResponse {
+export interface SelectProcessSuccessResponse {
   success: true;
 }
 
-export type UnderSelectProcessResponse =
-  | UnderSelectProcessSuccessResponse
+export type SelectProcessResponse =
+  | SelectProcessSuccessResponse
   | AuthLoginFailedResponse
   | CommonFailedResponse<
       | ActionFailType.Closed
@@ -73,10 +71,10 @@ export type UnderSelectProcessResponse =
     >;
 
 export const addSelectCourse = async (
-  options: UnderSelectAddOptions,
+  options: SelectAddOptions,
   cookieHeader: string,
   server: string,
-): Promise<UnderSelectProcessResponse> => {
+): Promise<SelectProcessResponse> => {
   const page = `${server}${options.link}`;
 
   const response = await fetch(`${page}/add`, {
@@ -99,7 +97,7 @@ export const addSelectCourse = async (
 
   if (response.status !== 200) return expiredResponse;
 
-  const data = (await response.json()) as RawUnderSelectProcessResponse;
+  const data = (await response.json()) as RawSelectProcessResponse;
 
   if (data.code !== 0) {
     if (data.code === -1) {
@@ -143,10 +141,10 @@ export const addSelectCourse = async (
 };
 
 export const removeSelectCourse = async (
-  options: UnderSelectRemoveOptions,
+  options: SelectRemoveOptions,
   cookieHeader: string,
   server: string,
-): Promise<UnderSelectProcessResponse> => {
+): Promise<SelectProcessResponse> => {
   const page = `${server}${options.link}`;
 
   const response = await fetch(`${page}/cancel`, {
@@ -167,7 +165,7 @@ export const removeSelectCourse = async (
 
   if (response.status !== 200) return expiredResponse;
 
-  const data = (await response.json()) as RawUnderSelectProcessResponse;
+  const data = (await response.json()) as RawSelectProcessResponse;
 
   if (data.code !== 0) {
     if (data.code === -1 && data.message === "当前不是选课时间") {

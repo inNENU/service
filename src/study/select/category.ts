@@ -4,7 +4,7 @@ import { EDGE_USER_AGENT_HEADERS } from "@/utils/index.js";
 
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
 
-export interface UnderSelectAllowedCategoryItem {
+export interface SelectAllowedCategoryItem {
   /** 分类名称 */
   name: string;
   /** 分类链接 */
@@ -25,7 +25,7 @@ export interface UnderSelectAllowedCategoryItem {
   endTime: string;
 }
 
-export interface UnderSelectDisallowedCategoryItem {
+export interface SelectDisallowedCategoryItem {
   /** 分类名称 */
   name: string;
   /** 分类链接 */
@@ -38,9 +38,9 @@ export interface UnderSelectDisallowedCategoryItem {
   description: string;
 }
 
-export interface UnderSelectCategoryInfo {
-  allowed: UnderSelectAllowedCategoryItem[];
-  disallowed: UnderSelectDisallowedCategoryItem[];
+export interface SelectCategoryInfo {
+  allowed: SelectAllowedCategoryItem[];
+  disallowed: SelectDisallowedCategoryItem[];
 }
 
 const ALLOWED_CATEGORY_ITEM_REGEXP =
@@ -48,7 +48,7 @@ const ALLOWED_CATEGORY_ITEM_REGEXP =
 const DISALLOWED_CATEGORY_ITEM_REGEXP =
   /<div id="bb1"[^]+?lay-tips="选课学期:(.*?)\s*<br>\s*([^"]+?)\s*"\s+lay-iframe="(.*?)"\s+data-href="(.*?)"/gu;
 
-const parseSelectCategories = (content: string): UnderSelectCategoryInfo => ({
+const parseSelectCategories = (content: string): SelectCategoryInfo => ({
   allowed: [...content.matchAll(ALLOWED_CATEGORY_ITEM_REGEXP)].map(
     ([, term, stage, canRemoveText, name, link, startTime, endTime]) => ({
       term,
@@ -77,16 +77,16 @@ const parseSelectCategories = (content: string): UnderSelectCategoryInfo => ({
   ),
 });
 
-export type UnderSelectCategorySuccessResponse = CommonSuccessResponse<UnderSelectCategoryInfo>;
+export type SelectCategorySuccessResponse = CommonSuccessResponse<SelectCategoryInfo>;
 
-export type UnderSelectCategoryResponse =
-  | UnderSelectCategorySuccessResponse
+export type SelectCategoryResponse =
+  | SelectCategorySuccessResponse
   | AuthLoginFailedResponse
   | CommonFailedResponse<
       ActionFailType.NotInitialized | ActionFailType.MissingCredential | ActionFailType.Unknown
     >;
 
-export const TEST_UNDER_SELECT_CATEGORY_RESPONSE: UnderSelectCategorySuccessResponse = {
+export const TEST_UNDER_SELECT_CATEGORY_RESPONSE: SelectCategorySuccessResponse = {
   success: true,
   data: {
     allowed: [],
@@ -105,7 +105,7 @@ export const TEST_UNDER_SELECT_CATEGORY_RESPONSE: UnderSelectCategorySuccessResp
 export const getSelectCategories = async (
   cookieHeader: string,
   server: string,
-): Promise<UnderSelectCategoryResponse> => {
+): Promise<SelectCategoryResponse> => {
   const response = await fetch(`${server}/new/student/xsxk/`, {
     headers: {
       Cookie: cookieHeader,

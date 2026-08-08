@@ -3,20 +3,14 @@ import type { RequestHandler } from "express";
 import { invalidArgResponse, missingArgResponse } from "@/config/index.js";
 import type { EmptyObject } from "@/typings.js";
 
-import {
-  UNDER_COURSE_COMMENTARY_LIST_TEST_RESPONSE,
-  UNDER_COURSE_COMMENTARY_VIEW_TEST_RESPONSE,
-  getUnderCommentary,
-  listUnderCourseCommentary,
-  submitUnderCourseCommentary,
-  viewUnderCourseCommentary,
-} from "../../study/course-commentary/index.js";
-import type {
-  GetUnderCourseCommentaryOptions,
-  ListUnderCourseCommentaryOptions,
-  SubmitUnderCourseCommentaryOptions,
-  ViewUnderCourseCommentaryOptions,
-} from "../../study/course-commentary/index.js";
+import type { GetUnderCourseCommentaryOptions } from "./get.js";
+import { getUnderCommentary } from "./get.js";
+import type { ListUnderCourseCommentaryOptions } from "./list.js";
+import { UNDER_COURSE_COMMENTARY_LIST_TEST_RESPONSE, listUnderCourseCommentary } from "./list.js";
+import type { SubmitUnderCourseCommentaryOptions } from "./submit.js";
+import { submitUnderCourseCommentary } from "./submit.js";
+import type { ViewUnderCourseCommentaryOptions } from "./view.js";
+import { UNDER_COURSE_COMMENTARY_VIEW_TEST_RESPONSE, viewUnderCourseCommentary } from "./view.js";
 
 type UnderCourseCommentaryOptions =
   | ListUnderCourseCommentaryOptions

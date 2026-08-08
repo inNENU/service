@@ -1,5 +1,5 @@
 /** 原始班级数据 */
-export interface RawUnderSelectClassItem {
+export interface RawSelectClassItem {
   /* ========= 课程基础信息 ========== */
 
   /**
@@ -172,14 +172,14 @@ export interface RawUnderSelectClassItem {
   sdm: "13253262";
 }
 
-export interface RawUnderSearchClassResponse {
+export interface RawSearchClassResponse {
   data: "";
-  rows: RawUnderSelectClassItem[];
+  rows: RawSelectClassItem[];
   total: number;
 }
 
 /** 课程信息 */
-export interface UnderSelectCourseInfo {
+export interface SelectCourseInfo {
   /** 课程名称 */
   name: string;
   /** 开课单位 */
@@ -203,7 +203,7 @@ export interface UnderSelectCourseInfo {
 }
 
 /** 班级信息 */
-export interface UnderSelectClassInfo extends UnderSelectCourseInfo {
+export interface SelectClassInfo extends SelectCourseInfo {
   /** 班级名称 */
   className?: string;
   /** 授课对象 */

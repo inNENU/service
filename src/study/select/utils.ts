@@ -1,12 +1,8 @@
-import type {
-  RawUnderSelectClassItem,
-  UnderSelectClassInfo,
-  UnderSelectCourseInfo,
-} from "./typings.js";
+import type { RawSelectClassItem, SelectClassInfo, SelectCourseInfo } from "./typings.js";
 
 export { COURSE_CATEGORIES } from "./categories.js";
 
-export const getCourses = (records: RawUnderSelectClassItem[]): UnderSelectCourseInfo[] =>
+export const getCourses = (records: RawSelectClassItem[]): SelectCourseInfo[] =>
   records.map(({ kcmc, jc, kcdlmc, kcflmc, kkyxmc, xf, zxs, kcbh, kcptdm }) => ({
     name: kcmc,
     shortType: jc,
@@ -19,7 +15,7 @@ export const getCourses = (records: RawUnderSelectClassItem[]): UnderSelectCours
     id: kcptdm,
   }));
 
-export const getClasses = (records: RawUnderSelectClassItem[]): UnderSelectClassInfo[] =>
+export const getClasses = (records: RawSelectClassItem[]): SelectClassInfo[] =>
   records.map(
     ({
       kcmc: name,

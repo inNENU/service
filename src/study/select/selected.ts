@@ -4,30 +4,30 @@ import type { CommonFailedResponse, CommonSuccessResponse, LoginOptions } from "
 import { EDGE_USER_AGENT_HEADERS } from "@/utils/index.js";
 
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
-import type { RawUnderSelectClassItem, UnderSelectClassInfo } from "./typings.js";
+import type { RawSelectClassItem, SelectClassInfo } from "./typings.js";
 import { getClasses } from "./utils.js";
 
-export interface UnderSelectSelectedOptions extends LoginOptions {
+export interface SelectSelectedOptions extends LoginOptions {
   /** 课程分类链接 */
   link: string;
 }
 
-interface RawUnderSelectedClassResponse {
+interface RawSelectedClassResponse {
   data: "";
-  rows: RawUnderSelectClassItem[];
+  rows: RawSelectClassItem[];
   total: number;
 }
 
-interface RawUnderSelectedClassResponse {
+interface RawSelectedClassResponse {
   data: "";
-  rows: RawUnderSelectClassItem[];
+  rows: RawSelectClassItem[];
   total: number;
 }
 
-export type UnderSelectSelectedSuccessResponse = CommonSuccessResponse<UnderSelectClassInfo[]>;
+export type SelectSelectedSuccessResponse = CommonSuccessResponse<SelectClassInfo[]>;
 
-export type UnderSelectSelectedResponse =
-  | UnderSelectSelectedSuccessResponse
+export type SelectSelectedResponse =
+  | SelectSelectedSuccessResponse
   | AuthLoginFailedResponse
   | CommonFailedResponse<ActionFailType.MissingArg | ActionFailType.Unknown>;
 
@@ -35,7 +35,7 @@ export const getSelectedCourses = async (
   link: string,
   cookieHeader: string,
   server: string,
-): Promise<UnderSelectSelectedResponse> => {
+): Promise<SelectSelectedResponse> => {
   const infoUrl = `${server}${link}/yxkc`;
 
   const response = await fetch(infoUrl, {
@@ -57,7 +57,7 @@ export const getSelectedCourses = async (
 
   if (response.status !== 200) return expiredResponse;
 
-  const data = (await response.json()) as RawUnderSelectedClassResponse;
+  const data = (await response.json()) as RawSelectedClassResponse;
 
   return {
     success: true,

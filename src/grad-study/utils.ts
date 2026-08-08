@@ -1,1 +1,1 @@
-export const GRAD_STUDY_SERVER = "https://dsyjs.nenu.edu.cn";
+export * from "../study/utils.js";

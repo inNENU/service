@@ -4,10 +4,10 @@ import type { CommonFailedResponse, CommonSuccessResponse, LoginOptions } from "
 import { EDGE_USER_AGENT_HEADERS } from "@/utils/index.js";
 
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
-import type { RawUnderSearchClassResponse, UnderSelectCourseInfo } from "./typings.js";
+import type { RawSearchClassResponse, SelectCourseInfo } from "./typings.js";
 import { getCourses } from "./utils.js";
 
-export interface UnderSelectSearchOptions extends LoginOptions {
+export interface SelectSearchOptions extends LoginOptions {
   /** 课程分类链接 */
   link: string;
   /** 课程名称 */
@@ -34,10 +34,10 @@ export interface UnderSelectSearchOptions extends LoginOptions {
   office?: string;
 }
 
-export type UnderSelectSearchSuccessResponse = CommonSuccessResponse<UnderSelectCourseInfo[]>;
+export type SelectSearchSuccessResponse = CommonSuccessResponse<SelectCourseInfo[]>;
 
-export type UnderSelectSearchResponse =
-  | UnderSelectSearchSuccessResponse
+export type SelectSearchResponse =
+  | SelectSearchSuccessResponse
   | AuthLoginFailedResponse
   | CommonFailedResponse<ActionFailType.MissingArg | ActionFailType.Unknown>;
 
@@ -55,10 +55,10 @@ export const searchSelectCourses = async (
     teacher = "",
     place = "",
     office = "",
-  }: UnderSelectSearchOptions,
+  }: SelectSearchOptions,
   cookieHeader: string,
   server: string,
-): Promise<UnderSelectSearchResponse> => {
+): Promise<SelectSearchResponse> => {
   const infoUrl = `${server}${link}/hzkc`;
 
   const response = await fetch(infoUrl, {
@@ -91,7 +91,7 @@ export const searchSelectCourses = async (
 
   if (response.status !== 200) return expiredResponse;
 
-  const data = (await response.json()) as RawUnderSearchClassResponse;
+  const data = (await response.json()) as RawSearchClassResponse;
 
   return {
     success: true,

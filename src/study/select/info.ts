@@ -80,11 +80,11 @@ const setAreas = (content: string): void => {
   areasStore.setState(areas);
 };
 
-export interface UnderSelectInfoOptions extends LoginOptions {
+export interface SelectInfoOptions extends LoginOptions {
   link: string;
 }
 
-export interface UnderSelectBaseInfo {
+export interface SelectBaseInfo {
   /** 学期 */
   term: string;
   /** 选课名称 */
@@ -113,7 +113,7 @@ export interface UnderSelectBaseInfo {
   currentGrade: number;
 }
 
-export interface UnderSelectAllowedInfo extends UnderSelectBaseInfo {
+export interface SelectAllowedInfo extends SelectBaseInfo {
   canSelect: true;
 
   /** 是否可退选 */
@@ -126,13 +126,13 @@ export interface UnderSelectAllowedInfo extends UnderSelectBaseInfo {
   endTime: string;
 }
 
-export interface UnderSelectDisallowedInfo extends UnderSelectBaseInfo {
+export interface SelectDisallowedInfo extends SelectBaseInfo {
   canSelect: false;
 }
 
-export type UnderSelectInfo = UnderSelectAllowedInfo | UnderSelectDisallowedInfo;
+export type SelectInfo = SelectAllowedInfo | SelectDisallowedInfo;
 
-const parseSelectInfo = (content: string): UnderSelectInfo => {
+const parseSelectInfo = (content: string): SelectInfo => {
   const [, term, name, canCancelText = ""] = INFO_TITLE_REGEXP.exec(content)!;
 
   const canSelect = !content.includes("现在不是选课时间");
@@ -234,10 +234,10 @@ const checkCourseCommentary = async (
   }
 };
 
-export type UnderSelectInfoSuccessResponse = CommonSuccessResponse<UnderSelectInfo>;
+export type SelectInfoSuccessResponse = CommonSuccessResponse<SelectInfo>;
 
-export type UnderSelectInfoResponse =
-  | UnderSelectInfoSuccessResponse
+export type SelectInfoResponse =
+  | SelectInfoSuccessResponse
   | AuthLoginFailedResponse
   | CommonFailedResponse<
       | ActionFailType.NotInitialized
@@ -251,7 +251,7 @@ export const getSelectInfo = async (
   cookieHeader: string,
   link: string,
   server: string,
-): Promise<UnderSelectInfoResponse> => {
+): Promise<SelectInfoResponse> => {
   const categoryUrl = `${server}${link}`;
 
   const response = await fetch(categoryUrl, {

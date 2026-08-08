@@ -4,20 +4,20 @@ import type { CommonFailedResponse, CommonSuccessResponse, LoginOptions } from "
 import { EDGE_USER_AGENT_HEADERS } from "@/utils/index.js";
 
 import type { AuthLoginFailedResponse } from "../../auth/index.js";
-import type { RawUnderSearchClassResponse, UnderSelectClassInfo } from "./typings.js";
+import type { RawSearchClassResponse, SelectClassInfo } from "./typings.js";
 import { getClasses } from "./utils.js";
 
-export interface UnderSelectClassOptions extends LoginOptions {
+export interface SelectClassOptions extends LoginOptions {
   /** 选课链接 */
   link: string;
   /** 课程 ID */
   courseId: string;
 }
 
-export type UnderSelectClassSuccessResponse = CommonSuccessResponse<UnderSelectClassInfo[]>;
+export type SelectClassSuccessResponse = CommonSuccessResponse<SelectClassInfo[]>;
 
-export type UnderSelectClassResponse =
-  | UnderSelectClassSuccessResponse
+export type SelectClassResponse =
+  | SelectClassSuccessResponse
   | AuthLoginFailedResponse
   | CommonFailedResponse<ActionFailType.MissingArg>;
 
@@ -26,7 +26,7 @@ export const getSelectClasses = async (
   courseId: string,
   cookieHeader: string,
   server: string,
-): Promise<UnderSelectClassResponse> => {
+): Promise<SelectClassResponse> => {
   const infoUrl = `${server}${link}/kxkc`;
 
   const response = await fetch(infoUrl, {
@@ -49,7 +49,7 @@ export const getSelectClasses = async (
 
   if (response.status !== 200) return expiredResponse;
 
-  const data = (await response.json()) as RawUnderSearchClassResponse;
+  const data = (await response.json()) as RawSearchClassResponse;
 
   return {
     success: true,
