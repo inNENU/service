@@ -5,11 +5,13 @@ import { validate } from "../utils/validate.js";
 import { gradStudyCheckHandler } from "./check.js";
 import { gradStudyCourseCommentaryHandler } from "./course-commentary/index.js";
 import { gradStudyCourseTableHandler } from "./course-table/index.js";
+import { gradStudyExamArrangementHandler } from "./exam-arrangement.js";
 import { gradGradeDetailHandler } from "./grade-detail.js";
 import { gradGradeListHandler } from "./grade-list.js";
 import { gradStudyLoginHandler, loginToGradStudy } from "./login.js";
 import {
   gradCourseTableSchema,
+  gradExamArrangementSchema,
   gradGradeDetailSchema,
   gradGradeListSchema,
   gradStudyLoginSchema,
@@ -30,6 +32,11 @@ gradStudyRouter.post(
   "/course-commentary",
   validate(commentarySchema),
   gradStudyCourseCommentaryHandler,
+);
+gradStudyRouter.post(
+  "/exam-arrangement",
+  validate(gradExamArrangementSchema),
+  gradStudyExamArrangementHandler,
 );
 gradStudyRouter.use("/select", gradStudySelectRouter);
 

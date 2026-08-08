@@ -41,6 +41,26 @@ const COMMENTARY_KEYS = [
   "commentaryCode",
 ];
 
+const EXAM_KEYS = [
+  "name",
+  "courseCode",
+  "date",
+  "time",
+  "form",
+  "assessmentForm",
+  "category",
+  "arrangementType",
+  "week",
+  "weekday",
+  "classPeriods",
+  "campus",
+  "room",
+  "seat",
+  "paperId",
+  "hours",
+  "note",
+];
+
 const account = getAccount("graduate");
 
 describe("研究生教务 /grad-study", () => {
@@ -89,5 +109,14 @@ describe("研究生教务 /grad-study", () => {
     const res = await client.post("/grad-study/course-commentary", { type: "list" });
 
     expectDataArray(res, COMMENTARY_KEYS, "course-commentary list", ["expired"]);
+  });
+
+  it("考试安排 POST /grad-study/exam-arrangement", async () => {
+    if (!account) throw new Error("缺少研究生登录态，请先运行 pnpm test:provision");
+
+    const res = await client.post("/grad-study/exam-arrangement", { time: GRAD_SEMESTER });
+
+    // 研究生账号可能无考试安排（data 可为空数组），仅校验结构
+    expectDataArray(res, EXAM_KEYS, "exam-arrangement", ["expired"]);
   });
 });
