@@ -14,6 +14,7 @@ const SYSTEM_DOMAINS: Record<string, string> = {
   oa: "oa-443.webvpn.nenu.edu.cn",
   "under-study": "bkjx.nenu.edu.cn",
   "under-system": "dsjx.webvpn.nenu.edu.cn",
+  "grad-study": "dsyjs.nenu.edu.cn",
 };
 
 /**
