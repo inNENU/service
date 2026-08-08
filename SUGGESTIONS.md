@@ -6,16 +6,6 @@
 
 ## 🔴 高优先级
 
-### 1. 提取统一的登录流程
-
-当前 `action`、`my`、`oa`、`under-study`、`under-system`、`grad-system`、`who` 七个模块各自实现几乎相同的登录流程：
-
-```
-VPN CAS 登录 → 统一身份认证 → ticket 兑换 → session 验证 → Cookie 存储
-```
-
-建议将通用流程抽象为 `src/auth/login-pipeline.ts`，各模块传入差异化配置（服务器 URL、service 参数、额外验证步骤）即可。这将消除 ~500+ 行重复代码。
-
 ### 2. 添加请求参数校验（进行中）
 
 当前所有 handler 直接使用 `req.body` 和 `req.query`，没有任何校验。已引入 [Zod](https://zod.dev/)，`src/utils/validate.ts` 提供校验中间件，`src/auth/schemas.ts` 定义 auth 模块 schema。

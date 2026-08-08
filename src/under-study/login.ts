@@ -1,21 +1,14 @@
-import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
 
-import { EDGE_USER_AGENT_HEADERS, request } from "@/utils/index.js";
+import { EDGE_USER_AGENT_HEADERS } from "@/utils/index.js";
 
+import { AUTH_SERVER, WEB_VPN_AUTH_SERVER } from "../auth/index.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { AUTH_SERVER, WEB_VPN_AUTH_SERVER, authLogin } from "../auth/index.js";
+import { createLoginHandlers, loginPipeline } from "../auth/login-pipeline.js";
 import type { ActionFailType } from "../config/index.js";
-import {
-  MissingCredentialResponse,
-  RestrictedResponse,
-  TEST_ID_NUMBER,
-  TEST_LOGIN_RESULT,
-  unknownResponse,
-} from "../config/index.js";
-import type { AccountInfo, CommonFailedResponse, LoginOptions } from "../typings.js";
+import { RestrictedResponse, unknownResponse } from "../config/index.js";
+import type { AccountInfo, CommonFailedResponse } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
-import { vpnCASLogin } from "../vpn/index.js";
 import { UNDER_STUDY_SERVER, UNDER_STUDY_VPN_SERVER } from "./utils.js";
 
 export interface UnderStudyLoginOptions extends AccountInfo {
@@ -41,122 +34,56 @@ export const underStudyLogin = async (
   const SSO_LOGIN_URL = `${server}/new/ssoLogin`;
   const MAIN_URL = `${server}/new/welcome.page`;
 
-  if (webVPN) {
-    const vpnLoginResult = await vpnCASLogin(options, cookieStore);
-
-    if (!vpnLoginResult.success) return vpnLoginResult;
-  }
-
-  const result = await authLogin({
-    ...options,
-    webVPN,
-    service: SSO_LOGIN_URL,
-    cookieStore,
-  });
-
-  if (!result.success) {
-    console.error(result.msg);
-
-    return result;
-  }
-
-  const ticketResponse = await fetch(
-    webVPN ? result.location.replace(UNDER_STUDY_SERVER, UNDER_STUDY_VPN_SERVER) : result.location,
+  return loginPipeline(
+    options,
     {
-      headers: {
-        Cookie: cookieStore.getHeader(result.location),
-        Referer: webVPN ? WEB_VPN_AUTH_SERVER : AUTH_SERVER,
+      service: SSO_LOGIN_URL,
+      webVPN,
+      ticket: {
+        referer: webVPN ? WEB_VPN_AUTH_SERVER : AUTH_SERVER,
+        timeout: 10_000,
+        ...(webVPN
+          ? {
+              transformUrl: (location) =>
+                location.replace(UNDER_STUDY_SERVER, UNDER_STUDY_VPN_SERVER),
+            }
+          : {}),
+        onNonRedirect: (status) => (status === 405 ? RestrictedResponse : null),
       },
-      redirect: "manual",
-      signal: AbortSignal.timeout(10000),
+      verify: async ({ cookieStore: store, finalLocation }) => {
+        if (finalLocation === SSO_LOGIN_URL) {
+          const ssoResponse = await fetch(SSO_LOGIN_URL, {
+            headers: {
+              Cookie: store.getHeader(SSO_LOGIN_URL),
+              Referer: server,
+              ...EDGE_USER_AGENT_HEADERS,
+            },
+            redirect: "manual",
+            signal: AbortSignal.timeout(10_000),
+          });
+
+          if (
+            ssoResponse.status === 302 &&
+            ssoResponse.headers.get("Location")?.startsWith(MAIN_URL)
+          ) {
+            return {
+              success: true,
+              cookieStore: store,
+            };
+          }
+        }
+
+        return unknownResponse("登录失败");
+      },
     },
+    cookieStore,
   );
-
-  cookieStore.applyResponse(ticketResponse, result.location);
-
-  if (ticketResponse.status === 405) return RestrictedResponse;
-
-  if (ticketResponse.status !== 302) return unknownResponse("登录失败");
-
-  const finalLocation = ticketResponse.headers.get("Location");
-
-  if (finalLocation === SSO_LOGIN_URL) {
-    const ssoResponse = await fetch(SSO_LOGIN_URL, {
-      headers: {
-        Cookie: cookieStore.getHeader(SSO_LOGIN_URL),
-        Referer: server,
-        ...EDGE_USER_AGENT_HEADERS,
-      },
-      redirect: "manual",
-      signal: AbortSignal.timeout(10000),
-    });
-
-    if (ssoResponse.status === 302 && ssoResponse.headers.get("Location")?.startsWith(MAIN_URL)) {
-      return {
-        success: true,
-        cookieStore,
-      };
-    }
-  }
-
-  return unknownResponse("登录失败");
 };
-
-export interface UnderStudyLoginSuccessResponse {
-  success: true;
-  cookies: CookieType[];
-}
 
 export type UnderStudyLoginFailedResponse =
   | AuthLoginFailedResponse
   | VPNLoginFailedResponse
   | CommonFailedResponse<ActionFailType.Restricted>;
 
-export type UnderStudyLoginResponse =
-  | UnderStudyLoginSuccessResponse
-  | UnderStudyLoginFailedResponse;
-
-export const loginToUnderStudy = request<
-  UnderStudyLoginResponse | CommonFailedResponse<ActionFailType.MissingCredential>,
-  LoginOptions
-  // oxlint-disable-next-line typescript/consistent-return
->(async (req, res, next) => {
-  if (!req.body) return res.json(MissingCredentialResponse);
-
-  const { id, password, authToken } = req.body;
-
-  if (id && password && authToken) {
-    const result = await underStudyLogin({ id, password, authToken });
-
-    if (!result.success) return res.json(result);
-
-    req.headers.cookie = result.cookieStore.getHeader(UNDER_STUDY_SERVER);
-  } else if (!req.headers.cookie) {
-    return res.json(MissingCredentialResponse);
-  }
-
-  next();
-});
-
-export const underStudyLoginHandler = request<UnderStudyLoginResponse, UnderStudyLoginOptions>(
-  async (req, res) => {
-    const result =
-      // fake result for testing
-      req.body.id === TEST_ID_NUMBER ? TEST_LOGIN_RESULT : await underStudyLogin(req.body);
-
-    if (result.success) {
-      const cookies = result.cookieStore.getAllCookies().map((item) => item.toJSON());
-
-      cookies.forEach(({ name, value, ...rest }) => {
-        res.cookie(name, value, rest);
-      });
-
-      return res.json({
-        success: true,
-        cookies,
-      });
-    }
-
-    return res.json(result);
-  },
-);
+export const { loginTo: loginToUnderStudy, loginHandler: underStudyLoginHandler } =
+  createLoginHandlers(underStudyLogin, UNDER_STUDY_SERVER);

@@ -1,20 +1,11 @@
-import type { CookieType } from "@mptool/net";
 import { CookieStore } from "@mptool/net";
 
-import { request } from "@/utils/index.js";
-
+import { WEB_VPN_AUTH_SERVER } from "../auth/index.js";
 import type { AuthLoginFailedResponse } from "../auth/index.js";
-import { WEB_VPN_AUTH_SERVER, authLogin } from "../auth/index.js";
-import type { ActionFailType } from "../config/index.js";
-import {
-  MissingCredentialResponse,
-  TEST_ID_NUMBER,
-  TEST_LOGIN_RESULT,
-  unknownResponse,
-} from "../config/index.js";
-import type { AccountInfo, CommonFailedResponse, LoginOptions } from "../typings.js";
+import { createLoginHandlers, loginPipeline } from "../auth/login-pipeline.js";
+import { unknownResponse } from "../config/index.js";
+import type { AccountInfo } from "../typings.js";
 import type { VPNLoginFailedResponse } from "../vpn/index.js";
-import { vpnCASLogin } from "../vpn/index.js";
 import { OA_ENTRANCE_PAGE, OA_MAIN_PAGE, OA_WEB_VPN_SERVER } from "./utils.js";
 
 export interface OALoginSuccessResult {
@@ -29,116 +20,52 @@ export type OALoginResult = OALoginSuccessResult | OALoginFailedResponse;
 export const oaLogin = async (
   options: AccountInfo,
   cookieStore = new CookieStore(),
-): Promise<OALoginResult> => {
-  const vpnLoginResult = await vpnCASLogin(options, cookieStore);
+): Promise<OALoginResult> =>
+  loginPipeline(
+    options,
+    {
+      service: OA_ENTRANCE_PAGE,
+      webVPN: true,
+      ticket: {
+        referer: WEB_VPN_AUTH_SERVER,
+        onNonRedirect: (status) => {
+          console.error("Login to oa failed", status);
 
-  if (!vpnLoginResult.success) return vpnLoginResult;
-
-  const result = await authLogin({
-    ...options,
-    service: OA_ENTRANCE_PAGE,
-    webVPN: true,
-    cookieStore,
-  });
-
-  if (!result.success) {
-    console.error(result.msg);
-
-    return result;
-  }
-
-  console.log("location", result.location, cookieStore.getHeader(result.location));
-  console.log("server", cookieStore.getHeader(OA_WEB_VPN_SERVER));
-
-  const ticketUrl = result.location;
-  const ticketResponse = await fetch(ticketUrl, {
-    headers: {
-      Cookie: cookieStore.getHeader(ticketUrl),
-      Referer: WEB_VPN_AUTH_SERVER,
-    },
-    redirect: "manual",
-  });
-
-  cookieStore.applyResponse(ticketResponse, ticketUrl);
-
-  if (ticketResponse.status !== 302) {
-    console.error("Login to oa failed", ticketResponse.status, await ticketResponse.text());
-
-    return unknownResponse("登录失败");
-  }
-
-  const sessionLocation = ticketResponse.headers.get("Location");
-
-  if (sessionLocation?.includes("jsessionid=")) {
-    const sessionResponse = await fetch(sessionLocation, {
-      headers: {
-        Cookie: cookieStore.getHeader(sessionLocation),
-        Referer: OA_WEB_VPN_SERVER,
+          return unknownResponse("登录失败");
+        },
       },
-      redirect: "manual",
-    });
+      verify: async ({ cookieStore: store, finalLocation: sessionLocation }) => {
+        if (sessionLocation?.includes("jsessionid=")) {
+          const sessionResponse = await fetch(sessionLocation, {
+            headers: {
+              Cookie: store.getHeader(sessionLocation),
+              Referer: OA_WEB_VPN_SERVER,
+            },
+            redirect: "manual",
+          });
 
-    cookieStore.applyResponse(sessionResponse, sessionLocation);
+          store.applyResponse(sessionResponse, sessionLocation);
 
-    if (
-      sessionResponse.status === 302 &&
-      sessionResponse.headers.get("Location") === OA_MAIN_PAGE
-    ) {
-      return {
-        success: true,
-        cookieStore,
-      };
-    }
-  }
+          if (
+            sessionResponse.status === 302 &&
+            sessionResponse.headers.get("Location") === OA_MAIN_PAGE
+          ) {
+            return {
+              success: true,
+              cookieStore: store,
+            };
+          }
+        }
 
-  console.error("login to oa failed", sessionLocation);
+        console.error("login to oa failed", sessionLocation);
 
-  return unknownResponse("登录失败");
-};
+        return unknownResponse("登录失败");
+      },
+    },
+    cookieStore,
+  );
 
-export interface OALoginSuccessResponse {
-  success: true;
-  cookies: CookieType[];
-}
-
-export type OALoginResponse = OALoginSuccessResponse | OALoginFailedResponse;
-
-export const loginToOA = request<
-  OALoginResponse | CommonFailedResponse<ActionFailType.MissingCredential>,
-  LoginOptions
-  // oxlint-disable-next-line typescript/consistent-return
->(async (req, res, next) => {
-  if (!req.body) return res.json(MissingCredentialResponse);
-
-  const { id, password, authToken } = req.body;
-
-  if (id && password && authToken) {
-    const result = await oaLogin({ id, password, authToken });
-
-    if (!result.success) return res.json(result);
-
-    req.headers.cookie = result.cookieStore.getHeader(OA_WEB_VPN_SERVER);
-  } else if (!req.headers.cookie) {
-    return res.json(MissingCredentialResponse);
-  }
-
-  next();
-});
-
-export const oaLoginHandler = request<OALoginResponse, AccountInfo>(async (req, res) => {
-  const result =
-    // fake result for testing
-    req.body.id === TEST_ID_NUMBER ? TEST_LOGIN_RESULT : await oaLogin(req.body);
-
-  if (result.success) {
-    const cookies = result.cookieStore.getAllCookies().map((item) => item.toJSON());
-
-    cookies.forEach(({ name, value, ...rest }) => {
-      res.cookie(name, value, rest);
-    });
-
-    return res.json({ success: true, cookies });
-  }
-
-  return res.json(result);
-});
+export const { loginTo: loginToOA, loginHandler: oaLoginHandler } = createLoginHandlers(
+  oaLogin,
+  OA_WEB_VPN_SERVER,
+);
