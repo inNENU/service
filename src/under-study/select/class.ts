@@ -1,62 +1,12 @@
-import type { ActionFailType } from "@/config/index.js";
-import { expiredResponse, missingArgResponse } from "@/config/index.js";
-import type { CommonFailedResponse, CommonSuccessResponse, LoginOptions } from "@/typings.js";
-import { EDGE_USER_AGENT_HEADERS, request } from "@/utils/index.js";
+import { missingArgResponse } from "@/config/index.js";
+import { request } from "@/utils/index.js";
 
-import type { AuthLoginFailedResponse } from "../../auth/index.js";
+import { getSelectClasses } from "../../study/select/index.js";
+import type {
+  UnderSelectClassOptions,
+  UnderSelectClassResponse,
+} from "../../study/select/index.js";
 import { UNDER_STUDY_SERVER } from "../utils.js";
-import type { RawUnderSearchClassResponse, UnderSelectClassInfo } from "./typings.js";
-import { getClasses } from "./utils.js";
-
-export interface UnderSelectClassOptions extends LoginOptions {
-  /** 选课链接 */
-  link: string;
-  /** 课程 ID */
-  courseId: string;
-}
-
-export type UnderSelectClassSuccessResponse = CommonSuccessResponse<UnderSelectClassInfo[]>;
-
-export type UnderSelectClassResponse =
-  | UnderSelectClassSuccessResponse
-  | AuthLoginFailedResponse
-  | CommonFailedResponse<ActionFailType.MissingArg>;
-
-export const getSelectClasses = async (
-  link: string,
-  courseId: string,
-  cookieHeader: string,
-  server: string,
-): Promise<UnderSelectClassResponse> => {
-  const infoUrl = `${server}${link}/kxkc`;
-
-  const response = await fetch(infoUrl, {
-    method: "POST",
-    headers: {
-      Accept: "application/json, text/javascript, */*; q=0.01",
-      Cookie: cookieHeader,
-      Referer: `${server}${link}`,
-      ...EDGE_USER_AGENT_HEADERS,
-    },
-    body: new URLSearchParams({
-      kcptdm: courseId,
-      page: "1",
-      row: "1000",
-      sort: "kcrwdm",
-      order: "asc",
-    }),
-    redirect: "manual",
-  });
-
-  if (response.status !== 200) return expiredResponse;
-
-  const data = (await response.json()) as RawUnderSearchClassResponse;
-
-  return {
-    success: true,
-    data: getClasses(data.rows),
-  };
-};
 
 export const underSelectClassHandler = request<UnderSelectClassResponse, UnderSelectClassOptions>(
   async (req, res) => {

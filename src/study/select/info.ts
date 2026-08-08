@@ -1,0 +1,315 @@
+import { ActionFailType, expiredResponse } from "@/config/index.js";
+import type { CommonFailedResponse, CommonSuccessResponse, LoginOptions } from "@/typings.js";
+import { EDGE_USER_AGENT_HEADERS } from "@/utils/index.js";
+
+import type { AuthLoginFailedResponse } from "../../auth/index.js";
+import type { SelectOptionConfig } from "./store.js";
+import { areasStore, majorsStore, officesStore, typesStore } from "./store.js";
+import { COURSE_CATEGORIES } from "./utils.js";
+
+const COURSE_OFFICES_REGEXP =
+  /<select id='kkyxdm' name='kkyxdm'.*?><option value=''>\(请选择\)<\/option>(.*?)<\/select>/u;
+const COURSE_OFFICE_ITEM_REGEXP = /<option value='(.+?)' >\d+-(.*?)<\/option>/gu;
+const AREAS_REGEXP =
+  /<select id='xqdm' name='xqdm'.*?><option value=''>\(请选择\)<\/option>(.*?)<\/select>/u;
+const AREA_ITEM_REGEXP = /<option value='(.+?)' >\d+-(.*?)<\/option>/gu;
+const COURSE_TYPES_REGEXP =
+  /<select id='kcdldm' name='kcdldm'.*?><option value=''>\(请选择\)<\/option>(.*?)<\/select>/u;
+const COURSE_TYPE_ITEM_REGEXP = /<option value='(.+?)' >(.*?)<\/option>/gu;
+const CURRENT_GRADE_REGEXP = /<option value='(\d+)' selected>\1<\/option>/u;
+const MAJORS_REGEXP =
+  /<select id='zydm' name='zydm'.*?><option value=''>\(全部\)<\/option>(.*?)<\/select>/u;
+const MAJOR_ITEM_REGEXP = /<option value='(\d+?)' (?:selected)?>\d+-(.*?)<\/option>/gu;
+const CURRENT_MAJOR_REGEXP = /<option value='(\d{6,7})' selected>\d+-(.*?)<\/option>/u;
+const INFO_TITLE_REGEXP =
+  /<span id="title">(.*?)学期&nbsp;&nbsp;(.*?)&nbsp;&nbsp;(?:<span.*?>(.*?)<\/span>)?<\/span>/u;
+const ALLOWED_INFO_REGEXP =
+  /<span id="sub-title">\s+?<div id="text">现在是(.*?)时间\s+（(\d\d:\d\d:\d\d)--(\d\d:\d\d:\d\d)）/u;
+
+const setMajors = (content: string): void => {
+  if (majorsStore.isValid()) return;
+
+  const [, majorText] = MAJORS_REGEXP.exec(content)!;
+
+  const majors = [...majorText.matchAll(MAJOR_ITEM_REGEXP)].map(([, value, name]) => ({
+    value,
+    name,
+  }));
+
+  majorsStore.setState(majors);
+};
+
+const setCourseOffices = (content: string): void => {
+  if (officesStore.isValid()) return;
+
+  const [, courseOfficeText] = COURSE_OFFICES_REGEXP.exec(content)!;
+
+  const offices = [...courseOfficeText.matchAll(COURSE_OFFICE_ITEM_REGEXP)].map(
+    ([, value, name]) => ({
+      value,
+      name,
+    }),
+  );
+
+  officesStore.setState(offices);
+};
+
+const setCourseTypes = (content: string): void => {
+  if (typesStore.isValid()) return;
+
+  const [, courseTypeText] = COURSE_TYPES_REGEXP.exec(content)!;
+
+  const types = [...courseTypeText.matchAll(COURSE_TYPE_ITEM_REGEXP)].map(([, value, name]) => ({
+    value,
+    name,
+  }));
+
+  typesStore.setState(types);
+};
+
+const setAreas = (content: string): void => {
+  if (areasStore.isValid()) return;
+
+  const [, areaText] = AREAS_REGEXP.exec(content)!;
+
+  const areas = [...areaText.matchAll(AREA_ITEM_REGEXP)].map(([, value, name]) => ({
+    value,
+    name,
+  }));
+
+  areasStore.setState(areas);
+};
+
+export interface UnderSelectInfoOptions extends LoginOptions {
+  link: string;
+}
+
+export interface UnderSelectBaseInfo {
+  /** 学期 */
+  term: string;
+  /** 选课名称 */
+  name: string;
+  /** 是否可以选课 */
+  canSelect: boolean;
+
+  /** 可用年级 */
+  grades: number[];
+  /** 可用校区 */
+  areas: SelectOptionConfig[];
+  /** 可用专业 */
+  majors: SelectOptionConfig[];
+  /** 可用开课单位 */
+  offices: SelectOptionConfig[];
+  /** 可用课程类别 */
+  types: SelectOptionConfig[];
+  /** 可用课程分类 */
+  categories: SelectOptionConfig[];
+
+  /** 当前校区 */
+  currentArea: string;
+  /** 当前专业 */
+  currentMajor: string;
+  /** 当前年级 */
+  currentGrade: number;
+}
+
+export interface UnderSelectAllowedInfo extends UnderSelectBaseInfo {
+  canSelect: true;
+
+  /** 是否可退选 */
+  canCancel: boolean;
+  /** 选课阶段 */
+  stage: string;
+  /** 开始时间 */
+  startTime: string;
+  /** 结束时间 */
+  endTime: string;
+}
+
+export interface UnderSelectDisallowedInfo extends UnderSelectBaseInfo {
+  canSelect: false;
+}
+
+export type UnderSelectInfo = UnderSelectAllowedInfo | UnderSelectDisallowedInfo;
+
+const parseSelectInfo = (content: string): UnderSelectInfo => {
+  const [, term, name, canCancelText = ""] = INFO_TITLE_REGEXP.exec(content)!;
+
+  const canSelect = !content.includes("现在不是选课时间");
+
+  const currentArea = name.includes("本部") ? "本部" : name.includes("净月") ? "净月" : "";
+  const currentGrade = Number(CURRENT_GRADE_REGEXP.exec(content)![1]);
+  // oxlint-disable-next-line prefer-destructuring
+  const currentMajor = CURRENT_MAJOR_REGEXP.exec(content)![2];
+
+  const currentYear = new Date().getFullYear();
+  const grades = Array.from({ length: 6 }, (_, i) => currentYear - i);
+
+  setAreas(content);
+  setCourseOffices(content);
+  setCourseTypes(content);
+  setMajors(content);
+
+  const currentMajorConfig = majorsStore.state.find((major) => major.name === currentMajor)!;
+
+  const state = {
+    term,
+    name,
+    canSelect,
+    grades,
+    majors: [currentMajorConfig, ...majorsStore.state],
+    areas: areasStore.state,
+    offices: officesStore.state,
+    types: typesStore.state,
+    categories: COURSE_CATEGORIES,
+
+    currentArea,
+    currentGrade,
+    currentMajor,
+  };
+
+  if (canSelect) {
+    const [, stage, startTime, endTime] = ALLOWED_INFO_REGEXP.exec(content)!;
+
+    return {
+      canCancel: canCancelText === "可退选",
+      stage,
+      startTime,
+      endTime,
+
+      ...state,
+    };
+  }
+
+  return {
+    ...state,
+    canSelect,
+  };
+};
+
+const checkCourseCommentary = async (
+  cookieHeader: string,
+  term: string,
+  categoryUrl: string,
+  server: string,
+): Promise<{ completed: boolean; msg: string }> => {
+  const response = await fetch(
+    `${server}/new/student/xsxk/checkFinishPj?xnxqdm=${term}&_=${Date.now()}`,
+    {
+      headers: {
+        // Accept: "application/json; q=0.01",
+        Cookie: cookieHeader,
+        DNT: "1",
+        Referer: categoryUrl,
+        "X-Requested-With": "XMLHttpRequest",
+        ...EDGE_USER_AGENT_HEADERS,
+      },
+      signal: AbortSignal.timeout(10000),
+    },
+  );
+
+  if (response.status !== 200) throw new Error(`status: ${response.status}`);
+
+  try {
+    const content = await response.text();
+
+    if (content.includes("评价已完成")) return { completed: true, msg: "已完成评教" };
+
+    if (content.includes("下次可检查时间为：")) {
+      const time = /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/u.exec(content)?.[0];
+
+      return { completed: false, msg: `检查过于频繁，请于 ${time} 后重试` };
+    }
+
+    if (content.includes("评价未完成")) return { completed: false, msg: "未完成评教" };
+
+    return {
+      completed: false,
+      msg: "请检查是否完成评教",
+    };
+  } catch (err) {
+    console.error(err);
+
+    throw new Error("评教检查失败", { cause: err });
+  }
+};
+
+export type UnderSelectInfoSuccessResponse = CommonSuccessResponse<UnderSelectInfo>;
+
+export type UnderSelectInfoResponse =
+  | UnderSelectInfoSuccessResponse
+  | AuthLoginFailedResponse
+  | CommonFailedResponse<
+      | ActionFailType.NotInitialized
+      | ActionFailType.MissingCredential
+      | ActionFailType.MissingCommentary
+      | ActionFailType.MissingArg
+      | ActionFailType.Unknown
+    >;
+
+export const getSelectInfo = async (
+  cookieHeader: string,
+  link: string,
+  server: string,
+): Promise<UnderSelectInfoResponse> => {
+  const categoryUrl = `${server}${link}`;
+
+  const response = await fetch(categoryUrl, {
+    headers: {
+      "Cache-Control": "max-age=0",
+      Cookie: cookieHeader,
+      Referer: `${server}/new/student/xsxk/xklx`,
+      ...EDGE_USER_AGENT_HEADERS,
+    },
+    redirect: "manual",
+  });
+
+  if (response.status !== 200) return expiredResponse;
+
+  let content = await response.text();
+
+  if (/<title>.*?评教检查<\/title>/u.test(content)) {
+    const { completed } = await checkCourseCommentary(
+      cookieHeader,
+      /xnxqdm=(\d+)'/u.exec(content)![1],
+      categoryUrl,
+      server,
+    );
+
+    if (!completed) {
+      return {
+        success: false,
+        msg: "未完成评教",
+        type: ActionFailType.MissingCommentary,
+      };
+    }
+
+    // 重新请求选课信息
+    const recheckResponse = await fetch(categoryUrl, {
+      headers: {
+        "Cache-Control": "max-age=0",
+        Cookie: cookieHeader,
+        Referer: `${server}/new/student/xsxk/xklx`,
+        ...EDGE_USER_AGENT_HEADERS,
+      },
+      redirect: "manual",
+    });
+
+    if (recheckResponse.status !== 200) return expiredResponse;
+
+    content = await recheckResponse.text();
+  }
+
+  if (content.includes("选课正在初始化")) {
+    return {
+      success: false,
+      msg: "选课正在初始化，请稍后再试",
+      type: ActionFailType.NotInitialized,
+    };
+  }
+
+  return {
+    success: true,
+    data: parseSelectInfo(content),
+  };
+};
