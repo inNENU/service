@@ -221,18 +221,20 @@ describe("本科教务（新）/under-study", () => {
   it("学习计划 POST /under-study/study-plan list", async () => {
     const res = await client.post("/under-study/study-plan", { type: "list" });
 
-    expectDataArray(res, STUDY_PLAN_KEYS, "study-plan list", ["expired"]);
+    // list 现只返回单个"教学计划"对象（不再返回数组）
+    expectDataObject(res, STUDY_PLAN_KEYS, "study-plan list", ["expired"]);
   });
 
   it("学习计划 POST /under-study/study-plan detail", async () => {
     const list = await client.post("/under-study/study-plan", { type: "list" });
 
-    if (list.body?.success !== true || list.body?.data?.length === 0)
-      expect.fail("学习计划为空，无法测试明细");
+    // list 返回单个教学计划对象（非数组），直接用其 planCode 查明细
+    if (list.body?.success !== true || !list.body?.data)
+      expect.fail("未获取到教学计划，无法测试明细");
 
     const res = await client.post("/under-study/study-plan", {
       type: "detail",
-      planCode: list.body.data[0].planCode,
+      planCode: list.body.data.planCode,
     });
 
     if (!expectSuccess(res, "study-plan detail", ["expired"])) return;
