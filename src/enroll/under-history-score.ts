@@ -1,7 +1,7 @@
 import { request } from "@/utils/index.js";
 
 import type { ActionFailType } from "../config/index.js";
-import { invalidArgResponse, missingArgResponse } from "../config/index.js";
+import { invalidArgResponse, missingArgResponse, unknownResponse } from "../config/index.js";
 import type { CommonFailedResponse, CommonSuccessResponse } from "../typings.js";
 
 export interface UnderHistoryScoreInfoOptions {
@@ -14,9 +14,9 @@ export interface UnderHistoryScoreQueryOptions {
   province: string;
   /** 年份 */
   year: string;
-  /** 类型 */
+  /** 科类（历史类/物理类等，对应学校接口 major_type） */
   classType: string;
-  /** 专业类型 */
+  /** 计划类型（一般计划（公费师范）等，对应学校接口 type） */
   majorType: string;
 }
 
@@ -157,7 +157,14 @@ export const queryUnderHistoryScore = async ({
     }),
   });
 
-  const result = (await queryResponse.json()) as RawUnderHistoryScoreResult;
+  // 学校接口在"省份+年份+类型+科类"组合无数据时返回 404 + { scores: null }
+  // 需要防御，避免 null.map 导致 500
+  const result = queryResponse.ok
+    ? ((await queryResponse.json()) as RawUnderHistoryScoreResult)
+    : null;
+
+  if (!result?.scores)
+    return unknownResponse(`未找到${province} ${year} 年${majorType} ${classType}的录取分数数据`);
 
   return {
     success: true,
