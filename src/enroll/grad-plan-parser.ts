@@ -1,62 +1,65 @@
-import { getRichTextNodes } from "@mptool/parser";
+import type { GradEnrollPlanInfo } from "./grad-plan.js";
 
-import type { GradEnrollPlanInfo, GradEnrollSchoolPlan } from "./grad-plan.js";
+/** 招生目录单行数据（已从学校系统响应字段映射为可读字段） */
+export interface GradEnrollPlanRow {
+  /** 是否为专业分组行（true 为专业标题行，false 为研究方向明细行） */
+  isMajorRow: boolean;
+  /** 专业及研究方向文本（分组行为"专业代码 专业名【类型】"，明细行为研究方向名） */
+  title: string;
+  /** 分组键：专业代码_学习方式_考试方式 */
+  groupKey: string;
+  /** 研究方向代码 */
+  code?: string;
+  /** 研究方向名称 */
+  name?: string;
+  /** 拟招收人数 */
+  count?: number;
+  /** 推免录取人数 */
+  recommendCount?: number;
+  /** 初试科目 */
+  subjects?: string;
+  /** 备注 */
+  note?: string;
+}
 
-const TABLE_HEADER = "<tr><th>专业代码</th><th>人数</th><th>考试科目</th><th>备注</th></tr>";
+/** 专业分组行 title 格式：`040101 教育学原理【全日制学术学位】` */
+const majorInfoRegExp = /^(\S+)\s+(.+?)【([^】]+)】$/u;
 
-const schoolInfoRegExp =
-  /bXYName\['.*?'\]="<tr><td colspan=4><a href='(.*?)' target='_blank'>([^<]+) ([^<]+)<\/a><br>联系方式：(\S+?)，(\S+?)，(\S+?)<\/td><\/tr>";/gu;
+/**
+ * 将招生目录单行数组解析为专业列表
+ *
+ * 分组行开启一个新专业，其后的明细行作为该专业的研究方向
+ *
+ * @param rows 招生目录单行数据
+ * @returns 专业列表
+ */
+export const parseGradEnrollPlan = (rows: GradEnrollPlanRow[]): GradEnrollPlanInfo[] => {
+  const majors: GradEnrollPlanInfo[] = [];
+  let currentMajor: GradEnrollPlanInfo | undefined;
 
-const parseMajors = async (content: string, name: string): Promise<GradEnrollPlanInfo[]> => {
-  const majorCodes = [
-    ...content.matchAll(new RegExp(`cXYName\\['${name}'\\]\\.push\\('([^']+)'\\)`, "gu")),
-  ];
+  for (const row of rows) {
+    if (row.isMajorRow) {
+      const info = majorInfoRegExp.exec(row.title);
 
-  const majorNameRegExp = [
-    ...content.matchAll(new RegExp(`fXYName\\['${name}'\\]\\.push\\('([^']+)'\\)`, "gu")),
-  ];
-
-  return Promise.all(
-    majorCodes.map(async ([, majorCode], index) => {
-      const [, majorName] = majorNameRegExp[index];
-
-      const majorTypeRegExp = new RegExp(
-        `dXYName\\['${name}'\\]\\['(${majorCode})'\\]\\.push\\("<tr><td colspan=4><b>\\1\\s+\\S+【(\\S+)】<\\/b><\\/td><\\/tr>"`,
-        "u",
-      );
-
-      const startLine = `dXYName['${name}']['${majorCode}'].push("<tr>");`;
-      const start = content.indexOf(startLine) + startLine.length;
-      const end = content.lastIndexOf(`dXYName['${name}']['${majorCode}'].push("</tr>");`);
-      const majorContent = content.slice(start, end);
-
-      const lines = [...majorContent.matchAll(/dXYName\['.*?'\]\['[^']+'\]\.push\("(.*)"\)/gu)].map(
-        ([, line]) => line.replaceAll(/<\/?center>/gu, ""),
-      );
-
-      return {
-        name: majorName,
-        code: majorCode,
-        type: majorTypeRegExp.exec(content)?.[2] ?? "",
-        content: await getRichTextNodes(
-          `<table>${TABLE_HEADER}<tr>${lines.join("\n")}</tr></table>`,
-        ),
+      currentMajor = {
+        name: info?.[2] ?? row.title,
+        code: info?.[1] ?? "",
+        type: info?.[3] ?? "",
+        directions: [],
       };
-    }),
-  );
-};
 
-export const parseGradEnrollPlan = async (content: string): Promise<GradEnrollSchoolPlan[]> =>
-  Promise.all(
-    [...content.matchAll(schoolInfoRegExp)].map(
-      async ([, site, code, name, contact, phone, mail]) => ({
-        name,
-        site,
-        code,
-        contact,
-        phone,
-        mail,
-        majors: await parseMajors(content, name),
-      }),
-    ),
-  );
+      majors.push(currentMajor);
+    } else if (currentMajor) {
+      currentMajor.directions.push({
+        name: row.name ?? row.title,
+        code: row.code ?? "",
+        count: row.count ?? 0,
+        recommendCount: row.recommendCount ?? 0,
+        subjects: row.subjects ?? "",
+        note: row.note ?? "",
+      });
+    }
+  }
+
+  return majors;
+};
