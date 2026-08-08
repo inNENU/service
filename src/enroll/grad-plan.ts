@@ -11,7 +11,7 @@ import { parseGradEnrollPlan } from "./grad-plan-parser.js";
 const GRAD_ENROLL_PLAN_BASE_URL = "https://yz.nenu.edu.cn/ssmlZsmlGbGl";
 
 /** 招生年份 → 招生计划编号（由研究生院每年发布，取自页面注入的 data-value） */
-const GRAD_ENROLL_PLAN_YEARS = {
+export const GRAD_ENROLL_PLAN_YEARS = {
   2025: "52af9dc490c515960190d81a18600065",
   2026: "52af9dc498df604e0198f51f2ec30126",
 } as const;

@@ -94,20 +94,37 @@ describe("招生 /enroll", () => {
     expect(res.body.type, "非法年份应返回 invalid-arg").toBe("invalid-arg");
   });
 
-  it("研究生推免计划 POST /enroll/grad-recommend-plan", async () => {
+  it("研究生推免计划 POST /enroll/grad-recommend-plan（缺省最新年份）", async () => {
     const res = await client.post("/enroll/grad-recommend-plan");
 
-    if (!expectSuccess(res, "/enroll/grad-recommend-plan", ["closed"])) return;
+    if (!expectSuccess(res, "/enroll/grad-recommend-plan")) return;
     expect(Array.isArray(res.body.data), "data 应为数组").toBe(true);
+    expect(res.body.data.length, "应包含至少一个院部").toBeGreaterThan(0);
 
     for (const plan of res.body.data) {
       expectObjectKeys(
         plan,
-        ["name", "code", "site", "contact", "phone", "mail", "majors"],
+        ["name", "code", "site", "contact", "phone", "mail", "note", "majors"],
         "grad-recommend item",
       );
       expect(Array.isArray(plan.majors), "majors 应为数组").toBe(true);
-      expectArrayItems(plan.majors, ["name", "code", "content"], "grad-recommend majors");
+
+      for (const major of plan.majors) {
+        expectObjectKeys(major, ["name", "code", "type", "directions"], "grad-recommend major");
+        expectArrayItems(
+          major.directions,
+          ["name", "code", "count", "recommendCount", "subjects", "note"],
+          "grad-recommend direction",
+        );
+      }
     }
+  });
+
+  it("研究生推免计划 POST /enroll/grad-recommend-plan 指定年份 2025", async () => {
+    const res = await client.post("/enroll/grad-recommend-plan", { year: 2025 });
+
+    if (!expectSuccess(res, "/enroll/grad-recommend-plan year=2025")) return;
+    expect(Array.isArray(res.body.data), "data 应为数组").toBe(true);
+    expect(res.body.data.length, "应包含至少一个院部").toBeGreaterThan(0);
   });
 });

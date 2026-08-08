@@ -40,3 +40,10 @@ export const gradEnrollPlanSchema = z.object({
 });
 
 export type GradEnrollPlanInput = z.infer<typeof gradEnrollPlanSchema>;
+
+/** 研究生推免计划（enroll /grad-recommend-plan） */
+export const gradRecommendPlanSchema = z.object({
+  year: z.number().int().positive().optional(),
+});
+
+export type GradRecommendPlanInput = z.infer<typeof gradRecommendPlanSchema>;

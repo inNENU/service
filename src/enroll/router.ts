@@ -6,6 +6,7 @@ import { gradEnrollPlanHandler } from "./grad-plan.js";
 import { gradRecommendPlanHandler } from "./grad-recommend-plan.js";
 import {
   gradEnrollPlanSchema,
+  gradRecommendPlanSchema,
   underAdmissionSchema,
   underHistoryScoreSchema,
   underPlanSchema,
@@ -25,7 +26,11 @@ enrollRouter.post(
 );
 enrollRouter.post("/under-plan", validate(underPlanSchema), underEnrollPlanHandler);
 enrollRouter.post("/grad-admission", gradAdmissionHandler);
-enrollRouter.post("/grad-recommend-plan", gradRecommendPlanHandler);
+enrollRouter.post(
+  "/grad-recommend-plan",
+  validate(gradRecommendPlanSchema),
+  gradRecommendPlanHandler,
+);
 enrollRouter.post("/grad-plan", validate(gradEnrollPlanSchema), gradEnrollPlanHandler);
 
 export { enrollRouter };

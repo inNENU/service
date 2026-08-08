@@ -39,7 +39,6 @@ const POST_SKIP_ROUTES = new Set([
   "my:/info", // 仅用 cookie 会话，不读 body
   "my:/identity", // 仅用 cookie 会话，不读 body
   "enroll:/grad-admission", // 暂不支持 stub，无实际逻辑
-  "enroll:/grad-recommend-plan", // 无请求参数
 ]);
 
 const walkFiles = (dir: string): string[] => {
