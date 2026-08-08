@@ -1,6 +1,4 @@
 /** 测试公共辅助函数：系统登录、会话校验、统一严格断言 */
-import { Cookie } from "@mptool/net";
-import type { CookieType } from "@mptool/net";
 import { expect } from "vitest";
 
 import type { ApiResponse } from "./client.js";
@@ -60,9 +58,10 @@ export const loginSystem = async (system: string, account: AccountAuth): Promise
   expect(res.status, `/${system}/login 返回 HTTP ${res.status}`).toBe(200);
   expect(res.body, `/${system}/login 失败`).toHaveProperty("success", true);
 
-  // 登录接口在响应体中返回外部系统 cookies，显式写入 CookieStore（复用其按域管理）
-  if (Array.isArray(res.body.cookies))
-    client.jar.apply(res.body.cookies.map((cookie: CookieType) => new Cookie(cookie)));
+  // 登录接口通过 res.cookie 下发外部系统 cookies（Set-Cookie），
+  // ApiClient.request 内的 applyHeader 已按域写入 CookieStore，无需再显式导入。
+  // 注意：不要再对 body.cookies 显式 new Cookie() 导入——会产生带点/不带点的同名重复
+  // cookie，导致 who 等系统请求时同名 cookie（如 iPlanetDirectoryPro）顺序错乱、鉴权失败。
 
   return client;
 };

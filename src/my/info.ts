@@ -1,6 +1,6 @@
 import type { PoolConnection } from "mysql2/promise";
 
-import { getConnection, releaseConnection, request } from "@/utils/index.js";
+import { getCampusLocation, getConnection, releaseConnection, request } from "@/utils/index.js";
 
 import type { ActionFailType } from "../config/index.js";
 import { expiredResponse, TEST_INFO, unknownResponse } from "../config/index.js";
@@ -178,52 +178,11 @@ export const getMyInfo = async (cookieHeader: string): Promise<MyInfoResult> => 
         info.birth = `${Number(year[0]) < 5 ? "20" : "19"}${year}-${monthMap[month]}-${day}`;
       }
 
-      const location = [
-        // 本部外国语专业
-        "167110",
-        "167111",
-        "167115",
-        "167118",
-        "045108",
-        "050201",
-        "055101",
-        "055102",
-        "1013973",
-        "1014014",
-        "1014030",
-      ].includes(info.majorId)
-        ? "benbu"
-        : [
-              // 净月外国语专业
-              "1066",
-              "167120",
-              "167122",
-              "167130",
-              "167133",
-              "167140",
-              "167141",
-              "167180",
-              "1014014",
-              "050202",
-              "1013992",
-              "1014015",
-              "1014073",
-              "1014199",
-              "050211",
-            ].includes(info.majorId)
-          ? "jingyue"
-          : ["070201"].includes(info.majorId) || info.major === "细胞生物学"
-            ? "unknown"
-            : [
-                  164000, 166000, 170000, 173000, 174000, 175000, 177000, 232000, 234000, 236000,
-                  253000,
-                ].includes(info.orgId)
-              ? "benbu"
-              : [161000, 168000, 169000, 178000, 235000, 245000, 246000, 252000, 261000].includes(
-                    info.orgId,
-                  )
-                ? "jingyue"
-                : "unknown";
+      const location = getCampusLocation({
+        majorId: info.majorId,
+        orgId: info.orgId,
+        major: info.major,
+      });
 
       try {
         connection = await getConnection();

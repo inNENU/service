@@ -1,4 +1,4 @@
-import { request } from "@/utils/index.js";
+import { getCampusLocation, request } from "@/utils/index.js";
 
 import { TEST_GRADE, TEST_ID_NUMBER, unknownResponse } from "../config/index.js";
 import type { CommonSuccessResponse } from "../typings.js";
@@ -54,6 +54,12 @@ export interface WhoInfoData {
   inYear: number;
   /** 用户入学年级 */
   grade: number;
+  /** 用户学制（年） */
+  studyLength?: number;
+  /** 用户年龄 */
+  age?: number;
+  /** 用户预计毕业日期 */
+  expectedGraduationDate?: string;
   /** 用户层次 */
   type: string;
   /** 用户层次代码 */
@@ -88,6 +94,9 @@ export const TEST_WHO_INFO: WhoInfoSuccessResponse = {
     majorId: "1",
     inYear: TEST_GRADE,
     grade: TEST_GRADE,
+    studyLength: 4,
+    age: 18,
+    expectedGraduationDate: `${TEST_GRADE + 4}-07-01`,
     type: "本科",
     typeId: "bks",
     people: "汉族",
@@ -118,8 +127,6 @@ export const getWhoInfo = async (id: number, cookieHeader: string): Promise<WhoI
     return unknownResponse("获取 Who 信息失败");
   }
 
-  console.log(userInfoData.data);
-
   const studentInfoResponse = await fetch(
     `${WHO_SERVER}/api/bd-sjmh/xs/info/queryXsInfo?xh=${id}&_t=${getWhoTime()}`,
     {
@@ -141,30 +148,36 @@ export const getWhoInfo = async (id: number, cookieHeader: string): Promise<WhoI
     return unknownResponse("获取 Who 信息失败");
   }
 
-  console.log(studentInfoData.data);
-
-  const { departmentId, idcard } = userInfoData.data;
-  const { XY, XH, SZXQ, ZYH, XB, PYCC, MZ, XM, RXNY, XSLB, NJ, ZYMC } = studentInfoData.data;
+  const { departmentId, departmentName, idcard } = userInfoData.data;
+  const { XY, XH, ZYH, XB, PYCC, MZ, XM, RXNY, XSLB, NJ, NL, XZ, YJBYRQ, ZYMC } =
+    studentInfoData.data;
 
   return {
     success: true,
     data: {
       id: Number(XH),
       name: XM,
-      org: XY,
+      // 研究生 queryXsInfo 的 XY（学院）可能为空，回退到 tryLoginUserInfo 的学院名
+      org: XY || departmentName,
       orgId: Number(departmentId),
       major: ZYMC,
       majorId: ZYH,
       inYear: Number(RXNY.slice(0, 4)),
       grade: Number(NJ),
+      ...(XZ ? { studyLength: Number(XZ) } : {}),
+      ...(NL ? { age: Number(NL) } : {}),
+      ...(YJBYRQ ? { expectedGraduationDate: YJBYRQ } : {}),
       type: XSLB,
       typeId: PYCC === "本科" ? "bks" : PYCC === "硕士" || PYCC === "博士" ? "yjs" : "unknown",
       idCard: idcard,
       people: MZ,
       gender: XB,
       genderId: XB === "女" ? 1 : 0,
-      birth: `${idcard.slice(6, 10)}-${idcard.slice(10, 12)}-${idcard.slice(12, 14)}`,
-      location: SZXQ === "自由校区" ? "benbu" : SZXQ === "净月校区" ? "jingyue" : "unknown",
+      birth:
+        idcard.length >= 14
+          ? `${idcard.slice(6, 10)}-${idcard.slice(10, 12)}-${idcard.slice(12, 14)}`
+          : "",
+      location: getCampusLocation({ majorId: ZYH, orgId: Number(departmentId), major: ZYMC }),
     },
   };
 };
