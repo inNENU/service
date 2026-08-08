@@ -10,7 +10,7 @@
 
 services:
   mariadb:
-    image: mariadb:11.8
+    image: mariadb:12.3
     container_name: innenu-mariadb
     restart: unless-stopped
     environment:
