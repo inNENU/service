@@ -5,12 +5,14 @@ import { validate } from "../utils/validate.js";
 import { underStudyCheckHandler } from "./check.js";
 import { underStudyCourseCommentaryHandler } from "./course-commentary/index.js";
 import { underStudyCourseTableHandler } from "./course-table/index.js";
+import { underStudyExamArrangementHandler } from "./exam-arrangement.js";
 import { underStudyGradeDetailHandler } from "./grade-detail.js";
 import { underStudyGradeListHandler } from "./grade-list.js";
 import { underInfoHandler } from "./info.js";
 import { loginToUnderStudy, underStudyLoginHandler } from "./login.js";
 import {
   courseTableSchema,
+  examArrangementSchema,
   gradeDetailSchema,
   gradeListSchema,
   underStudyLoginSchema,
@@ -36,6 +38,11 @@ underStudyRouter.use("/course-table", validate(courseTableSchema), underStudyCou
 underStudyRouter.post("/grade-detail", validate(gradeDetailSchema), underStudyGradeDetailHandler);
 underStudyRouter.post("/grade-list", validate(gradeListSchema), underStudyGradeListHandler);
 underStudyRouter.post("/info", underInfoHandler);
+underStudyRouter.post(
+  "/exam-arrangement",
+  validate(examArrangementSchema),
+  underStudyExamArrangementHandler,
+);
 underStudyRouter.post("/special-exam", underStudySpecialExamHandler);
 
 export { underStudyRouter };

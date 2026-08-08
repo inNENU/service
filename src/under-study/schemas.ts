@@ -29,3 +29,12 @@ export const gradeListSchema = z.object({
 });
 
 export type GradeListInput = z.infer<typeof gradeListSchema>;
+
+/** 考试安排请求（under-study /exam-arrangement，全部参数可选） */
+export const examArrangementSchema = z.object({
+  time: z.string().optional(),
+  type: z.string().optional(),
+  category: z.string().optional(),
+});
+
+export type ExamArrangementInput = z.infer<typeof examArrangementSchema>;

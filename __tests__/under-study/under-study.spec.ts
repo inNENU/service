@@ -49,6 +49,25 @@ const GRADE_KEYS = [
 ];
 const DETAIL_KEYS = ["name", "score", "percent"];
 const SPECIAL_KEYS = ["semester", "time", "name", "grade", "gradeCode"];
+const EXAM_KEYS = [
+  "name",
+  "courseCode",
+  "date",
+  "time",
+  "form",
+  "assessmentForm",
+  "category",
+  "arrangementType",
+  "week",
+  "weekday",
+  "classPeriods",
+  "campus",
+  "room",
+  "seat",
+  "paperId",
+  "hours",
+  "note",
+];
 const COMMENTARY_KEYS = [
   "term",
   "endDate",
@@ -164,6 +183,14 @@ describe("本科教务（新）/under-study", () => {
     const res = await client.post("/under-study/special-exam");
 
     expectDataArray(res, SPECIAL_KEYS, "special-exam", ["expired"]);
+  });
+
+  it("考试安排 POST /under-study/exam-arrangement", async () => {
+    const res = await client.post("/under-study/exam-arrangement", {
+      time: CURRENT_SEMESTER,
+    });
+
+    expectDataArray(res, EXAM_KEYS, "exam-arrangement", ["expired"]);
   });
 
   it("课程表 POST /under-study/course-table", async () => {
