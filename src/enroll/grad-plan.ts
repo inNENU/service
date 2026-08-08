@@ -293,6 +293,27 @@ const buildSchoolPlans = async (
   }, Promise.resolve([]));
 };
 
+/**
+ * 将初试科目/备注中的逗号统一替换为换行
+ *
+ * 学校系统以半角逗号分隔科目与备注项，替换后配合小程序端 pre-line 分行展示（与网页一致）。 与小程序端 service 的 normalizeGradEnrollPlan 保持同一逻辑。
+ *
+ * @param plans 招生计划
+ * @returns 替换完成后的招生计划
+ */
+const normalizeGradEnrollPlan = (plans: GradEnrollSchoolPlan[]): GradEnrollSchoolPlan[] =>
+  plans.map((school) => ({
+    ...school,
+    majors: school.majors.map((major) => ({
+      ...major,
+      directions: major.directions.map((direction) => ({
+        ...direction,
+        subjects: direction.subjects.replaceAll(",", "\n"),
+        note: direction.note.replaceAll(",", "\n"),
+      })),
+    })),
+  }));
+
 if (!existsSync("./cache")) mkdirSync("./cache");
 
 /**
@@ -319,7 +340,9 @@ export const getGradEnrollPlan = async (year: number): Promise<GradEnrollRespons
     if (existsSync(dataPath)) {
       return {
         success: true,
-        data: JSON.parse(readFileSync(dataPath, "utf-8")) as GradEnrollSchoolPlan[],
+        data: normalizeGradEnrollPlan(
+          JSON.parse(readFileSync(dataPath, "utf-8")) as GradEnrollSchoolPlan[],
+        ),
       };
     }
 
@@ -339,11 +362,13 @@ export const getGradEnrollPlan = async (year: number): Promise<GradEnrollRespons
   ) {
     return {
       success: true,
-      data: JSON.parse(readFileSync(dataPath, "utf-8")) as GradEnrollSchoolPlan[],
+      data: normalizeGradEnrollPlan(
+        JSON.parse(readFileSync(dataPath, "utf-8")) as GradEnrollSchoolPlan[],
+      ),
     };
   }
 
-  const schoolPlans = await buildSchoolPlans(planId, schoolList);
+  const schoolPlans = normalizeGradEnrollPlan(await buildSchoolPlans(planId, schoolList));
 
   writeFile(dataPath, JSON.stringify(schoolPlans), { encoding: "utf-8" }, (err) => {
     if (err) console.error(err);
